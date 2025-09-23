@@ -4,6 +4,8 @@ import { Button } from '../ui/button';
 import { useNavigate } from 'react-router-dom';
 
 const HeroSection = () => {
+  const navigate = useNavigate();
+  
   return (
     <section className="relative bg-gradient-to-r from-pink-50 to-purple-50 overflow-hidden">
       <div className="container mx-auto px-4 py-16 lg:py-20">
