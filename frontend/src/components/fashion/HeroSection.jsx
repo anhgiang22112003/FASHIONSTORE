@@ -32,12 +32,21 @@ const HeroSection = () => {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button size="lg" className="bg-pink-500 hover:bg-pink-600 text-white px-8 py-3">
+              <Button 
+                size="lg" 
+                className="bg-pink-500 hover:bg-pink-600 text-white px-8 py-3"
+                onClick={() => navigate('/category/women')}
+              >
                 Mua sắm ngay
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
               
-              <Button variant="outline" size="lg" className="border-gray-300 px-8 py-3">
+              <Button 
+                variant="outline" 
+                size="lg" 
+                className="border-gray-300 px-8 py-3"
+                onClick={() => navigate('/category/women')}
+              >
                 Xem bộ sưu tập
               </Button>
             </div>
