@@ -1,52 +1,53 @@
-import { useEffect } from "react";
-import "./App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import axios from "axios";
+import React, { useState } from "react";
+import "./index.css";
+import Sidebar from "./components/Sidebar";
+import TopBar from "./components/TopBar";
+import HomeView from "./components/HomeView";
+import SearchView from "./components/SearchView";
+import MusicPlayer from "./components/MusicPlayer";
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
+function App() {
+  const [currentView, setCurrentView] = useState('home');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [currentSong, setCurrentSong] = useState(null);
+  const [isPlaying, setIsPlaying] = useState(false);
 
-const Home = () => {
-  const helloWorldApi = async () => {
-    try {
-      const response = await axios.get(`${API}/`);
-      console.log(response.data.message);
-    } catch (e) {
-      console.error(e, `errored out requesting / api`);
+  const renderMainContent = () => {
+    switch (currentView) {
+      case 'home':
+        return <HomeView setCurrentSong={setCurrentSong} />;
+      case 'search':
+        return <SearchView searchQuery={searchQuery} />;
+      default:
+        return <HomeView setCurrentSong={setCurrentSong} />;
     }
   };
 
-  useEffect(() => {
-    helloWorldApi();
-  }, []);
-
   return (
-    <div>
-      <header className="App-header">
-        <a
-          className="App-link"
-          href="https://emergent.sh"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img src="https://avatars.githubusercontent.com/in/1201222?s=120&u=2686cf91179bbafbc7a71bfbc43004cf9ae1acea&v=4" />
-        </a>
-        <p className="mt-5">Building something incredible ~!</p>
-      </header>
-    </div>
-  );
-};
-
-function App() {
-  return (
-    <div className="App">
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />}>
-            <Route index element={<Home />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
+    <div className="h-screen bg-black flex flex-col">
+      <div className="flex flex-1 overflow-hidden">
+        {/* Sidebar */}
+        <Sidebar currentView={currentView} setCurrentView={setCurrentView} />
+        
+        {/* Main Content */}
+        <div className="flex-1 flex flex-col">
+          <TopBar 
+            currentView={currentView} 
+            searchQuery={searchQuery} 
+            setSearchQuery={setSearchQuery} 
+          />
+          <div className="flex-1 overflow-y-auto">
+            {renderMainContent()}
+          </div>
+        </div>
+      </div>
+      
+      {/* Music Player */}
+      <MusicPlayer 
+        currentSong={currentSong} 
+        isPlaying={isPlaying} 
+        setIsPlaying={setIsPlaying} 
+      />
     </div>
   );
 }

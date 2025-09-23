@@ -9,6 +9,8 @@ body {
         "Helvetica Neue", sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    background-color: #191414;
+    color: white;
 }
 
 code {
@@ -16,7 +18,49 @@ code {
         monospace;
 }
 
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 12px;
+}
 
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #535353;
+    border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #727272;
+}
+
+/* Spotify-like hover effects */
+.hover-scale {
+    transition: transform 0.2s ease;
+}
+
+.hover-scale:hover {
+    transform: scale(1.05);
+}
+
+/* Custom gradient overlays */
+.gradient-overlay {
+    background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.6) 100%);
+}
+
+/* Play button hover animation */
+.play-button {
+    transition: all 0.2s ease;
+    transform: translateY(8px);
+    opacity: 0;
+}
+
+.group:hover .play-button {
+    transform: translateY(0);
+    opacity: 1;
+}
 
 @layer base {
   :root {
@@ -73,8 +117,6 @@ code {
         --chart-5: 340 75% 55%;
     }
 }
-
-
 
 @layer base {
   * {
