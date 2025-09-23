@@ -2,18 +2,20 @@ import React, { useState } from 'react';
 import { Search, ShoppingBag, User, Menu, X, Heart } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [cartCount] = useState(3);
+  const navigate = useNavigate();
 
   const navItems = [
-    { name: 'Trang chủ', href: '#' },
-    { name: 'Nữ', href: '#' },
-    { name: 'Nam', href: '#' },
-    { name: 'Phụ kiện', href: '#' },
-    { name: 'Sale', href: '#' },
-    { name: 'Blog', href: '#' }
+    { name: 'Trang chủ', href: '/' },
+    { name: 'Nữ', href: '/category/women' },
+    { name: 'Nam', href: '/category/men' },
+    { name: 'Phụ kiện', href: '/category/accessories' },
+    { name: 'Giới thiệu', href: '/about' },
+    { name: 'Blog', href: '/blog' }
   ];
 
   return (
