@@ -108,14 +108,14 @@ const Header = () => {
                 />
               </div>
               {navItems.map((item) => (
-                <a
+                <Link
                   key={item.name}
-                  href={item.href}
+                  to={item.href}
                   className="block px-2 py-2 text-gray-700 hover:text-pink-500 font-medium"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {item.name}
-                </a>
+                </Link>
               ))}
             </div>
           </div>
