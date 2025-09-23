@@ -84,13 +84,13 @@ const Footer = () => {
             <h4 className="text-lg font-semibold text-white mb-6">Liên kết nhanh</h4>
             <ul className="space-y-3">
               {quickLinks.map((link) => (
-                <li key={link}>
-                  <a
-                    href="#"
+                <li key={link.name}>
+                  <Link
+                    to={link.href}
                     className="hover:text-pink-500 transition-colors"
                   >
-                    {link}
-                  </a>
+                    {link.name}
+                  </Link>
                 </li>
               ))}
             </ul>
