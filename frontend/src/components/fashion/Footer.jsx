@@ -10,12 +10,12 @@ const Footer = () => {
   ];
 
   const quickLinks = [
-    'Về chúng tôi',
-    'Chính sách bảo mật',
-    'Điều khoản sử dụng',
-    'Chính sách đổi trả',
-    'Hướng dẫn mua hàng',
-    'Tuyển dụng'
+    { name: 'Về chúng tôi', href: '/about' },
+    { name: 'Liên hệ', href: '/contact' },
+    { name: 'Chính sách bảo mật', href: '#' },
+    { name: 'Điều khoản sử dụng', href: '#' },
+    { name: 'Chính sách đổi trả', href: '#' },
+    { name: 'Hướng dẫn mua hàng', href: '#' }
   ];
 
   const categories = [
