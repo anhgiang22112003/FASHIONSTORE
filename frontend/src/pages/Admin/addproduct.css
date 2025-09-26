@@ -1,0 +1,9 @@
+/* Ẩn thanh cuộn cho WebKit browsers (Chrome, Safari) */
+.scrollbar-hidden::-webkit-scrollbar {
+    display: none;
+}
+
+/* Ẩn thanh cuộn cho Firefox */
+.scrollbar-hidden {
+    scrollbar-width: none;
+}

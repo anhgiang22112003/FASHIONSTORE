@@ -1,40 +1,26 @@
-import React from "react";
+import React, { Suspense, lazy } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import "./index.css";
 import Header from "./components/fashion/Header";
 import Footer from "./components/fashion/Footer";
-import HomePage from "./pages/HomePage";
-import ProductPage from "./pages/ProductPage";
-import CategoryPage from "./pages/CategoryPage";
-import CartPage from "./pages/CartPage";
-import AboutPage from "./pages/AboutPage";
-import ContactPage from "./pages/ContactPage";
-import BlogPage from "./pages/BlogPage";
 
-function App() {
-  return (
-    <Router>
-      <div className="min-h-screen bg-white">
-        <Header />
-        <main>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/product/:id" element={<ProductPage />} />
-            <Route path="/category/:category" element={<CategoryPage />} />
-            <Route path="/cart" element={<CartPage />} />
-            <Route path="/about" element={<AboutPage />} />
-            <Route path="/contact" element={<ContactPage />} />
-            <Route path="/blog" element={<BlogPage />} />
-            <Route path="/blog/:slug" element={<BlogArticlePage />} />
-          </Routes>
-        </main>
-        <Footer />
-      </div>
-    </Router>
-  );
-}
+// Lazy load các page
+const HomePage = lazy(() => import("./pages/HomePage"));
+const ProductPage = lazy(() => import("./pages/ProductPage"));
+const CategoryPage = lazy(() => import("./pages/CategoryPage"));
+const CartPage = lazy(() => import("./pages/CartPage"));
+const AboutPage = lazy(() => import("./pages/AboutPage"));
+const ContactPage = lazy(() => import("./pages/ContactPage"));
+const BlogPage = lazy(() => import("./pages/BlogPage"));
+const Checkout = lazy(() => import("./pages/Checkout"));
+const Wishlist = lazy(() => import("./pages/Wishlist"));
+const AuthPage = lazy(() => import("./pages/AuthPage"));
+const CollectionPage = lazy(() => import("./pages/Collection"));
+const ProductCategoryPage = lazy(() => import("./pages/Category"));
+const AdminLayout = lazy(() => import("./pages/Admin/Adminlayout"));
+const UserProfile = lazy(() => import("./pages/UserProfile"));
 
-// Simple Blog Article Page Component
+// Blog article inline
 const BlogArticlePage = () => {
   return (
     <div className="container mx-auto px-4 py-16">
@@ -54,5 +40,55 @@ const BlogArticlePage = () => {
     </div>
   );
 };
+
+// Layout Frontend có Header & Footer
+const FrontendLayout = ({ children }) => {
+  return (
+    <div className="min-h-screen bg-white">
+      <Header />
+      <main>{children}</main>
+      <Footer />
+    </div>
+  );
+};
+
+function App() {
+  return (
+    <Router>
+      {/* Suspense hiển thị fallback khi đang load component */}
+      <Suspense fallback={<div className="p-8 text-center">Đang tải...</div>}>
+        <Routes>
+          {/* Frontend routes */}
+          <Route
+            path="/*"
+            element={
+              <FrontendLayout>
+                <Routes>
+                  <Route path="/" element={<HomePage />} />
+                  <Route path="/product/:id" element={<ProductPage />} />
+                  <Route path="/category/:category" element={<CategoryPage />} />
+                  <Route path="/cart" element={<CartPage />} />
+                  <Route path="/about" element={<AboutPage />} />
+                  <Route path="/contact" element={<ContactPage />} />
+                  <Route path="/checkout" element={<Checkout />} />
+                  <Route path="/wishlist" element={<Wishlist />} />
+                  <Route path="/login" element={<AuthPage />} />
+                  <Route path="/collection" element={<CollectionPage />} />
+                  <Route path="/category" element={<ProductCategoryPage />} />
+                  <Route path="/blog" element={<BlogPage />} />
+                  <Route path="/blog/:slug" element={<BlogArticlePage />} />
+                  <Route path="/profile" element={<UserProfile />} />
+                </Routes>
+              </FrontendLayout>
+            }
+          />
+
+          {/* Admin routes */}
+          <Route path="/admin/*" element={<AdminLayout />} />
+        </Routes>
+      </Suspense>
+    </Router>
+  );
+}
 
 export default App;

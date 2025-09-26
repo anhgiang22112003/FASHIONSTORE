@@ -1,5 +1,6 @@
 import React from 'react';
 import { productCategories } from '../../data/fashionMock';
+import { Link } from 'react-router-dom'
 
 const ProductCategories = () => {
   return (
@@ -15,6 +16,7 @@ const ProductCategories = () => {
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+         
           {productCategories.map((category) => (
             <div
               key={category.id}
@@ -27,7 +29,7 @@ const ProductCategories = () => {
                   className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                 />
               </div>
-              
+               <Link to={"category"}>
               <div className="p-6 text-center">
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">
                   {category.name}
@@ -36,6 +38,7 @@ const ProductCategories = () => {
                   {category.itemCount}
                 </p>
               </div>
+               </Link>
 
               {/* Hover overlay */}
               <div className="absolute inset-0 bg-pink-500 bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300"></div>

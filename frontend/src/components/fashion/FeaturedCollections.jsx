@@ -1,7 +1,8 @@
-import React from 'react';
-import { ArrowRight } from 'lucide-react';
-import { Button } from '../ui/button';
-import { featuredCollections } from '../../data/fashionMock';
+import React from 'react'
+import { ArrowRight } from 'lucide-react'
+import { Button } from '../ui/button'
+import { featuredCollections } from '../../data/fashionMock'
+import { Link } from 'react-router-dom'
 
 const FeaturedCollections = () => {
   return (
@@ -29,10 +30,10 @@ const FeaturedCollections = () => {
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                 />
               </div>
-              
+
               {/* Overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
-              
+
               {/* Content */}
               <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
                 <h3 className="text-2xl font-bold mb-2">{collection.name}</h3>
@@ -43,7 +44,9 @@ const FeaturedCollections = () => {
                     size="sm"
                     className="bg-white text-gray-900 hover:bg-gray-100 opacity-0 group-hover:opacity-100 transition-opacity"
                   >
-                    Xem thêm
+                    <Link to={"collection"}>
+                      Xem thêm
+                    </Link>
                     <ArrowRight className="ml-2 w-4 h-4" />
                   </Button>
                 </div>
@@ -53,14 +56,17 @@ const FeaturedCollections = () => {
         </div>
 
         <div className="text-center mt-12">
-          <Button variant="outline" size="lg" className="border-pink-500 text-pink-500 hover:bg-pink-50">
-            Xem tất cả bộ sưu tập
-            <ArrowRight className="ml-2 w-5 h-5" />
-          </Button>
+          <Link to={"collection"}>
+            <Button variant="outline" size="lg" className="border-pink-500 text-pink-500 hover:bg-pink-50">
+              Xem tất cả bộ sưu tập
+              <ArrowRight className="ml-2 w-5 h-5" />
+            </Button>
+
+          </Link>
         </div>
       </div>
     </section>
-  );
-};
+  )
+}
 
-export default FeaturedCollections;
+export default FeaturedCollections
