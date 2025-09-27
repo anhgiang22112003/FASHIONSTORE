@@ -3,7 +3,8 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import "./index.css";
 import Header from "./components/fashion/Header";
 import Footer from "./components/fashion/Footer";
-
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 // Lazy load các page
 const HomePage = lazy(() => import("./pages/HomePage"));
 const ProductPage = lazy(() => import("./pages/ProductPage"));
@@ -57,6 +58,8 @@ function App() {
     <Router>
       {/* Suspense hiển thị fallback khi đang load component */}
       <Suspense fallback={<div className="p-8 text-center">Đang tải...</div>}>
+            <ToastContainer position="top-right" autoClose={3000} />
+
         <Routes>
           {/* Frontend routes */}
           <Route

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react"
 import { PencilIcon, TrashIcon, FunnelIcon, ArrowDownTrayIcon } from "@heroicons/react/24/outline"
 import DeleteProductModal from "@/components/DeleteProductPopup"
+import api from "@/service/api"
 
 
 
@@ -10,35 +11,40 @@ const statusColors = {
     "Ngừng bán": "bg-blue-100 text-blue-600",
 }
 
-const ProductsContent = ({ setActiveTab }) => {
-    const products = [
-    { id: "PF001", name: "Váy hồng thanh lịch", category: "Váy đầm", price: "590.000đ", stock: 25, status: "Còn hàng", image: "/images/product1.png" },
-    { id: "PF002", name: "Áo sơ mi trắng basic", category: "Váy đầm", price: "450.000đ", stock: 18, status: "Còn hàng", image: "/images/product1.png" },
-    { id: "PF003", name: "Chân váy xòe", category: "Áo", price: "380.000đ", stock: 32, status: "Còn hàng", image: "/images/product1.png" },
-    { id: "PF004", name: "Áo cardigan hồng", category: "Áo", price: "720.000đ", stock: 12, status: "Còn hàng", image: "/images/product1.png" },
-    { id: "PF005", name: "Quần jeans skinny", category: "Quần", price: "650.000đ", stock: 8, status: "Hết hàng", image: "/images/product1.png" },
-    { id: "PF006", name: "Áo thun cotton", category: "Quần", price: "250.000đ", stock: 45, status: "Ngừng bán", image: "/images/product1.png" },
-]
+const ProductsContent = ({ setActiveTab ,onEditProduct }) => {
+
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [productToDelete, setProductToDelete] = useState(null)
     const [isFilterVisible, setIsFilterVisible] = useState(false)
     const [filters, setFilters] = useState({ category: 'Tất cả', status: 'Tất cả', minPrice: '', maxPrice: '' })
     const [searchTerm, setSearchTerm] = useState('');
-    const [product, setProducts] = useState(products);
-
+    const [product, setProduct] = useState([]);
     useEffect(() => {
-        const filtered = products.filter(product => {
-            const categoryMatch = filters.category === 'Tất cả' || product.category === filters.category
-            const statusMatch = filters.status === 'Tất cả' || product.status === filters.status
-            const searchMatch = product.name.toLowerCase().includes(searchTerm.toLowerCase())
+        const fetchProducts = async () => {
+            try {
+                const response = await api.get('/products'); // Thay đổi URL thành API thực tế của bạn
+                
+                setProduct(response.data);
+            } catch (error) {
+                console.error('Error fetching products:', error);
+            }
+        }
+        fetchProducts();
+        // Giả sử bạn có một API để lấy danh sách sản phẩm
+    }, [])
+    // useEffect(() => {
+    //     const filtered = product.filter(product => {
+    //         const categoryMatch = filters.category === 'Tất cả' || product.category === filters.category
+    //         const statusMatch = filters.status === 'Tất cả' || product.status === filters.status
+    //         const searchMatch = product.name.toLowerCase().includes(searchTerm.toLowerCase())
 
-            const minPrice = parseFloat(filters.minPrice)
-            const maxPrice = parseFloat(filters.maxPrice)
-            const priceMatch = (isNaN(minPrice) || product.price >= minPrice) && (isNaN(maxPrice) || product.price <= maxPrice)
+    //         const minPrice = parseFloat(filters.minPrice)
+    //         const maxPrice = parseFloat(filters.maxPrice)
+    //         const priceMatch = (isNaN(minPrice) || product.price >= minPrice) && (isNaN(maxPrice) || product.price <= maxPrice)
 
-            return categoryMatch && statusMatch && searchMatch && priceMatch
-        })
-    }, [filters, searchTerm])
+    //         return categoryMatch && statusMatch && searchMatch && priceMatch
+    //     })
+    // }, [filters, searchTerm])
 
     const handleFilterChange = (e) => {
         setFilters({ ...filters, [e.target.name]: e.target.value })
@@ -161,17 +167,17 @@ const ProductsContent = ({ setActiveTab }) => {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
-                        {products.map((product) => (
-                            <tr key={product.id} className="hover:bg-pink-50">
+                        {product?.map((product) => (
+                            <tr key={product.Id} className="hover:bg-pink-50">
                                 <td className="px-6 py-4 flex items-center space-x-3">
-                                    <img src={product.image} alt={product.name} className="w-12 h-12 rounded-lg object-cover" />
+                                    <img src={product.mainImage} alt={product.name} className="w-12 h-12 rounded-lg object-cover" />
                                     <div>
                                         <p className="font-semibold">{product.name}</p>
-                                        <p className="text-gray-400 text-sm">SKU: {product.id}</p>
+                                        <p className="text-gray-400 text-sm">SKU: {product.sku}</p>
                                     </div>
                                 </td>
-                                <td className="px-6 py-4">{product.category}</td>
-                                <td className="px-6 py-4 font-semibold text-pink-600">{product.price}</td>
+                                <td className="px-6 py-4">{product.categories.name}</td>
+                                <td className="px-6 py-4 font-semibold text-pink-600">{product.originalPrice}</td>
                                 <td className="px-6 py-4">{product.stock}</td>
                                 <td className="px-6 py-4">
                                     <span className={`px-2 py-1 rounded-full text-xs ${statusColors[product.status]}`}>
@@ -179,11 +185,11 @@ const ProductsContent = ({ setActiveTab }) => {
                                     </span>
                                 </td>
                                 <td className="px-6 py-4 flex space-x-2">
-                                    <button onClick={() => setActiveTab('edit-product')} // Thêm onClick để chuyển trang
+                                    <button onClick={() => onEditProduct(product._id)} // Thêm onClick để chuyển trang
                                         className="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200">
-                                        <PencilIcon className="w-5 h-5" />
+                                        <PencilIcon  className="w-5 h-5" />
                                     </button>
-                                    <button onClick={() => handleDeleteClick(product.id)} className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200">
+                                    <button onClick={() => handleDeleteClick(product._id)} className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200">
                                         <TrashIcon className="w-5 h-5" />
                                     </button>
                                 </td>

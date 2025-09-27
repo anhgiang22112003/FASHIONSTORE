@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react'
 
 const colors = [
     { name: 'Đỏ', hex: '#EF4444', ring: 'ring-red-500' },
@@ -9,41 +9,46 @@ const colors = [
     { name: 'Tím', hex: '#A855F7', ring: 'ring-purple-500' },
     { name: 'Đen', hex: '#111827', ring: 'ring-gray-900' },
     { name: 'Trắng', hex: '#F9FAFB', ring: 'ring-gray-300' },
-];
+]
 
-const ProductVariations = ({ variations, setVariations }) => {
-    const [newColor, setNewColor] = useState('');
-    const [newSize, setNewSize] = useState('');
-    const [newStock, setNewStock] = useState('');
-    const [isFormVisible, setIsFormVisible] = useState(false);
-    const [isColorPickerOpen, setIsColorPickerOpen] = useState(false); // State mới để quản lý bảng màu
+const ProductVariations = ({ variations, setVariations, setStock }) => {
+    const [newColor, setNewColor] = useState('')
+    const [newSize, setNewSize] = useState('')
+    const [newStock, setNewStock] = useState('')
+    const [isFormVisible, setIsFormVisible] = useState(false)
+    const [isColorPickerOpen, setIsColorPickerOpen] = useState(false) // State mới để quản lý bảng màu
 
+    useEffect(() => {
+        const totalStock = variations.reduce((sum, v) => sum + v.stock, 0)
+        setStock(totalStock)
+    }, [variations, setStock])
+    
     const handleAddVariation = () => {
         if (newColor && newSize && newStock) {
             const newVariation = {
                 color: newColor,
                 size: newSize,
                 stock: parseInt(newStock)
-            };
-            setVariations([...variations, newVariation]);
-            setNewColor('');
-            setNewSize('');
-            setNewStock('');
-            setIsFormVisible(false);
+            }
+            setVariations([...variations, newVariation])
+            setNewColor('')
+            setNewSize('')
+            setNewStock('')
+            setIsFormVisible(false)
         } else {
-            alert('Vui lòng điền đầy đủ thông tin biến thể.');
+            alert('Vui lòng điền đầy đủ thông tin biến thể.')
         }
-    };
+    }
 
     const handleDeleteVariation = (index) => {
-        const updatedVariations = variations.filter((_, i) => i !== index);
-        setVariations(updatedVariations);
-    };
+        const updatedVariations = variations.filter((_, i) => i !== index)
+        setVariations(updatedVariations)
+    }
 
     const handleColorSelect = (colorName) => {
-        setNewColor(colorName);
-        setIsColorPickerOpen(false); // Đóng bảng màu sau khi chọn
-    };
+        setNewColor(colorName)
+        setIsColorPickerOpen(false) // Đóng bảng màu sau khi chọn
+    }
 
     return (
         <div className="bg-white p-8 rounded-2xl shadow-xl space-y-6">
@@ -51,7 +56,7 @@ const ProductVariations = ({ variations, setVariations }) => {
 
             {/* Bảng hiển thị các biến thể đã thêm */}
             {/* ... (phần này giữ nguyên) */}
-              {variations.length > 0 && (
+            {variations.length > 0 && (
                 <div className="overflow-x-auto rounded-xl border border-gray-200">
                     <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-50">
@@ -115,9 +120,8 @@ const ProductVariations = ({ variations, setVariations }) => {
                                             key={color.name}
                                             type="button"
                                             onClick={() => handleColorSelect(color.name)}
-                                            className={`w-8 h-8 rounded-full border border-gray-300 transition-all ${
-                                                newColor === color.name ? `ring-2 ring-offset-2 ${color.ring}` : ''
-                                            }`}
+                                            className={`w-8 h-8 rounded-full border border-gray-300 transition-all ${newColor === color.name ? `ring-2 ring-offset-2 ${color.ring}` : ''
+                                                }`}
                                             style={{ backgroundColor: color.hex }}
                                             aria-label={`Chọn màu ${color.name}`}
                                         ></button>
@@ -125,10 +129,10 @@ const ProductVariations = ({ variations, setVariations }) => {
                                 </div>
                             )}
                         </div>
-                        
+
                         <label className="space-y-1">
                             {/* ... (Giữ nguyên input kích thước và tồn kho) */}
-                             <span className="text-sm font-medium text-gray-600">Kích thước</span>
+                            <span className="text-sm font-medium text-gray-600">Kích thước</span>
                             <input
                                 type="text"
                                 value={newSize}
@@ -157,7 +161,7 @@ const ProductVariations = ({ variations, setVariations }) => {
                 )}
             </div>
         </div>
-    );
-};
+    )
+}
 
-export default ProductVariations;
+export default ProductVariations

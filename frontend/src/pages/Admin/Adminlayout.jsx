@@ -22,7 +22,12 @@ const AdminLayout = () => {
     const [activeTab, setActiveTab] = useState("dashboard")
 
     const [editingCustomer, setEditingCustomer] = useState(null)
+      const [editingProductId, setEditingProductId] = useState(null) 
     const [isSidebarOpen, setIsSidebarOpen] = useState(true) // State để quản lý việc mở/đóng Sidebar
+    const handleEditProduct = (productId) => {
+        setEditingProductId(productId); // Lưu ID sản phẩm
+        setActiveTab('edit-product');   // Chuyển sang tab chỉnh sửa
+    }
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen)
     }
@@ -35,11 +40,11 @@ const AdminLayout = () => {
             case 'dashboard':
                 return <Dashboard />
             case 'products':
-                return <Products setActiveTab={setActiveTab} /> // Truyền setActivePage vào Products
+                return <Products setActiveTab={setActiveTab} onEditProduct={handleEditProduct} /> 
             case 'add-product':
-                return <AddProduct />
+                return <AddProduct  setActiveTab={setActiveTab}/>
             case 'edit-product':
-                return <EditProduct />
+                return <EditProduct productId={editingProductId} onBack={() => setActiveTab('products')} />
                 case 'admin-setting':
                 return <AdminSettingsPage />
             case 'orders':
