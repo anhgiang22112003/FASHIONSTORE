@@ -3,7 +3,7 @@ import { XMarkIcon } from '@heroicons/react/24/solid';
 
 
 
-const DeleteConfirmationModal = ({ title, message, isOpen, onClose, onConfirm }) => {
+const DeleteConfirmationModal = ({ title, message, isOpen, onClose, onConfirm , id}) => {
     if (!isOpen) {
         return null;
     }

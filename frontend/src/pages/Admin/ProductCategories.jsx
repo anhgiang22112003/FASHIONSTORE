@@ -110,13 +110,17 @@ const ProductCategories = ({ }) => {
 
 
     // Hàm xử lý khi xác nhận xóa
-    const handleConfirmDelete = () => {
+    const handleConfirmDelete = async() => {
         if (itemToDelete) {
-            console.log(`Đang xóa ${itemToDelete.type} với ID: ${itemToDelete.id}`)
+           
             // Thực hiện logic xóa thực tế ở đây (ví dụ: gọi API)
             // Ví dụ: xóa danh mục
             if (itemToDelete.type === 'category') {
-                // ... logic xóa danh mục
+                const res = await api.delete(`/categories/${itemToDelete.id}`)
+                if(res.status === 200){
+                    toast.success("Xóa danh mục thành công")
+                    fetchCategories()
+                }
             }
             // Ví dụ: xóa bộ sưu tập
             else if (itemToDelete.type === 'collection') {
@@ -278,7 +282,7 @@ const ProductCategories = ({ }) => {
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 inline-block" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" /><path fillRule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clipRule="evenodd" /></svg>
                                     </button>
                                     <button
-                                        onClick={() => handleDeleteClick('category', category.id, category.name)}
+                                        onClick={() => handleDeleteClick('category', category._id, category.name)}
 
                                         className="text-red-600 hover:text-red-900 transition-colors"
                                     >
@@ -296,6 +300,7 @@ const ProductCategories = ({ }) => {
                 isOpen={isModalOpen}
                 onClose={handleCloseModal}
                 onConfirm={handleConfirmDelete}
+                id = {itemToDelete?.id}
             />
         </div>
     )
