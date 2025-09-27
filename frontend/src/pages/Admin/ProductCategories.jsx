@@ -1,98 +1,157 @@
 import DeleteConfirmationModal from '@/components/DeleteConfirmationModal'
-import React, { useState } from 'react'
+import api from '@/service/api'
+import React, { useEffect, useState } from 'react'
+import { toast } from 'react-toastify'
+import { Switch } from '@headlessui/react'
 
-const categoriesData = [
-    { id: 1, name: 'Áo', description: 'Các loại áo từ áo thun, sơ mi, đến áo khoác.', products: 150, image: 'https://via.placeholder.com/60' },
-    { id: 2, name: 'Quần', description: 'Các loại quần jeans, kaki, quần tây...', products: 90, image: 'https://via.placeholder.com/60' },
-    { id: 3, name: 'Váy & Đầm', description: 'Các loại váy và đầm phù hợp nhiều phong cách.', products: 210, image: 'https://via.placeholder.com/60' },
-    { id: 4, name: 'Phụ kiện', description: 'Các phụ kiện đi kèm như túi xách, mũ, nón...', products: 75, image: 'https://via.placeholder.com/60' },
-]
 
-const ProductCategories = () => {
-    const [categories, setCategories] = useState(categoriesData)
+
+const ProductCategories = ({ }) => {
     const [isFormOpen, setIsFormOpen] = useState(false)
     const [editCategory, setEditCategory] = useState(null)
     const [imagePreview, setImagePreview] = useState(null)
+    const [isNewCategoryActive, setIsNewCategoryActive] = useState(true) // 👈 STATE QUAN TRỌNG CHO SWITCH
+    const [name, setName] = useState("")
+    const [dec, setdec] = useState("")
+    const [category, setCategory] = useState([])
+    useEffect(() => {
+        if (editCategory) {
+            setName(editCategory.name)
+            setdec(editCategory.description)
+            setIsNewCategoryActive(editCategory.isActive)
+            setImagePreview(editCategory.image || null)
+        }
+    }, [editCategory])
 
     const [isModalOpen, setIsModalOpen] = useState(false)
-        // State lưu trữ loại và ID của đối tượng cần xóa
-        const [itemToDelete, setItemToDelete] = useState(null)
-    
-        // Mở modal với thông tin cụ thể
-        const handleDeleteClick = (type, id, name) => {
-            setItemToDelete({ type, id, name })
-            setIsModalOpen(true)
+    const [itemToDelete, setItemToDelete] = useState(null)
+    const fetchCategories = async () => {
+        try {
+            const response = await api.get("categories")
+            setCategory(response?.data)
+
+        } catch (error) {
+            toast.error("lỗi khi lấy danh mục")
         }
+    }
+    useEffect(() => {
+        fetchCategories()
+    }, [editCategory])
+    console.log(editCategory);
     
-        // Hàm xử lý khi xác nhận xóa
-        const handleConfirmDelete = () => {
-            if (itemToDelete) {
-                console.log(`Đang xóa ${itemToDelete.type} với ID: ${itemToDelete.id}`)
-                // Thực hiện logic xóa thực tế ở đây (ví dụ: gọi API)
-                // Ví dụ: xóa danh mục
-                if (itemToDelete.type === 'category') {
-                    // ... logic xóa danh mục
-                }
-                // Ví dụ: xóa bộ sưu tập
-                else if (itemToDelete.type === 'collection') {
-                    // ... logic xóa bộ sưu tập
-                }
+    const handleSubmit = async (e) => {
+        e.preventDefault()
+        let categorydata = {
+            name: name,
+            description: dec,
+            image: imagePreview,
+            isActive: isNewCategoryActive
+        }
+
+        try {
+            if (editCategory) {
+                // Cập nhật danh mục
+                const response = await api.put(`/categories/${editCategory._id}`, categorydata)
+                toast.success("Cập nhật danh mục thành công")
+            } else {
+                // Thêm mới danh mục
+                const response = await api.post("/categories", categorydata)
+                toast.success("Thêm danh mục thành công")
+                console.log(response)
             }
-            setIsModalOpen(false)
-            setItemToDelete(null)
+        } catch (error) {
+            toast.error(error.response?.data?.message || "Có lỗi xảy ra!")
         }
-    
-        // Hàm đóng modal
-        const handleCloseModal = () => {
-            setIsModalOpen(false)
-            setItemToDelete(null)
+
+        setIsFormOpen(false)
+        setImagePreview(null)
+        setEditCategory(null) // Reset khi đóng form
+    }
+    // Mở modal với thông tin cụ thể
+    const handleDeleteClick = (type, id, name) => {
+        setItemToDelete({ type, id, name })
+        setIsModalOpen(true)
+    }
+    const handleFileChange = async (event, index = null) => {
+        const file = event.target?.files?.[0];  // Get the first file
+        if (!file) return;  // Exit if no file is selected
+        console.log(1);
+
+        const formDataUpload = new FormData();
+        formDataUpload.append("file", file);
+
+        try {
+            const res = await api.post("/upload", formDataUpload, {
+                headers: { "Content-Type": "multipart/form-data" },
+            });
+
+            if (res.status === 201 || res.status === 200) {
+                const url = res.data.url; // URL from server
+
+                if (index === null) {
+                    // If no index provided, upload the main category image
+                    setImagePreview(url);
+                } else {
+                    // Otherwise, upload the additional product images (if any)
+                    const newImages = [...images];
+                    newImages[index] = url;
+                    setImages(newImages);
+                }
+
+                toast.success("Upload ảnh thành công!");
+            } else {
+                toast.error("Upload ảnh thất bại!");
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error("Lỗi khi upload ảnh!");
         }
-        const modalTitle = itemToDelete ? `Xác nhận xóa ${itemToDelete.type === 'category' ? 'danh mục' : 'bộ sưu tập'}` : ''
-        const modalMessage = itemToDelete ? `Bạn có chắc chắn muốn xóa "${itemToDelete.name}"? Thao tác này không thể hoàn tác.` : ''
-    
+    };
+
+
+    // Hàm xử lý khi xác nhận xóa
+    const handleConfirmDelete = () => {
+        if (itemToDelete) {
+            console.log(`Đang xóa ${itemToDelete.type} với ID: ${itemToDelete.id}`)
+            // Thực hiện logic xóa thực tế ở đây (ví dụ: gọi API)
+            // Ví dụ: xóa danh mục
+            if (itemToDelete.type === 'category') {
+                // ... logic xóa danh mục
+            }
+            // Ví dụ: xóa bộ sưu tập
+            else if (itemToDelete.type === 'collection') {
+                // ... logic xóa bộ sưu tập
+            }
+        }
+        setIsModalOpen(false)
+        setItemToDelete(null)
+    }
+
+    // Hàm đóng modal
+    const handleCloseModal = () => {
+        setIsModalOpen(false)
+        setItemToDelete(null)
+    }
+    const modalTitle = itemToDelete ? `Xác nhận xóa ${itemToDelete.type === 'category' ? 'danh mục' : 'bộ sưu tập'}` : ''
+    const modalMessage = itemToDelete ? `Bạn có chắc chắn muốn xóa "${itemToDelete.name}"? Thao tác này không thể hoàn tác.` : ''
+
     const handleOpenForm = (category = null) => {
         setEditCategory(category)
         setIsFormOpen(true)
         setImagePreview(category?.image || null)
     }
 
-    const handleDelete = (id) => {
-        if (window.confirm('Bạn có chắc chắn muốn xóa danh mục này?')) {
-            setCategories(categories.filter(cat => cat.id !== id))
-        }
-    }
-
-    const handleFileChange = (file) => {
-        if (file) {
-            const reader = new FileReader()
-            reader.onloadend = () => {
-                setImagePreview(reader.result)
-            }
-            reader.readAsDataURL(file)
-        } else {
-            setImagePreview(null)
-        }
-    }
-
-    const handleSubmit = (e) => {
-        e.preventDefault()
-        const formData = new FormData(e.target)
-        const newCategory = {
-            id: editCategory ? editCategory.id : categories.length > 0 ? Math.max(...categories.map(c => c.id)) + 1 : 1,
-            name: formData.get('name'),
-            description: formData.get('description'),
-            products: editCategory ? editCategory.products : 0,
-            image: imagePreview || 'https://via.placeholder.com/60',
-        }
-
-        if (editCategory) {
-            setCategories(categories.map(cat => cat.id === newCategory.id ? newCategory : cat))
-        } else {
-            setCategories([...categories, newCategory])
-        }
+    const handleCloseForm = () => {
         setIsFormOpen(false)
+        setEditCategory(null)
+        setNewCategoryName('')
+        setNewCategoryDescription('')
+        setIsNewCategoryActive(true) // Reset về true mặc định
         setImagePreview(null)
     }
+
+
+
 
     return (
         <div className="space-y-6">
@@ -117,6 +176,7 @@ const ProductCategories = () => {
                             <input
                                 type="text"
                                 name="name"
+                                onChange={(e) => setName(e.target.value)}
                                 defaultValue={editCategory?.name || ''}
                                 className="w-full px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
                                 required
@@ -126,11 +186,27 @@ const ProductCategories = () => {
                             <span className="text-gray-600">Mô tả</span>
                             <textarea
                                 name="description"
+                                onChange={(e) => setdec(e.target.value)}
                                 defaultValue={editCategory?.description || ''}
                                 rows="3"
                                 className="w-full px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200 resize-none"
                             ></textarea>
                         </label>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                            <span className="text-gray-700 font-medium">Trạng thái: {isNewCategoryActive ? 'Đang hoạt động' : 'Ngừng hoạt động'}</span>
+                            <Switch
+                                checked={isNewCategoryActive}
+                                onChange={setIsNewCategoryActive} // 👈 Cập nhật state khi click
+                                className={`${isNewCategoryActive ? 'bg-pink-600' : 'bg-gray-200'
+                                    } relative inline-flex h-6 w-11 items-center rounded-full transition-colors`}
+                            >
+                                <span className="sr-only">Bật/tắt trạng thái danh mục</span>
+                                <span
+                                    className={`${isNewCategoryActive ? 'translate-x-6' : 'translate-x-1'
+                                        } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+                                />
+                            </Switch>
+                        </div>
 
                         {/* Drag and Drop Image Uploader */}
                         <div className="border border-dashed border-pink-400 p-8 rounded-lg flex flex-col items-center justify-center text-center space-y-4">
@@ -140,7 +216,7 @@ const ProductCategories = () => {
                                 Chọn file
                                 <input
                                     type="file"
-                                    onChange={(e) => handleFileChange(e.target.files[0])}
+                                    onChange={(e) => handleFileChange(e)}  // Correct handler here
                                     className="hidden"
                                 />
                             </label>
@@ -159,6 +235,7 @@ const ProductCategories = () => {
                                 Hủy
                             </button>
                             <button
+                                onClick={handleSubmit}
                                 type="submit"
                                 className="px-6 py-3 bg-pink-600 text-white rounded-xl font-semibold hover:bg-pink-700 transition-colors"
                             >
@@ -177,18 +254,22 @@ const ProductCategories = () => {
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tên danh mục</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mô tả</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Số sản phẩm</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng thái</th>
+
                             <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Hành động</th>
                         </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                        {categories.map(category => (
+                        {category.map(category => (
                             <tr key={category.id}>
                                 <td className="px-6 py-4 whitespace-nowrap">
-                                    <img src={category.image} alt={category.name} className="w-10 h-10 object-cover rounded-md" />
+                                    <img src={category.image} alt={category.name} className="w-40 h-40 object-cover rounded-md" />
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{category.name}</td>
                                 <td className="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">{category.description}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{category.products}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{category.isActive ? "Hoạt động" : " Không hoạt động "}</td>
+
                                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
                                     <button
                                         onClick={() => handleOpenForm(category)}

@@ -30,14 +30,12 @@ const EditProduct = ({ productId, onBack }) => {
         if (!variations || variations.length === 0) return stock || 0
         return variations.reduce((sum, v) => sum + (Number(v.stock) || 0), 0)
     }
-console.log(tags);
 
     useEffect(() => {
         const getProductById = async (productId) => {
             try {
                 const res = await api.get(`/products/${productId}`)
                 const data = res.data
-                console.log(data.categories);
                 
                 setProductName(data.name)
                 setShortDesc(data.shortDescription)
@@ -213,13 +211,13 @@ console.log(tags);
             const productData = {
                 sku,
                 name: productName,
-                shortDescription,
-                detailedDescription,
+                shortDescription:shortDesc,
+                detailedDescription:detailedDesc,
                 originalPrice: Number(originalPrice),
                 sellingPrice: Number(sellingPrice),
                 discount: Number(discount),
                 categories: category, // 1 id duy nhất
-                brand,    // id từ backend (chọn trong select brand)
+                origin,    // id từ backend (chọn trong select brand)
                 tags,
                 stock: Number(stock),
                 status,
@@ -228,7 +226,6 @@ console.log(tags);
                 variations,
                 origin: "Việt Nam", // tạm thời hardcode
             }
-            console.log(1)
 
             if (variations.length > 0) {
                 const totalStock = variations.reduce((sum, v) => sum + (Number(v.stock) || 0), 0)
@@ -249,12 +246,12 @@ console.log(tags);
             const response = await api.put(`/products/${productId}`, productData)
 
             if (response.status !== 201) {
-                toast.error(error?.response?.data?.message || "Lỗi khi sửa sản phẩm!")
-            }
-            toast.success("Thêm sản phẩm thành công!")
+                     toast.success("Thêm sản phẩm thành công!")
             onBack()
+            }
+       
         } catch (error) {
-            console.error(error)
+            
             toast.error(error?.response?.data?.message || "Lỗi khi sửa sản phẩm!")
         }
     }
@@ -268,7 +265,7 @@ console.log(tags);
                     <h3 className="text-xl font-bold text-gray-800">Thông tin cơ bản</h3>
                     <label className="block space-y-2">
                         <span className="text-gray-600">Tên sản phẩm</span>
-                        <input type="text" value={productName} onChange={(e) => setName(e.target.value)} placeholder="Nhập tên sản phẩm" className="w-full px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200" />
+                        <input type="text" value={productName} onChange={(e) => setProductName(e.target.value)} placeholder="Nhập tên sản phẩm" className="w-full px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200" />
                     </label>
                     <label className="block space-y-2">
                         <span className="text-gray-600">Mô tả ngắn gọn về sản phẩm</span>

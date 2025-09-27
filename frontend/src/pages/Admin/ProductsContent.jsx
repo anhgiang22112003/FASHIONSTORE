@@ -11,7 +11,7 @@ const statusColors = {
     "Ngừng bán": "bg-blue-100 text-blue-600",
 }
 
-const ProductsContent = ({ setActiveTab ,onEditProduct }) => {
+const ProductsContent = ({ setActiveTab, onEditProduct }) => {
 
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [productToDelete, setProductToDelete] = useState(null)
@@ -23,7 +23,7 @@ const ProductsContent = ({ setActiveTab ,onEditProduct }) => {
         const fetchProducts = async () => {
             try {
                 const response = await api.get('/products'); // Thay đổi URL thành API thực tế của bạn
-                
+
                 setProduct(response.data);
             } catch (error) {
                 console.error('Error fetching products:', error);
@@ -92,72 +92,73 @@ const ProductsContent = ({ setActiveTab ,onEditProduct }) => {
                         + Thêm sản phẩm
                     </button>
                 </div>
-               
+
             </div>
-             {isFilterVisible && (
-                    <div className="mt-4  pt-4 border-t border-gray-200 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-                        {/* Bộ lọc danh mục */}
-                        <div>
-                            <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">Danh mục</label>
-                            <select
-                                id="category"
-                                name="category"
-                                value={filters?.category}
-                                onChange={handleFilterChange}
-                                className="px-4 py-2 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all w-full"
-                            >
-                                <option value="Tất cả">Tất cả danh mục</option>
-                                <option value="Váy">Váy</option>
-                                <option value="Áo">Áo</option>
-                                <option value="Quần">Quần</option>
-                            </select>
-                        </div>
+            {isFilterVisible && (
+                <div className="mt-4  pt-4 border-t border-gray-200 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+                    {/* Bộ lọc danh mục */}
+                    <div>
+                        <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">Danh mục</label>
+                        <select
+                            id="category"
+                            name="category"
+                            value={filters?.category}
+                            onChange={handleFilterChange}
+                            className="px-4 py-2 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all w-full"
+                        >
+                            <option value="Tất cả">Tất cả danh mục</option>
+                            <option value="Váy">Váy</option>
+                            <option value="Áo">Áo</option>
+                            <option value="Quần">Quần</option>
+                        </select>
+                    </div>
 
-                        {/* Bộ lọc trạng thái */}
-                        <div>
-                            <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">Trạng thái</label>
-                            <select
-                                id="status"
-                                name="status"
-                                value={filters?.status}
-                                onChange={handleFilterChange}
-                                className="px-4 py-2 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all w-full"
-                            >
-                                <option value="Tất cả">Tất cả trạng thái</option>
-                                <option value="Còn hàng">Còn hàng</option>
-                                <option value="Hết hàng">Hết hàng</option>
-                            </select>
-                        </div>
+                    {/* Bộ lọc trạng thái */}
+                    <div>
+                        <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">Trạng thái</label>
+                        <select
+                            id="status"
+                            name="status"
+                            value={filters?.status}
+                            onChange={handleFilterChange}
+                            className="px-4 py-2 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all w-full"
+                        >
+                            <option value="Tất cả">Tất cả trạng thái</option>
+                            <option value="Còn hàng">Còn hàng</option>
+                            <option value="Hết hàng">Hết hàng</option>
+                        </select>
+                    </div>
 
-                        {/* Bộ lọc giá tiền */}
-                        <div className="flex-1">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Giá tiền</label>
-                            <div className="flex space-x-2">
-                                <input
-                                    type="number"
-                                    name="minPrice"
-                                    placeholder="Tối thiểu"
-                                    value={filters?.minPrice}
-                                    onChange={handleFilterChange}
-                                    className="w-1/2 px-4 py-2 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all"
-                                />
-                                <input
-                                    type="number"
-                                    name="maxPrice"
-                                    placeholder="Tối đa"
-                                    value={filters?.maxPrice}
-                                    onChange={handleFilterChange}
-                                    className="w-1/2 px-4 py-2 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all"
-                                />
-                            </div>
+                    {/* Bộ lọc giá tiền */}
+                    <div className="flex-1">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Giá tiền</label>
+                        <div className="flex space-x-2">
+                            <input
+                                type="number"
+                                name="minPrice"
+                                placeholder="Tối thiểu"
+                                value={filters?.minPrice}
+                                onChange={handleFilterChange}
+                                className="w-1/2 px-4 py-2 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all"
+                            />
+                            <input
+                                type="number"
+                                name="maxPrice"
+                                placeholder="Tối đa"
+                                value={filters?.maxPrice}
+                                onChange={handleFilterChange}
+                                className="w-1/2 px-4 py-2 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all"
+                            />
                         </div>
                     </div>
-                )}
+                </div>
+            )}
 
             <div className="overflow-x-auto bg-white rounded-xl shadow">
                 <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-pink-50">
                         <tr>
+                            <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">ID Sản phẩm</th>
                             <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">Sản phẩm</th>
                             <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">Danh mục</th>
                             <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">Giá</th>
@@ -169,6 +170,7 @@ const ProductsContent = ({ setActiveTab ,onEditProduct }) => {
                     <tbody className="divide-y divide-gray-100">
                         {product?.map((product) => (
                             <tr key={product.Id} className="hover:bg-pink-50">
+                                <td className="px-6 py-4">{product.Id}</td>
                                 <td className="px-6 py-4 flex items-center space-x-3">
                                     <img src={product.mainImage} alt={product.name} className="w-12 h-12 rounded-lg object-cover" />
                                     <div>
@@ -177,7 +179,9 @@ const ProductsContent = ({ setActiveTab ,onEditProduct }) => {
                                     </div>
                                 </td>
                                 <td className="px-6 py-4">{product.categories.name}</td>
-                                <td className="px-6 py-4 font-semibold text-pink-600">{product.originalPrice}</td>
+                                <td className="px-6 py-4 font-semibold text-pink-600">
+                                    {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.originalPrice)}
+                                </td>                                
                                 <td className="px-6 py-4">{product.stock}</td>
                                 <td className="px-6 py-4">
                                     <span className={`px-2 py-1 rounded-full text-xs ${statusColors[product.status]}`}>
@@ -187,7 +191,7 @@ const ProductsContent = ({ setActiveTab ,onEditProduct }) => {
                                 <td className="px-6 py-4 flex space-x-2">
                                     <button onClick={() => onEditProduct(product._id)} // Thêm onClick để chuyển trang
                                         className="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200">
-                                        <PencilIcon  className="w-5 h-5" />
+                                        <PencilIcon className="w-5 h-5" />
                                     </button>
                                     <button onClick={() => handleDeleteClick(product._id)} className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200">
                                         <TrashIcon className="w-5 h-5" />

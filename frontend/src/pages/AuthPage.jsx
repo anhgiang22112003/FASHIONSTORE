@@ -64,7 +64,7 @@ export default function AuthPage() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (!validateForm()) return;
-
+  
     setLoading(true);
     try {
       if (isLogin) {
