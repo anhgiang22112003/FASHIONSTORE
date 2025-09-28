@@ -1,94 +1,125 @@
 import DeleteConfirmationModal from '@/components/DeleteConfirmationModal'
-import React, { useState } from 'react'
-
-const collectionsData = [
-    { id: 1, name: 'Bộ sưu tập mùa hè', description: 'Các sản phẩm mới nhất và phù hợp với mùa hè.', products: 50, image: 'https://via.placeholder.com/60' },
-    { id: 2, name: 'Giảm giá cuối mùa', description: 'Các sản phẩm giảm giá mạnh để xả kho.', products: 120, image: 'https://via.placeholder.com/60' },
-    { id: 3, name: 'Sản phẩm nổi bật', description: 'Các sản phẩm bán chạy nhất trong tháng.', products: 30, image: 'https://via.placeholder.com/60' },
-]
+import api from '@/service/api'
+import React, { useEffect, useState } from 'react'
+import { toast } from 'react-toastify'
+import { Switch } from '@headlessui/react'
 
 const ProductCollections = () => {
-    const [collections, setCollections] = useState(collectionsData)
+    const [collections, setCollections] = useState([])
     const [isFormOpen, setIsFormOpen] = useState(false)
     const [editCollection, setEditCollection] = useState(null)
     const [imagePreview, setImagePreview] = useState(null)
-
-
+    const [isLoading, setIsLoading] = useState(false)
+    const [isNewCollectionActive, setIsNewCollectionActive] = useState(true)
     const [isModalOpen, setIsModalOpen] = useState(false)
-    // State lưu trữ loại và ID của đối tượng cần xóa
     const [itemToDelete, setItemToDelete] = useState(null)
 
-    // Mở modal với thông tin cụ thể
-    const handleDeleteClick = (type, id, name) => {
-        setItemToDelete({ type, id, name })
+    // Fetch collections
+    const fetchCollections = async () => {
+        try {
+            setIsLoading(true)
+            const res = await api.get('/collection')
+            setCollections(res?.data || [])
+        } catch (err) {
+            toast.error('Lỗi khi lấy bộ sưu tập')
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
+    useEffect(() => {
+        fetchCollections()
+    }, [])
+
+    // Submit form
+    const handleSubmit = async (e) => {
+        e.preventDefault()
+        setIsLoading(true)
+
+        const formData = {
+            name: e.target.name.value,
+            description: e.target.description.value,
+            image: imagePreview,
+            isActive: isNewCollectionActive,
+
+        }
+
+        try {
+            if (editCollection) {
+                await api.put(`/collection/${editCollection._id}`, formData)
+                toast.success('Cập nhật bộ sưu tập thành công')
+            } else {
+                await api.post('/collection', formData)
+                toast.success('Thêm bộ sưu tập thành công')
+            }
+            fetchCollections()
+            handleCloseForm()
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Có lỗi xảy ra!')
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
+    // Delete
+    const handleDeleteClick = (id, name) => {
+        setItemToDelete({ id, name, type: 'collection' })
         setIsModalOpen(true)
     }
 
-    // Hàm xử lý khi xác nhận xóa
-    const handleConfirmDelete = () => {
-        if (itemToDelete) {
-            console.log(`Đang xóa ${itemToDelete.type} với ID: ${itemToDelete.id}`)
-            // Thực hiện logic xóa thực tế ở đây (ví dụ: gọi API)
-            // Ví dụ: xóa danh mục
-            if (itemToDelete.type === 'category') {
-                // ... logic xóa danh mục
+    const handleConfirmDelete = async () => {
+        if (!itemToDelete) return
+        try {
+            setIsLoading(true)
+            const res = await api.delete(`/collection/${itemToDelete.id}`)
+            if (res.status === 200) {
+                toast.success('Xóa bộ sưu tập thành công')
+                fetchCollections()
             }
-            // Ví dụ: xóa bộ sưu tập
-            else if (itemToDelete.type === 'collection') {
-                // ... logic xóa bộ sưu tập
-            }
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Lỗi khi xóa!')
+        } finally {
+            setIsLoading(false)
+            setIsModalOpen(false)
+            setItemToDelete(null)
         }
-        setIsModalOpen(false)
-        setItemToDelete(null)
     }
 
-    // Hàm đóng modal
-    const handleCloseModal = () => {
-        setIsModalOpen(false)
-        setItemToDelete(null)
+    // Upload file
+    const handleFileChange = async (e) => {
+        const file = e.target.files?.[0]
+        if (!file) return
+        const formData = new FormData()
+        formData.append('file', file)
+        try {
+            const res = await api.post('/upload', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            })
+            if (res.status === 200 || res.status === 201) {
+                setImagePreview(res.data.url)
+                toast.success('Upload ảnh thành công!')
+            }
+        } catch (err) {
+            toast.error('Upload ảnh thất bại!')
+        }
     }
-    const modalTitle = itemToDelete ? `Xác nhận xóa ${itemToDelete.type === 'category' ? 'danh mục' : 'bộ sưu tập'}` : ''
-    const modalMessage = itemToDelete ? `Bạn có chắc chắn muốn xóa "${itemToDelete.name}"? Thao tác này không thể hoàn tác.` : ''
 
+    // Form open/close
     const handleOpenForm = (collection = null) => {
         setEditCollection(collection)
         setIsFormOpen(true)
         setImagePreview(collection?.image || null)
     }
 
-    
-
-    const handleFileChange = (file) => {
-        if (file) {
-            const reader = new FileReader()
-            reader.onloadend = () => {
-                setImagePreview(reader.result)
-            }
-            reader.readAsDataURL(file)
-        } else {
-            setImagePreview(null)
-        }
-    }
-
-    const handleSubmit = (e) => {
-        e.preventDefault()
-        const formData = new FormData(e.target)
-        const newCollection = {
-            id: editCollection ? editCollection.id : collections.length > 0 ? Math.max(...collections.map(c => c.id)) + 1 : 1,
-            name: formData.get('name'),
-            description: formData.get('description'),
-            products: editCollection ? editCollection.products : 0,
-            image: imagePreview || 'https://via.placeholder.com/60',
-        }
-
-        if (editCollection) {
-            setCollections(collections.map(col => col.id === newCollection.id ? newCollection : col))
-        } else {
-            setCollections([...collections, newCollection])
-        }
+    const handleCloseForm = () => {
         setIsFormOpen(false)
+        setEditCollection(null)
         setImagePreview(null)
     }
+    
+
+    const modalTitle = itemToDelete ? `Xác nhận xóa bộ sưu tập` : ''
+    const modalMessage = itemToDelete ? `Bạn có chắc muốn xóa "${itemToDelete?.name}"?` : ''
 
     return (
         <div className="space-y-6">
@@ -102,6 +133,7 @@ const ProductCollections = () => {
                 </button>
             </div>
 
+            {/* FORM */}
             {isFormOpen && (
                 <div className="bg-white p-8 rounded-2xl shadow-xl mb-6">
                     <h3 className="text-xl font-bold text-gray-800 mb-4">
@@ -114,7 +146,7 @@ const ProductCollections = () => {
                                 type="text"
                                 name="name"
                                 defaultValue={editCollection?.name || ''}
-                                className="w-full px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
+                                className="w-full px-4 py-3 border border-pink-300 rounded-lg focus:ring-2 focus:ring-pink-200"
                                 required
                             />
                         </label>
@@ -124,91 +156,114 @@ const ProductCollections = () => {
                                 name="description"
                                 defaultValue={editCollection?.description || ''}
                                 rows="3"
-                                className="w-full px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200 resize-none"
-                            ></textarea>
+                                className="w-full px-4 py-3 border border-pink-300 rounded-lg focus:ring-2 focus:ring-pink-200 resize-none"
+                            />
                         </label>
-
-                        {/* Drag and Drop Image Uploader */}
-                        <div className="border border-dashed border-pink-400 p-8 rounded-lg flex flex-col items-center justify-center text-center space-y-4">
-                            <svg className="w-12 h-12 text-pink-600" fill="currentColor" viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4c-3.72 0-6.85 2.59-7.46 6.04-.32 1.94.49 3.82 1.83 5.06L7 16h10.42c1.78-.11 3.25-1.4 3.5-3.17.2-1.46-.23-2.91-1.57-3.79zM15 13l-3-3-3 3h2v4h2v-4h2z"></path></svg>
-                            <p className="text-gray-600">Kéo thả hình ảnh vào đây hoặc</p>
-                            <label className="px-6 py-3 bg-pink-600 text-white rounded-lg font-semibold cursor-pointer hover:bg-pink-700 transition-colors">
-                                Chọn file
-                                <input
-                                    type="file"
-                                    onChange={(e) => handleFileChange(e.target.files[0])}
-                                    className="hidden"
+                        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                            <span className="text-gray-700 font-medium">Trạng thái: {isNewCollectionActive ? 'Đang hoạt động' : 'Ngừng hoạt động'}</span>
+                            <Switch
+                                checked={isNewCollectionActive}
+                                onChange={setIsNewCollectionActive} // 👈 Cập nhật state khi click
+                                className={`${isNewCollectionActive ? 'bg-pink-600' : 'bg-gray-200'
+                                    } relative inline-flex h-6 w-11 items-center rounded-full transition-colors`}
+                            >
+                                <span className="sr-only">Bật/tắt trạng thái bộ sưu tập</span>
+                                <span
+                                    className={`${isNewCollectionActive ? 'translate-x-6' : 'translate-x-1'
+                                        } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
                                 />
+                            </Switch>
+                        </div>
+
+                        {/* Upload ảnh */}
+                        <div className="border border-dashed border-pink-400 p-8 rounded-lg flex flex-col items-center text-center space-y-4">
+                            <svg className="w-12 h-12 text-pink-600" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4c-3.72 0-6.85 2.59-7.46 6.04-.32 1.94.49 3.82 1.83 5.06L7 16h10.42c1.78-.11 3.25-1.4 3.5-3.17.2-1.46-.23-2.91-1.57-3.79zM15 13l-3-3-3 3h2v4h2v-4h2z"></path>
+                            </svg>
+                            <p className="text-gray-600">Kéo thả hình ảnh hoặc chọn file</p>
+                            <label className="px-6 py-3 bg-pink-600 text-white rounded-lg cursor-pointer">
+                                Chọn file
+                                <input type="file" onChange={handleFileChange} className="hidden" />
                             </label>
-                            <p className="text-sm text-gray-500">PNG, JPG, JPEG tối đa 5MB</p>
                             {imagePreview && (
-                                <img src={imagePreview} alt="Xem trước" className="mt-4 w-24 h-24 object-cover rounded-lg" />
+                                <img src={imagePreview} alt="Preview" className="mt-4 w-24 h-24 object-cover rounded-lg" />
                             )}
                         </div>
 
                         <div className="flex justify-end space-x-4 mt-6">
                             <button
                                 type="button"
-                                onClick={() => setIsFormOpen(false)}
-                                className="px-6 py-3 bg-white text-gray-600 rounded-xl font-semibold border border-gray-300 hover:bg-gray-100 transition-colors"
+                                onClick={handleCloseForm}
+                                className="px-6 py-3 bg-white border border-gray-300 rounded-xl"
                             >
                                 Hủy
                             </button>
                             <button
                                 type="submit"
-                                className="px-6 py-3 bg-pink-600 text-white rounded-xl font-semibold hover:bg-pink-700 transition-colors"
+                                disabled={isLoading}
+                                className={`px-6 py-3 rounded-xl font-semibold ${isLoading
+                                    ? 'bg-gray-400 text-white cursor-not-allowed'
+                                    : 'bg-pink-600 text-white hover:bg-pink-700'
+                                    }`}
                             >
-                                {editCollection ? 'Lưu thay đổi' : 'Thêm bộ sưu tập'}
+                                {isLoading ? 'Đang xử lý...' : editCollection ? 'Lưu thay đổi' : 'Thêm bộ sưu tập'}
                             </button>
                         </div>
                     </form>
                 </div>
             )}
 
+            {/* TABLE */}
             <div className="bg-white p-6 rounded-2xl shadow-xl overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-pink-50">
-                        <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hình ảnh</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tên bộ sưu tập</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mô tả</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Số sản phẩm</th>
-                            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Hành động</th>
-                        </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                        {collections.map(collection => (
-                            <tr key={collection.id}>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <img src={collection.image} alt={collection.name} className="w-10 h-10 object-cover rounded-md" />
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{collection.name}</td>
-                                <td className="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">{collection.description}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{collection.products}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                                    <button
+                {isLoading ? (
+                    <div className="text-center py-6 text-gray-500">Đang tải dữ liệu...</div>
+                ) : (
+                    <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-pink-50">
+                            <tr>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Hình ảnh</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tên bộ sưu tập</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Mô tả</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Số sản phẩm</th>
+                                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                            {collections?.map((collection) => (
+                                <tr key={collection?._id}>
+                                    <td className="px-6 py-4">
+                                        <img src={collection?.image} alt={collection?.name} className="w-20 h-20 object-cover rounded-md" />
+                                    </td>
+                                    <td className="px-6 py-4">{collection?.name}</td>
+                                    <td className="px-6 py-4 max-w-xs truncate">{collection?.description}</td>
+                                    <td className="px-6 py-4">{collection?.productCount}</td>
+                                    <td className="px-6 py-4 text-right space-x-2">
+                                        <button
                                         onClick={() => handleOpenForm(collection)}
                                         className="text-pink-600 hover:text-pink-900 transition-colors"
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 inline-block" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" /><path fillRule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clipRule="evenodd" /></svg>
                                     </button>
                                     <button
-                                         onClick={() => handleDeleteClick('collection', collection.id, collection.name)}
+                                         onClick={() => handleDeleteClick( collection?.id, collection?.name,'collection',)}
                                         className="text-red-600 hover:text-red-900 transition-colors"
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 inline-block" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
                                     </button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                )}
             </div>
-                 <DeleteConfirmationModal
+
+            {/* Modal confirm */}
+            <DeleteConfirmationModal
                 title={modalTitle}
                 message={modalMessage}
                 isOpen={isModalOpen}
-                onClose={handleCloseModal}
+                onClose={() => setIsModalOpen(false)}
                 onConfirm={handleConfirmDelete}
             />
         </div>

@@ -18,6 +18,9 @@ const AddProduct = ({ setActiveTab }) => {
     const [stock, setStock] = useState('')
     const [sku, setSku] = useState('')
     const [status, setStatus] = useState('Còn hàng')
+    const [collection, setCollection] = useState("")
+    const [collections, setCollections] = useState([]) // load từ API hoặc dữ liệu có sẵn
+
     const [isloading, setIsLoading] = useState(false)
     // State để lưu trữ File object của hình ảnh, không phải URL
     const [mainImageFile, setMainImageFile] = useState(null)
@@ -25,6 +28,18 @@ const AddProduct = ({ setActiveTab }) => {
     const [mainImagePreview, setMainImagePreview] = useState(null)
     const [subImageFiles, setSubImageFiles] = useState([]) // KHÔNG để [null]
     const [variations, setVariations] = useState([])
+    useEffect(() => {
+        const fetchCollections = async () => {
+            try {   
+                const res = await api.get("/collection") 
+                setCollections(res.data) // gán mảng collections
+            }
+            catch (error) {
+                toast.error("Lỗi khi load collections:", error)
+            }
+        }
+        fetchCollections()
+    }, [])
     // Cập nhật URL preview khi File thay đổi
     useEffect(() => {
         const fetchCategories = async () => {
@@ -185,7 +200,7 @@ const AddProduct = ({ setActiveTab }) => {
                 originalPrice: Number(originalPrice),
                 sellingPrice: Number(sellingPrice),
                 discount: Number(discountPercentage),
-                categories: category, // 1 id duy nhất
+                category: category, // 1 id duy nhất
                 brand,    // id từ backend (chọn trong select brand)
                 tags,
                 stock: Number(stock),
@@ -265,7 +280,9 @@ const AddProduct = ({ setActiveTab }) => {
                 {/* Product Type Section */}
                 <div className="bg-white p-8 rounded-2xl shadow-xl space-y-6">
                     <h3 className="text-xl font-bold text-gray-800">Phân loại sản phẩm</h3>
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Danh mục */}
                         <label className="block space-y-2">
                             <span className="text-gray-600">Danh mục</span>
                             <select
@@ -274,27 +291,68 @@ const AddProduct = ({ setActiveTab }) => {
                                 className="w-full px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
                             >
                                 <option value="">Chọn danh mục</option>
-                                {categories.map((item) => (
+                                {categories?.map((item) => (
                                     <option key={item._id} value={item._id}>
                                         {item.name}
                                     </option>
                                 ))}
                             </select>
-
                         </label>
+
+                        {/* Thương hiệu */}
                         <label className="block space-y-2">
                             <span className="text-gray-600">Thương hiệu</span>
-                            <input type="text" placeholder="Nhập thương hiệu" value={brand} onChange={(e) => setBrand(e.target.value)} className="w-full px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200" />
+                            <input
+                                type="text"
+                                placeholder="Nhập thương hiệu"
+                                value={brand}
+                                onChange={(e) => setBrand(e.target.value)}
+                                className="w-full px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
+                            />
+                        </label>
+
+                        {/* Bộ sưu tập */}
+                        <label className="block space-y-2">
+                            <span className="text-gray-600">Bộ sưu tập</span>
+                            <select
+                                value={collection}
+                                onChange={(e) => setCollection(e.target.value)}
+                                className="w-full px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
+                            >
+                                <option value="">Chọn bộ sưu tập</option>
+                                {collections.map((item) => (
+                                    <option key={item._id} value={item._id}>
+                                        {item.name}
+                                    </option>
+                                ))}
+                            </select>
                         </label>
                     </div>
+
+                    {/* Tags */}
                     <label className="block space-y-2">
                         <span className="text-gray-600">Tags</span>
                         <div className="flex flex-wrap gap-2 mb-2">
                             {tags.map((tag, index) => (
-                                <span key={index} className="flex items-center space-x-1 px-3 py-1 bg-pink-100 text-pink-700 rounded-full text-sm">
+                                <span
+                                    key={index}
+                                    className="flex items-center space-x-1 px-3 py-1 bg-pink-100 text-pink-700 rounded-full text-sm"
+                                >
                                     <span>{tag}</span>
-                                    <button onClick={() => handleRemoveTag(tag)} className="text-pink-500 hover:text-pink-800" aria-label={`Xóa tag ${tag}`}>
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                                    <button
+                                        onClick={() => handleRemoveTag(tag)}
+                                        className="text-pink-500 hover:text-pink-800"
+                                        aria-label={`Xóa tag ${tag}`}
+                                    >
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            className="h-3 w-3"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                        >
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
                                     </button>
                                 </span>
                             ))}
@@ -313,12 +371,24 @@ const AddProduct = ({ setActiveTab }) => {
                                 }}
                                 className="w-full px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
                             />
-                            <button onClick={handleAddTag} className="p-3 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+                            <button
+                                onClick={handleAddTag}
+                                className="p-3 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition-colors"
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="h-6 w-6"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                </svg>
                             </button>
                         </div>
                     </label>
                 </div>
+
 
                 {/* Product Attributes Section */}
                 <ProductVariations setStock={setStock} variations={variations} setVariations={setVariations} />

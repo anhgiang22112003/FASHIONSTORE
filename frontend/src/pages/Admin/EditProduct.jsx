@@ -43,7 +43,7 @@ const EditProduct = ({ productId, onBack }) => {
                 setOriginalPrice(data.originalPrice)
                 setSellingPrice(data.sellingPrice)
                 setDiscount(data.discount)
-                setCategory(data.categories?._id || data.categories)
+                setCategory(data.category?._id || data.category)
                 setOrigin(data.origin)
                 setStock(data.stock)
                 setSku(data.sku)
@@ -216,7 +216,7 @@ const EditProduct = ({ productId, onBack }) => {
                 originalPrice: Number(originalPrice),
                 sellingPrice: Number(sellingPrice),
                 discount: Number(discount),
-                categories: category, // 1 id duy nhất
+                category: category, // 1 id duy nhất
                 origin,    // id từ backend (chọn trong select brand)
                 tags,
                 stock: Number(stock),

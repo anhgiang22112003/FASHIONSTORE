@@ -3,7 +3,7 @@ import React from 'react';
 const DeleteProductModal = ({ isOpen, onClose, onConfirm, product }) => {
     // Nếu modal không hiển thị, không render gì cả
     if (!isOpen) return null;
-
+    
     return (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4 z-50 transition-opacity duration-300">
             <div className="bg-white p-8 rounded-2xl shadow-xl max-w-lg w-full transform transition-all duration-300 scale-100 opacity-100">
@@ -16,16 +16,16 @@ const DeleteProductModal = ({ isOpen, onClose, onConfirm, product }) => {
                     {/* Tiêu đề và thông điệp */}
                     <h3 className="text-2xl font-bold text-gray-800">Xóa sản phẩm</h3>
                     <p className="text-gray-600">
-                        Bạn có chắc chắn muốn xóa sản phẩm **<span className="font-semibold text-pink-600">{product.name}</span>** này không?
+                        Bạn có chắc chắn muốn xóa sản phẩm **<span className="font-semibold text-pink-600">{product?.name}</span>** này không?
                         Hành động này không thể hoàn tác.
                     </p>
 
                     {/* Thông tin sản phẩm */}
                     <div className="flex items-center space-x-4 bg-gray-50 p-4 rounded-xl w-full">
-                        <img className="w-16 h-16 object-cover rounded-lg" src={product.image} alt={product.name} />
+                        <img className="w-16 h-16 object-cover rounded-lg" src={product?.mainImage} alt={product?.name} />
                         <div className="flex-1 text-left">
-                            <p className="text-gray-800 font-medium">{product.name}</p>
-                            <p className="text-sm text-gray-500">Mã SKU: {product.sku}</p>
+                            <p className="text-gray-800 font-medium">{product?.name}</p>
+                            <p className="text-sm text-gray-500">Mã: {product?.Id}</p>
                         </div>
                     </div>
                 </div>

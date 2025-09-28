@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react"
 import { PencilIcon, TrashIcon, FunnelIcon, ArrowDownTrayIcon } from "@heroicons/react/24/outline"
 import DeleteProductModal from "@/components/DeleteProductPopup"
 import api from "@/service/api"
+import { toast } from "react-toastify"
 
 
 
@@ -19,8 +20,7 @@ const ProductsContent = ({ setActiveTab, onEditProduct }) => {
     const [filters, setFilters] = useState({ category: 'Tất cả', status: 'Tất cả', minPrice: '', maxPrice: '' })
     const [searchTerm, setSearchTerm] = useState('');
     const [product, setProduct] = useState([]);
-    useEffect(() => {
-        const fetchProducts = async () => {
+      const fetchProducts = async () => {
             try {
                 const response = await api.get('/products'); // Thay đổi URL thành API thực tế của bạn
 
@@ -29,25 +29,13 @@ const ProductsContent = ({ setActiveTab, onEditProduct }) => {
                 console.error('Error fetching products:', error);
             }
         }
+    useEffect(() => {
+      
         fetchProducts();
-        // Giả sử bạn có một API để lấy danh sách sản phẩm
     }, [])
-    // useEffect(() => {
-    //     const filtered = product.filter(product => {
-    //         const categoryMatch = filters.category === 'Tất cả' || product.category === filters.category
-    //         const statusMatch = filters.status === 'Tất cả' || product.status === filters.status
-    //         const searchMatch = product.name.toLowerCase().includes(searchTerm.toLowerCase())
-
-    //         const minPrice = parseFloat(filters.minPrice)
-    //         const maxPrice = parseFloat(filters.maxPrice)
-    //         const priceMatch = (isNaN(minPrice) || product.price >= minPrice) && (isNaN(maxPrice) || product.price <= maxPrice)
-
-    //         return categoryMatch && statusMatch && searchMatch && priceMatch
-    //     })
-    // }, [filters, searchTerm])
-
+   
     const handleFilterChange = (e) => {
-        setFilters({ ...filters, [e.target.name]: e.target.value })
+        setFilters({ ...filters, [e.target?.name]: e.target.value })
     }
 
     const toggleFilterDropdown = () => {
@@ -58,9 +46,10 @@ const ProductsContent = ({ setActiveTab, onEditProduct }) => {
         setIsModalOpen(true)
     }
 
-    const handleConfirmDelete = () => {
-        // Gọi API hoặc logic để xóa sản phẩm
-        console.log("Xóa sản phẩm có ID:", productToDelete.id)
+    const handleConfirmDelete = async () => {
+        await api.delete(`/products/${productToDelete?._id}`)
+        toast.success("Xóa sản phẩm thành công")
+        fetchProducts() // Tải lại danh sách sản phẩm sau khi xóa
         setIsModalOpen(false) // Đóng modal sau khi xóa thành công
     }
 
@@ -172,28 +161,28 @@ const ProductsContent = ({ setActiveTab, onEditProduct }) => {
                             <tr key={product.Id} className="hover:bg-pink-50">
                                 <td className="px-6 py-4">{product.Id}</td>
                                 <td className="px-6 py-4 flex items-center space-x-3">
-                                    <img src={product.mainImage} alt={product.name} className="w-12 h-12 rounded-lg object-cover" />
+                                    <img src={product.mainImage} alt={product?.name} className="w-12 h-12 rounded-lg object-cover" />
                                     <div>
-                                        <p className="font-semibold">{product.name}</p>
-                                        <p className="text-gray-400 text-sm">SKU: {product.sku}</p>
+                                        <p className="font-semibold">{product?.name}</p>
+                                        <p className="text-gray-400 text-sm">SKU: {product?.sku}</p>
                                     </div>
                                 </td>
-                                <td className="px-6 py-4">{product.categories.name}</td>
+                                <td className="px-6 py-4">{product?.category?.name}</td>
                                 <td className="px-6 py-4 font-semibold text-pink-600">
-                                    {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.originalPrice)}
+                                    {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product?.originalPrice)}
                                 </td>                                
-                                <td className="px-6 py-4">{product.stock}</td>
+                                <td className="px-6 py-4">{product?.stock}</td>
                                 <td className="px-6 py-4">
-                                    <span className={`px-2 py-1 rounded-full text-xs ${statusColors[product.status]}`}>
-                                        {product.status}
+                                    <span className={`px-2 py-1 rounded-full text-xs ${statusColors[product?.status]}`}>
+                                        {product?.status}
                                     </span>
                                 </td>
                                 <td className="px-6 py-4 flex space-x-2">
-                                    <button onClick={() => onEditProduct(product._id)} // Thêm onClick để chuyển trang
+                                    <button onClick={() => onEditProduct(product?._id)} // Thêm onClick để chuyển trang
                                         className="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200">
                                         <PencilIcon className="w-5 h-5" />
                                     </button>
-                                    <button onClick={() => handleDeleteClick(product._id)} className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200">
+                                    <button onClick={() => handleDeleteClick(product)} className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200">
                                         <TrashIcon className="w-5 h-5" />
                                     </button>
                                 </td>
