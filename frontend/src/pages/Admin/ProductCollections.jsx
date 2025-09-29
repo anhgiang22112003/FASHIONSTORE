@@ -225,6 +225,8 @@ const ProductCollections = () => {
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tên bộ sưu tập</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Mô tả</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Số sản phẩm</th>
+                                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Trạng thái</th>
+
                                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Hành động</th>
                             </tr>
                         </thead>
@@ -237,6 +239,8 @@ const ProductCollections = () => {
                                     <td className="px-6 py-4">{collection?.name}</td>
                                     <td className="px-6 py-4 max-w-xs truncate">{collection?.description}</td>
                                     <td className="px-6 py-4">{collection?.productCount}</td>
+                                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{collection?.isActive ? "Hoạt động" : "Không hoạt động"}</td>
+
                                     <td className="px-6 py-4 text-right space-x-2">
                                         <button
                                         onClick={() => handleOpenForm(collection)}
