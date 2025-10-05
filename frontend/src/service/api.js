@@ -28,7 +28,7 @@ api.interceptors.response.use(
     if (error.response && error.response.status === 401) {
       // token hết hạn hoặc không hợp lệ
       localStorage.removeItem("accessToken");
-      window.location.href = "/login"; // điều hướng về login
+      // window.location.href = "/login"; // điều hướng về login
     }
     return Promise.reject(error);
   }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react'
 import {
   MagnifyingGlassIcon,
   ArrowDownTrayIcon,
@@ -9,79 +9,34 @@ import {
   PlayIcon,
   CheckCircleIcon,
   XMarkIcon,
-} from '@heroicons/react/24/outline';
+} from '@heroicons/react/24/outline'
 import {
   ExclamationCircleIcon,
-} from '@heroicons/react/24/solid';
+} from '@heroicons/react/24/solid'
 import EditPromotionModal from '@/components/EditPromotionModal'
+import api from '@/service/api'
+import { set } from 'date-fns'
+import { toast } from 'react-toastify'
 
-// Dữ liệu khuyến mại giả lập
-const promotionsData = [
-  {
-    id: 1,
-    name: 'Flash Sale Cuối Tuần',
-    status: 'Đang hoạt động',
-    code: 'FLASHSALE50',
-    type: 'percent',
-    discountValue: 50,
-    minOrderValue: '500.000đ',
-    startDate: '2024-01-20T08:00',
-    endDate: '2024-01-21T23:59',
-    usedCount: 45,
-    maxUsage: 100,
-    isFreeShipping: false,
-    description: 'Giảm giá 50% tất cả sản phẩm váy trong cuối tuần',
-  },
-  {
-    id: 2,
-    name: 'Khuyến Mãi Khách Hàng Mới',
-    status: 'Đang hoạt động',
-    code: 'NEWCUSTOMER',
-    type: 'amount',
-    discountValue: '100.000đ',
-    minOrderValue: '300.000đ',
-    startDate: '2024-01-01T00:00',
-    endDate: '2024-12-31T23:59',
-    usedCount: 234,
-    maxUsage: 1000,
-    isFreeShipping: false,
-    description: 'Giảm 100K cho đơn hàng đầu tiên từ 300K',
-  },
-  {
-    id: 3,
-    name: 'Sale Hè 2024',
-    status: 'Bị tạm dừng',
-    code: 'SUMMER2024',
-    type: 'percent',
-    discountValue: 30,
-    minOrderValue: '200.000đ',
-    startDate: '2024-06-01T00:00',
-    endDate: '2024-08-31T23:59',
-    usedCount: 0,
-    maxUsage: 500,
-    isFreeShipping: false,
-    description: 'Giảm giá 30% cho bộ sưu tập hè',
-  },
-];
 
-// Helper để format ngày giờ
+
 const formatDateTime = (isoString) => {
-  const date = new Date(isoString);
+  const date = new Date(isoString)
   const formattedDate = date.toLocaleDateString('vi-VN', {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
-  });
+  })
   const formattedTime = date.toLocaleTimeString('vi-VN', {
     hour: '2-digit',
     minute: '2-digit',
-  });
-  return `${formattedDate} ${formattedTime}`;
-};
+  })
+  return `${formattedDate} ${formattedTime}`
+}
 
 // Modal chung
 const CommonModal = ({ title, isOpen, onClose, children, className = '' }) => {
-  if (!isOpen) return null;
+  if (!isOpen) return null
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
       <div className={`bg-white rounded-2xl p-6 mx-auto shadow-xl ${className}`}>
@@ -97,8 +52,8 @@ const CommonModal = ({ title, isOpen, onClose, children, className = '' }) => {
         {children}
       </div>
     </div>
-  );
-};
+  )
+}
 
 
 // Modal xác nhận chung
@@ -114,76 +69,122 @@ const ConfirmationModal = ({ title, message, isOpen, onClose, onConfirm, confirm
         <button onClick={onConfirm} className={`px-4 py-2 text-sm font-medium text-white ${buttonColor} rounded-lg hover:${buttonHoverColor} transition-colors`}>{confirmText}</button>
       </div>
     </CommonModal>
-  );
-};
+  )
+}
 
 const PromotionManagementPage = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('Tất cả');
-  const [selectedPromotion, setSelectedPromotion] = useState(null);
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isPauseModalOpen, setIsPauseModalOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('')
+  const [statusFilter, setStatusFilter] = useState('Tất cả')
+  const [selectedPromotion, setSelectedPromotion] = useState(null)
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [isPauseModalOpen, setIsPauseModalOpen] = useState(false)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [isLoading, setLoading] = useState(false)
+  const [promotionsData, setPromotionsData] = useState([])
+  const [isResumeModalOpen, setIsResumeModalOpen] = useState(false)
+  const handleResumeClick = (promotion) => {
+    setSelectedPromotion(promotion)
+    setIsResumeModalOpen(true)
+  }
 
   const handleAddClick = () => {
-    setSelectedPromotion(null);
-    setIsAddModalOpen(true);
-  };
+    setSelectedPromotion(null)
+    setIsAddModalOpen(true)
+  }
 
   const handleEditClick = (promotion) => {
-    setSelectedPromotion(promotion);
-    setIsEditModalOpen(true);
-  };
+    setSelectedPromotion(promotion)
+    setIsEditModalOpen(true)
+  }
 
   const handlePauseClick = (promotion) => {
-    setSelectedPromotion(promotion);
-    setIsPauseModalOpen(true);
-  };
+    setSelectedPromotion(promotion)
+    setIsPauseModalOpen(true)
+  }
 
   const handleDeleteClick = (promotion) => {
-    setSelectedPromotion(promotion);
-    setIsDeleteModalOpen(true);
-  };
+    setSelectedPromotion(promotion)
+    setIsDeleteModalOpen(true)
+  }
 
-  const handleConfirmAction = (action, data = null) => {
-    if (action === 'add') {
-      console.log('Thêm mới khuyến mại:', data);
-    } else if (action === 'edit') {
-      console.log('Cập nhật khuyến mại:', data);
-    } else {
-      console.log(`Đã thực hiện hành động "${action}" với khuyến mại ID: ${selectedPromotion.id}`);
+  const handleConfirmAction = async (action) => {
+    if (!selectedPromotion) return
+
+    try {
+      if (action === 'pause') {
+        // Gọi API tạm dừng
+        await api.patch(`/vouchers/${selectedPromotion._id}/pause`, { status: 'paused' })
+        toast.success('Tạm dừng voucher thành công!')
+      }
+
+      if (action === 'resume') {
+        // Gọi API kích hoạt lại
+        await api.patch(`/vouchers/${selectedPromotion._id}/pause`, { status: 'active' })
+        toast.success('Kích hoạt lại voucher thành công!')
+      }
+
+      if (action === 'delete') {
+        // Gọi API xóa
+        await api.delete(`/vouchers/${selectedPromotion._id}`)
+        toast.success('Xóa voucher thành công!')
+      }
+
+      // Reload danh sách
+      await fetVoucher()
+    } catch (error) {
+      toast.error(error?.response?.data?.message || 'Đã có lỗi xảy ra. Vui lòng thử lại.')
+    } finally {
+      // Đóng modal
+      setSelectedPromotion(null)
+      setIsResumeModalOpen(false)
+      setIsAddModalOpen(false)
+      setIsEditModalOpen(false)
+      setIsPauseModalOpen(false)
+      setIsDeleteModalOpen(false)
     }
-    setSelectedPromotion(null);
-    setIsAddModalOpen(false);
-    setIsEditModalOpen(false);
-    setIsPauseModalOpen(false);
-    setIsDeleteModalOpen(false);
-  };
+  }
 
-  const filteredPromotions = promotionsData.filter(promo => {
+  const fetVoucher = async () => {
+    setLoading(true)
+    try {
+      const response = await api.get('/vouchers')
+
+      setPromotionsData(response.data || [])
+    } catch (error) {
+      console.error('Error fetching promotions:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+  useEffect(() => {
+
+    fetVoucher()
+  }, [])
+
+  const filteredPromotions = promotionsData?.filter(promo => {
     const matchesSearch = promo.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      promo.code.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'Tất cả' || promo.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
+      promo.code.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesStatus = statusFilter === 'Tất cả' || promo.status === statusFilter
+    return matchesSearch && matchesStatus
+  })
 
   const getStatusClasses = (status) => {
     switch (status) {
-      case 'Đang hoạt động':
-        return 'bg-green-100 text-green-700';
-      case 'Bị tạm dừng':
-        return 'bg-yellow-100 text-yellow-700';
-      case 'Đã kết thúc':
-        return 'bg-gray-100 text-gray-700';
+      case 'active':
+        return 'bg-green-100 text-green-700'
+      case 'paused':
+        return 'bg-yellow-100 text-yellow-700'
+      case 'expired':
+        return 'bg-gray-100 text-gray-700'
       default:
-        return 'bg-gray-100 text-gray-700';
+        return 'bg-gray-100 text-gray-700'
     }
-  };
+  }
 
   const getUsagePercentage = (used, total) => {
-    return total > 0 ? (used / total) * 100 : 0;
-  };
+    return total > 0 ? (used / total) * 100 : 0
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 p-8 font-sans text-gray-800">
@@ -236,13 +237,13 @@ const PromotionManagementPage = () => {
                 <div className="flex items-center space-x-2 mb-1">
                   <span className="font-semibold text-gray-900">{promo.name}</span>
                   <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusClasses(promo.status)}`}>
-                    {promo.status}
+                    {promo?.status}
                   </span>
                   <span className="px-2 py-1 text-xs font-medium rounded-full bg-pink-200 text-pink-700">{promo.code}</span>
                 </div>
                 <p className="text-sm text-gray-600 mt-2">{promo.description}</p>
                 <div className="mt-4 text-sm">
-                  {promo.isFreeShipping ? (
+                  {promo?.type === "free_shipping" ? (
                     <p><span className="font-medium">Giá trị giảm:</span> Miễn phí vận chuyển</p>
                   ) : (
                     <p><span className="font-medium">Giá trị giảm:</span> {promo.discountValue}{promo.type === 'percent' ? '%' : 'đ'}</p>
@@ -270,7 +271,7 @@ const PromotionManagementPage = () => {
                 </div>
               </div>
               <div className="flex space-x-2 ml-4 mt-4 md:mt-0">
-                {promo.status === 'Đang hoạt động' && (
+                {promo.status === 'active' && (
                   <>
                     <button onClick={() => handleEditClick(promo)} title="Chỉnh sửa" className="p-2 rounded-full text-blue-600 hover:bg-blue-100 transition-colors">
                       <PencilIcon className="w-5 h-5" />
@@ -280,8 +281,8 @@ const PromotionManagementPage = () => {
                     </button>
                   </>
                 )}
-                {promo.status === 'Bị tạm dừng' && (
-                  <button onClick={() => handleConfirmAction('resume', promo)} title="Kích hoạt lại" className="p-2 rounded-full text-green-600 hover:bg-green-100 transition-colors">
+                {promo.status === 'paused' && (
+                  <button onClick={() => handleResumeClick(promo)} title="Kích hoạt lại" className="p-2 rounded-full text-green-600 hover:bg-green-100 transition-colors">
                     <PlayIcon className="w-5 h-5" />
                   </button>
                 )}
@@ -299,7 +300,7 @@ const PromotionManagementPage = () => {
           title="Thêm khuyến mại mới"
           isOpen={isAddModalOpen}
           onClose={() => setIsAddModalOpen(false)}
-          onSave={(data) => handleConfirmAction('add', data)}
+          onSave={fetVoucher}
         />
       )}
 
@@ -308,7 +309,7 @@ const PromotionManagementPage = () => {
           title="Chỉnh sửa khuyến mại"
           isOpen={isEditModalOpen}
           onClose={() => setIsEditModalOpen(false)}
-          onSave={(data) => handleConfirmAction('edit', data)}
+          onSave={fetVoucher}
           promotion={selectedPromotion}
         />
       )}
@@ -338,8 +339,21 @@ const PromotionManagementPage = () => {
           buttonHoverColor="bg-red-600"
         />
       )}
-    </div>
-  );
-};
+      {isResumeModalOpen && (
+        <ConfirmationModal
+          title="Kích hoạt lại khuyến mại"
+          message="Bạn có chắc chắn muốn kích hoạt lại khuyến mại này?"
+          isOpen={isResumeModalOpen}
+          onClose={() => setIsResumeModalOpen(false)}
+          onConfirm={() => handleConfirmAction('resume')}
+          confirmText="Kích hoạt"
+          buttonColor="bg-green-500"
+          buttonHoverColor="bg-green-600"
+        />
+      )}
 
-export default PromotionManagementPage;
+    </div>
+  )
+}
+
+export default PromotionManagementPage

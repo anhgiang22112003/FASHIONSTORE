@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
-import { XMarkIcon } from '@heroicons/react/24/outline';
+import React, { useEffect, useState } from 'react'
+import { XMarkIcon } from '@heroicons/react/24/outline'
+import api from '@/service/api'
+import { toast } from 'react-toastify'
 
 // Modal chung
 const CommonModal = ({ title, isOpen, onClose, children, className = '' }) => {
-  if (!isOpen) return null;
+  if (!isOpen) return null
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
       <div className={`bg-white rounded-2xl p-6 mx-auto shadow-xl ${className}`}>
@@ -19,42 +21,91 @@ const CommonModal = ({ title, isOpen, onClose, children, className = '' }) => {
         {children}
       </div>
     </div>
-  );
-};
+  )
+}
 
 const EditPromotionModal = ({ title, isOpen, onClose, onSave, promotion = null }) => {
+  const [categories, setCategories] = useState([])
   const [formData, setFormData] = useState({
-    name: promotion?.name || '',
-    code: promotion?.code || '',
-    description: promotion?.description || '',
-    type: promotion?.type || 'percent',
-    discountValue: promotion?.discountValue || '',
-    minOrderValue: promotion?.minOrderValue || '',
-    maxDiscount: promotion?.maxDiscount || '',
-    startDate: promotion?.startDate || '',
-    endDate: promotion?.endDate || '',
-    usageLimit: promotion?.maxUsage || '',
-    isFreeShipping: promotion?.isFreeShipping || false,
-    category: promotion?.category || 'Tất cả danh mục',
-  });
+    name: "",
+    code: "",
+    description: "",
+    type: "percent",
+    discountValue: "",
+    minOrderValue: "",
+    maxDiscount: "",
+    startDate: "",
+    endDate: "",
+    usageLimit: "",
+    applicableCategories: [],
+  })
+
+  useEffect(() => {
+    const fetCategories = async () => {
+      try {
+        const response = await api.get("/categories")
+        setCategories(response.data)
+      } catch (err) {
+        console.error("API Error:", err)
+        toast.error('Không tải được danh mục. Vui lòng thử lại.')
+
+      }
+    }
+    fetCategories()
+  }, [])
+
+  // Khi mở modal với data cũ thì fill vào form
+  useEffect(() => {
+    if (promotion) {
+      setFormData({
+        name: promotion.name || "",
+        code: promotion.code || "",
+        description: promotion.description || "",
+        type: promotion.type || "percent",
+        discountValue: promotion.discountValue || "",
+        minOrderValue: promotion.minOrderValue || "",
+        maxDiscount: promotion.maxDiscount || "",
+        startDate: promotion.startDate?.slice(0, 16) || "", // format datetime-local
+        endDate: promotion.endDate?.slice(0, 16) || "",
+        usageLimit: promotion.usageLimit || "",
+        applicableCategories: promotion.applicableCategories || "Tất cả danh mục",
+      })
+    }
+  }, [promotion])
 
   const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value, type, checked } = e.target
     setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
-  };
-
-  const handleSave = () => {
-    onSave(formData);
-    onClose();
-  };
+      [name]: type === "checkbox" ? checked : value,
+    }))
+  }
 
   const handleGenerateCode = () => {
-    const newCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-    setFormData((prev) => ({ ...prev, code: newCode }));
-  };
+    const newCode = Math.random().toString(36).substring(2, 8).toUpperCase()
+    setFormData((prev) => ({ ...prev, code: newCode }))
+  }
+  console.log(formData)
+  console.log(promotion)
+
+  const handleSave = async () => {
+    try {
+      let response
+      if (promotion) {
+        response = await api.patch(`/vouchers/${promotion._id}`, formData) // sửa
+        toast.success('Cập nhật voucher thành công!')
+      } else {
+        response = await api.post("/vouchers", formData) // thêm      
+        toast.success('Thêm voucher thành công!')
+      }
+      onSave()
+      onClose()
+    } catch (err) {
+      console.error("API Error:", err) // log để debug
+      toast.error(err?.response?.data?.message || 'Có lỗi xảy ra. Vui lòng thử lại.')
+    }
+  }
+
 
   return (
     <CommonModal title={title} isOpen={isOpen} onClose={onClose} className="w-full max-w-4xl">
@@ -114,8 +165,8 @@ const EditPromotionModal = ({ title, isOpen, onClose, onSave, promotion = null }
                 <input
                   type="radio"
                   name="type"
-                  value="freeship"
-                  checked={formData.type === 'freeship'}
+                  value="free_shipping"
+                  checked={formData.type === 'free_shipping'}
                   onChange={handleInputChange}
                   className="form-radio text-[#ff69b4] focus:ring-[#ff69b4]"
                 />
@@ -239,17 +290,23 @@ const EditPromotionModal = ({ title, isOpen, onClose, onSave, promotion = null }
           {/* Danh mục */}
           <div>
             <label className="block text-sm font-medium text-gray-700">Áp dụng cho danh mục</label>
-            <select
-              name="category"
-              value={formData.category}
-              onChange={handleInputChange}
-              className="mt-1 block w-full px-4 py-2 border rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#ff69b4]"
-            >
-              <option>Tất cả danh mục</option>
-              <option>Váy</option>
-              <option>Áo</option>
-              <option>Quần</option>
-            </select>
+            {/* Danh mục */}
+            <div>
+              <select
+                name="applicableCategories"
+                value={formData.applicableCategories}
+                onChange={handleInputChange}
+                className="mt-1 block w-full px-4 py-2 border rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#ff69b4]"
+              >
+                <option value="Tất cả danh mục">Tất cả danh mục</option>
+                {categories.map((cat) => (
+                  <option key={cat._id} value={cat._id}>
+                    {cat.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
           </div>
           {/* Preview */}
           <div className="p-4 bg-gray-100 rounded-lg">
@@ -257,7 +314,7 @@ const EditPromotionModal = ({ title, isOpen, onClose, onSave, promotion = null }
             <p className="text-sm mt-1 text-gray-600">
               Mã: <span className="font-semibold text-[#ff69b4]">{formData.code || '...'}</span>
               <br />
-              {formData.type === 'freeship' ? (
+              {formData.type === 'free_shipping' ? (
                 <>Miễn phí vận chuyển</>
               ) : (
                 <>
@@ -301,7 +358,7 @@ const EditPromotionModal = ({ title, isOpen, onClose, onSave, promotion = null }
         </button>
       </div>
     </CommonModal>
-  );
-};
+  )
+}
 
-export default EditPromotionModal;
+export default EditPromotionModal

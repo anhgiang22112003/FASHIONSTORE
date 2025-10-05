@@ -3,7 +3,7 @@ import { toast } from 'react-toastify'
 import api from "../../service/api"
 import ProductVariations from './ProductVariations.jsx'
 
-const AddProduct = ({ setActiveTab }) => {
+const AddProduct = ({ setActiveTab, fetchProducts }) => {
     const [productName, setProductName] = useState('')
     const [shortDescription, setShortDescription] = useState('')
     const [detailedDescription, setDetailedDescription] = useState('')
@@ -20,7 +20,6 @@ const AddProduct = ({ setActiveTab }) => {
     const [status, setStatus] = useState('Còn hàng')
     const [collection, setCollection] = useState("")
     const [collections, setCollections] = useState([]) // load từ API hoặc dữ liệu có sẵn
-
     const [isloading, setIsLoading] = useState(false)
     // State để lưu trữ File object của hình ảnh, không phải URL
     const [mainImageFile, setMainImageFile] = useState(null)
@@ -30,8 +29,8 @@ const AddProduct = ({ setActiveTab }) => {
     const [variations, setVariations] = useState([])
     useEffect(() => {
         const fetchCollections = async () => {
-            try {   
-                const res = await api.get("/collection") 
+            try {
+                const res = await api.get("/collection")
                 setCollections(res.data) // gán mảng collections
             }
             catch (error) {
@@ -201,6 +200,7 @@ const AddProduct = ({ setActiveTab }) => {
                 sellingPrice: Number(sellingPrice),
                 discount: Number(discountPercentage),
                 category: category, // 1 id duy nhất
+                collection,
                 brand,    // id từ backend (chọn trong select brand)
                 tags,
                 stock: Number(stock),
@@ -230,6 +230,7 @@ const AddProduct = ({ setActiveTab }) => {
                 toast.error(error?.response?.data?.message || "Lỗi khi thêm sản phẩm!")
             }
             toast.success("Thêm sản phẩm thành công!")
+            await fetchProducts() // gọi hàm fetchProducts để load lại danh sách sản phẩm
             setActiveTab('products')
         } catch (error) {
             console.error(error)

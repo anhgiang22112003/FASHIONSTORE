@@ -159,7 +159,9 @@ const ProductCategories = () => {
     }
 
     return (
-        <div className="space-y-6">
+            <div className=" min-h-screen bg-gray-50 font-sans antialiased">
+
+        <div className="space-y-6 p-6">
             <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-bold text-gray-800">Danh mục sản phẩm</h2>
                 <button
@@ -229,8 +231,17 @@ const ProductCategories = () => {
                             </label>
                             <p className="text-sm text-gray-500">PNG, JPG, JPEG tối đa 5MB</p>
                             {imagePreview && (
-                                <img src={imagePreview} alt="Xem trước" className="mt-4 w-24 h-24 object-cover rounded-lg" />
+                                <picture>
+                                    <source srcSet={imagePreview?.replace(/\.(jpg|jpeg|png)$/i, ".webp")} type="image/webp" />
+                                    <img
+                                        src={imagePreview}
+                                        alt="Xem trước"
+                                        loading="lazy"
+                                        className="mt-4 w-24 h-24 object-cover rounded-lg"
+                                    />
+                                </picture>
                             )}
+
                         </div>
 
                         <div className="flex justify-end space-x-4 mt-6">
@@ -275,9 +286,19 @@ const ProductCategories = () => {
                         <tbody className="bg-white divide-y divide-gray-200">
                             {category.map(category => (
                                 <tr key={category._id}>
+                                    {/* Trong bảng */}
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <img src={category.image} alt={category.name} className="w-40 h-40 object-cover rounded-md" />
+                                        <picture>
+                                            <source srcSet={category.image?.replace(/\.(jpg|jpeg|png)$/i, ".webp")} type="image/webp" />
+                                            <img
+                                                src={category.image}
+                                                alt={category.name}
+                                                loading="lazy"
+                                                className="w-40 h-40 object-cover rounded-md"
+                                            />
+                                        </picture>
                                     </td>
+
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{category?.name}</td>
                                     <td className="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">{category?.description}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{category?.productCount}</td>
@@ -312,6 +333,7 @@ const ProductCategories = () => {
                 onConfirm={handleConfirmDelete}
                 id={itemToDelete?.id}
             />
+        </div>
         </div>
     )
 }

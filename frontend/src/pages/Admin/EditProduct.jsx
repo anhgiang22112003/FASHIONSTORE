@@ -6,7 +6,7 @@ import { toast } from 'react-toastify'
 // Dữ liệu sản phẩm giả lập, sẽ được tải từ API trong thực tế
 
 
-const EditProduct = ({ productId, onBack }) => {
+const EditProduct = ({ productId, onBack ,fetchProducts }) => {
     const [productName, setProductName] = useState('')
     const [shortDesc, setShortDesc] = useState('')
     const [detailedDesc, setDetailedDesc] = useState('')
@@ -246,7 +246,8 @@ const EditProduct = ({ productId, onBack }) => {
             const response = await api.put(`/products/${productId}`, productData)
 
             if (response.status !== 201) {
-                     toast.success("Thêm sản phẩm thành công!")
+            toast.success("Sửa sản phẩm thành công!")
+            await fetchProducts()
             onBack()
             }
        

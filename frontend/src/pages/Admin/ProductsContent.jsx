@@ -12,7 +12,7 @@ const statusColors = {
     "Ngừng bán": "bg-blue-100 text-blue-600",
 }
 
-const ProductsContent = ({ setActiveTab, onEditProduct }) => {
+const ProductsContent = ({ setActiveTab, onEditProduct ,data}) => {
 
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [productToDelete, setProductToDelete] = useState(null)
@@ -32,7 +32,7 @@ const ProductsContent = ({ setActiveTab, onEditProduct }) => {
     useEffect(() => {
       
         fetchProducts();
-    }, [])
+    }, [data])
    
     const handleFilterChange = (e) => {
         setFilters({ ...filters, [e.target?.name]: e.target.value })

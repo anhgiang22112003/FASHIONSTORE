@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
-import { UserCircleIcon, CheckCircleIcon, XMarkIcon } from '@heroicons/react/24/solid';
+import React, { useState } from 'react'
+import { UserCircleIcon, CheckCircleIcon, XMarkIcon } from '@heroicons/react/24/solid'
+import api from '@/service/api'
+import { toast } from 'react-toastify'
 
-const AddCustomerPage = () => {
+const AddCustomerPage = ({ onBack, refreshCustomers }) => {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -20,58 +22,46 @@ const AddCustomerPage = () => {
     status: 'Hoạt động',
     customerGroup: '',
     notes: '',
-  });
+  })
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value, type, checked } = e.target
     setFormData({
       ...formData,
       [name]: type === 'checkbox' ? checked : value,
-    });
-  };
+    })
+  }
 
   const handleTagClick = (tag) => {
     setFormData((prev) => {
       if (prev.tags.includes(tag)) {
-        return { ...prev, tags: prev.tags.filter((t) => t !== tag) };
+        return { ...prev, tags: prev.tags.filter((t) => t !== tag) }
       } else {
-        return { ...prev, tags: [...prev.tags, tag] };
+        return { ...prev, tags: [...prev.tags, tag] }
       }
-    });
-  };
+    })
+  }
 
   const isFormValid = () => {
-    return formData.firstName.trim() !== '' && formData.lastName.trim() !== '' && formData.email.trim() !== '';
-  };
+    return formData.firstName.trim() !== '' && formData.lastName.trim() !== '' && formData.email.trim() !== ''
+  }
 
-  const handleSave = () => {
-    console.log('Đã lưu khách hàng:', formData);
-    // Logic lưu dữ liệu thực tế (gọi API, v.v.)
-  };
+  const handleSave = async () => {
+    try {
+      const response = await api.post('/users', formData)
+      if (response.status === 201) {
+        toast.success("Thêm khách hàng thành công!")
+        await refreshCustomers() // Tải lại danh sách khách hàng
+        onBack()
+      } else {
+        toast.error("Thêm khách hàng thất bại!")
+      }
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra!")
+    }
 
-  const handleSaveAndAddMore = () => {
-    console.log('Đã lưu và thêm khách hàng mới:', formData);
-    // Logic lưu và reset form
-    setFormData({
-      firstName: '',
-      lastName: '',
-      email: '',
-      phone: '',
-      birthDate: '',
-      gender: 'N/A',
-      address: '',
-      ward: '',
-      district: '',
-      province: '',
-      country: '',
-      tags: [],
-      newsletter: false,
-      smsMarketing: false,
-      status: 'Hoạt động',
-      customerGroup: '',
-      notes: '',
-    });
-  };
+  }
+
 
   return (
     <div className="min-h-screen bg-gray-100 p-8 font-sans text-gray-800">
@@ -81,14 +71,13 @@ const AddCustomerPage = () => {
           <button
             onClick={handleSave}
             disabled={!isFormValid()}
-            className={`flex items-center space-x-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-              isFormValid() ? 'bg-[#ff69b4] hover:bg-[#ff4f9f] text-white' : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-            }`}
+            className={`flex items-center space-x-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors ${isFormValid() ? 'bg-[#ff69b4] hover:bg-[#ff4f9f] text-white' : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              }`}
           >
             <CheckCircleIcon className="w-5 h-5" />
             <span>Lưu khách hàng</span>
           </button>
-          <button
+          {/* <button
             onClick={handleSaveAndAddMore}
             disabled={!isFormValid()}
             className={`flex items-center space-x-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
@@ -97,7 +86,7 @@ const AddCustomerPage = () => {
           >
             <XMarkIcon className="w-5 h-5" />
             <span>Lưu và thêm mới</span>
-          </button>
+          </button> */}
         </div>
       </header>
 
@@ -132,9 +121,9 @@ const AddCustomerPage = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Giới tính</label>
                 <select name="gender" value={formData.gender} onChange={handleChange} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff69b4]">
                   <option value="N/A">Chọn giới tính</option>
-                  <option value="Nam">Nam</option>
-                  <option value="Nữ">Nữ</option>
-                  <option value="Khác">Khác</option>
+                  <option value="male">Nam</option>
+                  <option value="female">Nữ</option>
+                  <option value="other">Khác</option>
                 </select>
               </div>
             </div>
@@ -177,9 +166,8 @@ const AddCustomerPage = () => {
                   key={tag}
                   type="button"
                   onClick={() => handleTagClick(tag)}
-                  className={`px-3 py-1 text-sm rounded-full transition-colors ${
-                    formData.tags.includes(tag) ? 'bg-pink-100 text-[#ff69b4] border border-[#ff69b4]' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }`}
+                  className={`px-3 py-1 text-sm rounded-full transition-colors ${formData.tags.includes(tag) ? 'bg-pink-100 text-[#ff69b4] border border-[#ff69b4]' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
                 >
                   {tag}
                 </button>
@@ -293,7 +281,7 @@ const AddCustomerPage = () => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default AddCustomerPage;
+export default AddCustomerPage
