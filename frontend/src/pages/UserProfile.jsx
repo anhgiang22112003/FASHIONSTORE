@@ -1,6 +1,9 @@
-import React, { useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import OrderDetails from "./OrderDetail"; // Import component chi tiết đơn hàng
 import { CameraIcon, LockClosedIcon, UserCircleIcon, XMarkIcon, CheckCircleIcon, PencilIcon } from '@heroicons/react/24/solid';
+import { toast } from 'react-toastify';
+import api from '@/service/api';
+import { AuthContext } from '@/context/Authcontext';
 
 // Giả lập dữ liệu người dùng
 const userData = {
@@ -107,25 +110,50 @@ const UserProfile = () => {
     const [activeTab, setActiveTab] = useState('profile');
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [orders, setOrders] = useState(userData.orders);
-
+    const [newPassword, setNewPassword] = useState()
     // State cho chức năng tải ảnh và đổi mật khẩu
     const [profilePic, setProfilePic] = useState(userData.avatar);
     const [oldPassword, setOldPassword] = useState('');
-    const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [message, setMessage] = useState({ text: '', type: '' });
+    const [users, setUsers] = useState()
+    const { user } = useContext(AuthContext);
+    const GetUserId = async () => {
+        const id = user?.user?.id
+        try {
+            const res = await api.get(`/users/${id}`)
+            setUsers(res?.data)
 
-    // Xử lý khi người dùng chọn file ảnh
-    const handleImageChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            const imageUrl = URL.createObjectURL(file);
-            setProfilePic(imageUrl);
-            setMessage({ text: 'Ảnh đại diện đã được cập nhật thành công!', type: 'success' });
-            // Logic tải ảnh lên server
+        } catch (error) {
+            toast.error(" loi lay thong tin nguoi dung")
         }
-    };
+    }
+    useEffect(() => { GetUserId() }, [
 
+    ])
+    
+    const handleSubmit = async ()=>{
+        const userPayload = {
+            
+        }
+    }
+    const handleFileChange = async (e) => {
+        const file = e.target.files?.[0]
+        if (!file) return
+        const formData = new FormData()
+        formData.append('file', file)
+        try {
+            const res = await api.post('/upload', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            })
+            if (res.status === 200 || res.status === 201) {
+                setProfilePic(res.data.url)
+                toast.success('Upload ảnh thành công!')
+            }
+        } catch (err) {
+            toast.error('Upload ảnh thất bại!')
+        }
+    }
     // Xử lý khi người dùng thay đổi mật khẩu
     const handlePasswordChange = (e) => {
         e.preventDefault();
@@ -165,9 +193,9 @@ const UserProfile = () => {
                     <div className="bg-white p-6 rounded-2xl shadow-md space-y-4">
                         <h3 className="text-xl font-semibold text-gray-800">Thông tin cá nhân</h3>
                         <div className="space-y-2">
-                            <p><span className="font-medium text-gray-600">Họ và tên:</span> {userData.name}</p>
-                            <p><span className="font-medium text-gray-600">Email:</span> {userData.email}</p>
-                            <p><span className="font-medium text-gray-600">Số điện thoại:</span> {userData.phone}</p>
+                            <p><span className="font-medium text-gray-600">Họ và tên:</span> {users?.name}</p>
+                            <p><span className="font-medium text-gray-600">Email:</span> {users?.email}</p>
+                            <p><span className="font-medium text-gray-600">Số điện thoại:</span> {users?.phone}</p>
                         </div>
                         <button onClick={() => setActiveTab('settings')} className="px-4 py-2 bg-pink-500 text-white rounded-xl hover:bg-pink-600 transition-colors">Chỉnh sửa</button>
                     </div>
@@ -248,7 +276,7 @@ const UserProfile = () => {
                                         type="file"
                                         accept="image/*"
                                         className="hidden"
-                                        onChange={handleImageChange}
+                                        onChange={handleFileChange}
                                     />
                                 </label>
                                 <p className="text-gray-600">Tải lên một bức ảnh mới để thay đổi ảnh đại diện của bạn.</p>
@@ -265,9 +293,8 @@ const UserProfile = () => {
                             {/* Hiển thị thông báo */}
                             {message.text && (
                                 <div
-                                    className={`p-4 rounded-xl flex items-center space-x-3 mb-6 transition-all duration-300 ${
-                                        message.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                                    }`}
+                                    className={`p-4 rounded-xl flex items-center space-x-3 mb-6 transition-all duration-300 ${message.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                                        }`}
                                 >
                                     {message.type === 'success' ? (
                                         <CheckCircleIcon className="w-6 h-6 flex-shrink-0" />
@@ -337,7 +364,7 @@ const UserProfile = () => {
                     <div className="flex items-center space-x-4 mb-4">
                         {/* Avatar */}
                         <div className="flex-shrink-0 relative">
-                            <img className="w-24 h-24 rounded-full border-4 border-pink-500 object-cover shadow-lg" src={profilePic} alt="User Avatar" />
+                            <img className="w-24 h-24 rounded-full border-4 border-pink-500 object-cover shadow-lg" src={users?.image} alt="User Avatar" />
                         </div>
                         {/* Nút tải ảnh mới */}
                         <label
@@ -349,15 +376,15 @@ const UserProfile = () => {
                             <input
                                 id="profile-pic-upload-header"
                                 type="file"
-                                accept="image/*"
+
                                 className="hidden"
-                                onChange={handleImageChange}
+                                onChange={handleFileChange}
                             />
                         </label>
                     </div>
 
-                    <h1 className="text-3xl font-bold text-gray-800 mt-0">{userData.name}</h1>
-                    <p className="text-gray-500 mt-1">{userData.email}</p>
+                    <h1 className="text-3xl font-bold text-gray-800 mt-0">{users?.name}</h1>
+                    <p className="text-gray-500 mt-1">{users?.email}</p>
                     <button onClick={() => setActiveTab('settings')} className="mt-4 px-6 py-2 bg-pink-100 text-pink-600 rounded-full font-semibold hover:bg-pink-200 transition-colors flex items-center space-x-2">
                         <PencilIcon className="w-4 h-4" />
                         <span>Sửa hồ sơ</span>
@@ -373,11 +400,10 @@ const UserProfile = () => {
                                 <button
                                     key={item.tab}
                                     onClick={() => setActiveTab(item.tab)}
-                                    className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-colors duration-200 ${
-                                        activeTab === item.tab
-                                            ? 'bg-pink-100 text-pink-600 shadow'
-                                            : 'text-gray-700 hover:bg-gray-50'
-                                    }`}
+                                    className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-colors duration-200 ${activeTab === item.tab
+                                        ? 'bg-pink-100 text-pink-600 shadow'
+                                        : 'text-gray-700 hover:bg-gray-50'
+                                        }`}
                                 >
                                     {item.name}
                                 </button>

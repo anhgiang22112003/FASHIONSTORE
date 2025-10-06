@@ -1,10 +1,13 @@
 // AuthPage.jsx
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import api from "../service/api";
+import { AuthContext } from "@/context/Authcontext";
 
 export default function AuthPage() {
+    const { login } = useContext(AuthContext);
+
   const [isLogin, setIsLogin] = useState(true);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -76,6 +79,8 @@ export default function AuthPage() {
         if (res?.status === 201) {
           localStorage.setItem("accessToken", res?.data?.accessToken);
           localStorage.setItem("user", JSON.stringify(res?.data?.user));
+                login(res.data); // ✅ Cập nhật context
+
           toast.success("Đăng nhập thành công 🎉");
           navigate("/");
         }

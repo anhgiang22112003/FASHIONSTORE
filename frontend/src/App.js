@@ -6,6 +6,7 @@ import Footer from "./components/fashion/Footer"
 import { ToastContainer } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
 import { AdminRoute } from "./service/AdminRoute"
+import { AuthProvider } from "./context/Authcontext"
 const AdminLoginForm = lazy(() => import("./pages/Admin/LoginAdmin"))
 // Lazy load các page
 const HomePage = lazy(() => import("./pages/HomePage"))
@@ -58,6 +59,7 @@ const FrontendLayout = ({ children }) => {
 function App() {
   return (
     <Router>
+      <AuthProvider>
       {/* Suspense hiển thị fallback khi đang load component */}
       <Suspense fallback={<div className="p-8 text-center">Đang tải...</div>}>
         <ToastContainer position="top-right" autoClose={3000} />
@@ -98,6 +100,7 @@ function App() {
           <Route path="/login/admin" element={<AdminLoginForm />} />
         </Routes>
       </Suspense>
+      </AuthProvider>
     </Router>
   )
 }
