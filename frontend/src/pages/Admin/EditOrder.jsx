@@ -109,7 +109,6 @@ const OrderEditPage = () => {
                 trackingHistory: [...prev.trackingHistory, newHistoryItem]
             }));
         }
-        console.log("Saving changes:", editedOrder);
         setIsEditMode(false);
     };
 

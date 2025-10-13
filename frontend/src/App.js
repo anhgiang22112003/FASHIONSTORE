@@ -23,6 +23,8 @@ const CollectionPage = lazy(() => import("./pages/Collection"))
 const ProductCategoryPage = lazy(() => import("./pages/Category"))
 const AdminLayout = lazy(() => import("./pages/Admin/Adminlayout"))
 const UserProfile = lazy(() => import("./pages/UserProfile"))
+const ResetPassword = lazy(() => import("./pages/ResetPassword"))
+const ForgotPassword = lazy(()=> import ("./pages/ForgotPassword"))  
 
 // Blog article inline
 const BlogArticlePage = () => {
@@ -60,46 +62,48 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-      {/* Suspense hiển thị fallback khi đang load component */}
-      <Suspense fallback={<div className="p-8 text-center">Đang tải...</div>}>
-        <ToastContainer position="top-right" autoClose={3000} />
+        {/* Suspense hiển thị fallback khi đang load component */}
+        <Suspense fallback={<div className="p-8 text-center">Đang tải...</div>}>
+          <ToastContainer position="top-right" autoClose={3000} />
 
-        <Routes>
-          {/* Frontend routes */}
-          <Route
-            path="/*"
-            element={
-              <FrontendLayout>
-                <Routes>
-                  <Route path="/" element={<HomePage />} />
-                  <Route path="/product/:id" element={<ProductPage />} />
-                  <Route path="/category/:category" element={<CategoryPage />} />
-                  <Route path="/cart" element={<CartPage />} />
-                  <Route path="/about" element={<AboutPage />} />
-                  <Route path="/contact" element={<ContactPage />} />
-                  <Route path="/checkout" element={<Checkout />} />
-                  <Route path="/wishlist" element={<Wishlist />} />
-                  <Route path="/login" element={<AuthPage />} />
-                  <Route path="/collection" element={<CollectionPage />} />
-                  <Route path="/category" element={<ProductCategoryPage />} />
-                  <Route path="/blog" element={<BlogPage />} />
-                  <Route path="/blog/:slug" element={<BlogArticlePage />} />
-                  <Route path="/profile" element={<UserProfile />} />
-                </Routes>
-              </FrontendLayout>
-            }
-          />
+          <Routes>
+            {/* Frontend routes */}
+            <Route
+              path="/*"
+              element={
+                <FrontendLayout>
+                  <Routes>
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/product/:id" element={<ProductPage />} />
+                    <Route path="/category/:category" element={<CategoryPage />} />
+                    <Route path="/cart" element={<CartPage />} />
+                    <Route path="/about" element={<AboutPage />} />
+                    <Route path="/contact" element={<ContactPage />} />
+                    <Route path="/checkout" element={<Checkout />} />
+                    <Route path="/wishlist" element={<Wishlist />} />
+                    <Route path="/login" element={<AuthPage />} />
+                    <Route path="/collection" element={<CollectionPage />} />
+                    <Route path="/category" element={<ProductCategoryPage />} />
+                    <Route path="/blog" element={<BlogPage />} />
+                    <Route path="/blog/:slug" element={<BlogArticlePage />} />
+                    <Route path="/profile" element={<UserProfile />} />
+                    <Route path="/forgot-password" element={<ForgotPassword />} />
+                    <Route path="/reset-password/:token" element={<ResetPassword />} />
+                  </Routes>
+                </FrontendLayout>
+              }
+            />
 
-          {/* Admin routes */}
-          <Route path="/admin/*"
-            element={
-              <AdminRoute>
-                <AdminLayout />
-              </AdminRoute>
-            } />
-          <Route path="/login/admin" element={<AdminLoginForm />} />
-        </Routes>
-      </Suspense>
+            {/* Admin routes */}
+            <Route path="/admin/*"
+              element={
+                <AdminRoute>
+                  <AdminLayout />
+                </AdminRoute>
+              } />
+            <Route path="/login/admin" element={<AdminLoginForm />} />
+          </Routes>
+        </Suspense>
       </AuthProvider>
     </Router>
   )

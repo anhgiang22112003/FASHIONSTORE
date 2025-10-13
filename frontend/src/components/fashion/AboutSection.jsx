@@ -65,7 +65,7 @@ const AboutSection = () => {
           {/* Right Content - Image */}
           <div className="relative">
             <img
-              src="https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Njl8MHwxfHNlYXJjaHwyfHxjbG90aGluZ3xlbnwwfHx8fDE3NTg1NTc0MDh8MA&ixlib=rb-4.1.0&q=85"
+              src="/image/anhabout.avif"
               alt="Fashion Store"
               className="w-full h-[500px] object-cover rounded-2xl shadow-2xl"
             />

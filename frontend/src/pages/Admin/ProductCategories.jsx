@@ -80,8 +80,6 @@ const ProductCategories = () => {
     const handleFileChange = async (event, index = null) => {
         const file = event.target?.files?.[0]  // Get the first file
         if (!file) return  // Exit if no file is selected
-        console.log(1)
-
         const formDataUpload = new FormData()
         formDataUpload.append("file", file)
 

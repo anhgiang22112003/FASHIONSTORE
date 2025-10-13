@@ -1,88 +1,88 @@
 // AuthPage.jsx
-import { useContext, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
-import api from "../service/api";
-import { AuthContext } from "@/context/Authcontext";
+import { useContext, useState } from "react"
+import { Link, useNavigate } from "react-router-dom"
+import { toast } from "react-toastify"
+import api from "../service/api"
+import { AuthContext } from "@/context/Authcontext"
 
 export default function AuthPage() {
-    const { login } = useContext(AuthContext);
+  const { login } = useContext(AuthContext)
 
-  const [isLogin, setIsLogin] = useState(true);
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+  const [isLogin, setIsLogin] = useState(true)
+  const navigate = useNavigate()
+  const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     phone: "",
     password: "",
-  });
-  const [errors, setErrors] = useState({});
+  })
+  const [errors, setErrors] = useState({})
 
   // Xử lý nhập dữ liệu
   const handleInputChange = (field) => (event) => {
     setFormData((prev) => ({
       ...prev,
       [field]: event.target.value,
-    }));
+    }))
 
     // Clear error khi user nhập
     if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: "" }));
+      setErrors((prev) => ({ ...prev, [field]: "" }))
     }
-  };
+  }
 
   // Validate form
   const validateForm = () => {
-    const newErrors = {};
+    const newErrors = {}
 
     if (!formData.email.trim()) {
-      newErrors.email = "Vui lòng nhập email";
+      newErrors.email = "Vui lòng nhập email"
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Email không hợp lệ";
+      newErrors.email = "Email không hợp lệ"
     }
 
     if (!formData.password) {
-      newErrors.password = "Vui lòng nhập mật khẩu";
+      newErrors.password = "Vui lòng nhập mật khẩu"
     } else if (formData.password.length < 6) {
-      newErrors.password = "Mật khẩu phải có ít nhất 6 ký tự";
+      newErrors.password = "Mật khẩu phải có ít nhất 6 ký tự"
     }
 
     if (!isLogin) {
       if (!formData.name.trim()) {
-        newErrors.name = "Vui lòng nhập họ và tên";
+        newErrors.name = "Vui lòng nhập họ và tên"
       }
       if (!formData.phone.trim()) {
-        newErrors.phone = "Vui lòng nhập số điện thoại";
+        newErrors.phone = "Vui lòng nhập số điện thoại"
       } else if (!/^\d{10,11}$/.test(formData.phone)) {
-        newErrors.phone = "Số điện thoại không hợp lệ";
+        newErrors.phone = "Số điện thoại không hợp lệ"
       }
     }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
 
   // Submit
   const handleSubmit = async (event) => {
-    event.preventDefault();
-    if (!validateForm()) return;
-  
-    setLoading(true);
+    event.preventDefault()
+    if (!validateForm()) return
+
+    setLoading(true)
     try {
       if (isLogin) {
         const res = await api.post("/auth/login", {
           email: formData.email,
           password: formData.password,
-        });
+        })
 
         if (res?.status === 201) {
-          localStorage.setItem("accessToken", res?.data?.accessToken);
-          localStorage.setItem("user", JSON.stringify(res?.data?.user));
-                login(res.data); // ✅ Cập nhật context
+          localStorage.setItem("accessToken", res?.data?.accessToken)
+          localStorage.setItem("user", JSON.stringify(res?.data?.user))
+          login(res.data) // ✅ Cập nhật context
 
-          toast.success("Đăng nhập thành công 🎉");
-          navigate("/");
+          toast.success("Đăng nhập thành công 🎉")
+          navigate("/")
         }
       } else {
         const res = await api.post("/auth/register", {
@@ -90,20 +90,20 @@ export default function AuthPage() {
           email: formData.email,
           phone: formData.phone,
           password: formData.password,
-        });
+        })
 
         if (res?.status === 201) {
-          localStorage.setItem("accessToken", res?.data?.accessToken);
-          toast.success("Đăng ký thành công 🎉");
-          navigate("/");
+          localStorage.setItem("accessToken", res?.data?.accessToken)
+          toast.success("Đăng ký thành công 🎉")
+          navigate("/")
         }
       }
     } catch (err) {
-      toast.error(err?.response?.data?.message || err.message);
+      toast.error(err?.response?.data?.message || err.message)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
     <div className="flex flex-col lg:flex-row items-center justify-center p-8 gap-12 min-h-screen bg-pink-50">
@@ -183,10 +183,17 @@ export default function AuthPage() {
           >
             {isLogin ? "Đăng ký ngay" : "Đăng nhập ngay"}
           </span>
+          <Link to="/forgot-password">
+            <p className="text-pink-600 font-semibold cursor-pointer">
+              {isLogin ? "Quên mật khẩu" : ""}{" "}
+
+            </p>
+          </Link>
         </p>
+
       </form>
     </div>
-  );
+  )
 }
 
 // Reusable InputField
@@ -196,7 +203,7 @@ function InputField({ id, type, label, placeholder, icon, value, onChange, error
     mail: "📧",
     phone: "📞",
     lock: "🔒",
-  };
+  }
 
   return (
     <div>
@@ -210,9 +217,8 @@ function InputField({ id, type, label, placeholder, icon, value, onChange, error
           placeholder={placeholder}
           value={value}
           onChange={onChange}
-          className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none ${
-            error ? "border-red-500" : "border-pink-300 focus:ring-2 focus:ring-pink-200"
-          }`}
+          className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none ${error ? "border-red-500" : "border-pink-300 focus:ring-2 focus:ring-pink-200"
+            }`}
         />
         <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
           {icons[icon]}
@@ -220,5 +226,5 @@ function InputField({ id, type, label, placeholder, icon, value, onChange, error
       </div>
       {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
     </div>
-  );
+  )
 }

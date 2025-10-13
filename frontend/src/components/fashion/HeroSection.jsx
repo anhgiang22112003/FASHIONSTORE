@@ -72,9 +72,10 @@ const HeroSection = () => {
           <div className="relative">
             <div className="relative z-10">
               <img
-                src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2NDF8MHwxfHNlYXJjaHwxfHxmYXNoaW9ufGVufDB8fHx8MTc1ODU3MzUzMXww&ixlib=rb-4.1.0&q=85"
+                src="/image/anhbia.avif"
                 alt="Fashion Model"
                 className="w-full h-[600px] object-cover rounded-2xl shadow-2xl"
+                loading="lazy"
               />
             </div>
             

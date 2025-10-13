@@ -167,8 +167,6 @@ const ReviewManagementPage = () => {
 
   // Logic xử lý khi xác nhận các hành động
   const handleConfirmAction = (action) => {
-    console.log(`Đã thực hiện hành động "${action}" với đánh giá ID: ${selectedReview.id}`);
-    // Thực hiện logic xử lý dữ liệu thực tế ở đây
     setSelectedReview(null);
     setIsReplyModalOpen(false);
     setIsApproveModalOpen(false);

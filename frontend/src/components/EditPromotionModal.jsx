@@ -85,8 +85,7 @@ const EditPromotionModal = ({ title, isOpen, onClose, onSave, promotion = null }
     const newCode = Math.random().toString(36).substring(2, 8).toUpperCase()
     setFormData((prev) => ({ ...prev, code: newCode }))
   }
-  console.log(formData)
-  console.log(promotion)
+
 
   const handleSave = async () => {
     try {

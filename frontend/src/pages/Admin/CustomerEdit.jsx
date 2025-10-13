@@ -133,9 +133,6 @@ const CustomerEdit = ({ customer: initialCustomerData, onBack ,refreshCustomers}
       toast.error("Không tìm thấy ID khách hàng để cập nhật.")
       return
     }
-
-    console.log("Dữ liệu gửi đi:", formData)
-
     // Chuẩn bị payload khớp với yêu cầu backend (đổi tên các trường nếu cần)
     const payload = {
       firstName: formData.firstName,

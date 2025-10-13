@@ -25,8 +25,6 @@ const Header = () => {
   const [isMessagesOpen, setIsMessagesOpen] = useState(false);
 
   const { user, logout } = useContext(AuthContext);
-
-  console.log(user);
   
   const toggleNotifications = () => {
     setIsNotificationsOpen(!isNotificationsOpen);

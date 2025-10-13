@@ -1,10 +1,26 @@
-import React from 'react'
+import React, { use, useEffect } from 'react'
 import { ArrowRight } from 'lucide-react'
 import { Button } from '../ui/button'
-import { featuredCollections } from '../../data/fashionMock'
 import { Link } from 'react-router-dom'
+import api from '@/service/api'
+import { toast } from 'react-toastify'
 
 const FeaturedCollections = () => {
+  const [collection , setCollection] = React.useState([])
+  const featuredCollections = async () => {
+    try {
+      const response = await api.get('/collection');
+     const activeCollection = response?.data.filter(item => item.isActive)
+      setCollection(activeCollection);
+    } catch (error) {
+      toast.error('Error fetching featured collections:', error);
+    }
+  }
+  
+  useEffect(() => {
+    featuredCollections();
+  }, [])
+  
   return (
     <section className="py-16 bg-white">
       <div className="container mx-auto px-4">
@@ -18,15 +34,15 @@ const FeaturedCollections = () => {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {featuredCollections.map((collection) => (
+          {collection?.map((collection) => (
             <div
-              key={collection.id}
+              key={collection?.id}
               className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2"
             >
               <div className="aspect-[4/5] overflow-hidden">
                 <img
-                  src={collection.image}
-                  alt={collection.name}
+                  src={collection?.image}
+                  alt={collection?.name}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                 />
               </div>
@@ -36,10 +52,10 @@ const FeaturedCollections = () => {
 
               {/* Content */}
               <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                <h3 className="text-2xl font-bold mb-2">{collection.name}</h3>
-                <p className="text-gray-200 mb-4">{collection.description}</p>
+                <h3 className="text-2xl font-bold mb-2">{collection?.name}</h3>
+                <p className="text-gray-200 mb-4">{collection?.description}</p>
                 <div className="flex items-center justify-between">
-                  <span className="text-xl font-semibold">{collection.price}</span>
+                  {/* <span className="text-xl font-semibold">{collection?.price}</span> */}
                   <Button
                     size="sm"
                     className="bg-white text-gray-900 hover:bg-gray-100 opacity-0 group-hover:opacity-100 transition-opacity"

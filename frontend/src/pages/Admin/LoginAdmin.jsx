@@ -11,9 +11,7 @@ const AdminLoginForm = () => {
     const handleSubmit = async (e) => {
         e.preventDefault()
         try {
-            const res = await api.post("/auth/login-admin", { email, password })
-            console.log(res?.data?.accessToken);
-            
+            const res = await api.post("/auth/login-admin", { email, password })            
             localStorage.setItem("accessToken", res?.data?.accessToken)
             localStorage.setItem("user", JSON.stringify(res.data.user))
             if (res.data.user.role !== "admin") {
