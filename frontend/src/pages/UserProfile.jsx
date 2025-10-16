@@ -147,8 +147,12 @@ const UserProfile = () => {
 
 
     const { user } = useContext(AuthContext)
+    console.log(user);
+    
     const GetUserId = async () => {
-        const id = user?.user?.id
+        const id = user?.id
+        console.log(id);
+        
         try {
             const res = await api.get(`/users/${id}`)
             setUsers(res?.data)
@@ -172,7 +176,7 @@ const UserProfile = () => {
             image: profilePic,
         }
         try {
-            const res = await api.put(`/users/${user?.user?.id}`, payload)
+            const res = await api.put(`/users/${user?.id}`, payload)
             toast.success('Cập nhật hồ sơ thành công!')
             setUsers(res.data)
             GetUserId()

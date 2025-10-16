@@ -74,12 +74,11 @@ export default function AuthPage() {
         const res = await api.post("/auth/login", {
           email: formData.email,
           password: formData.password,
-        })
-
+        })        
         if (res?.status === 201) {
           localStorage.setItem("accessToken", res?.data?.accessToken)
           localStorage.setItem("user", JSON.stringify(res?.data?.user))
-          login(res.data) // ✅ Cập nhật context
+          login(res.data.user) // ✅ Cập nhật context
 
           toast.success("Đăng nhập thành công 🎉")
           navigate("/")

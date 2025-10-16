@@ -1,6 +1,47 @@
-import React from 'react'
-
+import React, { useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import api from "@/service/api";
+import { toast } from "react-toastify";
 const Checkout = () => {
+    const navigate = useNavigate();
+  const location = useLocation();
+  const cart = location?.state?.cart; // ✅ Lấy dữ liệu giỏ hàng được truyền qua
+  console.log(cart);
+  
+  const [form, setForm] = useState({
+    name: "",
+    phone: "",
+    email: "",
+    address: "",
+    paymentMethod: "COD",
+  });
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleOrder = async () => {
+    if (!form.address) {
+      toast.warning("Vui lòng nhập địa chỉ giao hàng");
+      return;
+    }
+
+    try {
+      const res = await api.post("/orders", {
+        address: form.address,
+        paymentMethod: form.paymentMethod,
+      });
+
+      toast.success("Đặt hàng thành công 🎉");
+      navigate("/orders/" + res.data._id);
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Đặt hàng thất bại");
+    }
+  };
+
+  if (!cart) {
+    return <p className="text-center text-gray-600 mt-10">Không có sản phẩm trong giỏ hàng</p>;
+  }
   return (
     <div className="min-h-screen w-full bg-gray-100 p-8 font-sans flex items-center justify-center">
       <div className="w-full max-w-[1500px] bg-white rounded-none lg:rounded-lg shadow-xl p-6 lg:p-12 flex flex-col lg:flex-row gap-8 min-h-screen">

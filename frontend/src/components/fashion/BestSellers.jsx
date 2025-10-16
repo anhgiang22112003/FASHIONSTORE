@@ -68,7 +68,7 @@ const BestSellers = () => {
 
               {/* Product Info */}
               <div className="p-4">
-                <Link to={`products/${product?._id}`}>
+                <Link to={`product/${product?._id}`}>
                 <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">
                   {product?.name}
                 </h3>

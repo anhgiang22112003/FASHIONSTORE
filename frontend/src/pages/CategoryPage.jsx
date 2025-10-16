@@ -140,9 +140,7 @@ const CategoryPage = () => {
   const [priceRange, setPriceRange] = useState('all')
   const [selectedSubcategory, setSelectedSubcategory] = useState('all')
   const [loading, setLoading] = useState(true)
-  const [productList, setProductList] = useState([])
- console.log(productList);
- 
+  const [productList, setProductList] = useState([]) 
   useEffect(() => {
     setLoading(true)
     const fetchProducts = async () => {
@@ -314,7 +312,7 @@ const CategoryPage = () => {
                   key={product.id}
                   product={product}
                   viewMode={viewMode}
-                  onClick={() => navigate(`/product/${product.id}`)}
+                  onClick={() => navigate(`/product/${product._id}`)}
                 />
               ))}
             </div>

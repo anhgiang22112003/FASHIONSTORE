@@ -1,52 +1,81 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Minus, Plus, Trash2, ArrowRight, ShoppingBag } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { useNavigate } from 'react-router-dom';
+import api from '@/service/api'; // axios instance
+import { toast } from 'react-toastify';
 
 const CartPage = () => {
   const navigate = useNavigate();
-  const [cartItems, setCartItems] = useState([
-    {
-      id: 1,
-      name: "Classic White Blouse",
-      price: 89000,
-      image: "https://images.unsplash.com/photo-1558769132-cb1aea458c5e?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2NDF8MHwxfHNlYXJjaHw0fHxmYXNoaW9ufGVufDB8fHx8MTc1ODU3MzUzMXww&ixlib=rb-4.1.0&q=85",
-      size: "M",
-      color: "Trắng",
-      quantity: 2
-    },
-    {
-      id: 2,
-      name: "Premium Denim Jacket",
-      price: 149000,
-      image: "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Njl8MHwxfHNlYXJjaHwyfHxjbG90aGluZ3xlbnwwfHx8fDE3NTg1NTc0MDh8MA&ixlib=rb-4.1.0&q=85",
-      size: "L",
-      color: "Xanh đậm",
-      quantity: 1
-    }
-  ]);
+  const [cart, setCart] = useState(null);
 
-  const updateQuantity = (id, newQuantity) => {
-    if (newQuantity === 0) {
-      removeItem(id);
+  const fetchCart = async () => {
+    try {
+      const res = await api.get('/cart');      
+      setCart(res.data);
+    } catch (err) {
+      console.error(err);
+      toast.error('Lấy giỏ hàng thất bại');
+    } finally {
+    }
+  };
+ 
+  useEffect(() => {
+    fetchCart();
+  }, []);
+
+  const removeItem = async (itemId) => {
+    try {
+      await api.delete(`/cart/remove/${itemId}`);
+      toast.success('Đã xóa sản phẩm khỏi giỏ hàng');
+      fetchCart();
+    } catch (err) {
+      toast.error('Xóa thất bại');
+    }
+  };
+
+  const updateQuantity = async (itemId, newQuantity) => {
+    if (newQuantity <= 0) {
+      removeItem(itemId);
       return;
     }
-    setCartItems(items =>
-      items.map(item =>
-        item.id === id ? { ...item, quantity: newQuantity } : item
-      )
-    );
+    try {
+      await api.patch(`/cart/update/${itemId}`, { quantity: newQuantity });
+      fetchCart();
+    } catch (err) {
+      toast.error(err?.response?.data?.message || 'Cập nhật thất bại');
+    }
   };
 
-  const removeItem = (id) => {
-    setCartItems(items => items.filter(item => item.id !== id));
-  };
+  // const c = async () => {
+  //   try {
+  //     // đơn giản demo: yêu cầu địa chỉ tĩnh hoặc mở modal để nhập
+  //     if (!address) return;
 
-  const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const shipping = subtotal >= 500000 ? 0 : 30000;
-  const total = subtotal + shipping;
+  //     // Gọi API tạo order
+  //     const res = await api.post('/orders', {
+  //       address,
+  //       paymentMethod: 'COD', // ví dụ
+  //     });
 
-  if (cartItems.length === 0) {
+  //     toast.success('Đặt hàng thành công!');
+  //     // có thể navigate tới trang chi tiết đơn hàng
+  //     navigate(`/order/${res.data._id}`);
+  //   } catch (err) {
+  //     toast.error(err?.response?.data?.message || 'Đặt hàng thất bại');
+  //   } finally {
+  //     fetchCart(); // refetch (cart được clear bởi backend)
+  //   }
+  // };
+
+ 
+
+  const cartItems = cart?.items || [];
+  const subtotal = cart?.subtotal || 0;
+  const shipping = cart?.shipping || 0;
+  const total = cart?.total || 0;
+
+  if (!cartItems.length) {
     return (
       <div className="container mx-auto px-4 py-16">
         <div className="text-center">
@@ -77,17 +106,17 @@ const CartPage = () => {
       <div className="grid lg:grid-cols-3 gap-8">
         {/* Cart Items */}
         <div className="lg:col-span-2 space-y-4">
-          {cartItems.map((item) => (
-            <div key={item.id} className="bg-white rounded-lg shadow-sm border p-6">
+          {cartItems?.map((item) => (
+            <div key={item._id} className="bg-white rounded-lg shadow-sm border p-6">
               <div className="flex gap-4">
                 <img
-                  src={item.image}
-                  alt={item.name}
+                  src={item.product?.mainImage || item.productImage || 'https://via.placeholder.com/150'}
+                  alt={item.productName}
                   className="w-24 h-24 object-cover rounded-lg"
                 />
                 
                 <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900 mb-2">{item.name}</h3>
+                  <h3 className="font-semibold text-gray-900 mb-2">{item.productName}</h3>
                   <div className="text-sm text-gray-600 mb-2">
                     <span>Size: {item.size}</span>
                     <span className="mx-2">•</span>
@@ -100,7 +129,7 @@ const CartPage = () => {
 
                 <div className="flex flex-col items-end gap-4">
                   <button
-                    onClick={() => removeItem(item.id)}
+                    onClick={() => removeItem(item._id)}
                     className="text-gray-400 hover:text-red-500"
                   >
                     <Trash2 className="w-5 h-5" />
@@ -108,14 +137,14 @@ const CartPage = () => {
 
                   <div className="flex items-center border rounded-lg">
                     <button
-                      onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                      onClick={() => updateQuantity(item?._id, item.quantity - 1)}
                       className="p-2 hover:bg-gray-100"
                     >
                       <Minus className="w-4 h-4" />
                     </button>
                     <span className="px-4 py-2 min-w-[50px] text-center">{item.quantity}</span>
                     <button
-                      onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                      onClick={() => updateQuantity(item?._id, item.quantity + 1)}
                       className="p-2 hover:bg-gray-100"
                     >
                       <Plus className="w-4 h-4" />
@@ -162,7 +191,7 @@ const CartPage = () => {
             <Button 
               className="w-full bg-pink-500 hover:bg-pink-600 text-white"
               size="lg"
-              onClick={() => navigate('/checkout')}
+                onClick={() => navigate("/checkout", { state: { cart } })}
             >
               Thanh toán
               <ArrowRight className="w-5 h-5 ml-2" />
