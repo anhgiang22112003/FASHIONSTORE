@@ -47,29 +47,6 @@ const CartPage = () => {
     }
   };
 
-  // const c = async () => {
-  //   try {
-  //     // đơn giản demo: yêu cầu địa chỉ tĩnh hoặc mở modal để nhập
-  //     if (!address) return;
-
-  //     // Gọi API tạo order
-  //     const res = await api.post('/orders', {
-  //       address,
-  //       paymentMethod: 'COD', // ví dụ
-  //     });
-
-  //     toast.success('Đặt hàng thành công!');
-  //     // có thể navigate tới trang chi tiết đơn hàng
-  //     navigate(`/order/${res.data._id}`);
-  //   } catch (err) {
-  //     toast.error(err?.response?.data?.message || 'Đặt hàng thất bại');
-  //   } finally {
-  //     fetchCart(); // refetch (cart được clear bởi backend)
-  //   }
-  // };
-
- 
-
   const cartItems = cart?.items || [];
   const subtotal = cart?.subtotal || 0;
   const shipping = cart?.shipping || 0;
@@ -123,7 +100,7 @@ const CartPage = () => {
                     <span>Màu: {item.color}</span>
                   </div>
                   <div className="text-lg font-bold text-pink-500">
-                    {item.price.toLocaleString('vi-VN')}đ
+                    {item?.product?.originalPrice?.toLocaleString('vi-VN')}đ
                   </div>
                 </div>
 

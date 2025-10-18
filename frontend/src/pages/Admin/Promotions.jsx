@@ -261,12 +261,15 @@ const PromotionManagementPage = () => {
                 </p>
                 <div className="mt-4">
                   <p className="text-sm font-medium text-gray-700">Sử dụng</p>
-                  <p className="text-sm text-gray-500">{promo.usedCount}/{promo.maxUsage} ({getUsagePercentage(promo.usedCount, promo.maxUsage).toFixed(0)}%)</p>
+                  <p className="text-sm text-gray-500">
+                    {promo.usedCount}/{promo.usageLimit} ({getUsagePercentage(promo.usedCount, promo.usageLimit).toFixed(0)}%)
+                  </p>
                   <div className="w-full bg-gray-200 rounded-full h-2.5 mt-1">
                     <div
-                      className="bg-[#ff69b4] h-2.5 rounded-full"
-                      style={{ width: `${getUsagePercentage(promo.usedCount, promo.maxUsage)}%` }}
+                      className="bg-[#ff69b4] h-2.5 rounded-full transition-all duration-700 ease-in-out"
+                      style={{ width: `${getUsagePercentage(promo.usedCount, promo.usageLimit)}%` }}
                     ></div>
+
                   </div>
                 </div>
               </div>

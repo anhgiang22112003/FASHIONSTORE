@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { UserCircleIcon, CheckCircleIcon, XMarkIcon } from '@heroicons/react/24/solid'
 import api from '@/service/api'
 import { toast } from 'react-toastify'
@@ -23,6 +23,48 @@ const AddCustomerPage = ({ onBack, refreshCustomers }) => {
     customerGroup: '',
     notes: '',
   })
+  const [provinces, setProvinces] = useState([])
+  const [districts, setDistricts] = useState([])
+  const [wards, setWards] = useState([])
+
+  // ✅ Lấy danh sách tỉnh/thành Việt Nam khi mở form
+  useEffect(() => {
+    fetch('https://provinces.open-api.vn/api/p/')
+      .then(res => res.json())
+      .then(data => setProvinces(data))
+      .catch(err => console.error('Lỗi tải tỉnh thành:', err))
+  }, [])
+
+  // ✅ Khi chọn tỉnh thì tải quận/huyện tương ứng
+  useEffect(() => {
+    if (formData.province) {
+      const province = provinces.find(p => p.name === formData.province)
+      if (province) {
+        fetch(`https://provinces.open-api.vn/api/p/${province.code}?depth=2`)
+          .then(res => res.json())
+          .then(data => setDistricts(data.districts || []))
+          .catch(err => console.error('Lỗi tải quận huyện:', err))
+      }
+    } else {
+      setDistricts([])
+      setWards([])
+    }
+  }, [formData.province])
+
+  // ✅ Khi chọn quận/huyện thì tải phường/xã tương ứng
+  useEffect(() => {
+    if (formData.district) {
+      const district = districts.find(d => d.name === formData.district)
+      if (district) {
+        fetch(`https://provinces.open-api.vn/api/d/${district.code}?depth=2`)
+          .then(res => res.json())
+          .then(data => setWards(data.wards || []))
+          .catch(err => console.error('Lỗi tải phường xã:', err))
+      }
+    } else {
+      setWards([])
+    }
+  }, [formData.district])
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target
@@ -138,16 +180,71 @@ const AddCustomerPage = ({ onBack, refreshCustomers }) => {
                 <input type="text" name="address" value={formData.address} onChange={handleChange} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff69b4]" placeholder="vd: 123 Lê Duẩn" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Phường/Xã</label>
-                <input type="text" name="ward" value={formData.ward} onChange={handleChange} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff69b4]" placeholder="Phường/Xã" />
+                <label className="block text-sm font-medium text-gray-700 mb-1">Tỉnh/Thành phố</label>
+                <select
+                  name="province"
+                  value={formData.province}
+                  onChange={(e) => {
+                    setFormData({
+                      ...formData,
+                      province: e.target.value,
+                      district: '',
+                      ward: '',
+                    })
+                  }}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ff69b4]"
+                >
+                  <option value="">-- Chọn tỉnh/thành phố --</option>
+                  {provinces.map((p) => (
+                    <option key={p.code} value={p.name}>
+                      {p.name}
+                    </option>
+                  ))}
+                </select>
               </div>
+
+              {/* Chọn quận/huyện */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Quận/Huyện</label>
-                <input type="text" name="district" value={formData.district} onChange={handleChange} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff69b4]" placeholder="Quận/Huyện" />
+                <select
+                  name="district"
+                  value={formData.district}
+                  onChange={(e) => {
+                    setFormData({
+                      ...formData,
+                      district: e.target.value,
+                      ward: '',
+                    })
+                  }}
+                  disabled={!formData.province}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ff69b4]"
+                >
+                  <option value="">-- Chọn quận/huyện --</option>
+                  {districts.map((d) => (
+                    <option key={d.code} value={d.name}>
+                      {d.name}
+                    </option>
+                  ))}
+                </select>
               </div>
+
+              {/* Chọn phường/xã */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Tỉnh/Thành phố</label>
-                <input type="text" name="province" value={formData.province} onChange={handleChange} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff69b4]" placeholder="Tỉnh/Thành phố" />
+                <label className="block text-sm font-medium text-gray-700 mb-1">Phường/Xã</label>
+                <select
+                  name="ward"
+                  value={formData.ward}
+                  onChange={handleChange}
+                  disabled={!formData.district}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ff69b4]"
+                >
+                  <option value="">-- Chọn phường/xã --</option>
+                  {wards.map((w) => (
+                    <option key={w.code} value={w.name}>
+                      {w.name}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Quốc gia</label>

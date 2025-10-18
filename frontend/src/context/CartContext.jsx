@@ -22,10 +22,8 @@ export const CartProvider = ({ children }) => {
   }
 
   // ✅ Thêm sản phẩm vào giỏ hàng và cập nhật context
-  const addToCart = async (body) => {
-    try {
-        console.log(body);
-        
+  const addToCart = async (body) => {    
+    try {        
       const res = await api.post('/cart/add',body)
       toast.success('Đã thêm vào giỏ hàng')
       setCart(res.data)

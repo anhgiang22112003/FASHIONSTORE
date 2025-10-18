@@ -15,6 +15,7 @@ const TagInput = ({ tags, onAddTag, onRemoveTag }) => {
     }
   }
 
+
   return (
     <div className="border border-pink-300 rounded-lg p-2 flex flex-wrap items-center focus-within:ring-2 focus:ring-pink-200">
       {tags.map((tag, index) => (
@@ -54,12 +55,47 @@ const formatDateForInput = (isoDateString) => {
   }
 }
 
-const CustomerEdit = ({ customer: initialCustomerData, onBack ,refreshCustomers}) => { // Đổi tên prop để dễ quản lý
+const CustomerEdit = ({ customer: initialCustomerData, onBack, refreshCustomers }) => { // Đổi tên prop để dễ quản lý
   const [openEmailForm, setOpenEmailForm] = useState(false)
   const [emailSubject, setEmailSubject] = useState('')
   const [emailMessage, setEmailMessage] = useState('')
   const [openLockForm, setOpenLockForm] = useState(false)
   const [lockReason, setLockReason] = useState("")
+  const [provinces, setProvinces] = useState([])
+  const [districts, setDistricts] = useState([])
+  const [wards, setWards] = useState([])
+
+  React.useEffect(() => {
+    const fetchProvinces = async () => {
+      try {
+        const res = await fetch('https://provinces.open-api.vn/api/?depth=3')
+        const data = await res.json()
+        setProvinces(data)
+      } catch (error) {
+        console.error('Lỗi khi tải danh sách tỉnh/thành:', error)
+      }
+    }
+    fetchProvinces()
+  }, [])
+
+  useEffect(() => {
+    if (provinces.length > 0 && initialCustomerData?.province) {
+      const initialProvince = provinces.find(
+        (p) => p.name === initialCustomerData.province
+      )
+      if (initialProvince) {
+        setDistricts(initialProvince.districts || [])
+        if (initialCustomerData.district) {
+          const initialDistrict = initialProvince.districts.find(
+            (d) => d.name === initialCustomerData.district
+          )
+          if (initialDistrict) {
+            setWards(initialDistrict.wards || [])
+          }
+        }
+      }
+    }
+  }, [provinces, initialCustomerData])
   const [formData, setFormData] = useState({
     firstName: initialCustomerData?.firstName || "",
     lastName: initialCustomerData?.lastName || "",
@@ -70,12 +106,12 @@ const CustomerEdit = ({ customer: initialCustomerData, onBack ,refreshCustomers}
     address: initialCustomerData?.address || "",
     ward: initialCustomerData?.ward || "",
     district: initialCustomerData?.district || "",
-    province: initialCustomerData?.city || "", // Mapping 'city' thành 'province'
+    province: initialCustomerData?.province || "", 
     country: initialCustomerData?.country || "Việt Nam",
     customerGroup: initialCustomerData?.customerGroup || "Thành viên",
     newsletter: initialCustomerData?.subscribeNewsletter || false,
     smsMarketing: initialCustomerData?.subscribeSMS || false,
-    notes: initialCustomerData?.note || "", // Mapping 'note' thành 'notes'
+    notes: initialCustomerData?.note || "", 
     tags: initialCustomerData?.tags || [],
   })
 
@@ -92,7 +128,7 @@ const CustomerEdit = ({ customer: initialCustomerData, onBack ,refreshCustomers}
         address: initialCustomerData.address || "",
         ward: initialCustomerData.ward || "",
         district: initialCustomerData.district || "",
-        province: initialCustomerData.city || "",
+        province: initialCustomerData.province || "",
         country: initialCustomerData.country || "Việt Nam",
         customerGroup: initialCustomerData.customerGroup || "Thành viên",
         newsletter: initialCustomerData.subscribeNewsletter || false,
@@ -117,10 +153,14 @@ const CustomerEdit = ({ customer: initialCustomerData, onBack ,refreshCustomers}
   }
 
   const handleAddTag = (tag) => {
-    if (!formData.tags.includes(tag)) {
+    const index = formData.tags.findIndex(t => t.toLowerCase() === tag.toLowerCase())
+    if (index === -1) {
       setFormData({ ...formData, tags: [...formData.tags, tag] })
+    } else {
+      toast.info("Tag này đã tồn tại")
     }
   }
+
 
   const handleRemoveTag = (tagToRemove) => {
     setFormData({ ...formData, tags: formData.tags.filter(tag => tag !== tagToRemove) })
@@ -133,23 +173,21 @@ const CustomerEdit = ({ customer: initialCustomerData, onBack ,refreshCustomers}
       toast.error("Không tìm thấy ID khách hàng để cập nhật.")
       return
     }
-    // Chuẩn bị payload khớp với yêu cầu backend (đổi tên các trường nếu cần)
     const payload = {
       firstName: formData.firstName,
       lastName: formData.lastName,
       email: formData.email,
       phone: formData.phone,
       gender: formData.gender,
-      birthDate: formData.birthDate, // API có thể yêu cầu ISO string, nên cần kiểm tra lại
+      birthDate: formData.birthDate,
 
       // Địa chỉ
       address: formData.address,
       ward: formData.ward,
       district: formData.district,
-      city: formData.province, // Gửi lại là 'city' nếu backend cần
+      province: formData.province,
       country: formData.country,
 
-      // Marketing & Nhóm
       customerGroup: formData.customerGroup,
       subscribeNewsletter: formData.newsletter,
       subscribeSMS: formData.smsMarketing,
@@ -159,10 +197,8 @@ const CustomerEdit = ({ customer: initialCustomerData, onBack ,refreshCustomers}
     }
 
     try {
-      // API PATCH để sửa thông tin khách hàng
-      // Sử dụng api.patch theo yêu cầu
-      const response = await api.put(`/users/${id}`, payload)
 
+      const response = await api.put(`/users/${id}`, payload)
       if (response.status === 200) {
         onBack()
         await refreshCustomers()
@@ -176,9 +212,9 @@ const CustomerEdit = ({ customer: initialCustomerData, onBack ,refreshCustomers}
       toast.error(`Lỗi: ${err.response?.data?.message || "Không thể kết nối API."}`)
     }
   }
-  const handleSendEmail = async () => { 
+  const handleSendEmail = async () => {
     try {
-      const res= await api.post(`/users/${initialCustomerData._id}/send-welcome`, {
+      const res = await api.post(`/users/${initialCustomerData._id}/send-welcome`, {
         subject: emailSubject,
         text: emailMessage,
       })
@@ -394,44 +430,77 @@ const CustomerEdit = ({ customer: initialCustomerData, onBack ,refreshCustomers}
         </label>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Phường/Xã */}
-          <label className="block space-y-2">
-            <span className="font-semibold text-gray-600">Phường/Xã</span>
-            <input
-              type="text"
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Tỉnh / Thành phố</label>
+            <select
+              name="province"
+              // Giá trị này là TÊN tỉnh: formData.province
+              value={formData.province}
+              onChange={(e) => {
+                const selectedName = e.target.value
+                const selected = provinces.find((p) => p.name === selectedName)
+                setFormData({
+                  ...formData,
+                  province: selectedName, 
+                  district: '',
+                  ward: ''
+                })
+                setDistricts(selected?.districts || [])
+                setWards([])
+              }}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff69b4]"
+            >
+              <option value="">Chọn tỉnh / thành</option>
+              {provinces.map((p) => (
+                <option key={p.code} value={p.name}>{p.name}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Quận / Huyện */}
+         <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Quận / Huyện</label>
+            <select
+              name="district"
+              value={formData.district} 
+              onChange={(e) => {
+                // Tìm quận/huyện dựa trên **tên** được chọn (e.target.value là tên)
+                const selected = districts.find((d) => d.name === e.target.value) 
+                setFormData({ ...formData, district: selected ? selected.name : '', ward: '' }) 
+                setWards(selected ? selected.wards : []) 
+              }}
+              disabled={!districts.length}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff69b4] disabled:bg-gray-100"
+            >
+              <option value="">Chọn quận / huyện</option>
+              {districts.map((d) => (
+                <option key={d.code} value={d.name}>{d.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Phường / Xã</label>
+            <select
               name="ward"
               value={formData.ward}
-              onChange={handleChange}
-              placeholder="Phường/Xã"
-              className="w-full px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
-            />
-          </label>
-          {/* Quận/Huyện */}
-          <label className="block space-y-2">
-            <span className="font-semibold text-gray-600">Quận/Huyện</span>
-            <input
-              type="text"
-              name="district"
-              value={formData.district}
-              onChange={handleChange}
-              placeholder="Quận/Huyện"
-              className="w-full px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
-            />
-          </label>
-          {/* Tỉnh/Thành phố */}
-          <label className="block space-y-2">
-            <span className="font-semibold text-gray-600">Tỉnh/Thành phố</span>
-            <input
-              type="text"
-              name="province"
-              value={formData.province}
-              onChange={handleChange}
-              placeholder="Tỉnh/Thành phố"
-              className="w-full px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
-            />
-          </label>
+              onChange={(e) => {
+                // Tìm phường/xã dựa trên **tên** được chọn (e.target.value là tên)
+                const selected = wards.find((w) => w.name === e.target.value)
+                setFormData({ ...formData, ward: selected ? selected.name : '' })
+              }}
+              disabled={!wards.length}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff69b4] disabled:bg-gray-100"
+            >
+              <option value="">Chọn phường / xã</option>
+              {wards.map((w) => (
+                // Dùng **tên** làm giá trị (value) của option
+                <option key={w.code} value={w.name}>{w.name}</option>
+              ))}
+            </select>
+          </div>
           {/* Quốc gia */}
-          <label className="block space-y-2">
+          <label className="block ">
             <span className="font-semibold text-gray-600">Quốc gia</span>
             <input
               type="text"
@@ -549,7 +618,7 @@ const CustomerEdit = ({ customer: initialCustomerData, onBack ,refreshCustomers}
           </div>
         </div>
       )}
-       {openLockForm && (
+      {openLockForm && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
           <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md space-y-4">
             <h3 className="text-lg font-bold text-gray-800">Nhập lý do khóa tài khoản</h3>

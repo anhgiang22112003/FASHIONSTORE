@@ -116,6 +116,9 @@ const UserProfile = () => {
     const [users, setUsers] = useState()
     const [confirmPassword, setConfirmPassword] = useState('')
     const [message, setMessage] = useState({ text: '', type: '' })
+    const [provinces, setProvinces] = useState([]) // Danh sách Tỉnh/Thành phố
+    const [districts, setDistricts] = useState([]) // Danh sách Quận/Huyện của Tỉnh đã chọn
+    const [wards, setWards] = useState([])
     const [userProfile, setUserProfile] = useState({
         name: '',
         email: '',
@@ -124,8 +127,8 @@ const UserProfile = () => {
             address: '',
             ward: '',
             district: '',
-            city: '',
-            country: '',
+            province: '',
+            country: 'Việt Nam',
         },
     })
     useEffect(() => {
@@ -138,7 +141,7 @@ const UserProfile = () => {
                     address: users?.address || '',
                     ward: users?.ward || '',
                     district: users?.district || '',
-                    city: users?.province || '',
+                    province: users?.province || '',
                     country: users?.country || '',
                 },
             })
@@ -147,12 +150,11 @@ const UserProfile = () => {
 
 
     const { user } = useContext(AuthContext)
-    console.log(user);
-    
+
     const GetUserId = async () => {
         const id = user?.id
-        console.log(id);
-        
+        console.log(id)
+
         try {
             const res = await api.get(`/users/${id}`)
             setUsers(res?.data)
@@ -165,13 +167,17 @@ const UserProfile = () => {
 
     const handleProfileSubmit = async (e) => {
         e.preventDefault()
+        if (!userProfile.address.province || !userProfile.address.district || !userProfile.address.ward) {
+            toast.error('Vui lòng chọn đầy đủ Tỉnh/Thành phố, Quận/Huyện, và Phường/Xã.')
+            return
+        }
         const payload = {
             name: userProfile.name || users?.name,
             phone: userProfile.phone || users?.phone,
             address: userProfile.address.address,
             ward: userProfile.address.ward,
             district: userProfile.address.district,
-            city: userProfile.address.city,
+            province: userProfile.address.province,
             country: userProfile.address.country,
             image: profilePic,
         }
@@ -232,7 +238,72 @@ const UserProfile = () => {
         setSelectedOrder(null)
         setActiveTab('orders')
     }
+    useEffect(() => {
+        const fetchProvinces = async () => {
+            try {
+                // Sử dụng fetch API để tải dữ liệu địa lý
+                const res = await fetch('https://provinces.open-api.vn/api/?depth=3')
+                const data = await res.json()
+                setProvinces(data)
+            } catch (error) {
+                console.error('Lỗi khi tải danh sách tỉnh/thành:', error)
+            }
+        }
+        fetchProvinces()
+    }, [])
 
+    // 2. Khởi tạo danh sách Huyện và Xã dựa trên dữ liệu người dùng đã có
+    useEffect(() => {
+        if (provinces.length > 0 && userProfile?.address?.province) {
+            // Tìm Tỉnh/Thành phố ban đầu
+            const initialProvince = provinces.find(
+                (p) => p.name === userProfile.address.province
+            )
+
+            if (initialProvince) {
+                // Thiết lập danh sách Huyện
+                setDistricts(initialProvince.districts || [])
+
+                if (userProfile.address.district) {
+                    // Tìm Quận/Huyện ban đầu
+                    const initialDistrict = initialProvince.districts.find(
+                        (d) => d.name === userProfile.address.district
+                    )
+
+                    if (initialDistrict) {
+                        // Thiết lập danh sách Xã
+                        setWards(initialDistrict.wards || [])
+                    }
+                }
+            }
+        }
+    }, [provinces, userProfile.address.province, userProfile.address.district])
+    const handleAddressChange = (field, value) => {
+        setUserProfile(prev => {
+            const newAddress = { ...prev.address, [field]: value }
+
+            if (field === 'province') {
+                const selectedProvince = provinces.find(p => p.name === value)
+                setDistricts(selectedProvince ? selectedProvince.districts : [])
+                newAddress.district = ''
+                newAddress.ward = ''
+                setWards([])
+
+            } else if (field === 'district') {
+                const currentProvince = provinces.find(p => p.name === prev.address.province)
+
+                if (currentProvince) {
+                    const selectedDistrict = currentProvince.districts.find(d => d.name === value)
+                    setWards(selectedDistrict ? selectedDistrict.wards : [])
+                }
+                newAddress.ward = ''
+
+            } else if (field === 'ward') {
+            }
+
+            return { ...prev, address: newAddress }
+        })
+    }
 
     const renderEditProfile = () => (
         <div className="bg-white p-6 rounded-2xl shadow-md space-y-6">
@@ -307,76 +378,69 @@ const UserProfile = () => {
                 </div>
 
                 {/* Địa chỉ chi tiết */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label className="block text-gray-700 font-medium mb-1">Địa chỉ</label>
-                        <input
-                            type="text"
-                            value={userProfile.address.address}
-                            onChange={(e) =>
-                                setUserProfile({
-                                    ...userProfile,
-                                    address: { ...userProfile.address, address: e.target.value },
-                                })
-                            }
-                            placeholder="Số nhà, tên đường..."
-                            className="w-full px-5 py-3 mb-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-500/50 transition-all"
-                        />
-                    </div>
-                </div>
-
-
-                {/* Phường/Xã */}
                 <div>
-                    <label className="block text-gray-700 font-medium mb-1">Phường / Xã</label>
+                    <label className="block text-gray-700 font-medium mb-1">Địa chỉ</label>
                     <input
                         type="text"
-                        value={userProfile.address.ward}
+                        value={userProfile.address.address}
                         onChange={(e) =>
                             setUserProfile({
                                 ...userProfile,
-                                address: { ...userProfile.address, ward: e.target.value },
+                                address: { ...userProfile.address, address: e.target.value },
                             })
                         }
-                        placeholder="Nhập phường / xã"
-                        className="w-full px-5 py-3 mb-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-500/50 transition-all"
+                        placeholder="Số nhà, tên đường..."
+                        className="w-full px-5 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-500/50 transition-all"
                     />
                 </div>
-
+                <div>
+                    <label className="block text-gray-700 font-medium mb-1">Tỉnh / Thành phố <span className="text-red-500">*</span></label>
+                    <select
+                        value={userProfile.address.province}
+                        onChange={(e) => handleAddressChange('province', e.target.value)}
+                        required
+                        className="w-full px-5 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-500/50 transition-all appearance-none"
+                    >
+                        <option value="">-- Chọn Tỉnh / Thành phố --</option>
+                        {provinces.map((province) => (
+                            <option key={province.code} value={province.name}>{province.name}</option>
+                        ))}
+                    </select>
+                </div>
                 {/* Quận / Huyện */}
                 <div>
-                    <label className="block text-gray-700 font-medium mb-1">Quận / Huyện</label>
-                    <input
-                        type="text"
+                    <label className="block text-gray-700 font-medium mb-1">Quận / Huyện <span className="text-red-500">*</span></label>
+                    <select
                         value={userProfile.address.district}
-                        onChange={(e) =>
-                            setUserProfile({
-                                ...userProfile,
-                                address: { ...userProfile.address, district: e.target.value },
-                            })
-                        }
-                        placeholder="Nhập quận / huyện"
-                        className="w-full px-5 py-3 mb-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-500/50 transition-all"
-                    />
+                        onChange={(e) => handleAddressChange('district', e.target.value)}
+                        required
+                        // Disable nếu chưa chọn Tỉnh/Thành phố hoặc chưa tải xong danh sách Huyện
+                        disabled={!userProfile.address.province || districts.length === 0}
+                        className={`w-full px-5 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-500/50 transition-all appearance-none ${!userProfile.address.province || districts.length === 0 ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''}`}
+                    >
+                        <option value="">-- Chọn Quận / Huyện --</option>
+                        {districts.map((district) => (
+                            <option key={district.code} value={district.name}>{district.name}</option>
+                        ))}
+                    </select>
                 </div>
-
-                {/* Tỉnh / Thành phố */}
+                {/* Phường/Xã */}
                 <div>
-                    <label className="block text-gray-700 font-medium mb-1">Tỉnh / Thành phố</label>
-                    <input
-                        type="text"
-                        value={userProfile.address.city}
-                        onChange={(e) =>
-                            setUserProfile({
-                                ...userProfile,
-                                address: { ...userProfile.address, city: e.target.value },
-                            })
-                        }
-                        placeholder="Nhập tỉnh / thành phố"
-                        className="w-full px-5 py-3 mb-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-500/50 transition-all"
-                    />
+                    <label className="block text-gray-700 font-medium mb-1">Phường / Xã <span className="text-red-500">*</span></label>
+                    <select
+                        value={userProfile.address.ward}
+                        onChange={(e) => handleAddressChange('ward', e.target.value)}
+                        required
+                        // Disable nếu chưa chọn Quận/Huyện hoặc chưa tải xong danh sách Xã
+                        disabled={!userProfile.address.district || wards.length === 0}
+                        className={`w-full px-5 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-500/50 transition-all appearance-none ${!userProfile.address.district || wards.length === 0 ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''}`}
+                    >
+                        <option value="">-- Chọn Phường / Xã --</option>
+                        {wards.map((ward) => (
+                            <option key={ward.code} value={ward.name}>{ward.name}</option>
+                        ))}
+                    </select>
                 </div>
-
                 {/* Quốc gia */}
                 <div>
                     <label className="block text-gray-700 font-medium mb-1">Quốc gia</label>
@@ -393,9 +457,6 @@ const UserProfile = () => {
                         className="w-full px-5 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-500/50 transition-all"
                     />
                 </div>
-
-
-                {/* Nút hành động */}
                 <div className="flex justify-end space-x-3 pt-4">
                     <button
                         type="button"
@@ -588,8 +649,8 @@ const UserProfile = () => {
                                     key={item.tab}
                                     onClick={() => setActiveTab(item.tab)}
                                     className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-colors duration-200 ${isNavActive(item.tab)
-                                            ? 'bg-pink-100 text-pink-600 shadow-inner'
-                                            : 'text-gray-700 hover:bg-gray-50'
+                                        ? 'bg-pink-100 text-pink-600 shadow-inner'
+                                        : 'text-gray-700 hover:bg-gray-50'
                                         }`}
                                 >
                                     {item.name}
