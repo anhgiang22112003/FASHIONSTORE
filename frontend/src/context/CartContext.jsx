@@ -7,9 +7,11 @@ export const CartContext = createContext()
 export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState(null)
 
-  // ✅ Lấy giỏ hàng khi load trang
   useEffect(() => {
-    fetchCart()
+    const token = localStorage.getItem('accessToken') // hoặc tên token bạn dùng
+    if (token) {
+      fetchCart()
+    }
   }, [])
 
   const fetchCart = async () => {
@@ -21,12 +23,15 @@ export const CartProvider = ({ children }) => {
     }
   }
 
-  // ✅ Thêm sản phẩm vào giỏ hàng và cập nhật context
   const addToCart = async (body) => {
     try {
-        console.log(body);
-        
-      const res = await api.post('/cart/add',body)
+      const token = localStorage.getItem('accessToken')
+      if (!token) {
+        toast.warning('Vui lòng đăng nhập để thêm vào giỏ hàng')
+        return
+      }
+
+      const res = await api.post('/cart/add', body)
       toast.success('Đã thêm vào giỏ hàng')
       setCart(res.data)
     } catch (error) {
