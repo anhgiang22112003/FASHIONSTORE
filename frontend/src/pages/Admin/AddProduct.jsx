@@ -204,6 +204,7 @@ const AddProduct = ({ setActiveTab, fetchProducts }) => {
                 brand,    // id từ backend (chọn trong select brand)
                 tags,
                 stock: Number(stock),
+                 soldCount: 0,
                 status,
                 mainImage: mainImageFile, // link ảnh chính
                 subImages: subImageFiles.filter(img => img),
