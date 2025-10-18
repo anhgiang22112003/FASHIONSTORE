@@ -9,6 +9,8 @@ export const CartProvider = ({ children }) => {
 
   useEffect(() => {
     const token = localStorage.getItem('accessToken') // hoặc tên token bạn dùng
+    console.log(token);
+    
     if (token) {
       fetchCart()
     }
@@ -16,7 +18,7 @@ export const CartProvider = ({ children }) => {
 
   const fetchCart = async () => {
     try {
-      const res = await api.get('/cart')
+      const res = await api.get('/cart')      
       setCart(res.data)
     } catch (error) {
       console.error('Lỗi lấy giỏ hàng:', error)

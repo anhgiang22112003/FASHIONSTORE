@@ -8,6 +8,7 @@ import "react-toastify/dist/ReactToastify.css"
 import { AdminRoute } from "./service/AdminRoute"
 import { AuthProvider } from "./context/Authcontext"
 import { CartProvider } from "./context/CartContext"
+import OrderHistory from "./pages/OrderHistory"
 const AdminLoginForm = lazy(() => import("./pages/Admin/LoginAdmin"))
 // Lazy load các page
 const HomePage = lazy(() => import("./pages/HomePage"))
@@ -89,6 +90,7 @@ function App() {
                     <Route path="/blog" element={<BlogPage />} />
                     <Route path="/blog/:slug" element={<BlogArticlePage />} />
                     <Route path="/profile" element={<UserProfile />} />
+                    <Route path="/orders" element={<OrderHistory />} />
                     <Route path="/forgot-password" element={<ForgotPassword />} />
                     <Route path="/reset-password/:token" element={<ResetPassword />} />
                   </Routes>

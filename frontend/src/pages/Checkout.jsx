@@ -4,6 +4,8 @@ import api from "@/service/api"
 import { toast } from "react-toastify"
 import { CartContext } from "@/context/CartContext"
 import AddproductSearch from "@/components/fashion/AddProductSearch"
+// import { Loader2 } from "lucide-react"
+
 const Checkout = () => {
   const navigate = useNavigate()
   const { cart, fetchCart } = useContext(CartContext)
@@ -15,11 +17,47 @@ const Checkout = () => {
   const [isVoucherPopupOpen, setIsVoucherPopupOpen] = useState(false)
   const [availableVouchers, setAvailableVouchers] = useState([])
   const [shippingMethod, setShippingMethod] = useState("standard")
+  const [isFormInitialized, setIsFormInitialized] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    fetchCart()
+    const timer = setTimeout(() => setIsLoading(false), 1000)
+    return () => clearTimeout(timer)
+  }, [])
+
 
   const shippingOptions = [
     { id: "standard", name: "Giao hàng tiêu chuẩn", price: 30000 },
     { id: "express", name: "Giao hàng nhanh", price: 50000 },
   ]
+  useEffect(() => {
+    // Nếu chưa có dữ liệu user hoặc tỉnh thì đợi
+    if (!cart?.user || provinces.length === 0) return
+
+    // Tự động fill dữ liệu khi có user lần đầu
+    const savedProvince = provinces.find(p => p.name === cart.user.province)
+    const savedDistrict = savedProvince?.districts.find(d => d.name === cart.user.district)
+    const savedWard = savedDistrict?.wards.find(w => w.name === cart.user.ward)
+
+    setForm({
+      name: cart.user.name || "",
+      phone: cart.user.phone || "",
+      email: cart.user.email || "",
+      address: cart.user.address || "",
+      provinceCode: savedProvince?.code || "",
+      districtCode: savedDistrict?.code || "",
+      wardCode: savedWard?.code || "",
+      paymentMethod: "COD",
+    })
+
+    setDistricts(savedProvince?.districts || [])
+    setWards(savedDistrict?.wards || [])
+
+    setIsFormInitialized(true)
+  }, [cart?.user, provinces])
+
+
   const openVoucherPopup = async () => {
     try {
       setIsVoucherPopupOpen(true)
@@ -83,40 +121,7 @@ const Checkout = () => {
       toast.error(err?.response?.data?.message || 'Cập nhật thất bại')
     }
   }
-  useEffect(() => {
-    if (provinces.length > 0 && cart?.user?.province) {
-      // Tìm Mã Tỉnh/Thành phố dựa trên TÊN đã lưu
-      const savedProvince = provinces.find(p => p.name === cart.user.province)
-      const provinceCode = savedProvince?.code || ""
 
-      // Tìm Mã Quận/Huyện dựa trên TÊN đã lưu
-      const savedDistrict = savedProvince?.districts.find(d => d.name === cart.user.district)
-      const districtCode = savedDistrict?.code || ""
-
-      // Tìm Mã Phường/Xã dựa trên TÊN đã lưu
-      const savedWard = savedDistrict?.wards.find(w => w.name === cart.user.ward)
-      const wardCode = savedWard?.code || ""
-
-      // Cập nhật form state bằng các mã code vừa tìm được
-      setForm(prevForm => ({
-        ...prevForm,
-        name: cart.user.name || prevForm.name,
-        phone: cart.user.phone || prevForm.phone,
-        email: cart.user.email || prevForm.email,
-        address: cart.user.address || prevForm.address,
-        provinceCode: provinceCode,
-        districtCode: districtCode,
-        wardCode: wardCode,
-      }))
-      // Tự động load danh sách Quận/Huyện và Phường/Xã cho lần render đầu
-      if (provinceCode) {
-        setDistricts(savedProvince.districts || [])
-        if (districtCode) {
-          setWards(savedDistrict.wards || [])
-        }
-      }
-    }
-  }, [cart, provinces])
 
   const handleProvinceChange = (e) => {
     const provinceCode = e.target.value
@@ -145,20 +150,8 @@ const Checkout = () => {
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value })
   }
-  useEffect(() => {
-    if (cart?.user) {
-      setForm(prevForm => ({
-        ...prevForm,
-        name: cart?.user?.name || prevForm.name,
-        phone: cart?.user?.phone || prevForm.phone,
-        email: cart?.user?.email || prevForm.email,
-        address: cart?.user?.address || prevForm.address,
-        provinceCode: cart?.user?.province || prevForm.province,
-        districtCode: cart?.user?.district || prevForm.district,
-        wardCode: cart?.user?.ward || prevForm.ward,
-      }))
-    }
-  }, [cart])
+
+
 
   const handleDistrictChange = (e) => {
     const district = e.target.value
@@ -188,7 +181,8 @@ const Checkout = () => {
       })
 
       toast.success("Đặt hàng thành công 🎉")
-      navigate("/orders/" + res.data._id)
+      fetchCart()
+      navigate("/orders")
     } catch (err) {
       toast.error(err?.response?.data?.message || "Đặt hàng thất bại")
     }
@@ -214,6 +208,14 @@ const Checkout = () => {
   if (!cart) {
     return <p className="text-center text-gray-600 mt-10">Không có sản phẩm trong giỏ hàng</p>
   }
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-white/70 backdrop-blur-sm z-50">
+        <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen w-full bg-gray-100 p-8 font-sans flex items-center justify-center">
       <div className="w-full  bg-white rounded-none lg:rounded-lg shadow-xl p-6 lg:p-12 flex flex-col lg:flex-row gap-8 min-h-screen">
@@ -232,7 +234,7 @@ const Checkout = () => {
             </div>
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1">Email</label>
-              <input name="address" type="text" value={form.email} onChange={handleChange} placeholder="Nhập địa chỉ giao hàng (Số nhà, tên đường...)" className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-300" />            </div>
+              <input name="email" type="text" value={form.email} onChange={handleChange} placeholder="Nhập địa chỉ giao hàng (Số nhà, tên đường...)" className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-300" />            </div>
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1">Địa chỉ</label>
               <input name="address" type="text" value={form.address} onChange={handleChange} placeholder="Nhập địa chỉ giao hàng (Số nhà, tên đường...)" className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-300" />            </div>
@@ -339,12 +341,12 @@ const Checkout = () => {
               </div>
             </div>
 
-            <button
+            {/* <button
               onClick={handleOrder}
               className="mt-6 w-full py-3 bg-pink-500 text-white font-semibold rounded-lg hover:bg-pink-600 transition"
             >
               Đặt hàng
-            </button>
+            </button> */}
           </div>
         </div>
 
