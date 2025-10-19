@@ -5,10 +5,13 @@ import { toast } from "react-toastify"
 import { CartContext } from "@/context/CartContext"
 import AddproductSearch from "@/components/fashion/AddProductSearch"
 // import { Loader2 } from "lucide-react"
-
+const ShippingMethodEnum = {
+  STANDARD: 'NHANH',
+  EXPRESS: 'HOA_TOC',
+}
 const Checkout = () => {
   const navigate = useNavigate()
-  const { cart, fetchCart } = useContext(CartContext)
+  const { cart, fetchCart, setCart } = useContext(CartContext)
   const [provinces, setProvinces] = useState([])
   const [districts, setDistricts] = useState([])
   const [wards, setWards] = useState([])
@@ -16,10 +19,25 @@ const Checkout = () => {
   const [isApplying, setIsApplying] = useState(false)
   const [isVoucherPopupOpen, setIsVoucherPopupOpen] = useState(false)
   const [availableVouchers, setAvailableVouchers] = useState([])
-  const [shippingMethod, setShippingMethod] = useState("standard")
   const [isFormInitialized, setIsFormInitialized] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [shippingMethod, setShippingMethod] = useState("standard")
+  const [form, setForm] = useState({
+    name: cart?.user?.name || "",
+    phone: cart?.user?.phone || "",
+    email: cart?.user?.email || "",
+    address: cart?.user?.address || "",
+    provinceCode: "",
+    districtCode: "",
+    wardCode: "",
+    paymentMethod: "COD",
+    note: "",
+  })
 
+  const shippingOptions = [
+    { id: "standard", name: "Giao hàng tiêu chuẩn", price: 30000, backendValue: ShippingMethodEnum.STANDARD },
+    { id: "express", name: "Giao hàng hỏa tốc (HOA_TOC)", price: 50000, backendValue: ShippingMethodEnum.EXPRESS },
+  ]
   useEffect(() => {
     fetchCart()
     const timer = setTimeout(() => setIsLoading(false), 1000)
@@ -27,10 +45,7 @@ const Checkout = () => {
   }, [])
 
 
-  const shippingOptions = [
-    { id: "standard", name: "Giao hàng tiêu chuẩn", price: 30000 },
-    { id: "express", name: "Giao hàng nhanh", price: 50000 },
-  ]
+
   useEffect(() => {
     // Nếu chưa có dữ liệu user hoặc tỉnh thì đợi
     if (!cart?.user || provinces.length === 0) return
@@ -49,6 +64,7 @@ const Checkout = () => {
       districtCode: savedDistrict?.code || "",
       wardCode: savedWard?.code || "",
       paymentMethod: "COD",
+      note: "",
     })
 
     setDistricts(savedProvince?.districts || [])
@@ -61,37 +77,55 @@ const Checkout = () => {
   const openVoucherPopup = async () => {
     try {
       setIsVoucherPopupOpen(true)
-      const res = await api.get("/vouchers/available") // 🔥 API này bạn cần tạo ở backend
+      const res = await api.get("/vouchers/available")
       setAvailableVouchers(res.data)
     } catch (err) {
       toast.error("Không thể tải danh sách voucher")
     }
   }
   const handleSelectVoucher = async (code) => {
-    setVoucherCode(code)
-    setIsVoucherPopupOpen(false)
-    try {
-      setIsApplying(true)
-      const res = await api.post("/vouchers/apply-voucher", { code: code })
-      toast.success(res.data.message || "Áp dụng mã giảm giá thành công 🎉")
-      fetchCart() // Cập nhật lại giỏ hàng
-    } catch (err) {
-      toast.error(err?.response?.data?.message || "Mã giảm giá không hợp lệ")
-    } finally {
-      setIsApplying(false)
-    }
-  }
+  setVoucherCode(code)
+  setIsVoucherPopupOpen(false)
+  try {
+    setIsApplying(true)
+    const res = await api.post("/vouchers/apply-voucher", { code })
 
-  const [form, setForm] = useState({
-    name: cart?.user?.name || "",
-    phone: cart?.user?.phone || "",
-    email: cart?.user?.email || "",
-    address: cart?.user?.address || "",
-    provinceCode: "",
-    districtCode: "",
-    wardCode: "",
-    paymentMethod: "COD",
-  })
+    // Lấy phí ship hiện tại
+    const shippingFee = shippingMethod === "express" ? 50000 : 30000
+    const subtotal = cart?.subtotal || 0
+    const discount = res.data.discount || 0
+    const newTotal = subtotal - discount + shippingFee
+
+    // ✅ Cập nhật cart mà không làm sai shippingMethod
+    setCart(prev => ({
+      ...prev,
+      voucherCode: res.data.code,
+      discount: discount,
+      total: newTotal,
+      shipping: shippingFee,
+    }))
+
+    toast.success(res.data.message || "Áp dụng mã giảm giá thành công 🎉")
+  } catch (err) {
+    toast.error(err?.response?.data?.message || "Mã giảm giá không hợp lệ")
+  } finally {
+    setIsApplying(false)
+  }
+}
+
+
+useEffect(() => {
+  const newShippingFee = shippingMethod === "express" ? 50000 : 30000
+  const subtotal = cart?.subtotal || 0
+  const discount = cart?.discount || 0
+  const newTotal = subtotal - discount + newShippingFee
+
+  setCart(prev => ({
+    ...prev,
+    shipping: newShippingFee,
+    total: newTotal,
+  }))
+}, [shippingMethod, cart?.discount, cart?.subtotal])
 
   useEffect(() => {
     fetch("https://provinces.open-api.vn/api/?depth=3")
@@ -151,8 +185,6 @@ const Checkout = () => {
     setForm({ ...form, [e.target.name]: e.target.value })
   }
 
-
-
   const handleDistrictChange = (e) => {
     const district = e.target.value
     const selectedDistrict = districts.find(d => d.code == district)
@@ -160,26 +192,47 @@ const Checkout = () => {
     setForm(prevForm => ({
       ...prevForm,
       districtCode: district,
-      wardCode: "", // Reset Phường/Xã
+      wardCode: "",
     }))
   }
   const handlePaymentChange = (method) => {
     setForm((prev) => ({ ...prev, paymentMethod: method }))
   }
-  const fullAddress = `${form.address}, ${form.wardCode || ""}, ${form.districtCode || ""}, ${form.provinceCode || ""}`.replace(/,\s*,/g, ",")
 
   const handleOrder = async () => {
-    if (!form.address) {
-      toast.warning("Vui lòng nhập địa chỉ giao hàng")
+    if (!form.address || !form.provinceCode || !form.districtCode || !form.wardCode) {
+      toast.warning("Vui lòng nhập đầy đủ địa chỉ giao hàng (Số nhà, Tỉnh/Thành, Quận/Huyện, Phường/Xã)")
       return
     }
 
-    try {
-      const res = await api.post("/orders", {
-        address: fullAddress,
-        paymentMethod: form.paymentMethod,
-      })
+    const provinceName = provinces.find(p => p.code == form.provinceCode)?.name || ""
+    const districtName = districts.find(d => d.code == form.districtCode)?.name || ""
+    const wardName = wards.find(w => w.code == form.wardCode)?.name || ""
 
+    const fullAddress = `${form.address}, ${wardName}, ${districtName}, ${provinceName}`.replace(/,\s*,/g, ", ")
+    const selectedShippingOption = shippingOptions.find(opt => opt.id === shippingMethod)
+    const backendShippingMethod = selectedShippingOption ? selectedShippingOption.backendValue : ShippingMethodEnum.NHANH
+
+
+    try {
+      // Dữ liệu gửi lên server
+      const orderPayload = {
+        shippingMethod: backendShippingMethod,
+        paymentMethod: form.paymentMethod,
+        address: fullAddress,
+        voucherCode: cart.voucherCode,
+        note: form.note,
+        shippingInfo: {
+          name: form.name,
+          phone: form.phone,
+          address: fullAddress,
+          city: provinceName,
+          note: form.note,
+        },
+      }
+      console.log(orderPayload);
+      
+      const res = await api.post("/orders", orderPayload)
       toast.success("Đặt hàng thành công 🎉")
       fetchCart()
       navigate("/orders")
@@ -187,6 +240,7 @@ const Checkout = () => {
       toast.error(err?.response?.data?.message || "Đặt hàng thất bại")
     }
   }
+
 
   const applyVoucher = async () => {
     if (!voucherCode.trim()) {
@@ -205,6 +259,11 @@ const Checkout = () => {
     }
   }
 
+  const displayShippingFee = cart?.shipping ?? (
+    shippingMethod === "express" ? 50000 : 30000
+  )
+
+
   if (!cart) {
     return <p className="text-center text-gray-600 mt-10">Không có sản phẩm trong giỏ hàng</p>
   }
@@ -215,29 +274,30 @@ const Checkout = () => {
       </div>
     )
   }
-
   return (
-    <div className="min-h-screen w-full bg-gray-100 p-8 font-sans flex items-center justify-center">
-      <div className="w-full  bg-white rounded-none lg:rounded-lg shadow-xl p-6 lg:p-12 flex flex-col lg:flex-row gap-8 min-h-screen">
+    <div className="min-h-screen w-full bg-gray-100  p-8 font-sans flex items-center justify-center">
+      <div className="w-full  bg-white rounded-none lg:rounded-lg shadow-xl p-6 lg:p-12 flex flex-col lg:flex-row gap-8">
 
         {/* Bên trái: Thông tin giao hàng */}
         <div className="flex-1 space-y-8 overflow-auto">
           <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-gray-800">Thông tin giao hàng</h2>
+            <h2 className="text-2xl font-bold text-gray-800 border-b pb-3">Thông tin giao hàng</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-1">Họ và tên</label>
-                <input name="name" value={form.name} onChange={handleChange} type="text" placeholder="Nhập họ và tên" className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-300" />              </div>
+                <input name="name" value={form.name} onChange={handleChange} type="text" placeholder="Nhập họ và tên" className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-300" />
+              </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-1">Số điện thoại</label>
-                <input name="phone" value={form.phone} onChange={handleChange} type="tel" placeholder="Nhập số điện thoại" className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-300" />              </div>
+                <input name="phone" value={form.phone} onChange={handleChange} type="tel" placeholder="Nhập số điện thoại" className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-300" />
+              </div>
             </div>
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1">Email</label>
-              <input name="email" type="text" value={form.email} onChange={handleChange} placeholder="Nhập địa chỉ giao hàng (Số nhà, tên đường...)" className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-300" />            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">Địa chỉ</label>
-              <input name="address" type="text" value={form.address} onChange={handleChange} placeholder="Nhập địa chỉ giao hàng (Số nhà, tên đường...)" className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-300" />            </div>
+              <input name="email" type="email" value={form.email} onChange={handleChange} placeholder="Nhập email" className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-300" />
+            </div>
+
+            {/* Địa chỉ chi tiết */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-1">Tỉnh/Thành phố</label>
@@ -248,46 +308,69 @@ const Checkout = () => {
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-1">Quận/Huyện</label>
-                <select onChange={handleDistrictChange} value={form.districtCode} className="w-full p-3 border border-gray-300 rounded-lg bg-white appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-pink-300">
+                <select onChange={handleDistrictChange} value={form.districtCode} className="w-full p-3 border border-gray-300 rounded-lg bg-white appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-pink-300" disabled={districts.length === 0}>
                   <option value="">Chọn quận/huyện</option>
                   {districts.map(d => <option key={d.code} value={d.code}>{d.name}</option>)}
                 </select>
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-1">Phường/Xã</label>
-                <select onChange={handleWardChange} value={form.wardCode} className="w-full p-3 border border-gray-300 rounded-lg bg-white appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-pink-300">
+                <select onChange={handleWardChange} value={form.wardCode} className="w-full p-3 border border-gray-300 rounded-lg bg-white appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-pink-300" disabled={wards.length === 0}>
                   <option value="">Chọn phường/xã</option>
                   {wards.map(w => <option key={w.code} value={w.code}>{w.name}</option>)}
                 </select>
               </div>
             </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Số nhà, tên đường</label>
+              <input name="address" type="text" value={form.address} onChange={handleChange} placeholder="Số nhà, tên đường, thôn xóm..." className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-300" />
+            </div>
+
+            {/* 🔥 TRƯỜNG GHI CHÚ (NOTE) MỚI */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Ghi chú cho đơn hàng (Tùy chọn)</label>
+              <textarea
+                name="note"
+                value={form.note}
+                onChange={handleChange}
+                placeholder="Ví dụ: Giao hàng vào buổi tối, gọi điện trước khi giao..."
+                rows="3"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-300 resize-none"
+              />
+            </div>
+
           </div>
-          <div className="space-y-4 bg-white rounded-xl">
-            <h3 className="text-2xl font-bold text-gray-800 font-semibold mb-2">Phương thức vận chuyển</h3>
-            {shippingOptions.map((option) => (
-              <label key={option.id} className="flex items-center gap-2 py-1">
-                <input
-                  type="radio"
-                  name="shipping"
-                  value={option.id}
-                  checked={shippingMethod === option.id}
-                  onChange={() => setShippingMethod(option.id)}
-                />
-                <span>{option.name} — {option.price.toLocaleString()}đ</span>
-              </label>
-            ))}
+
+          <div className="space-y-4 pt-4 border-t border-gray-200">
+            <h3 className="text-2xl font-bold text-gray-800">Phương thức vận chuyển</h3>
+            <div className="space-y-2">
+              {shippingOptions.map((option) => (
+                <label key={option.id} className={`flex justify-between items-center p-3 border rounded-lg cursor-pointer transition ${shippingMethod === option.id ? "border-pink-500 bg-pink-50" : "border-gray-300 hover:bg-gray-50"}`}>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="radio"
+                      name="shipping"
+                      value={option.id}
+                      checked={shippingMethod === option.id}
+                      onChange={() => setShippingMethod(option.id)}
+                      className="w-4 h-4 text-pink-600 border-gray-300 focus:ring-pink-500"
+                    />
+                    <span className="font-semibold text-gray-700">{option.name}</span>
+                  </div>
+                  <span className="font-bold text-gray-900">{option.price.toLocaleString("vi-VN")}₫</span>
+                </label>
+              ))}
+            </div>
           </div>
 
           {/* Phương thức thanh toán */}
-          <div className="space-y-4">
+          <div className="space-y-4 pt-4 border-t border-gray-200">
             <h2 className="text-2xl font-bold text-gray-800">Phương thức thanh toán</h2>
-
             <div className="space-y-4">
               {/* COD */}
               <div
                 onClick={() => handlePaymentChange("COD")}
-                className={`relative flex items-center p-4 border rounded-lg cursor-pointer transition ${form.paymentMethod === "COD" ? "border-pink-500 bg-pink-50" : "border-gray-300"
-                  }`}
+                className={`relative flex items-center p-4 border rounded-lg cursor-pointer transition ${form.paymentMethod === "COD" ? "border-pink-500 bg-pink-50" : "border-gray-300 hover:bg-gray-50"}`}
               >
                 <input
                   type="radio"
@@ -295,7 +378,7 @@ const Checkout = () => {
                   id="cod"
                   checked={form.paymentMethod === "COD"}
                   onChange={() => handlePaymentChange("COD")}
-                  className="w-5 h-5 appearance-none border border-gray-400 rounded-full cursor-pointer checked:border-pink-500 checked:bg-white"
+                  className="w-5 h-5 text-pink-600 border-gray-300 focus:ring-pink-500"
                 />
                 <label htmlFor="cod" className="ml-3 font-bold text-gray-800 cursor-pointer">
                   Thanh toán khi nhận hàng (COD)
@@ -305,8 +388,7 @@ const Checkout = () => {
               {/* Bank transfer */}
               <div
                 onClick={() => handlePaymentChange("BANK")}
-                className={`relative flex items-center p-4 border rounded-lg cursor-pointer transition ${form.paymentMethod === "BANK" ? "border-pink-500 bg-pink-50" : "border-gray-300"
-                  }`}
+                className={`relative flex items-center p-4 border rounded-lg cursor-pointer transition ${form.paymentMethod === "BANK" ? "border-pink-500 bg-pink-50" : "border-gray-300 hover:bg-gray-50"}`}
               >
                 <input
                   type="radio"
@@ -314,9 +396,9 @@ const Checkout = () => {
                   id="bank"
                   checked={form.paymentMethod === "BANK"}
                   onChange={() => handlePaymentChange("BANK")}
-                  className="w-5 h-5 appearance-none border border-gray-400 rounded-full cursor-pointer checked:border-pink-500 checked:bg-white"
+                  className="w-5 h-5 text-pink-600 border-gray-300 focus:ring-pink-500"
                 />
-                <label htmlFor="bank" className="ml-3 text-gray-600 cursor-pointer">
+                <label htmlFor="bank" className="ml-3 font-bold text-gray-800 cursor-pointer">
                   Chuyển khoản ngân hàng
                 </label>
               </div>
@@ -324,8 +406,7 @@ const Checkout = () => {
               {/* MoMo */}
               <div
                 onClick={() => handlePaymentChange("MOMO")}
-                className={`relative flex items-center p-4 border rounded-lg cursor-pointer transition ${form.paymentMethod === "MOMO" ? "border-pink-500 bg-pink-50" : "border-gray-300"
-                  }`}
+                className={`relative flex items-center p-4 border rounded-lg cursor-pointer transition ${form.paymentMethod === "MOMO" ? "border-pink-500 bg-pink-50" : "border-gray-300 hover:bg-gray-50"}`}
               >
                 <input
                   type="radio"
@@ -333,75 +414,69 @@ const Checkout = () => {
                   id="momo"
                   checked={form.paymentMethod === "MOMO"}
                   onChange={() => handlePaymentChange("MOMO")}
-                  className="w-5 h-5 appearance-none border border-gray-400 rounded-full cursor-pointer checked:border-pink-500 checked:bg-white"
+                  className="w-5 h-5 text-pink-600 border-gray-300 focus:ring-pink-500"
                 />
-                <label htmlFor="momo" className="ml-3 text-gray-600 cursor-pointer">
+                <label htmlFor="momo" className="ml-3 font-bold text-gray-800 cursor-pointer">
                   Ví điện tử MoMo
                 </label>
               </div>
             </div>
-
-            {/* <button
-              onClick={handleOrder}
-              className="mt-6 w-full py-3 bg-pink-500 text-white font-semibold rounded-lg hover:bg-pink-600 transition"
-            >
-              Đặt hàng
-            </button> */}
           </div>
         </div>
 
-        {/* Bên phải: Đơn hàng */}
-        <div className="flex-1 bg-pink-100  lg:rounded-lg lg:p-8 space-y-6 overflow-auto">
-          <h2 className="text-2xl font-bold text-gray-800 ">Đơn hàng của bạn</h2>
+        {/* Bên phải: Đơn hàng & Tổng kết */}
+        <div className="flex-1 flex-shrink-0 bg-pink-50 rounded-2xl p-6 lg:p-8 space-y-6">
+          <h2 className="text-3xl font-bold text-gray-800">Đơn hàng của bạn</h2>
 
           <AddproductSearch />
 
           {/* Danh sách sản phẩm */}
-          {cart?.items?.map((item, index) => (
-            <div
-              key={index}
-              className="flex items-center justify-between p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200"
-            >
-              <div className="flex items-center gap-4">
-                {/* Ảnh sản phẩm */}
-                <img
-                  src={item?.product?.mainImage || "/placeholder.png"}
-                  alt={item?.name}
-                  className="w-16 h-16 rounded-lg object-cover border"
-                />
-                <div>
-                  <p className="font-semibold text-gray-800">{item?.product?.name}</p>
-                  <p className="text-sm text-gray-500">
-                    Size: {item?.size} | Màu: {item?.color}
-                  </p>
-                  <p className="text-pink-600 font-semibold mt-1">
-                    {item?.product?.originalPrice?.toLocaleString("vi-VN")}₫
-                  </p>
+          <div className="space-y-4 max-h-[300px] lg:max-h-[400px] overflow-y-auto pr-2">
+            {cart?.items?.map((item, index) => (
+              <div
+                key={index}
+                className="flex items-center justify-between p-3 bg-white rounded-lg shadow-sm"
+              >
+                <div className="flex items-center gap-4">
+                  <img
+                    src={item?.product?.mainImage || "placeholder.png"}
+                    alt={item?.product?.name}
+                    className="w-14 h-14 rounded-lg object-cover border"
+                  />
+                  <div className='flex-1 min-w-0'>
+                    <p className="font-semibold text-gray-800 truncate">{item?.product?.name}</p>
+                    <p className="text-xs text-gray-500">
+                      Size: {item?.size} | Màu: {item?.color}
+                    </p>
+                    <p className="text-pink-600 font-semibold mt-1">
+                      {item?.product?.originalPrice?.toLocaleString("vi-VN")}₫
+                    </p>
+                  </div>
+                </div>
+
+                {/* Tăng giảm số lượng */}
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => updateQuantity(item?._id, item?.quantity - 1)}
+                    className="p-1 border border-gray-300 rounded-full w-6 h-6 flex items-center justify-center text-sm text-gray-600 hover:bg-gray-100"
+                  >
+                    −
+                  </button>
+                  <span className="min-w-[20px] text-center font-medium">{item.quantity}</span>
+                  <button
+                    onClick={() => updateQuantity(item?._id, item?.quantity + 1)}
+                    className="p-1 border border-gray-300 rounded-full w-6 h-6 flex items-center justify-center text-sm text-gray-600 hover:bg-gray-100"
+                  >
+                    +
+                  </button>
                 </div>
               </div>
+            ))}
+          </div>
 
-              {/* Tăng giảm số lượng */}
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => updateQuantity(item?._id, item?.quantity - 1)}
-                  className="px-2 py-1 border border-gray-300 rounded hover:bg-gray-100"
-                >
-                  -
-                </button>
-                <span className="min-w-[20px] text-center">{item.quantity}</span>
-                <button
-                  onClick={() => updateQuantity(item?._id, item?.quantity + 1)}
-                  className="px-2 py-1 border border-gray-300 rounded hover:bg-gray-100"
-                >
-                  +
-                </button>
-              </div>
-            </div>
-          ))}
-          <div className="space-y-2 mb-4">
-            <label className="block text-sm font-semibold text-gray-700 mb-1">
-              Mã giảm giá
-            </label>
+          {/* Mã giảm giá */}
+          <div className="space-y-2 pt-4 border-t border-gray-300">
+            <label className="block text-sm font-semibold text-gray-700">Mã giảm giá</label>
             <div className="flex gap-2">
               <input
                 type="text"
@@ -410,24 +485,22 @@ const Checkout = () => {
                 placeholder="Nhập mã giảm giá..."
                 className="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-300 outline-none"
               />
-              <div className="flex gap-2">
-                <button
-                  onClick={applyVoucher}
-                  disabled={isApplying}
-                  className="px-4 py-2 bg-pink-600 text-white font-semibold rounded-lg hover:bg-pink-700 disabled:opacity-50"
-                >
-                  {isApplying ? "Đang áp dụng..." : "Áp dụng"}
-                </button>
-                <button
-                  onClick={openVoucherPopup}
-                  className="px-4 py-2 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300"
-                >
-                  🎟 Chọn voucher
-                </button>
-              </div>
-
+              <button
+                onClick={applyVoucher}
+                disabled={isApplying}
+                className="px-4 py-2 bg-pink-600 text-white font-semibold rounded-lg hover:bg-pink-700 disabled:opacity-50 transition-colors"
+              >
+                {isApplying ? "..." : "Áp dụng"}
+              </button>
             </div>
+            <button
+              onClick={openVoucherPopup}
+              className="w-full text-center text-sm text-pink-600 font-medium hover:text-pink-700 mt-2"
+            >
+              🎟 Chọn từ voucher có sẵn
+            </button>
           </div>
+
           {/* Tổng kết */}
           <div className="space-y-4 pt-6 border-t border-gray-300">
             <div className="flex justify-between items-center">
@@ -443,12 +516,12 @@ const Checkout = () => {
               </p>
             </div>
             <div className="flex justify-between items-center">
-              <p className="text-gray-600">Phí vận chuyển:</p>
+              <p className="text-gray-600">Phí vận chuyển ({shippingOptions.find(opt => opt.id === shippingMethod)?.name}):</p>
               <p className="font-medium text-gray-800">
-                {cart?.shipping?.toLocaleString("vi-VN")}₫
+                {displayShippingFee.toLocaleString("vi-VN")}₫
               </p>
             </div>
-            <div className="flex justify-between items-center text-xl font-bold pt-4 border-t-2 border-dashed border-gray-300">
+            <div className="flex justify-between items-center text-xl font-bold pt-4 border-t-2 border-dashed border-pink-300">
               <p className="text-gray-800">Tổng cộng:</p>
               <p className="text-pink-600">
                 {cart?.total?.toLocaleString("vi-VN")}₫
@@ -458,63 +531,62 @@ const Checkout = () => {
 
           <button
             onClick={handleOrder}
-            className="w-full py-4 bg-pink-600 text-white font-bold rounded-lg hover:bg-pink-700 transition-colors duration-300"
+            className="w-full py-4 bg-pink-600 text-white font-bold rounded-lg hover:bg-pink-700 transition-colors duration-300 shadow-lg shadow-pink-200/50"
           >
             Hoàn tất đặt hàng
           </button>
         </div>
 
 
-      </div>
-      {isVoucherPopupOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
-            <h2 className="text-xl font-bold mb-4">🎁 Voucher của bạn</h2>
-            <button
-              onClick={() => setIsVoucherPopupOpen(false)}
-              className="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
-            >
-              ✖
-            </button>
+        {/* Popup Voucher */}
+        {isVoucherPopupOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 relative">
+              <h2 className="text-2xl font-bold mb-4 text-pink-600">🎁 Voucher của bạn</h2>
+              <button
+                onClick={() => setIsVoucherPopupOpen(false)}
+                className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 transition"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+              </button>
 
-            {availableVouchers.length === 0 ? (
-              <p className="text-gray-500 text-center">Bạn chưa có voucher nào khả dụng 😢</p>
-            ) : (
-              <ul className="space-y-3 max-h-80 overflow-y-auto">
-                {availableVouchers.map((v) => (
-                  <li
-                    key={v.code}
-                    className="border border-gray-300 rounded-lg p-4 hover:border-pink-400 transition"
-                  >
-                    <div className="flex justify-between items-center">
+              {availableVouchers.length === 0 ? (
+                <p className="text-gray-500 text-center py-8">Bạn chưa có voucher nào khả dụng 😢</p>
+              ) : (
+                <ul className="space-y-3 max-h-80 overflow-y-auto pr-2">
+                  {availableVouchers.map((v) => (
+                    <li
+                      key={v.code}
+                      className="border border-gray-200 rounded-xl p-4 flex justify-between items-center bg-white shadow-sm hover:border-pink-500 transition-all"
+                    >
                       <div>
-                        <p className="font-bold text-gray-800">{v.name}</p>
-                        <p className="text-sm text-gray-600">
-                          Mã: <span className="font-mono">{v.code}</span>
-                        </p>
+                        <p className="font-bold text-lg text-gray-800">{v.name}</p>
                         <p className="text-sm text-gray-500 mt-1">
+                          Mã: <span className="font-mono text-pink-600 font-semibold">{v.code}</span>
+                        </p>
+                        <p className="text-sm text-gray-600">
                           {v.type === "percent"
                             ? `Giảm ${v.discountValue}%`
                             : v.type === "amount"
-                              ? `Giảm ${v.discountValue.toLocaleString()}đ`
+                              ? `Giảm ${v.discountValue.toLocaleString()}₫`
                               : "Miễn phí vận chuyển"}
                         </p>
                       </div>
                       <button
                         onClick={() => handleSelectVoucher(v.code)}
-                        className="bg-pink-600 text-white px-3 py-1 rounded-lg hover:bg-pink-700"
+                        className="bg-pink-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-pink-700 transition"
                       >
                         Áp dụng
                       </button>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
+      </div>
     </div>
   )
 }

@@ -1,67 +1,38 @@
-import React, { useState, useEffect } from 'react';
-import { PencilIcon, PrinterIcon, PaperAirplaneIcon, XMarkIcon, CheckIcon, TrashIcon, PlusIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import React, { useState, useEffect } from "react"
+import {
+    PencilIcon,
+    PrinterIcon,
+    PaperAirplaneIcon,
+    XMarkIcon,
+    CheckIcon,
+    TrashIcon,
+    PlusIcon,
+    MagnifyingGlassIcon,
+} from "@heroicons/react/24/outline"
+import api from "@/service/api"
+import { toast } from "react-toastify"
+import AddProductToOrder from "./AddProductToOrder"
 
-// Dữ liệu giả định cho đơn hàng
-const orderData = {
-    orderId: "PF0145789",
-    status: "Đang giao",
-    trackingHistory: [
-        { date: "15/1/2024 - 10:30", note: "Xác nhận đơn hàng" },
-        { date: "15/1/2024 - 15:00", note: "Đang xử lý" },
-        { date: "15/1/2024 - 17:30", note: "Đang giao" },
-        { date: "16/1/2024 - 10:00", note: "Hoàn thành" }
-    ],
-    customerInfo: {
-        name: "Nguyễn Thị Lan",
-        email: "lan.nguyen@email.com",
-        phone: "0912345678",
-        address: "245 Đường Tôn Đức Thắng, Phường Hàng Bột, Quận Đống Đa, Hà Nội"
-    },
-    shippingInfo: {
-        type: "Giao hàng tiêu chuẩn",
-        unit: "GHN",
-        note: "Giao trong giờ hành chính, gọi trước 15 phút"
-    },
-    paymentInfo: {
-        method: "Thanh toán khi nhận hàng (COD)",
-        voucher: "SALE10",
-    },
-    productList: [
-        {
-            id: 1,
-            name: "Váy Hoa Nhí Vintage",
-            sku: "SKU-VHVN-01",
-            color: "Màu Hồng",
-            size: "M",
-            quantity: 2,
-            unitPrice: 450000,
-            image: "https://placehold.co/100x100/f0d1de/ffffff?text=Váy"
-        },
-        {
-            id: 2,
-            name: "Áo Blouse Trắng Thanh Lịch",
-            sku: "SKU-ABTT-02",
-            color: "Màu Trắng",
-            size: "S",
-            quantity: 1,
-            unitPrice: 320000,
-            image: "https://placehold.co/100x100/f0d1de/ffffff?text=Áo"
-        }
-    ]
-};
+const statusOptions = [
+    { value: "PENDING", label: "Chờ xác nhận" },
+    { value: "PROCESSING", label: "Đang xử lý" },
+    { value: "SHIPPED", label: "Đang giao" },
+    { value: "COMPLETED", label: "Hoàn thành" },
+    { value: "CANCELLED", label: "Đã hủy" },
+]
 
-// Danh sách sản phẩm có sẵn để thêm vào đơn hàng
-const availableProducts = [
-    { id: 101, name: "Quần Jean Bò Nam", sku: "SKU-QJBN-01", color: "Màu Xanh", size: "L", unitPrice: 350000, image: "https://placehold.co/100x100/b8c6e3/ffffff?text=Quần" },
-    { id: 102, name: "Áo Thun Unisex basic", sku: "SKU-ATUB-02", color: "Màu Đen", size: "XL", unitPrice: 150000, image: "https://placehold.co/100x100/333333/ffffff?text=Áo" },
-    { id: 103, name: "Giày Sneaker Trắng", sku: "SKU-GST-03", color: "Màu Trắng", size: "40", unitPrice: 700000, image: "https://placehold.co/100x100/ffffff/000000?text=Giày" },
-    { id: 104, name: "Túi Xách Da Nữ", sku: "SKU-TXDN-04", color: "Màu Nâu", size: "F", unitPrice: 500000, image: "https://placehold.co/100x100/c49a62/ffffff?text=Túi" },
-];
 
-const statusOptions = ["Xác nhận đơn hàng", "Đang xử lý", "Đang giao", "Hoàn thành", "Đã hủy"];
-const paymentMethods = ["Thanh toán khi nhận hàng (COD)", "Chuyển khoản ngân hàng", "Thẻ tín dụng"];
-const shippingUnits = ["GHN", "GHTK", "J&T Express", "Viettel Post"];
-const shippingTypes = ["Giao hàng tiêu chuẩn", "Giao hàng nhanh", "Giao hàng tiết kiệm"];
+const paymentMethods = [
+    "Thanh toán khi nhận hàng (COD)",
+    "Chuyển khoản ngân hàng",
+    "Thẻ tín dụng",
+]
+const shippingUnits = ["GHN", "GHTK", "J&T Express", "Viettel Post"]
+const shippingTypes = [
+    "Giao hàng tiêu chuẩn",
+    "Giao hàng nhanh",
+    "Giao hàng tiết kiệm",
+]
 
 const statusColors = {
     "Xác nhận đơn hàng": "bg-gray-100 text-gray-600",
@@ -69,177 +40,228 @@ const statusColors = {
     "Đang giao": "bg-yellow-100 text-yellow-600",
     "Hoàn thành": "bg-green-100 text-green-600",
     "Đã hủy": "bg-red-100 text-red-600",
-};
+}
 
 const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
-};
+    if (typeof amount !== "number") return "0₫"
+    return new Intl.NumberFormat("vi-VN", {
+        style: "currency",
+        currency: "VND",
+    }).format(amount)
+}
 
-const calculateTotals = (products) => {
-    const subtotal = products.reduce((acc, product) => acc + product.quantity * product.unitPrice, 0);
-    const shippingFee = 30000;
-    const discount = 125000;
-    const total = subtotal + shippingFee - discount;
-    return { subtotal, shippingFee, discount, total };
-};
+const OrderEditPage = ({ orderId }) => {
+    const [isEditMode, setIsEditMode] = useState(false)
+    const [editedOrder, setEditedOrder] = useState(null)
+    const [originalOrder, setOriginalOrder] = useState(null)
+    const [isAddingProduct, setIsAddingProduct] = useState(false)
+    const [productSearchTerm, setProductSearchTerm] = useState("")
+    const [availableProducts, setAvailableProducts] = useState([])
+    const [isLoading, setIsLoading] = useState(true)
+    const [isAddProductOpen, setIsAddProductOpen] = useState(false)
 
-const OrderEditPage = () => {
-    const [isEditMode, setIsEditMode] = useState(false);
-    const [editedOrder, setEditedOrder] = useState(orderData);
-    const [originalOrder, setOriginalOrder] = useState(orderData);
-    const [isAddingProduct, setIsAddingProduct] = useState(false);
-    const [productSearchTerm, setProductSearchTerm] = useState('');
 
-    const totals = calculateTotals(editedOrder.productList);
+    // ✅ Fetch chi tiết đơn hàng
 
-    const handleEditClick = () => {
-        setOriginalOrder(editedOrder);
-        setIsEditMode(true);
-    };
+    const fetchOrder = async () => {
+        try {
+            const res = await api.get(`/orders/${orderId}`)
+            const order = res.data
 
-    const handleSaveClick = () => {
-        const changes = getOrderChanges();
-        if (changes.length > 0) {
-            const newHistoryItem = {
-                date: new Date().toLocaleString('vi-VN'),
-                note: changes.join('; ')
-            };
-            setEditedOrder(prev => ({
-                ...prev,
-                trackingHistory: [...prev.trackingHistory, newHistoryItem]
-            }));
+            const mapped = {
+                orderId: order._id,
+                status: order.status,
+                customerInfo: {
+                    name: order.shippingInfo.name,
+                    phone: order.shippingInfo.phone,
+                    email: order.user?.email || "",
+                    address: order.shippingInfo.address,
+                },
+                shippingInfo: {
+                    type:
+                        order.shippingMethod === "HOA_TOC"
+                            ? "Giao hàng hỏa tốc"
+                            : "Giao hàng tiêu chuẩn",
+                    unit: order.shippingUnit || "GHN",
+                    note: order.note || "",
+                },
+                paymentInfo: {
+                    method:
+                        order.paymentMethod === "COD"
+                            ? "Thanh toán khi nhận hàng (COD)"
+                            : order.paymentMethod,
+                    voucher: order.voucherCode || "",
+                },
+                productList: order.items.map((item) => ({
+                    id: item.product,
+                    name: item.productName,
+                    color: item.color,
+                    size: item.size,
+                    quantity: item.quantity,
+                    unitPrice: item.price,
+                    image: item.image || "https://placehold.co/100x100",
+                })),
+                trackingHistory: order.editHistory
+                    ? order.editHistory.map((h) => ({
+                        date: new Date(h.editedAt).toLocaleString("vi-VN"),
+                        note: h.changes,
+                    }))
+                    : [],
+                totals: {
+                    subtotal: order.subtotal || 0,
+                    shippingFee: order.shipping || 0,
+                    discount: order.discount || 0,
+                    total: order.total || 0,
+                },
+            }
+
+            setEditedOrder(mapped)
+            setOriginalOrder(mapped)
+        } catch (err) {
+            console.error("Lỗi khi lấy đơn hàng:", err)
+            toast.error("Không thể tải đơn hàng")
+        } finally {
+            setIsLoading(false)
         }
-        setIsEditMode(false);
-    };
+    }
+    useEffect(() => {
+        fetchOrder()
+    }, [orderId])
+
+    // ✅ Fetch danh sách sản phẩm có thể thêm
+    useEffect(() => {
+        const fetchProducts = async () => {
+            try {
+                const res = await api.get("/products")
+                const products = res.data.map((p) => ({
+                    id: p._id,
+                    name: p.name,
+                    sku: p.sku || p._id.slice(-6),
+                    unitPrice: p.price,
+                    image: p.images?.[0] || "https://placehold.co/100x100",
+                }))
+                setAvailableProducts(products)
+            } catch (err) {
+                console.error("Lỗi khi lấy danh sách sản phẩm:", err)
+            }
+        }
+        fetchProducts()
+    }, [])
+
+    const calculateTotals = (products) => {
+        const subtotal = products.reduce(
+            (acc, p) => acc + p.unitPrice * p.quantity,
+            0
+        )
+        const shippingFee = editedOrder?.totals?.shippingFee || 0
+        const discount = editedOrder?.totals?.discount || 0
+        const total = subtotal + shippingFee - discount
+        return { subtotal, shippingFee, discount, total }
+    }
+
+    const totals = editedOrder ? calculateTotals(editedOrder.productList) : {}
+
+    const handleEditClick = () => setIsEditMode(true)
+
+    const handleSaveClick = async () => {
+        try {
+            const updateData = {
+                status: editedOrder.status,
+                note: editedOrder.shippingInfo.note,
+                paymentMethod: editedOrder.paymentInfo.method.includes("COD")
+                    ? "COD"
+                    : editedOrder.paymentInfo.method,
+                shippingInfo: {
+                    name: editedOrder.customerInfo.name,
+                    phone: editedOrder.customerInfo.phone,
+                    address: editedOrder.customerInfo.address,
+                },
+                items: editedOrder.productList.map((p) => ({
+                    product: p.id,
+                    productName: p.name,
+                    price: p.unitPrice,
+                    quantity: p.quantity,
+                    color: p.color,
+                    size: p.size,
+                })),
+            }
+
+            const res = await api.patch(`/orders/${orderId}/edit`, updateData)
+            setEditedOrder(res.data)
+            setOriginalOrder(res.data)
+            setIsEditMode(false)
+            toast.success("Cập nhật đơn hàng thành công 🎉")
+        } catch (err) {
+            console.error("Lỗi khi lưu đơn hàng:", err)
+            toast.error("Không thể lưu thay đổi")
+        }
+    }
 
     const handleCancelClick = () => {
-        setEditedOrder(originalOrder);
-        setIsEditMode(false);
-        setIsAddingProduct(false);
-        setProductSearchTerm('');
-    };
+        setEditedOrder(originalOrder)
+        setIsEditMode(false)
+    }
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
-        const [section, field] = name.split('.');
-        setEditedOrder(prev => ({
+        const { name, value } = e.target
+        const [section, field] = name.split(".")
+        setEditedOrder((prev) => ({
             ...prev,
             [section]: {
                 ...prev[section],
-                [field]: value
-            }
-        }));
-    };
+                [field]: value,
+            },
+        }))
+    }
 
     const handleProductChange = (index, e) => {
-        const { name, value } = e.target;
-        const newProducts = [...editedOrder.productList];
+        const { name, value } = e.target
+        const newProducts = [...editedOrder.productList]
         newProducts[index] = {
             ...newProducts[index],
-            [name]: name === 'quantity' || name === 'unitPrice' ? parseFloat(value) || 0 : value
-        };
-        setEditedOrder(prev => ({
+            [name]:
+                name === "quantity" || name === "unitPrice"
+                    ? parseFloat(value) || 0
+                    : value,
+        }
+        setEditedOrder((prev) => ({
             ...prev,
-            productList: newProducts
-        }));
-    };
+            productList: newProducts,
+        }))
+    }
 
     const handleAddProduct = (productToAdd) => {
-        const existingProduct = editedOrder.productList.find(p => p.id === productToAdd.id);
-        if (existingProduct) {
-            const newProducts = editedOrder.productList.map(p =>
+        const existing = editedOrder.productList.find(
+            (p) => p.id === productToAdd.id
+        )
+        let newList
+        if (existing) {
+            newList = editedOrder.productList.map((p) =>
                 p.id === productToAdd.id ? { ...p, quantity: p.quantity + 1 } : p
-            );
-            setEditedOrder(prev => ({ ...prev, productList: newProducts }));
+            )
         } else {
-            const newProduct = { ...productToAdd, quantity: 1 };
-            setEditedOrder(prev => ({ ...prev, productList: [...prev.productList, newProduct] }));
+            newList = [...editedOrder.productList, { ...productToAdd, quantity: 1 }]
         }
-        setIsAddingProduct(false);
-        setProductSearchTerm('');
-    };
+        setEditedOrder((prev) => ({ ...prev, productList: newList }))
+        setIsAddingProduct(false)
+    }
 
     const handleRemoveProduct = (index) => {
-        const newProducts = editedOrder.productList.filter((_, i) => i !== index);
-        setEditedOrder(prev => ({
+        const newProducts = editedOrder.productList.filter((_, i) => i !== index)
+        setEditedOrder((prev) => ({
             ...prev,
-            productList: newProducts
-        }));
-    };
-    
-    // Logic so sánh để tạo log chi tiết
-    const getOrderChanges = () => {
-        const changes = [];
-        const original = originalOrder;
-        const edited = editedOrder;
+            productList: newProducts,
+        }))
+    }
 
-        // So sánh thông tin đơn hàng chung
-        if (original.status !== edited.status) {
-            changes.push(`Đã thay đổi Trạng thái đơn hàng từ '${original.status}' thành '${edited.status}'`);
-        }
+    const filteredProducts = availableProducts.filter(
+        (p) =>
+            p.name.toLowerCase().includes(productSearchTerm.toLowerCase()) ||
+            p.sku.toLowerCase().includes(productSearchTerm.toLowerCase())
+    )
 
-        // So sánh thông tin khách hàng
-        for (const key in edited.customerInfo) {
-            if (edited.customerInfo[key] !== original.customerInfo[key]) {
-                const label = key === 'name' ? 'Tên khách hàng' : key === 'email' ? 'Email' : key === 'phone' ? 'Số điện thoại' : 'Địa chỉ';
-                changes.push(`Đã thay đổi ${label} từ '${original.customerInfo[key]}' thành '${edited.customerInfo[key]}'`);
-            }
-        }
-
-        // So sánh thông tin vận chuyển
-        for (const key in edited.shippingInfo) {
-            if (edited.shippingInfo[key] !== original.shippingInfo[key]) {
-                const label = key === 'unit' ? 'Đơn vị vận chuyển' : key === 'type' ? 'Loại hình vận chuyển' : 'Ghi chú vận chuyển';
-                changes.push(`Đã thay đổi ${label} từ '${original.shippingInfo[key]}' thành '${edited.shippingInfo[key]}'`);
-            }
-        }
-
-        // So sánh thông tin thanh toán
-        for (const key in edited.paymentInfo) {
-            if (edited.paymentInfo[key] !== original.paymentInfo[key]) {
-                const label = key === 'method' ? 'Phương thức thanh toán' : 'Mã khuyến mãi';
-                changes.push(`Đã thay đổi ${label} từ '${original.paymentInfo[key]}' thành '${edited.paymentInfo[key]}'`);
-            }
-        }
-
-        // So sánh danh sách sản phẩm
-        const originalProducts = new Map(original.productList.map(p => [p.id, p]));
-        const editedProducts = new Map(edited.productList.map(p => [p.id, p]));
-
-        // Sản phẩm đã thêm
-        editedProducts.forEach((product, id) => {
-            if (!originalProducts.has(id)) {
-                changes.push(`Đã thêm sản phẩm '${product.name}' với số lượng ${product.quantity}`);
-            }
-        });
-
-        // Sản phẩm đã xóa
-        originalProducts.forEach((product, id) => {
-            if (!editedProducts.has(id)) {
-                changes.push(`Đã xóa sản phẩm '${product.name}'`);
-            }
-        });
-
-        // Sản phẩm đã thay đổi
-        editedProducts.forEach((editedProduct, id) => {
-            if (originalProducts.has(id)) {
-                const originalProduct = originalProducts.get(id);
-                if (editedProduct.quantity !== originalProduct.quantity) {
-                    changes.push(`Đã cập nhật số lượng sản phẩm '${editedProduct.name}' từ ${originalProduct.quantity} thành ${editedProduct.quantity}`);
-                }
-                if (editedProduct.unitPrice !== originalProduct.unitPrice) {
-                    changes.push(`Đã thay đổi đơn giá sản phẩm '${editedProduct.name}' từ ${formatCurrency(originalProduct.unitPrice)} thành ${formatCurrency(editedProduct.unitPrice)}`);
-                }
-            }
-        });
-
-        return changes;
-    };
-    
-    const filteredProducts = availableProducts.filter(product =>
-        product.name.toLowerCase().includes(productSearchTerm.toLowerCase()) ||
-        product.sku.toLowerCase().includes(productSearchTerm.toLowerCase())
-    );
+    if (isLoading) return <div>Đang tải...</div>
+    if (!editedOrder) return <div>Không tìm thấy đơn hàng</div>
 
     const renderEditableField = (label, name, value, inputType = "text", options = []) => (
         <div className="flex-1 space-y-1">
@@ -271,7 +293,7 @@ const OrderEditPage = () => {
                 <p className="font-semibold text-gray-800">{value}</p>
             )}
         </div>
-    );
+    )
 
     const renderHeaderButtons = () => {
         if (isEditMode) {
@@ -292,7 +314,7 @@ const OrderEditPage = () => {
                         <span>Hủy bỏ</span>
                     </button>
                 </div>
-            );
+            )
         } else {
             return (
                 <div className="flex space-x-2">
@@ -309,34 +331,47 @@ const OrderEditPage = () => {
                         <span>Gửi email</span>
                     </button>
                 </div>
-            );
+            )
         }
-    };
+    }
 
     const renderStatusSection = () => {
         if (isEditMode) {
             return (
                 <select
                     value={editedOrder.status}
-                    onChange={(e) => setEditedOrder({ ...editedOrder, status: e.target.value })}
+                    onChange={(e) =>
+                        setEditedOrder({ ...editedOrder, status: e.target.value })
+                    }
                     className="w-full px-4 py-2 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all"
                 >
-                    {statusOptions.map(status => (
-                        <option key={status} value={status}>{status}</option>
+                    {statusOptions.map((status) => (
+                        <option key={status.value} value={status.value}>
+                            {status.label}
+                        </option>
                     ))}
                 </select>
-            );
+            )
         } else {
+            const current = statusOptions.find(
+                (s) => s.value === editedOrder.status
+            )
             return (
                 <div className="flex items-center space-x-2">
-                    <span className={`px-3 py-1 rounded-full font-semibold text-sm ${statusColors[editedOrder.status]}`}>
-                        {editedOrder.status}
+                    <span
+                        className={`px-3 py-1 rounded-full font-semibold text-sm ${statusColors[current?.label] || "bg-gray-100 text-gray-600"
+                            }`}
+                    >
+                        {current?.label || editedOrder.status}
                     </span>
-                    <span className="text-sm text-gray-500">#{editedOrder.orderId}</span>
+                    <span className="text-sm text-gray-500">
+                        #{editedOrder.orderId}
+                    </span>
                 </div>
-            );
+            )
         }
-    };
+    }
+
 
     return (
         <div className="min-h-screen bg-gray-50 font-sans antialiased p-8">
@@ -455,15 +490,25 @@ const OrderEditPage = () => {
                             </div>
                             {isEditMode && (
                                 <div className="mt-4 text-center">
-                                    <button onClick={() => setIsAddingProduct(true)} className="flex items-center justify-center space-x-1 px-4 py-2 bg-pink-100 text-pink-600 rounded-xl font-semibold hover:bg-pink-200 transition-colors w-full">
+                                    <button
+                                        onClick={() => setIsAddProductOpen(true)}
+                                        className="flex items-center justify-center space-x-1 px-4 py-2 bg-pink-100 text-pink-600 rounded-xl font-semibold hover:bg-pink-200 transition-colors w-full"
+                                    >
                                         <PlusIcon className="w-5 h-5" />
                                         <span>Thêm sản phẩm</span>
                                     </button>
                                 </div>
                             )}
+                            {isAddProductOpen && (
+                                <AddProductToOrder
+                                    orderId={orderId}
+                                    fetchOrder={fetchOrder}
+                                    onClose={() => setIsAddingProduct(false)}
+                                />
+                            )}
 
                             {/* Add Product Modal */}
-                            {isAddingProduct && (
+                            {/* {isAddingProduct && (
                                 <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4 z-50">
                                     <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[80vh] overflow-y-auto p-6 space-y-4">
                                         <div className="flex justify-between items-center border-b pb-2">
@@ -501,7 +546,8 @@ const OrderEditPage = () => {
                                         </div>
                                     </div>
                                 </div>
-                            )}
+                            )} */}
+
                         </div>
 
                         {/* Payment Info */}
@@ -565,8 +611,9 @@ const OrderEditPage = () => {
                     </div>
                 </div>
             </div>
-        </div>
-    );
-};
 
-export default OrderEditPage;
+        </div>
+    )
+}
+
+export default OrderEditPage

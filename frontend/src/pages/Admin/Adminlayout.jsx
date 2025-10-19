@@ -23,6 +23,8 @@ const AdminLayout = () => {
   const [activeTab, setActiveTab] = useState("dashboard")
   const [editingCustomer, setEditingCustomer] = useState(null)
   const [editingProductId, setEditingProductId] = useState(null)
+  const [editingOrder, setEditingOrder] = useState(null)
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
 
   // ✅ Cache data cho từng tab
@@ -52,11 +54,22 @@ const AdminLayout = () => {
       console.error("Lỗi khi fetch customers:", err)
     }
   }
-
-
+  const fetchOrders = async () => {
+    try {
+      const res = await api.get("/orders/all")
+      setTabData((prev) => ({ ...prev, orders: res?.data }))
+    } catch (err) {
+      console.error("Lỗi khi fetch orders:", err)
+    }
+  }
   const handleEditProduct = (productId) => {
     setEditingProductId(productId)
     setActiveTab("edit-product")
+  }
+
+  const handleEditOrder = (oderId) => {
+    setEditingOrder(oderId)
+    setActiveTab("edit-order")
   }
 
   const toggleSidebar = () => {
@@ -113,12 +126,14 @@ const AdminLayout = () => {
             <Orders
               setActiveTab={setActiveTab}
               data={tabData.orders}
+              onEditOrder={handleEditOrder}
               setData={(data) => setTabData((prev) => ({ ...prev, orders: data }))}
+              fetchOrders={fetchOrders}
             />
           </div>
 
           <div className={activeTab === "edit-order" ? "block" : "hidden"}>
-            <OrderEditPage />
+            <OrderEditPage orderId={editingOrder} onBack={() => setActiveTab("orders")} fetchOrders={fetchOrders} />
           </div>
 
           <div className={activeTab === "product-categories" ? "block" : "hidden"}>

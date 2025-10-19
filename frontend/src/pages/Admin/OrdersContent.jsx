@@ -1,205 +1,155 @@
-import React, { useState, useMemo } from "react";
-import { EyeIcon, PencilIcon, FunnelIcon, ArrowDownTrayIcon } from "@heroicons/react/24/outline";
+import React, { useState, useEffect, useMemo } from "react"
+import { EyeIcon, PencilIcon, FunnelIcon, ArrowDownTrayIcon } from "@heroicons/react/24/outline"
+import api from "@/service/api"
+import { toast } from "react-toastify"
 
-// Dữ liệu đơn hàng giả lập
-const orders = [
-  { id: "PF0001", customer: "Nguyễn Thị Lan", email: "lan@email.com", date: "24/01/2024", total: "1.250.000₫", status: "Hoàn thành" },
-  { id: "PF0002", customer: "Trần Thị Hoa", email: "hoa@email.com", date: "24/01/2024", total: "890.000₫", status: "Hoàn thành" },
-  { id: "PF0003", customer: "Lê Thị Mai", email: "mai@email.com", date: "23/01/2024", total: "2.100.000₫", status: "Đang giao" },
-  { id: "PF0004", customer: "Phạm Thị Linh", email: "linh@email.com", date: "23/01/2024", total: "650.000₫", status: "Đang giao" },
-  { id: "PF0005", customer: "Hoàng Thị Nga", email: "nga@email.com", date: "22/01/2024", total: "1.450.000₫", status: "Đang xử lý" },
-  { id: "PF0006", customer: "Vũ Thị Hương", email: "huong@email.com", date: "22/01/2024", total: "780.000₫", status: "Đang xử lý" },
-  { id: "PF0007", customer: "Đỗ Thị Thảo", email: "thao@email.com", date: "21/01/2024", total: "1.120.000₫", status: "Đã hủy" },
-  { id: "PF0008", customer: "Bùi Thị Loan", email: "loan@email.com", date: "21/01/2024", total: "950.000₫", status: "Đã hủy" },
-];
+const statusOptions = [
+  { value: "PENDING", label: "Đang chờ xử lý" },
+  { value: "PROCESSING", label: "Đang xử lý" },
+  { value: "SHIPPED", label: "Đang giao hàng" },
+  { value: "COMPLETED", label: "Hoàn thành" },
+  { value: "CANCELLED", label: "Đã hủy" },
+]
 
 const statusColors = {
-  "Hoàn thành": "bg-green-100 text-green-600",
-  "Đang giao": "bg-yellow-100 text-yellow-600",
-  "Đang xử lý": "bg-blue-100 text-blue-600",
-  "Đã hủy": "bg-red-100 text-red-600",
-};
+  PENDING: "bg-yellow-100 text-yellow-600",
+  PROCESSING: "bg-blue-100 text-blue-600",
+  SHIPPED: "bg-purple-100 text-purple-600",
+  COMPLETED: "bg-green-100 text-green-600",
+  CANCELLED: "bg-red-100 text-red-600",
+}
 
-// Hàm để chuyển đổi chuỗi ngày DD/MM/YYYY thành đối tượng Date
-const parseDate = (dateString) => {
-  if (!dateString) return null;
-  const [day, month, year] = dateString.split('/').map(Number);
-  return new Date(year, month - 1, day);
-};
-
-// Hàm để chuyển đổi chuỗi tiền tệ thành số
-const parseCurrency = (currencyString) => {
-  return parseFloat(currencyString.replace(/\./g, '').replace('₫', '').replace(',', '.'));
-};
-
-const OrdersContent = ({setActiveTab}) => {
-  const [isFilterVisible, setIsFilterVisible] = useState(false);
+const OrdersContent = ({ data,onEditOrder }) => {
+  const [orders, setOrders] = useState([])
+  const [isFilterVisible, setIsFilterVisible] = useState(false)
+  const [editingId, setEditingId] = useState(null)
+  const [loading, setLoading] = useState(false)
   const [filters, setFilters] = useState({
-    customerName: '',
-    minDate: '',
-    maxDate: '',
-    minTotal: '',
-    maxTotal: '',
-    status: 'Tất cả',
-  });
+    customerName: "",
+    status: "Tất cả",
+    minDate: "",
+    maxDate: "",
+  })
+
+   useEffect(() => {
+    fetchOrders()
+  }, [data])
+
+  const fetchOrders = async () => {
+    try {
+      const res = await api.get("/orders/all")
+      setOrders(res.data || [])
+    } catch (err) {
+      toast.error("Không thể tải danh sách đơn hàng")
+    }
+  }
+  const handleStatusChange = async (id, newStatus) => {
+    try {
+      setLoading(true)
+      await api.patch(`/orders/${id}/status`, { status: newStatus })
+      toast.success("Cập nhật trạng thái thành công ✅")
+       fetchOrders() // reload lại list
+      setEditingId(null)
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Lỗi khi cập nhật trạng thái")
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleFilterChange = (e) => {
-    setFilters({
-      ...filters,
-      [e.target.name]: e.target.value,
-    });
-  };
+    setFilters({ ...filters, [e.target.name]: e.target.value })
+  }
 
-  const toggleFilter = () => {
-    setIsFilterVisible(!isFilterVisible);
-  };
+  const toggleFilter = () => setIsFilterVisible(!isFilterVisible)
 
-  // Lấy danh sách khách hàng duy nhất và trạng thái từ dữ liệu
-  const uniqueCustomers = useMemo(() => {
-    const customerNames = new Set(orders.map(o => o.customer));
-    return [...customerNames];
-  }, []);
-
-  const uniqueStatuses = useMemo(() => {
-    const statuses = new Set(orders.map(o => o.status));
-    return ['Tất cả', ...statuses];
-  }, []);
-
-  // Lọc đơn hàng dựa trên các bộ lọc đã chọn
   const filteredOrders = useMemo(() => {
-    return orders.filter(order => {
-      // Lọc theo tên khách hàng
-      const customerMatch = filters.customerName === '' || order.customer.toLowerCase().includes(filters.customerName.toLowerCase());
+    return orders.filter((order) => {
+      const customerMatch =
+        filters.customerName === "" ||
+        order.user?.name?.toLowerCase().includes(filters.customerName.toLowerCase())
 
-      // Lọc theo trạng thái
-      const statusMatch = filters.status === 'Tất cả' || order.status === filters.status;
+      const statusMatch =
+        filters.status === "Tất cả" || order.status === filters.status
 
-      // Lọc theo ngày
-      const orderDate = parseDate(order.date);
-      const minDate = filters.minDate ? new Date(filters.minDate) : null;
-      const maxDate = filters.maxDate ? new Date(filters.maxDate) : null;
-      const dateMatch = (!minDate || orderDate >= minDate) && (!maxDate || orderDate <= maxDate);
+      const orderDate = new Date(order.createdAt)
+      const minDate = filters.minDate ? new Date(filters.minDate) : null
+      const maxDate = filters.maxDate ? new Date(filters.maxDate) : null
+      const dateMatch =
+        (!minDate || orderDate >= minDate) && (!maxDate || orderDate <= maxDate)
 
-      // Lọc theo tổng tiền
-      const orderTotal = parseCurrency(order.total);
-      const minTotal = filters.minTotal ? parseFloat(filters.minTotal) : null;
-      const maxTotal = filters.maxTotal ? parseFloat(filters.maxTotal) : null;
-      const totalMatch = (!minTotal || orderTotal >= minTotal) && (!maxTotal || orderTotal <= maxTotal);
-
-      return customerMatch && statusMatch && dateMatch && totalMatch;
-    });
-  }, [orders, filters]);
+      return customerMatch && statusMatch && dateMatch
+    })
+  }, [orders, filters])
 
   return (
     <div className="flex min-h-screen bg-gray-50 font-sans antialiased">
-      {/* Main Content */}
       <main className="flex-1 p-6">
-         <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">Danh sách Đơn hàng</h1>
-        {/* Header buttons */}
-        <div className="flex space-x-2">
-          <button 
-            onClick={toggleFilter} 
-            className="flex items-center space-x-1 bg-pink-50 text-pink-600 px-4 py-2 rounded-xl font-semibold hover:bg-pink-100 transition-colors"
-          >
-            <FunnelIcon className="w-5 h-5" />
-            <span>Bộ lọc</span>
-          </button>
-          <button className="flex items-center space-x-1 bg-pink-600 text-white px-4 py-2 rounded-xl font-semibold hover:bg-pink-700 transition-colors">
-            <ArrowDownTrayIcon className="w-5 h-5" />
-            <span>Xuất báo cáo</span>
-          </button>
+        {/* Header */}
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold text-gray-800">Danh sách Đơn hàng</h1>
+          <div className="flex space-x-2">
+            <button
+              onClick={toggleFilter}
+              className="flex items-center space-x-1 bg-pink-50 text-pink-600 px-4 py-2 rounded-xl font-semibold hover:bg-pink-100 transition-colors"
+            >
+              <FunnelIcon className="w-5 h-5" />
+              <span>Bộ lọc</span>
+            </button>
+            <button className="flex items-center space-x-1 bg-pink-600 text-white px-4 py-2 rounded-xl font-semibold hover:bg-pink-700 transition-colors">
+              <ArrowDownTrayIcon className="w-5 h-5" />
+              <span>Xuất báo cáo</span>
+            </button>
+          </div>
         </div>
-      </div>
 
-        {/* Filter dropdown */}
+        {/* Bộ lọc */}
         {isFilterVisible && (
           <div className="bg-white rounded-xl shadow-md p-6 mb-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {/* Lọc theo khách hàng */}
-              <div className="col-span-1 md:col-span-2 lg:col-span-2">
-                <label htmlFor="customerName" className="block text-sm font-medium text-gray-700 mb-1">
-                  Tên khách hàng
-                </label>
+              <div className="col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Tên khách hàng</label>
                 <input
                   type="text"
-                  id="customerName"
                   name="customerName"
-                  placeholder="Tìm hoặc chọn khách hàng"
                   value={filters.customerName}
                   onChange={handleFilterChange}
-                  list="customer-names"
-                  className="w-full px-4 py-2 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all"
+                  className="w-full px-4 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-pink-500"
                 />
-                <datalist id="customer-names">
-                  {uniqueCustomers.map((name) => (
-                    <option key={name} value={name} />
-                  ))}
-                </datalist>
               </div>
 
-              {/* Lọc theo trạng thái */}
               <div>
-                <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
-                  Trạng thái
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Trạng thái</label>
                 <select
-                  id="status"
                   name="status"
                   value={filters.status}
                   onChange={handleFilterChange}
-                  className="w-full px-4 py-2 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all"
+                  className="w-full px-4 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-pink-500"
                 >
-                  {uniqueStatuses.map(status => (
-                    <option key={status} value={status}>{status}</option>
-                  ))}
+                  <option>Tất cả</option>
+                  <option value="PENDING">Đang xử lý</option>
+                  <option value="SHIPPING">Đang giao</option>
+                  <option value="DELIVERED">Hoàn thành</option>
+                  <option value="CANCELED">Đã hủy</option>
                 </select>
               </div>
 
-              {/* Lọc theo ngày */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Khoảng ngày
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Khoảng ngày</label>
                 <div className="flex space-x-2">
                   <input
                     type="date"
                     name="minDate"
                     value={filters.minDate}
                     onChange={handleFilterChange}
-                    className="w-1/2 px-4 py-2 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all"
+                    className="w-1/2 px-4 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-pink-500"
                   />
                   <input
                     type="date"
                     name="maxDate"
                     value={filters.maxDate}
                     onChange={handleFilterChange}
-                    className="w-1/2 px-4 py-2 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all"
-                  />
-                </div>
-              </div>
-
-              {/* Lọc theo tổng tiền */}
-              <div className="col-span-1 md:col-span-2 lg:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Khoảng giá tiền
-                </label>
-                <div className="flex space-x-2">
-                  <input
-                    type="number"
-                    name="minTotal"
-                    placeholder="Từ"
-                    value={filters.minTotal}
-                    onChange={handleFilterChange}
-                    className="w-1/2 px-4 py-2 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all"
-                  />
-                  <input
-                    type="number"
-                    name="maxTotal"
-                    placeholder="Đến"
-                    value={filters.maxTotal}
-                    onChange={handleFilterChange}
-                    className="w-1/2 px-4 py-2 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all"
+                    className="w-1/2 px-4 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-pink-500"
                   />
                 </div>
               </div>
@@ -207,7 +157,7 @@ const OrdersContent = ({setActiveTab}) => {
           </div>
         )}
 
-        {/* Orders table */}
+        {/* Bảng đơn hàng */}
         <div className="overflow-x-auto bg-white rounded-xl shadow">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-pink-50">
@@ -223,32 +173,57 @@ const OrdersContent = ({setActiveTab}) => {
             <tbody className="divide-y divide-gray-100">
               {filteredOrders.length > 0 ? (
                 filteredOrders.map((order) => (
-                  <tr key={order.id} className="hover:bg-pink-50">
-                    <td className="px-6 py-4 font-semibold text-pink-600">{order.id}</td>
+                  <tr key={order._id} className="hover:bg-pink-50">
+                    <td className="px-6 py-4 font-semibold text-pink-600">{order._id.slice(-6)}</td>
                     <td className="px-6 py-4">
-                      <p>{order.customer}</p>
-                      <p className="text-gray-400 text-sm">{order.email}</p>
+                      <p>{order.user?.name}</p>
+                      <p className="text-gray-400 text-sm">{order.user?.email}</p>
                     </td>
-                    <td className="px-6 py-4">{order.date}</td>
-                    <td className="px-6 py-4 font-semibold">{order.total}</td>
                     <td className="px-6 py-4">
-                      <span className={`px-2 py-1 rounded-full text-xs ${statusColors[order.status]}`}>
-                        {order.status}
-                      </span>
+                      {new Date(order.createdAt).toLocaleDateString("vi-VN")}
+                    </td>
+                    <td className="px-6 py-4 font-semibold">
+                      {order.total.toLocaleString("vi-VN")}₫
+                    </td>
+                    <td className="px-6 py-4">
+                      {editingId === order._id ? (
+                        <select
+                          className="border border-pink-400 rounded-lg p-1 text-sm"
+                          defaultValue={order.status}
+                          onChange={(e) => handleStatusChange(order._id, e.target.value)}
+                          disabled={loading}
+                        >
+                          {statusOptions.map(opt => (
+                            <option key={opt.value} value={opt.value}>
+                              {opt.label}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-semibold cursor-pointer ${statusColors[order.status]}`}
+                          onClick={() => setEditingId(order._id)}
+                        >
+                          {statusOptions.find(s => s.value === order.status)?.label || order.status}
+                        </span>
+                      )}
                     </td>
                     <td className="px-6 py-4 flex space-x-2">
-                      <button onClick={()=>setActiveTab("edit-order")} className="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200">
+                      <button
+                        onClick={() =>onEditOrder(order?._id)}
+                        className="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200"
+                      > 
+
                         <EyeIcon className="w-5 h-5" />
-                      </button>
-                      <button className="p-2 bg-green-100 text-green-600 rounded-lg hover:bg-green-200">
-                        <PencilIcon className="w-5 h-5" />
                       </button>
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                    <td colSpan="6" className="px-6 py-4 text-center text-gray-500">Không tìm thấy đơn hàng nào phù hợp với bộ lọc.</td>
+                  <td colSpan="6" className="px-6 py-4 text-center text-gray-500">
+                    Không có đơn hàng nào.
+                  </td>
                 </tr>
               )}
             </tbody>
@@ -256,7 +231,7 @@ const OrdersContent = ({setActiveTab}) => {
         </div>
       </main>
     </div>
-  );
-};
+  )
+}
 
-export default OrdersContent;
+export default OrdersContent
