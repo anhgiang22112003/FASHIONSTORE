@@ -132,8 +132,12 @@ const AdminLayout = () => {
             />
           </div>
 
-          <div className={activeTab === "edit-order" ? "block" : "hidden"}>
-            <OrderEditPage orderId={editingOrder} onBack={() => setActiveTab("orders")} fetchOrders={fetchOrders} />
+          <div hidden={activeTab !== "edit-order"}>
+            <OrderEditPage
+              orderId={editingOrder}
+              onBack={() => setActiveTab("orders")}
+              fetchOrders={fetchOrders}
+            />
           </div>
 
           <div className={activeTab === "product-categories" ? "block" : "hidden"}>
