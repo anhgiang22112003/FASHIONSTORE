@@ -57,7 +57,7 @@ const AdminLayout = () => {
   const fetchOrders = async () => {
     try {
       const res = await api.get("/orders/all")
-      setTabData((prev) => ({ ...prev, orders: res?.data }))
+      setTabData((prev) => ({ ...prev, orders: res?.data?.data }))
     } catch (err) {
       console.error("Lỗi khi fetch orders:", err)
     }

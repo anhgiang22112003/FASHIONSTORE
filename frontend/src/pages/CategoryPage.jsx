@@ -149,7 +149,7 @@ const CategoryPage = () => {
         setProductList(response.data)
         setLoading(false)
         socket.on("newProduct", (newProduct) => {
-          setProductList((prev) => [newProduct, ...prev]) // thêm lên đầu danh sách
+          setProductList((prev) => [newProduct, ...prev]) 
         })
         return () => socket.off("newProduct")
       } catch (error) {

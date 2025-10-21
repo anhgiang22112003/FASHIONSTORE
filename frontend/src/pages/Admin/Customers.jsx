@@ -53,20 +53,17 @@ const CustomerCard = ({ customer, setEditingCustomer, setActivePage }) => {
 }
 
 const Customers = ({ setEditingCustomer, setActivePage, data }) => {
-  const [customersData, setCustomersData] = React.useState(null)
-  const fetchCustomers = async () => {
+  const [customersData, setCustomersData] = React.useState([])
+  const fetchCustomers = async ( page = 1) => {
     try {
-      const response = await api.get('/users?role=customer')
-      setCustomersData(response.data)
-
+      const response = await api.get(`/users?role=customer&page=${page}&limit=10`)
+      setCustomersData(response.data.data)
     } catch (error) {
       toast.error('Error fetching customers:', error)
     }
   }
   useEffect(() => {
-    
       fetchCustomers()
-    
   }, [data])
   if (!customersData) return <div>Loading...</div>
 

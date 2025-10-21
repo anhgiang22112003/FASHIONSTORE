@@ -1,47 +1,52 @@
-import React, { useState } from 'react';
+import React, { useState } from 'react'
 import {
-  BellIcon,
-  UserCircleIcon,
-  Bars3Icon,
-  Cog6ToothIcon,
-  ArrowRightStartOnRectangleIcon,
-  QuestionMarkCircleIcon,
-  TicketIcon,
-  CurrencyDollarIcon,
-  UserPlusIcon,
-} from '@heroicons/react/24/outline';
+    BellIcon,
+    UserCircleIcon,
+    Bars3Icon,
+    Cog6ToothIcon,
+    ArrowRightStartOnRectangleIcon,
+    QuestionMarkCircleIcon,
+    TicketIcon,
+    CurrencyDollarIcon,
+    UserPlusIcon,
+} from '@heroicons/react/24/outline'
 import {
-  ChatBubbleBottomCenterTextIcon,
-  ExclamationCircleIcon,
-} from '@heroicons/react/24/solid';
+    ChatBubbleBottomCenterTextIcon,
+    ExclamationCircleIcon,
+} from '@heroicons/react/24/solid'
 
-const Header = ({ toggleSidebar,setActiveTab }) => {
-    const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
-    const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
-    const [isMessagesOpen, setIsMessagesOpen] = useState(false);
+const Header = ({ toggleSidebar, setActiveTab }) => {
+    const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
+    const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
+    const [isMessagesOpen, setIsMessagesOpen] = useState(false)
 
     const toggleNotifications = () => {
-        setIsNotificationsOpen(!isNotificationsOpen);
-        setIsProfileMenuOpen(false);
-        setIsMessagesOpen(false);
-    };
+        setIsNotificationsOpen(!isNotificationsOpen)
+        setIsProfileMenuOpen(false)
+        setIsMessagesOpen(false)
+    }
 
     const toggleProfileMenu = () => {
-        setIsProfileMenuOpen(!isProfileMenuOpen);
-        setIsNotificationsOpen(false);
-        setIsMessagesOpen(false);
-    };
+        setIsProfileMenuOpen(!isProfileMenuOpen)
+        setIsNotificationsOpen(false)
+        setIsMessagesOpen(false)
+    }
 
     const toggleMessages = () => {
-        setIsMessagesOpen(!isMessagesOpen);
-        setIsNotificationsOpen(false);
-        setIsProfileMenuOpen(false);
-    };
+        setIsMessagesOpen(!isMessagesOpen)
+        setIsNotificationsOpen(false)
+        setIsProfileMenuOpen(false)
+    }
+   const handleLogout = () => {
+        localStorage.removeItem('token')
+        localStorage.removeItem('user')
+        window.location.href = '/login/admin'
+    }
 
     return (
         <header className="flex items-center justify-between h-full px-2.5">
             {/* Nút toggle cho mobile */}
-            <button 
+            <button
                 onClick={toggleSidebar}
                 className="lg:hidden p-2 rounded-full text-gray-500 hover:bg-gray-100 hover:text-pink-600 transition-colors"
             >
@@ -57,6 +62,8 @@ const Header = ({ toggleSidebar,setActiveTab }) => {
                 <div className="relative">
                     <button
                         onClick={toggleNotifications}
+                         onBlur={() => setIsNotificationsOpen(null)} // 👈 Khi click ra ngoài sẽ đóng select
+                          autoFocus // 👈 Tự focus khi hiển thị
                         className="p-2 rounded-full text-gray-500 hover:bg-gray-100 hover:text-pink-600 transition-colors"
                     >
                         <BellIcon className="w-6 h-6" />
@@ -96,6 +103,8 @@ const Header = ({ toggleSidebar,setActiveTab }) => {
                 <div className="relative">
                     <button
                         onClick={toggleMessages}
+                         onBlur={() => setIsMessagesOpen(null)} // 👈 Khi click ra ngoài sẽ đóng select
+                          autoFocus // 👈 Tự focus khi hiển thị
                         className="p-2 rounded-full text-gray-500 hover:bg-gray-100 hover:text-pink-600 transition-colors"
                     >
                         <ChatBubbleBottomCenterTextIcon className="w-6 h-6" />
@@ -122,11 +131,13 @@ const Header = ({ toggleSidebar,setActiveTab }) => {
                         </div>
                     )}
                 </div>
-                
+
                 {/* Profile Menu Icon */}
                 <div className="relative">
                     <button
                         onClick={toggleProfileMenu}
+                         onBlur={() => setIsProfileMenuOpen(null)} // 👈 Khi click ra ngoài sẽ đóng select
+                          autoFocus // 👈 Tự focus khi hiển thị
                         className="flex items-center space-x-2 px-2 py-1 rounded-full text-gray-700 hover:bg-gray-200 transition-colors"
                     >
                         <UserCircleIcon className="w-8 h-8 text-gray-600" />
@@ -139,7 +150,7 @@ const Header = ({ toggleSidebar,setActiveTab }) => {
                                 <p className="text-sm text-gray-500">Vai trò: Quản trị viên</p>
                             </div>
                             <div className="py-2 space-y-1">
-                                <a onClick={()=>setActiveTab("admin-setting")} href="#" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
+                                <a onClick={() => setActiveTab("admin-setting")} href="#" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
                                     <Cog6ToothIcon className="w-5 h-5 mr-2 text-gray-500" />
                                     Cài đặt tài khoản
                                 </a>
@@ -147,7 +158,7 @@ const Header = ({ toggleSidebar,setActiveTab }) => {
                                     <QuestionMarkCircleIcon className="w-5 h-5 mr-2 text-gray-500" />
                                     Hỗ trợ
                                 </a>
-                                <a href="#" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
+                                <a onClick={handleLogout} href="#" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
                                     <ArrowRightStartOnRectangleIcon className="w-5 h-5 mr-2 text-gray-500" />
                                     Đăng xuất
                                 </a>
@@ -174,7 +185,7 @@ const Header = ({ toggleSidebar,setActiveTab }) => {
                 </div>
             </div>
         </header>
-    );
-};
+    )
+}
 
-export default Header;
+export default Header

@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
 import api from "../service/api"
 import { AuthContext } from "@/context/Authcontext"
+import { set } from "date-fns"
 
 export default function AuthPage() {
   const { login } = useContext(AuthContext)
@@ -94,7 +95,8 @@ export default function AuthPage() {
         if (res?.status === 201) {
           localStorage.setItem("accessToken", res?.data?.accessToken)
           toast.success("Đăng ký thành công 🎉")
-          navigate("/")
+          // navigate("/login")
+          setIsLogin(true)
         }
       }
     } catch (err) {

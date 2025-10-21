@@ -25,7 +25,7 @@ const Header = () => {
   const [isMessagesOpen, setIsMessagesOpen] = useState(false)
 
   const { user, logout } = useContext(AuthContext)
-  const { cart } = useContext(CartContext)  
+  const { cart } = useContext(CartContext)
   const totalItems = cart?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0
   const toggleNotifications = () => {
     setIsNotificationsOpen(!isNotificationsOpen)
@@ -104,49 +104,13 @@ const Header = () => {
             </Link>
             {user ? <>
               <div className="flex items-center space-x-4 ml-auto">
-                {/* Icon thông báo */}
-                <div className="relative">
-                  <button
-                    onClick={toggleNotifications}
-                    className="p-2 rounded-full text-gray-500 hover:bg-gray-100 hover:text-pink-600 transition-colors"
-                  >
-                    <BellIcon className="w-6 h-6" />
-                    <span className="absolute top-2 right-2 block h-2 w-2 rounded-full ring-2 ring-white bg-red-500"></span>
-                  </button>
-                  {isNotificationsOpen && (
-                    <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl py-2 z-10">
-                      <div className="px-4 py-2 border-b border-gray-200">
-                        <h4 className="font-semibold text-gray-800">Thông báo (4)</h4>
-                      </div>
-                      <div className="max-h-60 overflow-y-auto">
-                        <div className="px-4 py-3 hover:bg-gray-50 transition-colors cursor-pointer border-b border-gray-100">
-                          <p className="text-sm font-medium text-pink-600">Đơn hàng mới cần xử lý</p>
-                          <p className="text-xs text-gray-500">Đơn hàng #DH123456 vừa được tạo.</p>
-                        </div>
-                        <div className="px-4 py-3 hover:bg-gray-50 transition-colors cursor-pointer border-b border-gray-100">
-                          <p className="text-sm font-medium text-yellow-600">Sản phẩm sắp hết kho</p>
-                          <p className="text-xs text-gray-500">Váy Xòe Dịu Dàng chỉ còn 5 sản phẩm.</p>
-                        </div>
-                        <div className="px-4 py-3 hover:bg-gray-50 transition-colors cursor-pointer border-b border-gray-100">
-                          <p className="text-sm font-medium text-blue-600">Đánh giá mới</p>
-                          <p className="text-xs text-gray-500">Khách hàng A đã đánh giá sản phẩm Áo Khoác.</p>
-                        </div>
-                        <div className="px-4 py-3 hover:bg-gray-50 transition-colors cursor-pointer">
-                          <p className="text-sm font-medium text-green-600">Báo cáo doanh thu</p>
-                          <p className="text-xs text-gray-500">Báo cáo doanh thu hàng ngày đã sẵn sàng.</p>
-                        </div>
-                      </div>
-                      <div className="px-4 py-2 border-t border-gray-200 text-center">
-                        <a href="#" className="text-sm font-medium text-pink-600 hover:underline">Xem tất cả</a>
-                      </div>
-                    </div>
-                  )}
-                </div>
 
                 {/* Icon tin nhắn */}
                 <div className="relative">
                   <button
                     onClick={toggleMessages}
+                    onBlur={() => setIsMessagesOpen(null)} // 👈 Khi click ra ngoài sẽ đóng select
+                    autoFocus // 👈 Tự focus khi hiển thị
                     className="p-2 rounded-full text-gray-500 hover:bg-gray-100 hover:text-pink-600 transition-colors"
                   >
                     <ChatBubbleBottomCenterTextIcon className="w-6 h-6" />
@@ -178,6 +142,8 @@ const Header = () => {
                 <div className="relative">
                   <button
                     onClick={toggleProfileMenu}
+                    // onBlur={() => setIsProfileMenuOpen(null)} // 👈 Khi click ra ngoài sẽ đóng select
+                    // autoFocus // 👈 Tự focus khi hiển thị
                     className="flex items-center space-x-2 px-2 py-1 rounded-full text-gray-700 hover:bg-gray-200 transition-colors"
                   >
                     <UserCircleIcon className="w-8 h-8 text-gray-600" />

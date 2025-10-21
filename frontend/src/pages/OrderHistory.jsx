@@ -4,6 +4,7 @@ import { toast } from "react-toastify"
 import { format } from "date-fns"
 import { vi } from "date-fns/locale"
 import OrderDetail from "./OrderDetail" // Import component chi tiết
+import { socket } from "@/service/socket"
 
 // Hàm tiện ích để chuyển đổi trạng thái thành tiếng Việt
 const getStatusVietnamese = (status) => {
@@ -14,7 +15,7 @@ const getStatusVietnamese = (status) => {
       return "Đang đóng gói"
     case "SHIPPED":
       return "Đang vận chuyển"
-    case "DELIVERED":
+    case "COMPLETED":
       return "Đã giao hàng"
     case "CANCELLED":
       return "Đã hủy"
@@ -26,7 +27,7 @@ const getStatusVietnamese = (status) => {
 // Hàm tiện ích để lấy màu cho trạng thái
 const getStatusColor = (status) => {
   switch (status) {
-    case "DELIVERED":
+    case "COMPLETED":
       return "bg-green-100 text-green-700 border-green-200"
     case "CANCELLED":
       return "bg-red-100 text-red-700 border-red-200"
@@ -43,7 +44,17 @@ const OrderHistory = () => {
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
   const [selectedOrder, setSelectedOrder] = useState(null) // State để lưu đơn hàng được chọn
+  const currentUser = JSON.parse(localStorage.getItem("user"))
+  useEffect(() => {
+    socket.on("orderStatusUpdated", (order) => {
+      if (order.user === currentUser?.id) {
+        fetchOrders()
+        toast.info(`Trạng thái đơn #${order._id} đã đổi thành ${order.status}`)
+      }
+    })
 
+    return () => socket.off("orderStatusUpdated")
+  }, [])
   const fetchOrders = async () => {
     try {
       // Giả định API trả về danh sách đơn hàng của người dùng hiện tại
@@ -87,10 +98,10 @@ const OrderHistory = () => {
       <div className="space-y-4">
         {/* Header cho danh sách đơn hàng (chỉ để tham khảo giao diện) */}
         <div className="hidden md:grid grid-cols-5 gap-4 py-3 px-6 bg-gray-50 text-gray-500 font-semibold text-sm rounded-lg">
-            <span>Mã đơn hàng</span>
-            <span className="col-span-2">Ngày đặt & Tổng tiền</span>
-            <span>Trạng thái</span>
-            <span className="text-right">Xem chi tiết</span>
+          <span>Mã đơn hàng</span>
+          <span className="col-span-2">Ngày đặt & Tổng tiền</span>
+          <span>Trạng thái</span>
+          <span className="text-right">Xem chi tiết</span>
         </div>
 
         {orders.map((order) => (
@@ -117,7 +128,7 @@ const OrderHistory = () => {
                 {order.total.toLocaleString()}₫
               </p>
             </div>
-            
+
             {/* Cột 4: Trạng thái */}
             <div className="col-span-2 md:col-span-1">
               <span
@@ -129,9 +140,9 @@ const OrderHistory = () => {
 
             {/* Cột 5: Nút Xem chi tiết (Chỉ hiện icon) */}
             <div className="col-span-1 text-right">
-                <button className="text-gray-400 hover:text-pink-600 transition-colors hidden md:inline-block" title="Xem chi tiết">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path></svg>
-                </button>
+              <button className="text-gray-400 hover:text-pink-600 transition-colors hidden md:inline-block" title="Xem chi tiết">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path></svg>
+              </button>
             </div>
           </div>
         ))}

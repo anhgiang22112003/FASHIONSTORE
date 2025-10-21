@@ -11,7 +11,7 @@ const getStatusVietnamese = (status) => {
             return "Đang đóng gói"
         case "SHIPPED":
             return "Đang vận chuyển"
-        case "DELIVERED":
+        case "COMPLETED":
             return "Đã giao hàng"
         case "CANCELLED":
             return "Đã hủy"
@@ -21,7 +21,7 @@ const getStatusVietnamese = (status) => {
 }
 const getStatusColor = (status) => {
     switch (status) {
-        case "DELIVERED":
+        case "COMPLETED":
             return "bg-green-600 text-white"
         case "CANCELLED":
             return "bg-red-600 text-white"

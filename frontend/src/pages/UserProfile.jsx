@@ -4,6 +4,7 @@ import { CameraIcon, LockClosedIcon, UserCircleIcon, XMarkIcon, CheckCircleIcon,
 import { toast } from 'react-toastify'
 import api from '@/service/api'
 import { AuthContext } from '@/context/Authcontext'
+import OrderDetail from './OrderDetail'
 
 // Giả lập dữ liệu người dùng
 const userData = {
@@ -598,7 +599,7 @@ const UserProfile = () => {
             case 'orderDetails':
                 if (selectedOrder) {
                     return (
-                        <OrderDetails orderData={selectedOrder} onBack={handleBackToOrders} />
+                        <OrderDetail order={selectedOrder} onBack={() => setSelectedOrder(null)} />
                     )
                 }
                 return null

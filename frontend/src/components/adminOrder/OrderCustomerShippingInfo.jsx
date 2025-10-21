@@ -12,8 +12,13 @@ const OrderCustomerShippingInfo = ({ editedOrder, handleChange, isEditMode, canE
             </div>
             <div>
                 <h2 className="text-lg font-semibold text-gray-800 mb-4">Thông tin vận chuyển</h2>
-                {renderEditableField("Phương thức giao hàng", "shippingInfo.type", editedOrder.shippingInfo.type)}
-                {renderEditableField("Đơn vị giao hàng", "shippingInfo.unit", editedOrder.shippingInfo.unit)}
+                {renderEditableField(
+                    "Phương thức giao hàng",
+                    "shippingInfo.type",
+                    editedOrder.shippingInfo.type,
+                    "text",
+                    shippingTypes
+                )}
                 {renderEditableField("Ghi chú", "shippingInfo.note", editedOrder.shippingInfo.note)}
 
                 <h2 className="text-lg font-semibold text-gray-800 mb-4 mt-6">Thông tin thanh toán</h2>

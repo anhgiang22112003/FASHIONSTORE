@@ -52,13 +52,8 @@ const OrderEditPage = ({ orderId }) => {
     const [editedOrder, setEditedOrder] = useState(initialOrderState)
     const [originalOrder, setOriginalOrder] = useState(initialOrderState)
     const [isLoading, setIsLoading] = useState(true)
-
-    // Xác định quyền chỉnh sửa dựa trên trạng thái
     const canEditFull = editedOrder.status === 'PENDING' || editedOrder.status === 'PROCESSING'
     const canEditProductList = editedOrder.status !== 'COMPLETED' && editedOrder.status !== 'CANCELLED'
-    console.log(orderId)
-
-    // 🔥 HÀM FETCH DỮ LIỆU ĐƠN HÀNG
     const fetchOrder = async () => {
         setIsLoading(true)
         try {
@@ -76,7 +71,6 @@ const OrderEditPage = ({ orderId }) => {
                 },
                 shippingInfo: {
                     type: order.shippingMethod === "HOA_TOC" ? "Giao hàng hỏa tốc" : "Giao hàng tiêu chuẩn",
-                    unit: order.shippingUnit || "GHN",
                     note: order.note || "",
                 },
                 paymentInfo: {
@@ -124,6 +118,19 @@ const OrderEditPage = ({ orderId }) => {
         }
     }, [orderId])
     console.log(editedOrder)
+useEffect(() => {
+  if (editedOrder.shippingInfo.type === "Giao hàng hỏa tốc") {
+    setEditedOrder((prev) => ({
+      ...prev,
+      totals: { ...prev.totals, shippingFee: 50000 },
+    }))
+  } else {
+    setEditedOrder((prev) => ({
+      ...prev,
+      totals: { ...prev.totals, shippingFee: 30000 },
+    }))
+  }
+}, [editedOrder.shippingInfo.type])
 
 
     // 🔥 HÀM LƯU ĐƠN HÀNG
@@ -139,7 +146,6 @@ const OrderEditPage = ({ orderId }) => {
                 voucherCode: canEditFull ? editedOrder.paymentInfo.voucher : originalOrder.paymentInfo.voucher, // Chỉ cho sửa voucher khi canEditFull
                 note: editedOrder.shippingInfo.note,
                 shippingMethod: editedOrder.shippingInfo.type.includes("hỏa tốc") ? "HOA_TOC" : "NHANH",
-                shippingUnit: editedOrder.shippingInfo.unit,
                 paymentMethod: editedOrder.paymentInfo.method.includes("COD") ? "COD" : editedOrder.paymentInfo.method,
                 shippingInfo: {
                     name: editedOrder.customerInfo.name,
@@ -163,7 +169,7 @@ const OrderEditPage = ({ orderId }) => {
             toast.success("Cập nhật đơn hàng thành công 🎉")
         } catch (err) {
             console.error("Lỗi khi lưu đơn hàng:", err)
-            toast.error("Không thể lưu thay đổi")
+            toast.error(err.response?.data?.message || "Lỗi khi lưu đơn hàng")
         }
     }
 
@@ -185,14 +191,17 @@ const OrderEditPage = ({ orderId }) => {
         }))
     }
 
-    if (isLoading) return <div className="p-8 text-center text-gray-600">Đang tải chi tiết đơn hàng...</div>
+   
+     if (isLoading) return  (
+      <div className="fixed inset-0 flex items-center justify-center bg-white/70 backdrop-blur-sm z-50">
+        <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    )
     if (!editedOrder || !editedOrder.orderId) return <div className="p-8 text-center text-red-600">Không tìm thấy đơn hàng</div>
 
     const currentTotals = calculateTotals(editedOrder.productList, originalOrder.totals)
     const statusObj = statusOptions.find(s => s.value === editedOrder.status || s.label === editedOrder.status)
-    const currentStatusLabel = statusObj ? statusObj.label : String(editedOrder.status || "")
- console.log(statusObj);
- 
+    const currentStatusLabel = statusObj ? statusObj.label : String(editedOrder.status || "") 
 
     // --- RENDERING SUB-COMPONENTS ---
     const renderEditableField = (label, name, value, inputType = "text", options = [], disabled = false) => (
