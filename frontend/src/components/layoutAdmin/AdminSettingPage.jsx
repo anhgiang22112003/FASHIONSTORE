@@ -189,6 +189,7 @@ const AdminSettingsPage = () => {
                 type="password"
                 name="currentPassword"
                 id="currentPassword"
+                 autoComplete="current-password"
                 value={password.currentPassword}
                 onChange={handlePasswordChange}
                 className="block w-full rounded-md border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-pink-500 focus:border-pink-500 sm:text-sm"
@@ -204,6 +205,7 @@ const AdminSettingsPage = () => {
                 type="password"
                 name="newPassword"
                 id="newPassword"
+                 autoComplete="new-password"
                 value={password.newPassword}
                 onChange={handlePasswordChange}
                 className="block w-full rounded-md border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-pink-500 focus:border-pink-500 sm:text-sm"

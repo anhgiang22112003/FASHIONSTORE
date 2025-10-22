@@ -6,7 +6,7 @@ import { toast } from 'react-toastify'
 // Dữ liệu sản phẩm giả lập, sẽ được tải từ API trong thực tế
 
 
-const EditProduct = ({ productId, onBack ,fetchProducts }) => {
+const EditProduct = ({ productId, onBack, fetchProducts }) => {
     const [productName, setProductName] = useState('')
     const [shortDesc, setShortDesc] = useState('')
     const [detailedDesc, setDetailedDesc] = useState('')
@@ -25,7 +25,8 @@ const EditProduct = ({ productId, onBack ,fetchProducts }) => {
     const [mainImagePreview, setMainImagePreview] = useState(null)
     const [subImageFiles, setSubImageFiles] = useState([])
     const [variations, setVariations] = useState([])
-
+    const [collection, setCollection] = useState('')
+    const [collections, setCollections] = useState([])
     const getTotalStock = () => {
         if (!variations || variations.length === 0) return stock || 0
         return variations.reduce((sum, v) => sum + (Number(v.stock) || 0), 0)
@@ -36,7 +37,7 @@ const EditProduct = ({ productId, onBack ,fetchProducts }) => {
             try {
                 const res = await api.get(`/products/${productId}`)
                 const data = res.data
-                
+                setCollection(data.collection?._id || data.collection || '')
                 setProductName(data.name)
                 setShortDesc(data.shortDescription)
                 setDetailedDesc(data.detailedDescription)
@@ -65,8 +66,10 @@ const EditProduct = ({ productId, onBack ,fetchProducts }) => {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const res = await api.get("/categories") // đổi endpoint đúng backend bạn
-                setCategories(res.data) // gán mảng categories
+                const res = await api.get("/categories")
+                setCategories(res.data)
+                const collRes = await api.get("/collection")
+                setCollections(collRes.data)
             } catch (error) {
                 console.error("Lỗi khi load categories:", error)
             }
@@ -92,12 +95,17 @@ const EditProduct = ({ productId, onBack ,fetchProducts }) => {
     const handleRemoveMainImage = () => {
         setMainImageFile(null)
     }
+    const handleRemoveSubImage = (index) => {
+        const newSubImages = [...subImageFiles]
+        newSubImages.splice(index, 1)
+        setSubImageFiles(newSubImages)
+    }
 
     // Hàm tải ảnh chính
     const handleFileChange = async (event, index = null) => {
         const file = event.target.files[0]
+        console.log(file);        
         if (!file) return
-
         const formDataUpload = new FormData()
         formDataUpload.append("file", file)
 
@@ -167,57 +175,18 @@ const EditProduct = ({ productId, onBack ,fetchProducts }) => {
     }
     const handldeSubmitProduct = async () => {
         try {
-            if (!productName.trim()) {
-                toast.error("Vui lòng nhập tên sản phẩm!")
-                return
-            }
-            if (!shortDesc.trim()) {
-                toast.error("Vui lòng nhập mô tả ngắn gọn!")
-                return
-            }
-            if (!detailedDesc.trim()) {
-                toast.error("Vui lòng nhập mô tả chi tiết!")
-                return
-            }
-            if (!originalPrice || Number(originalPrice) <= 0) {
-                toast.error("Giá gốc phải lớn hơn 0!")
-                return
-            }
-            if (!sellingPrice || Number(sellingPrice) <= 0) {
-                toast.error("Giá bán phải lớn hơn 0!")
-                return
-            }
-            if (!category) {
-                toast.error("Vui lòng chọn danh mục!")
-                return
-            }
-            // if (!brand.trim()) {
-            //     toast.error("Vui lòng nhập thương hiệu!")
-            //     return
-            // }
-            if (!stock || Number(stock) < 0) {
-                toast.error("Số lượng tồn kho không hợp lệ!")
-                return
-            }
-            if (!sku.trim()) {
-                toast.error("Vui lòng nhập mã SKU!")
-                return
-            }
-            if (!mainImageFile) {
-                toast.error("Vui lòng tải lên hình ảnh chính!")
-                return
-            }
-
+    
             const productData = {
                 sku,
                 name: productName,
-                shortDescription:shortDesc,
-                detailedDescription:detailedDesc,
+                shortDescription: shortDesc,
+                detailedDescription: detailedDesc,
                 originalPrice: Number(originalPrice),
                 sellingPrice: Number(sellingPrice),
                 discount: Number(discount),
-                category: category, // 1 id duy nhất
-                origin,    // id từ backend (chọn trong select brand)
+                category: category,
+                collection: collection || null,
+                origin,
                 tags,
                 stock: Number(stock),
                 status,
@@ -246,15 +215,28 @@ const EditProduct = ({ productId, onBack ,fetchProducts }) => {
             const response = await api.put(`/products/${productId}`, productData)
 
             if (response.status !== 201) {
-            toast.success("Sửa sản phẩm thành công!")
-            await fetchProducts()
-            onBack()
+                toast.success("Sửa sản phẩm thành công!")
+                await fetchProducts()
+                onBack()
             }
-       
+
         } catch (error) {
-            
+
             toast.error(error?.response?.data?.message || "Lỗi khi sửa sản phẩm!")
         }
+    }
+
+    const formatCurrency = (number) => {
+        if (number === '' || number === null || number === undefined) return ''
+        const num = Number(number)
+        if (isNaN(num)) return ''
+        return num.toLocaleString('en-US')
+    }
+    const parseCurrency = (string) => {
+        if (string === '' || string === null || string === undefined) return ''
+        const cleanString = String(string).replace(/[^0-9]/g, '')
+        const num = Number(cleanString)
+        return isNaN(num) ? '' : num
     }
 
 
@@ -284,11 +266,23 @@ const EditProduct = ({ productId, onBack ,fetchProducts }) => {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <label className="block space-y-2">
                             <span className="text-gray-600">Giá gốc</span>
-                            <input type="number" value={originalPrice} onChange={(e) => setOriginalPrice(e.target.value)} placeholder="₫" className="w-full px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200" />
+                            <input
+                                type="text" // Đổi thành text để sử dụng formatCurrency
+                                value={formatCurrency(originalPrice)}
+                                onChange={(e) => setOriginalPrice(parseCurrency(e.target.value))}
+                                placeholder="₫"
+                                className="w-full px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
+                            />
                         </label>
                         <label className="block space-y-2">
                             <span className="text-gray-600">Giá bán</span>
-                            <input type="number" value={sellingPrice} onChange={(e) => setSellingPrice(e.target.value)} placeholder="₫" className="w-full px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200" />
+                            <input
+                                type="text" // Đổi thành text để sử dụng formatCurrency
+                                value={formatCurrency(sellingPrice)}
+                                onChange={(e) => setSellingPrice(parseCurrency(e.target.value))}
+                                placeholder="₫"
+                                className="w-full px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
+                            />
                         </label>
                         <label className="block space-y-2">
                             <span className="text-gray-600">Phần trăm giảm giá</span>
@@ -310,6 +304,21 @@ const EditProduct = ({ productId, onBack ,fetchProducts }) => {
                             >
                                 <option value="">Chọn danh mục</option>
                                 {categories.map((item) => (
+                                    <option key={item._id} value={item._id}>
+                                        {item.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </label>
+                        <label className="block space-y-2">
+                            <span className="text-gray-600">Bộ sưu tập (Collection)</span>
+                            <select
+                                value={collection}
+                                onChange={(e) => setCollection(e.target.value)}
+                                className="w-full px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
+                            >
+                                <option value="">Không</option>
+                                {collections.map((item) => (
                                     <option key={item._id} value={item._id}>
                                         {item.name}
                                     </option>
@@ -495,9 +504,9 @@ const EditProduct = ({ productId, onBack ,fetchProducts }) => {
                         <p className="font-semibold text-gray-800">{name}</p>
                         <p className="text-sm text-gray-500">{shortDesc}</p>
                     </div>
-                    <div className="flex items-center space-x-2">
-                        <p className="text-lg font-bold text-pink-600">{sellingPrice}₫</p>
-                        <p className="text-sm text-gray-400 line-through">{originalPrice}₫</p>
+                  <div className="flex items-center space-x-2">
+                        <p className="text-lg font-bold text-pink-600">{formatCurrency(sellingPrice)}₫</p>
+                        <p className="text-sm text-gray-400 line-through">{formatCurrency(originalPrice)}₫</p>
                     </div>
 
                     <div className="flex items-center justify-between text-sm text-gray-500">

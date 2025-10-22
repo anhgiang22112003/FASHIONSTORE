@@ -11,7 +11,7 @@ const AddProduct = ({ setActiveTab, fetchProducts }) => {
     const [sellingPrice, setSellingPrice] = useState('')
     const [discountPercentage, setDiscountPercentage] = useState('')
     const [category, setCategory] = useState('')
-    const [categories, setCategories] = useState([])   // mảng danh mục
+    const [categories, setCategories] = useState([])
     const [brand, setBrand] = useState('')
     const [tags, setTags] = useState([])
     const [tagInput, setTagInput] = useState('')
@@ -19,19 +19,17 @@ const AddProduct = ({ setActiveTab, fetchProducts }) => {
     const [sku, setSku] = useState('')
     const [status, setStatus] = useState('Còn hàng')
     const [collection, setCollection] = useState("")
-    const [collections, setCollections] = useState([]) // load từ API hoặc dữ liệu có sẵn
+    const [collections, setCollections] = useState([])
     const [isloading, setIsLoading] = useState(false)
-    // State để lưu trữ File object của hình ảnh, không phải URL
     const [mainImageFile, setMainImageFile] = useState(null)
-    // State để hiển thị preview hình ảnh
     const [mainImagePreview, setMainImagePreview] = useState(null)
-    const [subImageFiles, setSubImageFiles] = useState([]) // KHÔNG để [null]
+    const [subImageFiles, setSubImageFiles] = useState([])
     const [variations, setVariations] = useState([])
     useEffect(() => {
         const fetchCollections = async () => {
             try {
                 const res = await api.get("/collection")
-                setCollections(res.data) // gán mảng collections
+                setCollections(res.data)
             }
             catch (error) {
                 toast.error("Lỗi khi load collections:", error)
@@ -201,15 +199,15 @@ const AddProduct = ({ setActiveTab, fetchProducts }) => {
                 discount: Number(discountPercentage),
                 category: category, // 1 id duy nhất
                 collection,
-                brand,    // id từ backend (chọn trong select brand)
+                brand,   
                 tags,
                 stock: Number(stock),
-                 soldCount: 0,
+                soldCount: 0,
                 status,
-                mainImage: mainImageFile, // link ảnh chính
+                mainImage: mainImageFile, 
                 subImages: subImageFiles.filter(img => img),
                 variations,
-                origin: "Việt Nam", // tạm thời hardcode
+                origin: "Việt Nam", 
             }
             if (variations.length > 0) {
                 const totalStock = variations.reduce((sum, v) => sum + (Number(v.stock) || 0), 0)
@@ -226,18 +224,50 @@ const AddProduct = ({ setActiveTab, fetchProducts }) => {
             }
 
             const response = await api.post('/products', productData)
-
             if (response.status !== 201) {
                 toast.error(error?.response?.data?.message || "Lỗi khi thêm sản phẩm!")
             }
             toast.success("Thêm sản phẩm thành công!")
-            await fetchProducts() // gọi hàm fetchProducts để load lại danh sách sản phẩm
+            await fetchProducts() 
+            handleResetForm()
             setActiveTab('products')
         } catch (error) {
             console.error(error)
             toast.error(error?.response?.data?.message || "Lỗi khi thêm sản phẩm!")
         }
     }
+     const handleResetForm = () => {    
+        setProductName('')
+        setShortDescription('')
+        setDetailedDescription('')
+        setOriginalPrice('')
+        setSellingPrice('')
+        setDiscountPercentage('')
+        setCategory('')
+        setBrand('')
+        setTags([])
+        setTagInput('')
+        setStock('')
+        setSku('')
+        setStatus('Còn hàng') // Đặt lại trạng thái mặc định
+        setCollection("")
+        setMainImageFile(null)
+        setMainImagePreview(null) // Reset preview
+        setSubImageFiles([])
+        setVariations([]) // Reset danh sách biến thể
+     }
+
+    const formatCurrency = (value) => {
+        if (value === null || value === undefined || value === '') return ''
+        return Number(value).toLocaleString('vi-VN')
+    }
+
+    const parseCurrency = (value) => {
+        if (typeof value !== 'string') return value
+        const cleanedValue = value.replace(/[^0-9]/g, '')
+        return cleanedValue === '' ? '' : parseInt(cleanedValue, 10)
+    }
+
 
     return (
         <div className="flex flex-col lg:flex-row lg:space-x-8 h-full">
@@ -266,15 +296,34 @@ const AddProduct = ({ setActiveTab, fetchProducts }) => {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <label className="block space-y-2">
                             <span className="text-gray-600">Giá gốc</span>
-                            <input type="number" placeholder="₫" value={originalPrice} onChange={(e) => setOriginalPrice(e.target.value)} className="w-full px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200" />
+                            <input
+                                type="text" // ĐỔI SANG TYPE TEXT ĐỂ CHỨA DẤU PHÂN CÁCH
+                                placeholder="₫"
+                                value={formatCurrency(originalPrice)} // DÙNG formatCurrency ĐỂ HIỂN THỊ
+                                onChange={(e) => setOriginalPrice(parseCurrency(e.target.value))} // DÙNG parseCurrency ĐỂ LƯU SỐ NGUYÊN
+                                className="w-full px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
+                            />
                         </label>
                         <label className="block space-y-2">
                             <span className="text-gray-600">Giá bán</span>
-                            <input type="number" placeholder="₫" value={sellingPrice} onChange={(e) => setSellingPrice(e.target.value)} className="w-full px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200" />
+                            <input
+                                type="text" // ĐỔI SANG TYPE TEXT
+                                placeholder="₫"
+                                value={formatCurrency(sellingPrice)} // DÙNG formatCurrency ĐỂ HIỂN THỊ
+                                onChange={(e) => setSellingPrice(parseCurrency(e.target.value))} // DÙNG parseCurrency ĐỂ LƯU SỐ NGUYÊN
+                                className="w-full px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
+                            />
                         </label>
+                        {/* ... discountPercentage giữ nguyên type="number" vì nó là phần trăm ... */}
                         <label className="block space-y-2">
                             <span className="text-gray-600">Phần trăm giảm giá</span>
-                            <input type="number" placeholder="%" value={discountPercentage} onChange={(e) => setDiscountPercentage(e.target.value)} className="w-full px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200" />
+                            <input
+                                type="number" // Giữ nguyên type="number"
+                                placeholder="%"
+                                value={discountPercentage}
+                                onChange={(e) => setDiscountPercentage(e.target.value)}
+                                className="w-full px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
+                            />
                         </label>
                     </div>
                 </div>
@@ -391,12 +440,9 @@ const AddProduct = ({ setActiveTab, fetchProducts }) => {
                     </label>
                 </div>
 
-
                 {/* Product Attributes Section */}
                 <ProductVariations setStock={setStock} variations={variations} setVariations={setVariations} />
 
-
-                {/* Stock Management Section */}
                 <div className="bg-white p-8 rounded-2xl shadow-xl space-y-6">
                     <h3 className="text-xl font-bold text-gray-800">Quản lý kho hàng</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -499,8 +545,6 @@ const AddProduct = ({ setActiveTab, fetchProducts }) => {
                             </label>
                         )}
                     </div>
-
-
                 </div>
 
                 {/* Action Buttons */}
@@ -530,9 +574,9 @@ const AddProduct = ({ setActiveTab, fetchProducts }) => {
                             <span className="text-gray-400">Hình ảnh sản phẩm</span>
                         )}
                     </div>
-                    <div className="space-y-1">
-                        <p className="font-semibold text-gray-800">{productName || 'Tên sản phẩm'}</p>
-                        <p className="text-sm text-gray-500">{shortDescription || 'Mô tả ngắn gọn sẽ hiển thị ở đây'}</p>
+                    <div className="flex items-center space-x-2">
+                        <p className="text-lg font-bold text-pink-600">{sellingPrice ? `${formatCurrency(sellingPrice)}₫` : '0₫'}</p>
+                        <p className="text-sm text-gray-400 line-through">{originalPrice ? `${formatCurrency(originalPrice)}₫` : '0₫'}</p>
                     </div>
                     <div className="flex items-center space-x-2">
                         <p className="text-lg font-bold text-pink-600">{sellingPrice ? `${sellingPrice}₫` : '0₫'}</p>

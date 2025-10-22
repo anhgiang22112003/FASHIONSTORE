@@ -8,9 +8,7 @@ export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState(null)
 
   useEffect(() => {
-    const token = localStorage.getItem('accessToken') // hoặc tên token bạn dùng
-    console.log(token);
-    
+    const token = localStorage.getItem('accessToken') // hoặc tên token bạn dùng    
     if (token) {
       fetchCart()
     }

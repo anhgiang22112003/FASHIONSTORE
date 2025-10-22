@@ -518,6 +518,7 @@ const UserProfile = () => {
                     <input
                         type="password"
                         value={newPassword}
+                        autoComplete="new-password"
                         onChange={(e) => setNewPassword(e.target.value)}
                         required
                         className="w-full px-5 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all"

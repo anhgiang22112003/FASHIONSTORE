@@ -1,33 +1,35 @@
-import React, { useState } from "react"
-import Dashboard from "./AdminDasbroad"
-import Orders from "./OrdersContent"
-import Products from "./ProductsContent"
-import Customers from "./Customers"
-import Settings from "./SettingsContent"
+import React, { useEffect, useState, Suspense } from "react"
 import Sidebar from "../../components/layoutAdmin/SliderbarAdmin"
-import CustomerEdit from "./CustomerEdit"
-import Statistics from "./StatisticsContent"
-import ProductCategories from './ProductCategories'
-import ProductCollections from './ProductCollections'
-import AddProduct from './AddProduct'
 import Header from "@/components/layoutAdmin/HeaderAdmin"
-import EditProduct from "./EditProduct"
-import OrderEditPage from "./EditOrder"
-import AddCustomerPage from "./AddCustomer"
-import ReviewManagementPage from "./Reviews"
-import PromotionManagementPage from "./Promotions"
-import AdminSettingsPage from "@/components/layoutAdmin/AdminSettingPage"
 import api from "@/service/api"
+import { toast } from "react-toastify"
+
+// ✅ Lazy load các tab lớn (chỉ load khi cần)
+const Dashboard = React.lazy(() => import("./AdminDasbroad"))
+const Orders = React.lazy(() => import("./OrdersContent"))
+const Products = React.lazy(() => import("./ProductsContent"))
+const Customers = React.lazy(() => import("./Customers"))
+const CustomerEdit = React.lazy(() => import("./CustomerEdit"))
+const Statistics = React.lazy(() => import("./StatisticsContent"))
+const ProductCategories = React.lazy(() => import("./ProductCategories"))
+const ProductCollections = React.lazy(() => import("./ProductCollections"))
+const AddProduct = React.lazy(() => import("./AddProduct"))
+const EditProduct = React.lazy(() => import("./EditProduct"))
+const OrderEditPage = React.lazy(() => import("./EditOrder"))
+const AddCustomerPage = React.lazy(() => import("./AddCustomer"))
+const ReviewManagementPage = React.lazy(() => import("./Reviews"))
+const PromotionManagementPage = React.lazy(() => import("./Promotions"))
+const Settings = React.lazy(() => import("./SettingsContent"))
+const AdminSettingsPage = React.lazy(() => import("@/components/layoutAdmin/AdminSettingPage"))
 
 const AdminLayout = () => {
   const [activeTab, setActiveTab] = useState("dashboard")
   const [editingCustomer, setEditingCustomer] = useState(null)
   const [editingProductId, setEditingProductId] = useState(null)
   const [editingOrder, setEditingOrder] = useState(null)
-
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
 
-  // ✅ Cache data cho từng tab
+  // ✅ Dữ liệu cache từng tab
   const [tabData, setTabData] = useState({
     products: null,
     orders: null,
@@ -37,7 +39,8 @@ const AdminLayout = () => {
     reviews: null,
     promotions: null,
   })
-  // AdminLayout.jsx
+
+  // ---- FETCH DATA ----
   const fetchCustomers = async () => {
     try {
       const res = await api.get("/users?role=customer")
@@ -46,14 +49,16 @@ const AdminLayout = () => {
       console.error("Lỗi khi fetch customers:", err)
     }
   }
-  const fetchProduct = async () => {
+
+  const fetchProducts = async () => {
     try {
       const res = await api.get("/products")
       setTabData((prev) => ({ ...prev, products: res?.data }))
     } catch (err) {
-      console.error("Lỗi khi fetch customers:", err)
+      console.error("Lỗi khi fetch products:", err)
     }
   }
+
   const fetchOrders = async () => {
     try {
       const res = await api.get("/orders/all")
@@ -62,22 +67,28 @@ const AdminLayout = () => {
       console.error("Lỗi khi fetch orders:", err)
     }
   }
+
+  useEffect(() => {
+    if (activeTab === "products" && !tabData.products) fetchProducts()
+    if (activeTab === "orders" && !tabData.orders) fetchOrders()
+    if (activeTab === "customers" && !tabData.customers) fetchCustomers()
+  }, [activeTab])
+
+  // ---- ACTION HANDLERS ----
   const handleEditProduct = (productId) => {
     setEditingProductId(productId)
     setActiveTab("edit-product")
   }
 
-  const handleEditOrder = (oderId) => {
-    setEditingOrder(oderId)
+  const handleEditOrder = (orderId) => {
+    setEditingOrder(orderId)
     setActiveTab("edit-order")
   }
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen)
-  }
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen)
 
   return (
-    <div className="flex h-screen bg-pink-50">
+    <div className="flex h-screen bg-pink-50 overflow-hidden">
       {/* Sidebar */}
       <Sidebar
         activeTab={activeTab}
@@ -87,125 +98,117 @@ const AdminLayout = () => {
       />
 
       {/* Main */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="sticky top-0 z-40 h-[80px] px-2.5 items-center bg-white shadow">
+        <div className="h-[70px] flex items-center bg-white shadow-sm sticky top-0 z-40 px-4">
           <Header toggleSidebar={toggleSidebar} setActiveTab={setActiveTab} />
         </div>
 
-        {/* Nội dung */}
-        <div className="flex-1 overflow-y-auto p-8">
-          {/* Thay vì unmount, mình render tất cả nhưng ẩn đi */}
-          <div className={activeTab === "dashboard" ? "block" : "hidden"}>
-            <Dashboard />
-          </div>
+        {/* Nội dung chính */}
+        <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
+          <Suspense fallback={<div className="text-center p-10">⏳ Đang tải...</div>}>
+            {activeTab === "dashboard" && <Dashboard />}
 
-          <div className={activeTab === "products" ? "block" : "hidden"}>
-            <Products
-              setActiveTab={setActiveTab}
-              onEditProduct={handleEditProduct}
-              data={tabData.products}
-              setData={(data) => setTabData((prev) => ({ ...prev, products: data }))}
-              fetchProducts={fetchProduct}
-            />
-          </div>
+            {activeTab === "products" && (
+              <Products
+                setActiveTab={setActiveTab}
+                onEditProduct={handleEditProduct}
+                data={tabData.products}
+              />
+            )}
 
-          <div className={activeTab === "add-product" ? "block" : "hidden"}>
-            <AddProduct fetchProducts={fetchProduct} setActiveTab={setActiveTab} />
-          </div>
+            {activeTab === "add-product" && (
+              <AddProduct fetchProducts={fetchProducts} setActiveTab={setActiveTab} />
+            )}
 
-          <div className={activeTab === "edit-product" ? "block" : "hidden"}>
-            <EditProduct
-              productId={editingProductId}
-              onBack={() => setActiveTab("products")}
-              fetchProducts={fetchProduct}
-            />
-          </div>
+            {activeTab === "edit-product" && (
+              <EditProduct
+                productId={editingProductId}
+                onBack={() => setActiveTab("products")}
+                fetchProducts={fetchProducts}
+              />
+            )}
 
-          <div className={activeTab === "orders" ? "block" : "hidden"}>
-            <Orders
-              setActiveTab={setActiveTab}
-              data={tabData.orders}
-              onEditOrder={handleEditOrder}
-              setData={(data) => setTabData((prev) => ({ ...prev, orders: data }))}
-              fetchOrders={fetchOrders}
-            />
-          </div>
+            {activeTab === "orders" && (
+              <Orders
+                setActiveTab={setActiveTab}
+                data={tabData.orders}
+                onEditOrder={handleEditOrder}
+                setData={(data) => setTabData((prev) => ({ ...prev, orders: data }))}
+                fetchOrders={fetchOrders}
+              />
+            )}
 
-          <div hidden={activeTab !== "edit-order"}>
-            <OrderEditPage
-              orderId={editingOrder}
-              onBack={() => setActiveTab("orders")}
-              fetchOrders={fetchOrders}
-            />
-          </div>
+            {activeTab === "edit-order" && (
+              <OrderEditPage
+                orderId={editingOrder}
+                onBack={() => setActiveTab("orders")}
+                fetchOrders={fetchOrders}
+              />
+            )}
 
-          <div className={activeTab === "product-categories" ? "block" : "hidden"}>
-            <ProductCategories
-              data={tabData.categories}
-              setData={(data) => setTabData((prev) => ({ ...prev, categories: data }))}
-            />
-          </div>
+            {activeTab === "product-categories" && (
+              <ProductCategories
+                data={tabData.categories}
+                setData={(data) => setTabData((prev) => ({ ...prev, categories: data }))}
+              />
+            )}
 
-          <div className={activeTab === "product-collections" ? "block" : "hidden"}>
-            <ProductCollections
-              data={tabData.collections}
-              setData={(data) => setTabData((prev) => ({ ...prev, collections: data }))}
-            />
-          </div>
+            {activeTab === "product-collections" && (
+              <ProductCollections
+                data={tabData.collections}
+                setData={(data) => setTabData((prev) => ({ ...prev, collections: data }))}
+              />
+            )}
 
-          <div className={activeTab === "customers" ? "block" : "hidden"}>
-            <Customers
-              setEditingCustomer={setEditingCustomer}
-              setActivePage={setActiveTab}
-              data={tabData.customers}
-              setData={(data) => setTabData((prev) => ({ ...prev, customers: data }))}
-              refreshCustomers={fetchCustomers}
+            {activeTab === "customers" && (
+              <Customers
+                setEditingCustomer={setEditingCustomer}
+                setActivePage={setActiveTab}
+                data={tabData.customers}
+                setData={(data) => setTabData((prev) => ({ ...prev, customers: data }))}
+                refreshCustomers={fetchCustomers}
+              />
+            )}
 
-            />
-          </div>
+            {activeTab === "customerEdit" && (
+              <CustomerEdit
+                customer={editingCustomer}
+                refreshCustomers={fetchCustomers}
+                onBack={() => setActiveTab("customers")}
+              />
+            )}
 
-          <div className={activeTab === "customerEdit" ? "block" : "hidden"}>
-            <CustomerEdit
-              customer={editingCustomer}
-              refreshCustomers={fetchCustomers}
-              onBack={() => setActiveTab("customers")}
-            />
-          </div>
+            {activeTab === "add-customer" && (
+              <AddCustomerPage
+                refreshCustomers={fetchCustomers}
+                onBack={() => setActiveTab("customers")}
+              />
+            )}
 
-          <div className={activeTab === "add-customer" ? "block" : "hidden"}>
-            <AddCustomerPage refreshCustomers={fetchCustomers} onBack={() => setActiveTab("customers")} />
-          </div>
+            {activeTab === "statistics" && <Statistics />}
 
-          <div className={activeTab === "statistics" ? "block" : "hidden"}>
-            <Statistics />
-          </div>
+            {activeTab === "review" && (
+              <ReviewManagementPage
+                data={tabData.reviews}
+                setData={(data) => setTabData((prev) => ({ ...prev, reviews: data }))}
+              />
+            )}
 
-          <div className={activeTab === "review" ? "block" : "hidden"}>
-            <ReviewManagementPage
-              data={tabData.reviews}
-              setData={(data) => setTabData((prev) => ({ ...prev, reviews: data }))}
-            />
-          </div>
+            {activeTab === "promotion" && (
+              <PromotionManagementPage
+                data={tabData.promotions}
+                setData={(data) => setTabData((prev) => ({ ...prev, promotions: data }))}
+              />
+            )}
 
-          <div className={activeTab === "promotion" ? "block" : "hidden"}>
-            <PromotionManagementPage
-              data={tabData.promotions}
-              setData={(data) => setTabData((prev) => ({ ...prev, promotions: data }))}
-            />
-          </div>
-
-          <div className={activeTab === "settings" ? "block" : "hidden"}>
-            <Settings />
-          </div>
-
-          <div className={activeTab === "admin-setting" ? "block" : "hidden"}>
-            <AdminSettingsPage />
-          </div>
+            {activeTab === "settings" && <Settings />}
+            {activeTab === "admin-setting" && <AdminSettingsPage />}
+          </Suspense>
         </div>
       </div>
     </div>
   )
 }
 
-export default AdminLayout
+export default React.memo(AdminLayout)

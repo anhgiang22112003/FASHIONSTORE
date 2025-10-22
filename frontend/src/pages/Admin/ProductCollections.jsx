@@ -3,7 +3,8 @@ import api from '@/service/api'
 import React, { useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
 import { Switch } from '@headlessui/react'
-
+import { LazyLoadImage } from 'react-lazy-load-image-component'
+import 'react-lazy-load-image-component/src/effects/blur.css'
 const ProductCollections = () => {
     const [collections, setCollections] = useState([])
     const [isFormOpen, setIsFormOpen] = useState(false)
@@ -246,11 +247,14 @@ const ProductCollections = () => {
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <picture>
                                                 <source srcSet={collection?.image?.replace(/\.(jpg|jpeg|png)$/i, ".webp")} type="image/webp" />
-                                                <img
-                                                    src={collection?.image}
+                                              
+                                                <LazyLoadImage  
+                                                    src={collection?.image || "https://placehold.co/100x100"}
                                                     alt={collection?.name}
-                                                    loading="lazy"
-                                                    className="w-40 h-40 object-cover rounded-md"
+                                                    effect="blur"
+                                                    width={48}
+                                                    height={48}
+                                                    className="w-12 h-12 rounded-lg object-cover"
                                                 />
                                             </picture>
                                         </td>

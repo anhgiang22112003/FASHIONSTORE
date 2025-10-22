@@ -27,6 +27,8 @@ const OrdersContent = ({ data, onEditOrder }) => {
   const [editingId, setEditingId] = useState(null)
   const [loading, setLoading] = useState(false)
   const fileInputRef = useRef(null)
+  const [selectedOrders, setSelectedOrders] = useState([])
+  const [bulkStatus, setBulkStatus] = useState("")
 
   const [filters, setFilters] = useState({
     userId: "",
@@ -104,12 +106,13 @@ const OrdersContent = ({ data, onEditOrder }) => {
       })
 
       const data = res.data
-      if (data.errors && data.errors.length > 0) {
-        toast.warning(`${data.message} ⚠️`)
-        data.errors.forEach(err => toast.error(err))
+      if (data.errors?.length) {
+        toast.warning(`${data.message} ⚠️ (${data.errors.length} lỗi)`)
+        console.error("Chi tiết lỗi:", data.errors)
       } else {
         toast.success(data.message || "Import Excel thành công 🎉")
       }
+
 
       fetchOrders()
     } catch (err) {
@@ -124,8 +127,6 @@ const OrdersContent = ({ data, onEditOrder }) => {
   const fetchOrders = async (pageNum = 1) => {
     try {
       const res = await api.get(`/orders/all?page=${pageNum}&limit=${limit}`)
-      console.log(res)
-
       setOrders(res?.data.data || [])
       setTotal(res.data.total || 0)
       setPage(res.data.page || 1)
@@ -216,8 +217,6 @@ const OrdersContent = ({ data, onEditOrder }) => {
   }
 
   const toggleFilter = () => setIsFilterVisible(!isFilterVisible)
-  console.log(filters)
-
   const applyFilter = async () => {
     try {
       const res = await api.get("/orders/filter", { params: filters })
@@ -243,8 +242,45 @@ const OrdersContent = ({ data, onEditOrder }) => {
     })
     fetchOrders()
   }
-
   const filteredOrders = useMemo(() => orders, [orders])
+
+  const handleSelectOrder = (orderId) => {
+    setSelectedOrders(prev =>
+      prev.includes(orderId)
+        ? prev.filter(id => id !== orderId)
+        : [...prev, orderId]
+    )
+  }
+
+  const handleSelectAll = (e) => {
+    if (e.target.checked) {
+      setSelectedOrders(filteredOrders.map(o => o._id))
+    } else {
+      setSelectedOrders([])
+    }
+  }
+
+  const isAllSelected = filteredOrders.length > 0 && selectedOrders.length === filteredOrders.length
+  const handleBulkStatusUpdate = async () => {
+    if (selectedOrders.length === 0 || !bulkStatus) return toast.warn("Vui lòng chọn đơn và trạng thái!")
+
+    try {
+      setLoading(true)
+      await api.patch("/orders/bulk-status", {
+        orderIds: selectedOrders,
+        status: bulkStatus
+      })
+      toast.success("Cập nhật trạng thái hàng loạt thành công ✅")
+      setSelectedOrders([])
+      setBulkStatus("")
+      fetchOrders()
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Lỗi khi cập nhật hàng loạt ❌")
+    } finally {
+      setLoading(false)
+    }
+  }
+
 
   return (
     <div className="flex min-h-screen bg-gray-50 font-sans antialiased">
@@ -339,7 +375,6 @@ const OrdersContent = ({ data, onEditOrder }) => {
         )}
 
 
-        {/* 🔽 PHẦN BỘ LỌC ĐÃ CẢI TIẾN 🔽 */}
         {isFilterVisible && (
           <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
             <h3 className="text-xl font-semibold text-gray-700 mb-4 border-b pb-2">Bộ lọc nâng cao</h3>
@@ -463,12 +498,44 @@ const OrdersContent = ({ data, onEditOrder }) => {
             </div>
           </div>
         )}
+        {selectedOrders.length > 0 && (
+          <div className="flex items-center justify-between bg-pink-50 border border-pink-200 rounded-xl px-4 py-3 mb-4">
+            <span className="text-pink-700 font-medium">
+              Đã chọn {selectedOrders.length} đơn hàng
+            </span>
+            <div className="flex items-center space-x-3">
+              <select
+                value={bulkStatus}
+                onChange={(e) => setBulkStatus(e.target.value)}
+                className="border border-pink-400 rounded-lg p-1 text-sm bg-white"
+              >
+                <option value="">-- Chọn trạng thái --</option>
+                {statusOptions.map(opt => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+              <button
+                onClick={handleBulkStatusUpdate}
+                disabled={!bulkStatus || loading}
+                className="bg-pink-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-pink-700 transition-colors disabled:opacity-60"
+              >
+                Cập nhật
+              </button>
+            </div>
+          </div>
+        )}
 
-        {/* 🔽 PHẦN BẢNG ĐƠN HÀNG ĐÃ CẢI TIẾN 🔽 */}
         <div className="overflow-x-auto bg-white rounded-xl shadow-lg">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-pink-50">
               <tr>
+                <th className="px-4 py-3">
+                  <input
+                    type="checkbox"
+                    checked={isAllSelected}
+                    onChange={handleSelectAll}
+                  />
+                </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Mã đơn</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Khách hàng</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Ngày đặt</th>
@@ -481,7 +548,15 @@ const OrdersContent = ({ data, onEditOrder }) => {
             <tbody className="divide-y divide-gray-100">
               {filteredOrders.length > 0 ? (
                 filteredOrders.map((order) => (
-                  <tr key={order._id} className="hover:bg-pink-50/50 transition-colors">
+                  <tr key={order?._id} className="hover:bg-pink-50/50 transition-colors">
+                    <td className="px-4 py-4 text-center">
+                      <input
+                        type="checkbox"
+                        checked={selectedOrders.includes(order?._id)}
+                        onChange={() => handleSelectOrder(order?._id)}
+                      />
+                    </td>
+
                     <td className="px-6 py-4 font-bold text-pink-600 text-sm">#{order._id.slice(-6).toUpperCase()}</td>
 
                     {/* Cột Khách hàng */}

@@ -117,20 +117,20 @@ const OrderEditPage = ({ orderId }) => {
             fetchOrder() // Gọi API lấy thông tin đơn hàng
         }
     }, [orderId])
-    console.log(editedOrder)
-useEffect(() => {
-  if (editedOrder.shippingInfo.type === "Giao hàng hỏa tốc") {
-    setEditedOrder((prev) => ({
-      ...prev,
-      totals: { ...prev.totals, shippingFee: 50000 },
-    }))
-  } else {
-    setEditedOrder((prev) => ({
-      ...prev,
-      totals: { ...prev.totals, shippingFee: 30000 },
-    }))
-  }
-}, [editedOrder.shippingInfo.type])
+
+    useEffect(() => {
+        if (editedOrder.shippingInfo.type === "Giao hàng hỏa tốc") {
+            setEditedOrder((prev) => ({
+                ...prev,
+                totals: { ...prev.totals, shippingFee: 50000 },
+            }))
+        } else {
+            setEditedOrder((prev) => ({
+                ...prev,
+                totals: { ...prev.totals, shippingFee: 30000 },
+            }))
+        }
+    }, [editedOrder.shippingInfo.type])
 
 
     // 🔥 HÀM LƯU ĐƠN HÀNG
@@ -191,17 +191,17 @@ useEffect(() => {
         }))
     }
 
-   
-     if (isLoading) return  (
-      <div className="fixed inset-0 flex items-center justify-center bg-white/70 backdrop-blur-sm z-50">
-        <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-      </div>
+
+    if (isLoading) return (
+        <div className="fixed inset-0 flex items-center justify-center bg-white/70 backdrop-blur-sm z-50">
+            <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+        </div>
     )
     if (!editedOrder || !editedOrder.orderId) return <div className="p-8 text-center text-red-600">Không tìm thấy đơn hàng</div>
 
     const currentTotals = calculateTotals(editedOrder.productList, originalOrder.totals)
     const statusObj = statusOptions.find(s => s.value === editedOrder.status || s.label === editedOrder.status)
-    const currentStatusLabel = statusObj ? statusObj.label : String(editedOrder.status || "") 
+    const currentStatusLabel = statusObj ? statusObj.label : String(editedOrder.status || "")
 
     // --- RENDERING SUB-COMPONENTS ---
     const renderEditableField = (label, name, value, inputType = "text", options = [], disabled = false) => (
