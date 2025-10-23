@@ -1,6 +1,7 @@
 import React from 'react'
 import { format } from "date-fns"
 import { vi } from "date-fns/locale"
+import ProductReviewForm from './ProductReviewForm'
 
 // Hàm tiện ích (Cần được copy hoặc import từ component cha nếu đặt riêng file)
 const getStatusVietnamese = (status) => {
@@ -34,10 +35,11 @@ const getStatusColor = (status) => {
     }
 }
 
+
 const OrderDetail = ({ order, onBack }) => {
     // Tính tổng số lượng sản phẩm
-    const totalItems = order.items.reduce((sum, item) => sum + item.quantity, 0)
-    
+    const totalItems = order?.items?.reduce((sum, item) => sum + item.quantity, 0)
+
     return (
         <div className="max-w-6xl mx-auto px-4 py-8">
             <button
@@ -52,9 +54,13 @@ const OrderDetail = ({ order, onBack }) => {
                 {/* Header và Trạng thái */}
                 <div className="flex justify-between items-start border-b pb-4">
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-800">Chi tiết đơn hàng #{order._id.substring(0, 8).toUpperCase()}</h1>
-                        <p className="text-sm text-gray-500">Đặt vào: {format(new Date(order.createdAt), "dd/MM/yyyy HH:mm", { locale: vi })}</p>
-                    </div>
+                        <h1 className="text-3xl font-bold text-gray-800">Chi tiết đơn hàng #{order?._id?.substring(0, 8).toUpperCase()}</h1>
+                        <p className="text-sm text-gray-500">
+                            Đặt vào:{" "}
+                            {order?.createdAt
+                                ? format(new Date(order.createdAt), "dd/MM/yyyy HH:mm", { locale: vi })
+                                : "Không xác định"}
+                        </p>                    </div>
                     <span className={`text-sm font-bold px-4 py-2 rounded-lg ${getStatusColor(order.status)}`}>
                         {getStatusVietnamese(order.status)}
                     </span>
@@ -70,7 +76,7 @@ const OrderDetail = ({ order, onBack }) => {
                             <p><strong>SĐT:</strong> {order.phone || 'N/A'}</p>
                             <p><strong>Địa chỉ:</strong> {order.address}</p>
                         </div>
-                        
+
                         <h2 className="text-xl font-semibold text-gray-700 border-b pb-2 pt-4">Thanh toán</h2>
                         <p className="text-gray-600"><strong>Phương thức:</strong> {order.paymentMethod}</p>
                         <p className={`text-sm font-medium ${order.paymentStatus === 'PAID' ? 'text-green-600' : 'text-yellow-600'}`}>
@@ -102,7 +108,7 @@ const OrderDetail = ({ order, onBack }) => {
                 <div className="pt-4 border-t">
                     <h2 className="text-xl font-semibold text-gray-700 mb-4">Danh sách sản phẩm</h2>
                     <div className="space-y-3">
-                        {order.items.map((item, i) => (
+                        {order?.items?.map((item, i) => (
                             <div key={i} className="flex justify-between items-center py-3 border-b last:border-b-0">
                                 <div className="flex items-center space-x-4">
                                     {/* Giả định có trường 'imageUrl' */}
@@ -125,6 +131,15 @@ const OrderDetail = ({ order, onBack }) => {
                         ))}
                     </div>
                 </div>
+                {order?.status === "COMPLETED" && (
+                    <div className="mt-8 border-t pt-6">
+                        <h2 className="text-xl font-semibold text-gray-800 mb-4">Đánh giá sản phẩm</h2>
+                        {order?.items?.map((item, i) => (
+                            <ProductReviewForm key={i} item={item} userId={order?.user} orderId={order._id} />
+                        ))}
+                    </div>
+                )}
+
             </div>
         </div>
     )

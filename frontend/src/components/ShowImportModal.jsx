@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { EyeIcon, FunnelIcon, ArrowDownTrayIcon, ArrowUpTrayIcon } from "@heroicons/react/24/outline"
 import { toast } from 'react-toastify'
-import api from '@/service/api'
+import apiAdmin from '@/service/apiAdmin'
 const ShowImportModal = ({fetchProducts}) => {
     const [showImportModal, setShowImportModal] = useState(false)
     const [loading, setLoading] = useState(false)
@@ -15,7 +15,7 @@ const ShowImportModal = ({fetchProducts}) => {
 
         try {
             setLoading(true)
-            const res = await api.post("/excel/products/import", formData, {
+            const res = await apiAdmin.post("/excel/products/import", formData, {
                 headers: { "Content-Type": "multipart/form-data" },
             })
             const data = res.data
@@ -72,7 +72,7 @@ const ShowImportModal = ({fetchProducts}) => {
                             <button
                                 onClick={async () => {
                                     try {
-                                        const res = await api.get("/excel/products/export-template", { responseType: "blob" })
+                                        const res = await apiAdmin.get("/excel/products/export-template", { responseType: "blob" })
                                         const blob = new Blob([res.data], {
                                             type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                                         })

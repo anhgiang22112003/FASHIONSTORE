@@ -38,8 +38,8 @@ const Header = ({ toggleSidebar, setActiveTab }) => {
         setIsProfileMenuOpen(false)
     }
    const handleLogout = () => {
-        localStorage.removeItem('token')
-        localStorage.removeItem('user')
+        sessionStorage.removeItem('token')
+        sessionStorage.removeItem('user')
         window.location.href = '/login/admin'
     }
 

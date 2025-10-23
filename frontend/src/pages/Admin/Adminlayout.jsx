@@ -1,8 +1,9 @@
 import React, { useEffect, useState, Suspense } from "react"
 import Sidebar from "../../components/layoutAdmin/SliderbarAdmin"
 import Header from "@/components/layoutAdmin/HeaderAdmin"
-import api from "@/service/api"
 import { toast } from "react-toastify"
+import ProductDetailContent from "@/components/ProductDetailContent"
+import apiAdmin from "@/service/apiAdmin"
 
 // ✅ Lazy load các tab lớn (chỉ load khi cần)
 const Dashboard = React.lazy(() => import("./AdminDasbroad"))
@@ -26,6 +27,7 @@ const AdminLayout = () => {
   const [activeTab, setActiveTab] = useState("dashboard")
   const [editingCustomer, setEditingCustomer] = useState(null)
   const [editingProductId, setEditingProductId] = useState(null)
+  const [viewProductId, setViewProductId] = useState(null)
   const [editingOrder, setEditingOrder] = useState(null)
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
 
@@ -43,7 +45,7 @@ const AdminLayout = () => {
   // ---- FETCH DATA ----
   const fetchCustomers = async () => {
     try {
-      const res = await api.get("/users?role=customer")
+      const res = await apiAdmin.get("/users?role=customer")
       setTabData((prev) => ({ ...prev, customers: res?.data }))
     } catch (err) {
       console.error("Lỗi khi fetch customers:", err)
@@ -52,7 +54,7 @@ const AdminLayout = () => {
 
   const fetchProducts = async () => {
     try {
-      const res = await api.get("/products")
+      const res = await apiAdmin.get("/products")
       setTabData((prev) => ({ ...prev, products: res?.data }))
     } catch (err) {
       console.error("Lỗi khi fetch products:", err)
@@ -61,7 +63,7 @@ const AdminLayout = () => {
 
   const fetchOrders = async () => {
     try {
-      const res = await api.get("/orders/all")
+      const res = await apiAdmin.get("/orders/all")
       setTabData((prev) => ({ ...prev, orders: res?.data?.data }))
     } catch (err) {
       console.error("Lỗi khi fetch orders:", err)
@@ -79,6 +81,10 @@ const AdminLayout = () => {
     setEditingProductId(productId)
     setActiveTab("edit-product")
   }
+    const handleViewProduct = (productId) => {
+    setViewProductId(productId)
+    setActiveTab("view-product")
+  }
 
   const handleEditOrder = (orderId) => {
     setEditingOrder(orderId)
@@ -88,7 +94,7 @@ const AdminLayout = () => {
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen)
 
   return (
-    <div className="flex h-screen bg-pink-50 overflow-hidden">
+    <div className="flex h-screen bg-pink-50">
       {/* Sidebar */}
       <Sidebar
         activeTab={activeTab}
@@ -98,9 +104,9 @@ const AdminLayout = () => {
       />
 
       {/* Main */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col">
         {/* Header */}
-        <div className="h-[70px] flex items-center bg-white shadow-sm sticky top-0 z-40 px-4">
+        <div className="sticky top-0 z-40 h-[70px] px-2.5  items-center bg-white shadow-sm sticky top-0 z-40 px-4">
           <Header toggleSidebar={toggleSidebar} setActiveTab={setActiveTab} />
         </div>
 
@@ -113,6 +119,7 @@ const AdminLayout = () => {
               <Products
                 setActiveTab={setActiveTab}
                 onEditProduct={handleEditProduct}
+                onViewProductDetail={handleViewProduct}
                 data={tabData.products}
               />
             )}
@@ -124,6 +131,15 @@ const AdminLayout = () => {
             {activeTab === "edit-product" && (
               <EditProduct
                 productId={editingProductId}
+                onBack={() => setActiveTab("products")}
+                fetchProducts={fetchProducts}
+              />
+            )}
+
+             {activeTab === "view-product" && (
+              <ProductDetailContent
+                productId={viewProductId}
+                onEditProduct={handleEditProduct}
                 onBack={() => setActiveTab("products")}
                 fetchProducts={fetchProducts}
               />

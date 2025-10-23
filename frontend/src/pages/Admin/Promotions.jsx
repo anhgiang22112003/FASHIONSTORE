@@ -14,9 +14,9 @@ import {
   ExclamationCircleIcon,
 } from '@heroicons/react/24/solid'
 import EditPromotionModal from '@/components/EditPromotionModal'
-import api from '@/service/api'
 import { set } from 'date-fns'
 import { toast } from 'react-toastify'
+import apiAdmin from '@/service/apiAdmin'
 
 
 
@@ -114,19 +114,19 @@ const PromotionManagementPage = () => {
     try {
       if (action === 'pause') {
         // Gọi API tạm dừng
-        await api.patch(`/vouchers/${selectedPromotion._id}/pause`, { status: 'paused' })
+        await apiAdmin.patch(`/vouchers/${selectedPromotion._id}/pause`, { status: 'paused' })
         toast.success('Tạm dừng voucher thành công!')
       }
 
       if (action === 'resume') {
         // Gọi API kích hoạt lại
-        await api.patch(`/vouchers/${selectedPromotion._id}/pause`, { status: 'active' })
+        await apiAdmin.patch(`/vouchers/${selectedPromotion._id}/pause`, { status: 'active' })
         toast.success('Kích hoạt lại voucher thành công!')
       }
 
       if (action === 'delete') {
         // Gọi API xóa
-        await api.delete(`/vouchers/${selectedPromotion._id}`)
+        await apiAdmin.delete(`/vouchers/${selectedPromotion._id}`)
         toast.success('Xóa voucher thành công!')
       }
 
@@ -148,7 +148,7 @@ const PromotionManagementPage = () => {
   const fetVoucher = async () => {
     setLoading(true)
     try {
-      const response = await api.get('/vouchers')
+      const response = await apiAdmin.get('/vouchers')
 
       setPromotionsData(response.data || [])
     } catch (error) {

@@ -1,4 +1,4 @@
-import api from "@/service/api"
+import apiAdmin from "@/service/apiAdmin"
 import React, { useEffect, useState } from "react"
 import { toast } from "react-toastify"
 
@@ -27,7 +27,7 @@ const AddProductToOrder = ({ orderId, fetchOrder }) => {
   const fetchResults = async (query) => {
     try {
       setLoading(true)
-      const res = await api.get(`/products/search?query=${query}`)
+      const res = await apiAdmin.get(`/products/search?query=${query}`)
       setResults(res.data)
     } catch (err) {
       console.error(err)
@@ -50,7 +50,7 @@ const AddProductToOrder = ({ orderId, fetchOrder }) => {
     }
 
     try {
-      await api.patch(`/orders/${orderId}/add-item`, body)
+      await apiAdmin.patch(`/orders/${orderId}/add-item`, body)
       toast.success("✅ Đã thêm sản phẩm vào đơn hàng")
       setSearchTerm("")
       setResults([])

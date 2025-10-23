@@ -1,12 +1,13 @@
 import React, { useEffect, useMemo, useState } from "react"
-import { PencilIcon, TrashIcon, FunnelIcon, ArrowDownTrayIcon, ArrowUpTrayIcon } from "@heroicons/react/24/outline"
+import { PencilIcon, TrashIcon, FunnelIcon, ArrowDownTrayIcon, ArrowUpTrayIcon, EyeIcon } from "@heroicons/react/24/outline"
 import DeleteProductModal from "../../components/DeleteProductPopup"
-import api from "@/service/api"
 import { toast } from "react-toastify"
 import ShowImportModal from "../../components/ShowImportModal"
 import { LazyLoadImage } from 'react-lazy-load-image-component'
 import 'react-lazy-load-image-component/src/effects/blur.css'
 import debounce from "lodash.debounce"
+import ConfirmBulkDeleteModal from "@/components/ConfirmBulkDeleteModal"
+import apiAdmin from "@/service/apiAdmin"
 
 const statusColors = {
     "Còn hàng": "bg-green-100 text-green-600",
@@ -20,7 +21,7 @@ const formatCurrency = (number) => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(Number(number))
 }
 
-const ProductsContent = ({ setActiveTab, onEditProduct, data }) => {
+const ProductsContent = ({ setActiveTab, onEditProduct, onViewProductDetail, data }) => {
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [productToDelete, setProductToDelete] = useState(null)
     const [isFilterVisible, setIsFilterVisible] = useState(false)
@@ -31,7 +32,11 @@ const ProductsContent = ({ setActiveTab, onEditProduct, data }) => {
     const [loading, setLoading] = useState(false)
     const [categories, setCategories] = useState([])
     const [collections, setCollections] = useState([])
-    const [displayMinPrice, setDisplayMinPrice] = useState("") 
+    const [selectedProducts, setSelectedProducts] = useState([])
+    const [isAllSelected, setIsAllSelected] = useState(false)
+    const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false)
+
+    const [displayMinPrice, setDisplayMinPrice] = useState("")
     const [displayMaxPrice, setDisplayMaxPrice] = useState("")
     const [filters, setFilters] = useState({
         category: "",
@@ -41,12 +46,73 @@ const ProductsContent = ({ setActiveTab, onEditProduct, data }) => {
         maxPrice: "",
         sortBy: "newest",
     })
+
+    // ✅ Xử lý chọn checkbox
+    const handleSelectAll = () => {
+        if (isAllSelected) {
+            setSelectedProducts([])
+        } else {
+            setSelectedProducts(product.map(p => p._id))
+        }
+        setIsAllSelected(!isAllSelected)
+    }
+
+    const handleSelectOne = (id) => {
+        setSelectedProducts(prev =>
+            prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+        )
+    }
+
+    // ✅ Bulk Update Status
+    const handleBulkUpdateStatus = async (status) => {
+        if (selectedProducts.length === 0) return toast.info("Vui lòng chọn sản phẩm trước.")
+        try {
+            await apiAdmin.put("/products/bulk-update-status", {
+                ids: selectedProducts,
+                status,
+            })
+            toast.success("Cập nhật trạng thái hàng loạt thành công 🎉")
+            fetchProducts()
+            setSelectedProducts([])
+            setIsAllSelected(false)
+        } catch (err) {
+            console.error(err)
+            toast.error("Không thể cập nhật trạng thái ❌")
+        }
+    }
+    const handleBulkDelete = async () => {
+        if (selectedProducts.length === 0)
+            return toast.info("Vui lòng chọn sản phẩm để xóa.")
+
+        setIsBulkDeleteModalOpen(true)
+    }
+
+    const confirmBulkDelete = async () => {
+        try {
+            await apiAdmin.delete("/products/bulk-delete", {
+                data: { ids: selectedProducts },
+            })
+            toast.success("Đã xóa sản phẩm được chọn ✅")
+            fetchProducts()
+            setSelectedProducts([])
+            setIsAllSelected(false)
+        } catch (err) {
+            console.error(err)
+            toast.error("Xóa sản phẩm thất bại ❌")
+        } finally {
+            setIsBulkDeleteModalOpen(false)
+        }
+    }
+
+
+    // ✅ Bulk Delete
+
     const limit = 10
     const fetchFiltersData = async () => {
         try {
             const [cats, cols] = await Promise.all([
-                api.get("/categories"),
-                api.get("/collection"),
+                apiAdmin.get("/categories"),
+                apiAdmin.get("/collection"),
             ])
             setCategories(cats.data)
             setCollections(cols.data)
@@ -71,7 +137,7 @@ const ProductsContent = ({ setActiveTab, onEditProduct, data }) => {
                 sortBy: filtersData.sortBy || "newest",
             })
 
-            const res = await api.get(`/products?${params.toString()}`)
+            const res = await apiAdmin.get(`/products?${params.toString()}`)
             setProduct(res.data.products || [])
             setTotal(res.data.total || 0)
             setPage(res.data.page || 1)
@@ -96,26 +162,26 @@ const ProductsContent = ({ setActiveTab, onEditProduct, data }) => {
     useEffect(() => {
         // Luôn chuyển về trang 1 khi filter hoặc search thay đổi
         if (page === 1) {
-             debouncedFetch(1, filters, searchTerm)
+            debouncedFetch(1, filters, searchTerm)
         } else {
-             // Chỉ gọi API với page 1, còn không thì trigger lại bằng cách setPage(1)
-             setPage(1)
+            // Chỉ gọi API với page 1, còn không thì trigger lại bằng cách setPage(1)
+            setPage(1)
         }
         return () => debouncedFetch.cancel()
     }, [filters, searchTerm])
-    
+
     // Gọi API khi page thay đổi
     useEffect(() => {
         if (page) {
-             fetchProducts(page, filters, searchTerm)
+            fetchProducts(page, filters, searchTerm)
         }
     }, [page])
 
-const handlePriceChange = (e) => {
+    const handlePriceChange = (e) => {
         const { name, value } = e.target
         // Loại bỏ mọi ký tự không phải số và dấu chấm (dấu thập phân)
         const rawValue = value.replace(/[^0-9]/g, "")
-        
+
         if (name === 'minPrice') {
             setFilters(prev => ({ ...prev, minPrice: rawValue }))
             setDisplayMinPrice(rawValue)
@@ -124,12 +190,12 @@ const handlePriceChange = (e) => {
             setDisplayMaxPrice(rawValue)
         }
     }
-    
+
     // Xử lý Blur để định dạng giá trị hiển thị
     const handlePriceBlur = (e) => {
         const { name } = e.target
-        const rawValue = filters[name];
-        
+        const rawValue = filters[name]
+
         if (rawValue) {
             const formattedValue = new Intl.NumberFormat('vi-VN').format(Number(rawValue))
             if (name === 'minPrice') {
@@ -139,13 +205,13 @@ const handlePriceChange = (e) => {
             }
         }
     }
-    
+
     // Xử lý Focus để xóa định dạng cho dễ nhập
     const handlePriceFocus = (e) => {
         const { name } = e.target
-        const rawValue = filters[name];
+        const rawValue = filters[name]
         if (rawValue) {
-             if (name === 'minPrice') {
+            if (name === 'minPrice') {
                 setDisplayMinPrice(rawValue)
             } else {
                 setDisplayMaxPrice(rawValue)
@@ -163,7 +229,7 @@ const handlePriceChange = (e) => {
     const handleExportExcel = async () => {
         try {
             setLoading(true)
-            const res = await api.get("/excel/products/export", {
+            const res = await apiAdmin.get("/excel/products/export", {
                 responseType: "blob",
             })
             const blob = new Blob([res.data], {
@@ -195,7 +261,7 @@ const handlePriceChange = (e) => {
     }
 
     const handleConfirmDelete = async () => {
-        await api.delete(`/products/${productToDelete?._id}`)
+        await apiAdmin.delete(`/products/${productToDelete?._id}`)
         toast.success("Xóa sản phẩm thành công")
         fetchProducts(page, filters, searchTerm)
         setIsModalOpen(false)
@@ -207,7 +273,7 @@ const handlePriceChange = (e) => {
         setProductToDelete(null)
     }
     const handleResetFilters = () => {
-         setFilters({
+        setFilters({
             category: "",
             collection: "",
             status: "",
@@ -220,6 +286,31 @@ const handlePriceChange = (e) => {
     }
     return (
         <div className="p-6 bg-gray-50 min-h-screen">
+            {selectedProducts.length > 0 && (
+                <div className="bg-white p-4 mb-4 rounded-xl shadow flex justify-between items-center border border-pink-200">
+                    <p className="text-gray-700 font-medium">
+                        Đã chọn <span className="font-bold text-pink-600">{selectedProducts.length}</span> sản phẩm
+                    </p>
+                    <div className="flex space-x-3 items-center">
+                        <select
+                            onChange={(e) => handleBulkUpdateStatus(e.target.value)}
+                            defaultValue=""
+                            className="border rounded-xl px-3 py-2 focus:ring-pink-500"
+                        >
+                            <option value="" disabled>Đổi trạng thái...</option>
+                            <option value="Còn hàng">Còn hàng</option>
+                            <option value="Hết hàng">Hết hàng</option>
+                            <option value="Ngừng bán">Ngừng bán</option>
+                        </select>
+                        <button
+                            onClick={handleBulkDelete}
+                            className="px-4 py-2 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 transition"
+                        >
+                            Xóa sản phẩm đã chọn
+                        </button>
+                    </div>
+                </div>
+            )}
             <div className="flex justify-between items-center mb-4">
                 <input
                     type="text"
@@ -229,10 +320,10 @@ const handlePriceChange = (e) => {
                     className="px-4 py-2 border rounded-lg w-1/3 focus:outline-none focus:ring-2 focus:ring-pink-500"
                 />
                 <div className="space-x-2 flex items-center">
-                  <button 
-                        onClick={toggleFilterDropdown} 
-                        className={`px-4 py-2 rounded-xl flex items-center space-x-1 font-medium transition-all ${isFilterVisible 
-                            ? 'bg-pink-600 text-white hover:bg-pink-700' 
+                    <button
+                        onClick={toggleFilterDropdown}
+                        className={`px-4 py-2 rounded-xl flex items-center space-x-1 font-medium transition-all ${isFilterVisible
+                            ? 'bg-pink-600 text-white hover:bg-pink-700'
                             : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100'}`}
                     >
                         <FunnelIcon className="w-5 h-5" />
@@ -258,11 +349,11 @@ const handlePriceChange = (e) => {
 
             </div>
 
-           {isFilterVisible && (
+            {isFilterVisible && (
                 <div className="mt-4 p-5 border rounded-xl bg-white shadow-lg mb-6">
                     <h4 className="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Bộ lọc nâng cao</h4>
                     <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                        
+
                         {/* Danh mục */}
                         <div>
                             <label className="block text-sm font-medium text-gray-600 mb-1">Danh mục</label>
@@ -345,7 +436,7 @@ const handlePriceChange = (e) => {
                             />
                         </div>
                     </div>
-                    
+
                     {/* Hàng Sắp xếp và nút Reset */}
                     <div className="flex justify-between items-end mt-4 pt-4 border-t border-gray-100">
                         {/* Sắp xếp */}
@@ -365,9 +456,9 @@ const handlePriceChange = (e) => {
                                 <option value="stockDesc">Tồn kho cao → thấp</option>
                             </select>
                         </div>
-                        
-                         <button 
-                            onClick={handleResetFilters} 
+
+                        <button
+                            onClick={handleResetFilters}
                             className="px-4 py-2 bg-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-300 transition-colors"
                         >
                             Xóa bộ lọc
@@ -380,9 +471,17 @@ const handlePriceChange = (e) => {
                 <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-pink-50">
                         <tr>
+                            <th className="px-4  text-left text-sm">
+                                <input
+                                    type="checkbox"
+                                    checked={isAllSelected}
+                                    onChange={handleSelectAll}
+                                />
+                            </th>
                             <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">ID Sản phẩm</th>
                             <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">Sản phẩm</th>
                             <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">Danh mục</th>
+                            <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">Bộ sưu tập</th>
                             <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">Giá</th>
                             <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">Tồn kho</th>
                             <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">Trạng thái</th>
@@ -392,6 +491,13 @@ const handlePriceChange = (e) => {
                     <tbody className="divide-y divide-gray-100">
                         {product?.map((product) => (
                             <tr key={product.Id} className="hover:bg-pink-50">
+                                <td className="px-4 py-4">
+                                    <input
+                                        type="checkbox"
+                                        checked={selectedProducts.includes(product._id)}
+                                        onChange={() => handleSelectOne(product._id)}
+                                    />
+                                </td>
                                 <td className="px-6 py-4">{product.Id}</td>
                                 <td className="px-6 py-4 flex items-center space-x-3">
                                     <LazyLoadImage
@@ -407,6 +513,7 @@ const handlePriceChange = (e) => {
                                     </div>
                                 </td>
                                 <td className="px-6 py-4">{product?.category?.name}</td>
+                                <td className="px-6 py-4">{product?.collection?.name}</td>
                                 <td className="px-6 py-4 font-semibold text-pink-600">
                                     {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product?.originalPrice)}
                                 </td>
@@ -417,6 +524,12 @@ const handlePriceChange = (e) => {
                                     </span>
                                 </td>
                                 <td className="px-6 py-4 flex space-x-2">
+                                    <button
+                                        onClick={() => onViewProductDetail(product?._id)}
+                                        className="p-2 bg-pink-100 text-pink-600 rounded-lg hover:bg-pink-200"
+                                    >
+                                        <EyeIcon className="w-5 h-5" />
+                                    </button>
                                     <button onClick={() => onEditProduct(product?._id)} // Thêm onClick để chuyển trang
                                         className="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200">
                                         <PencilIcon className="w-5 h-5" />
@@ -470,6 +583,13 @@ const handlePriceChange = (e) => {
                     product={productToDelete}
                 />
             )}
+            <ConfirmBulkDeleteModal
+                isOpen={isBulkDeleteModalOpen}
+                onClose={() => setIsBulkDeleteModalOpen(false)}
+                onConfirm={confirmBulkDelete}
+                count={selectedProducts.length}
+            />
+
         </div>
     )
 }

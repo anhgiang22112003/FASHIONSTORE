@@ -1,10 +1,10 @@
 import DeleteConfirmationModal from '@/components/DeleteConfirmationModal'
-import api from '@/service/api'
 import React, { useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
 import { Switch } from '@headlessui/react'
 import { LazyLoadImage } from 'react-lazy-load-image-component'
 import 'react-lazy-load-image-component/src/effects/blur.css'
+import apiAdmin from '@/service/apiAdmin'
 const ProductCategories = () => {
     const [isFormOpen, setIsFormOpen] = useState(false)
     const [editCategory, setEditCategory] = useState(null)
@@ -30,7 +30,7 @@ const ProductCategories = () => {
     const fetchCategories = async () => {
         try {
             setIsLoading(true) // bật loading
-            const response = await api.get("categories")
+            const response = await apiAdmin.get("categories")
             setCategory(response?.data || [])
         } catch (error) {
             toast.error("Lỗi khi lấy danh mục")
@@ -56,10 +56,10 @@ const ProductCategories = () => {
 
         try {
             if (editCategory) {
-                await api.put(`/categories/${editCategory._id}`, categorydata)
+                await apiAdmin.put(`/categories/${editCategory._id}`, categorydata)
                 toast.success("Cập nhật danh mục thành công")
             } else {
-                await api.post("/categories", categorydata)
+                await apiAdmin.post("/categories", categorydata)
                 toast.success("Thêm danh mục thành công")
             }
             fetchCategories()
@@ -85,7 +85,7 @@ const ProductCategories = () => {
         formDataUpload.append("file", file)
 
         try {
-            const res = await api.post("/upload", formDataUpload, {
+            const res = await apiAdmin.post("/upload", formDataUpload, {
                 headers: { "Content-Type": "multipart/form-data" },
             })
 
@@ -118,7 +118,7 @@ const ProductCategories = () => {
             try {
                 setIsLoading(true)
                 if (itemToDelete.type === 'category') {
-                    const res = await api.delete(`/categories/${itemToDelete.id}`)
+                    const res = await apiAdmin.delete(`/categories/${itemToDelete.id}`)
                     if (res.status === 200) {
                         toast.success("Xóa danh mục thành công")
                         fetchCategories()

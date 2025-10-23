@@ -146,7 +146,9 @@ const CategoryPage = () => {
     const fetchProducts = async () => {
       try {
         const response = await api.get('/products')
-        setProductList(response.data)
+        console.log(response);
+        
+        setProductList(response?.data?.products)
         setLoading(false)
         socket.on("newProduct", (newProduct) => {
           setProductList((prev) => [newProduct, ...prev]) 

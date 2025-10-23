@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
-import api from "../../service/api"
+import apiAdmin from "../../service/apiAdmin"
 import ProductVariations from './ProductVariations.jsx'
 
 const AddProduct = ({ setActiveTab, fetchProducts }) => {
@@ -28,7 +28,7 @@ const AddProduct = ({ setActiveTab, fetchProducts }) => {
     useEffect(() => {
         const fetchCollections = async () => {
             try {
-                const res = await api.get("/collection")
+                const res = await apiAdmin.get("/collection")
                 setCollections(res.data)
             }
             catch (error) {
@@ -41,7 +41,7 @@ const AddProduct = ({ setActiveTab, fetchProducts }) => {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const res = await api.get("/categories") // đổi endpoint đúng backend bạn
+                const res = await apiAdmin.get("/categories") // đổi endpoint đúng backend bạn
                 setCategories(res.data) // gán mảng categories
             } catch (error) {
                 console.error("Lỗi khi load categories:", error)
@@ -78,7 +78,7 @@ const AddProduct = ({ setActiveTab, fetchProducts }) => {
         formDataUpload.append("file", file)
 
         try {
-            const res = await api.post("/upload", formDataUpload, {
+            const res = await apiAdmin.post("/upload", formDataUpload, {
                 headers: { "Content-Type": "multipart/form-data" },
             })
 
@@ -115,7 +115,7 @@ const AddProduct = ({ setActiveTab, fetchProducts }) => {
                 const formData = new FormData()
                 formData.append("file", files[i])
 
-                const res = await api.post("/upload", formData, {
+                const res = await apiAdmin.post("/upload", formData, {
                     headers: { "Content-Type": "multipart/form-data" },
                 })
                 uploadedUrls.push(res.data.url)
@@ -223,7 +223,7 @@ const AddProduct = ({ setActiveTab, fetchProducts }) => {
 
             }
 
-            const response = await api.post('/products', productData)
+            const response = await apiAdmin.post('/products', productData)
             if (response.status !== 201) {
                 toast.error(error?.response?.data?.message || "Lỗi khi thêm sản phẩm!")
             }

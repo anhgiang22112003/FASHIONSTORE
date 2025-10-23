@@ -10,7 +10,7 @@ const BestSellers = () => {
   const getBestSellers = async () => {
     try {
       const response = await api.get('/products'); 
-      setProducts(response.data);
+      setProducts(response.data.products);
     } catch (error) {
       console.error('Error fetching best sellers:', error);
     }

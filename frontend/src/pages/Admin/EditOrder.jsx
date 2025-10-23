@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react"
 import { PencilIcon, PrinterIcon, PaperAirplaneIcon, XMarkIcon, CheckIcon, } from "@heroicons/react/24/outline"
-import api from "@/service/api"
+import apiAdmin from "@/service/apiAdmin"
 import { toast } from "react-toastify"
 
 import OrderProductList from "../../components/adminOrder/OrderProductList"
@@ -57,7 +57,7 @@ const OrderEditPage = ({ orderId }) => {
     const fetchOrder = async () => {
         setIsLoading(true)
         try {
-            const res = await api.get(`/orders/${orderId}/detail`)
+            const res = await apiAdmin.get(`/orders/${orderId}/detail`)
             const order = res.data
             const mapped = {
                 _id: order._id, // Giữ lại _id để gửi API
@@ -162,7 +162,7 @@ const OrderEditPage = ({ orderId }) => {
                 })),
             }
 
-            const res = await api.patch(`/orders/${editedOrder._id}/edit`, updateData)
+            const res = await apiAdmin.patch(`/orders/${editedOrder._id}/edit`, updateData)
             // Sau khi backend tính toán lại, fetch lại dữ liệu mới nhất
             fetchOrder()
             setIsEditMode(false)

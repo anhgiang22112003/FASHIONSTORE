@@ -1,10 +1,10 @@
 import DeleteConfirmationModal from '@/components/DeleteConfirmationModal'
-import api from '@/service/api'
 import React, { useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
 import { Switch } from '@headlessui/react'
 import { LazyLoadImage } from 'react-lazy-load-image-component'
 import 'react-lazy-load-image-component/src/effects/blur.css'
+import apiAdmin from '@/service/apiAdmin'
 const ProductCollections = () => {
     const [collections, setCollections] = useState([])
     const [isFormOpen, setIsFormOpen] = useState(false)
@@ -19,7 +19,7 @@ const ProductCollections = () => {
     const fetchCollections = async () => {
         try {
             setIsLoading(true)
-            const res = await api.get('/collection')
+            const res = await apiAdmin.get('/collection')
             setCollections(res?.data || [])
         } catch (err) {
             toast.error('Lỗi khi lấy bộ sưu tập')
@@ -47,10 +47,10 @@ const ProductCollections = () => {
 
         try {
             if (editCollection) {
-                await api.put(`/collection/${editCollection._id}`, formData)
+                await apiAdmin.put(`/collection/${editCollection._id}`, formData)
                 toast.success('Cập nhật bộ sưu tập thành công')
             } else {
-                await api.post('/collection', formData)
+                await apiAdmin.post('/collection', formData)
                 toast.success('Thêm bộ sưu tập thành công')
             }
             fetchCollections()
@@ -72,7 +72,7 @@ const ProductCollections = () => {
         if (!itemToDelete) return
         try {
             setIsLoading(true)
-            const res = await api.delete(`/collection/${itemToDelete.id}`)
+            const res = await apiAdmin.delete(`/collection/${itemToDelete.id}`)
             if (res.status === 200) {
                 toast.success('Xóa bộ sưu tập thành công')
                 fetchCollections()
@@ -93,7 +93,7 @@ const ProductCollections = () => {
         const formData = new FormData()
         formData.append('file', file)
         try {
-            const res = await api.post('/upload', formData, {
+            const res = await apiAdmin.post('/upload', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             })
             if (res.status === 200 || res.status === 201) {

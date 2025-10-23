@@ -4,7 +4,7 @@ import {
     PlusIcon,
     MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline"
-import api from "@/service/api"
+import apiAdmin from "@/service/apiAdmin"
 import { toast } from "react-toastify"
 import { formatCurrency } from "../../pages/Admin/EditOrder"
 const AddProductToOrder = ({ orderId, fetchOrder, onClose }) => {
@@ -29,7 +29,7 @@ const AddProductToOrder = ({ orderId, fetchOrder, onClose }) => {
     const fetchResults = async (query) => {
         try {
             setLoading(true)
-            const res = await api.get(`/products/search?query=${query}`)
+            const res = await apiAdmin.get(`/products/search?query=${query}`)
             setResults(res.data || [])
         } catch (err) {
             console.error(err)
@@ -46,7 +46,7 @@ const AddProductToOrder = ({ orderId, fetchOrder, onClose }) => {
         }
 
         try {
-            await api.patch(`/orders/${orderId}/add-item`, {
+            await apiAdmin.patch(`/orders/${orderId}/add-item`, {
                 productId: selectedProduct._id,
                 color: selectedColor,
                 size: selectedSize,
@@ -374,7 +374,7 @@ const OrderProductList = ({
         const product = editedOrder.productList[index]
         if (!product) return
         try {
-            await api.delete(`/orders/${editedOrder._id}/item`, {
+            await apiAdmin.delete(`/orders/${editedOrder._id}/item`, {
                 params: {
                     productId: product.id._id,
                     color: product.color,

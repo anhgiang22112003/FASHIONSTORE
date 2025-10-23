@@ -1,7 +1,7 @@
 import axios from 'axios'
 import React, { useState, useEffect } from 'react'
-import api from '@/service/api' // Giả sử bạn có sẵn api instance này
 import { toast } from 'react-toastify' // Dùng toast để hiển thị thông báo
+import apiAdmin from '@/service/apiAdmin'
 
 // Component Input Tags đơn giản
 const TagInput = ({ tags, onAddTag, onRemoveTag }) => {
@@ -198,7 +198,7 @@ const CustomerEdit = ({ customer: initialCustomerData, onBack, refreshCustomers 
 
     try {
 
-      const response = await api.put(`/users/${id}`, payload)
+      const response = await apiAdmin.put(`/users/${id}`, payload)
       if (response.status === 200) {
         onBack()
         await refreshCustomers()
@@ -214,7 +214,7 @@ const CustomerEdit = ({ customer: initialCustomerData, onBack, refreshCustomers 
   }
   const handleSendEmail = async () => {
     try {
-      const res = await api.post(`/users/${initialCustomerData._id}/send-welcome`, {
+      const res = await apiAdmin.post(`/users/${initialCustomerData._id}/send-welcome`, {
         subject: emailSubject,
         text: emailMessage,
       })
@@ -233,7 +233,7 @@ const CustomerEdit = ({ customer: initialCustomerData, onBack, refreshCustomers 
       return
     }
     try {
-      await api.post(`/users/${initialCustomerData._id}/block`, {
+      await apiAdmin.post(`/users/${initialCustomerData._id}/block`, {
         reason: lockReason
       })
       onBack()
@@ -247,7 +247,7 @@ const CustomerEdit = ({ customer: initialCustomerData, onBack, refreshCustomers 
 
   const handleGiveVoucher = async () => {
     try {
-      await axios.post(`/api/customers/${customer.id}/give-voucher`, {
+      await axios.post(`/customers/${customer.id}/give-voucher`, {
         voucherCode: "SALE50",
         discount: 50,
         expireDate: "2025-12-31",

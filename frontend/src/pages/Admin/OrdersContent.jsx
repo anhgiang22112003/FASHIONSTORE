@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { EyeIcon, FunnelIcon, ArrowDownTrayIcon, ArrowUpTrayIcon } from "@heroicons/react/24/outline"
-import api from "@/service/api"
 import { toast } from "react-toastify"
 import { socket } from "@/service/socket"
+import apiAdmin from "@/service/apiAdmin"
 
 
 const statusOptions = [
@@ -68,7 +68,7 @@ const OrdersContent = ({ data, onEditOrder }) => {
   const handleExportExcel = async () => {
     try {
       setLoading(true)
-      const res = await api.get("/excel/export", {
+      const res = await apiAdmin.get("/excel/export", {
         responseType: "blob",
       })
       const blob = new Blob([res.data], {
@@ -101,7 +101,7 @@ const OrdersContent = ({ data, onEditOrder }) => {
 
     try {
       setLoading(true)
-      const res = await api.post("/excel/import", formData, {
+      const res = await apiAdmin.post("/excel/import", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       })
 
@@ -126,7 +126,7 @@ const OrdersContent = ({ data, onEditOrder }) => {
 
   const fetchOrders = async (pageNum = 1) => {
     try {
-      const res = await api.get(`/orders/all?page=${pageNum}&limit=${limit}`)
+      const res = await apiAdmin.get(`/orders/all?page=${pageNum}&limit=${limit}`)
       setOrders(res?.data.data || [])
       setTotal(res.data.total || 0)
       setPage(res.data.page || 1)
@@ -137,7 +137,7 @@ const OrdersContent = ({ data, onEditOrder }) => {
 
   const fetchCustomers = async (page = 1) => {
     try {
-      const res = await api.get(`/users?role=customer&page=${page}&limit=10`)
+      const res = await apiAdmin.get(`/users?role=customer&page=${page}&limit=10`)
       const newCustomers = res.data.data || []
       if (newCustomers.length === 0) setHasMoreCustomers(false)
       setCustomers(prev => page === 1 ? newCustomers : [...prev, ...newCustomers])
@@ -201,7 +201,7 @@ const OrdersContent = ({ data, onEditOrder }) => {
   const handleStatusChange = async (id, newStatus) => {
     try {
       setLoading(true)
-      await api.patch(`/orders/${id}/status`, { status: newStatus })
+      await apiAdmin.patch(`/orders/${id}/status`, { status: newStatus })
       toast.success("Cập nhật trạng thái thành công ✅")
       fetchOrders()
       setEditingId(null)
@@ -219,7 +219,7 @@ const OrdersContent = ({ data, onEditOrder }) => {
   const toggleFilter = () => setIsFilterVisible(!isFilterVisible)
   const applyFilter = async () => {
     try {
-      const res = await api.get("/orders/filter", { params: filters })
+      const res = await apiAdmin.get("/orders/filter", { params: filters })
       setOrders(res.data)
       toast.success("Lọc thành công ✅")
     } catch {
@@ -266,7 +266,7 @@ const OrdersContent = ({ data, onEditOrder }) => {
 
     try {
       setLoading(true)
-      await api.patch("/orders/bulk-status", {
+      await apiAdmin.patch("/orders/bulk-status", {
         orderIds: selectedOrders,
         status: bulkStatus
       })
@@ -343,7 +343,7 @@ const OrdersContent = ({ data, onEditOrder }) => {
                 <button
                   onClick={async () => {
                     try {
-                      const res = await api.get("/excel/export-template", { responseType: "blob" })
+                      const res = await apiAdmin.get("/excel/export-template", { responseType: "blob" })
                       const blob = new Blob([res.data], {
                         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                       })

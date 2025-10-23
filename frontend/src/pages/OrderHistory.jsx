@@ -58,7 +58,7 @@ const OrderHistory = () => {
   const fetchOrders = async () => {
     try {
       // Giả định API trả về danh sách đơn hàng của người dùng hiện tại
-      const res = await api.get("/orders")
+      const res = await api.get("/orders/detail")
       setOrders(res.data)
     } catch (err) {
       toast.error(err?.response?.data?.message || "Không thể tải đơn hàng")

@@ -1,14 +1,15 @@
-import React, { Suspense, lazy } from "react"
+import React, { Suspense, lazy, useEffect } from "react"
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
 import "./index.css"
 import Header from "./components/fashion/Header"
 import Footer from "./components/fashion/Footer"
-import { ToastContainer } from "react-toastify"
+import { toast, ToastContainer } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
 import { AdminRoute } from "./service/AdminRoute"
 import { AuthProvider } from "./context/Authcontext"
 import { CartProvider } from "./context/CartContext"
 import OrderHistory from "./pages/OrderHistory"
+import { socket } from "./service/socket"
 const AdminLoginForm = lazy(() => import("./pages/Admin/LoginAdmin"))
 // Lazy load các page
 const HomePage = lazy(() => import("./pages/HomePage"))
@@ -26,7 +27,7 @@ const ProductCategoryPage = lazy(() => import("./pages/Category"))
 const AdminLayout = lazy(() => import("./pages/Admin/Adminlayout"))
 const UserProfile = lazy(() => import("./pages/UserProfile"))
 const ResetPassword = lazy(() => import("./pages/ResetPassword"))
-const ForgotPassword = lazy(()=> import ("./pages/ForgotPassword"))  
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword"))
 
 // Blog article inline
 const BlogArticlePage = () => {
@@ -51,6 +52,8 @@ const BlogArticlePage = () => {
 
 // Layout Frontend có Header & Footer
 const FrontendLayout = ({ children }) => {
+
+
   return (
     <div className="min-h-screen bg-white">
       <Header />
@@ -61,53 +64,79 @@ const FrontendLayout = ({ children }) => {
 }
 
 function App() {
+
+  const currentUser = JSON.parse(localStorage.getItem("user"))
+  console.log(currentUser);
+  
+  useEffect(() => {
+
+    socket.on("updateReview", (review) => {
+      if (review?.userId?._id === currentUser?.id) {
+        toast.info(`Trạng thái đánh giá của bạn #${review._id} đã đổi thành ${review.status}`)
+      }
+    })
+
+    return () => socket.off("updateReview")
+  }, [])
+
+
+  useEffect(() => {
+    socket.on("ReplyReview", (review) => {
+      if (review?.userId?._id === currentUser?.id) {
+        toast.info(`Đánh giá của bạn với sản phẩm #${review.productId.name} đã được phản hồi`)
+      }
+    })
+
+    return () => socket.off("ReplyReview")
+  }, [])
+
   return (
     <Router>
       <AuthProvider>
         <CartProvider>
-        {/* Suspense hiển thị fallback khi đang load component */}
-        <Suspense fallback={<div className="p-8 text-center">Đang tải...</div>}>
-          <ToastContainer position="top-right" autoClose={3000} />
+          {/* Suspense hiển thị fallback khi đang load component */}
+          <Suspense fallback={<div className="p-8 text-center">Đang tải...</div>}>
+            <ToastContainer position="top-right" autoClose={3000} />
 
-          <Routes>
-            {/* Frontend routes */}
-            <Route
-              path="/*"
-              element={
-                <FrontendLayout>
-                  <Routes>
-                    <Route path="/" element={<HomePage />} />
-                    <Route path="/product/:id" element={<ProductPage />} />
-                    <Route path="/category/:category" element={<CategoryPage />} />
-                    <Route path="/cart" element={<CartPage />} />
-                    <Route path="/about" element={<AboutPage />} />
-                    <Route path="/contact" element={<ContactPage />} />
-                    <Route path="/checkout" element={<Checkout />} />
-                    <Route path="/wishlist" element={<Wishlist />} />
-                    <Route path="/login" element={<AuthPage />} />
-                    <Route path="/collection" element={<CollectionPage />} />
-                    <Route path="/category" element={<ProductCategoryPage />} />
-                    <Route path="/blog" element={<BlogPage />} />
-                    <Route path="/blog/:slug" element={<BlogArticlePage />} />
-                    <Route path="/profile" element={<UserProfile />} />
-                    <Route path="/orders" element={<OrderHistory />} />
-                    <Route path="/forgot-password" element={<ForgotPassword />} />
-                    <Route path="/reset-password/:token" element={<ResetPassword />} />
-                  </Routes>
-                </FrontendLayout>
-              }
-            />
+            <Routes>
+              {/* Frontend routes */}
+              <Route
+                path="/*"
+                element={
+                  <FrontendLayout>
+                    <Routes>
+                      <Route path="/" element={<HomePage />} />
+                      <Route path="/product/:id" element={<ProductPage />} />
+                      <Route path="/category/:category" element={<CategoryPage />} />
+                      <Route path="/cart" element={<CartPage />} />
+                      <Route path="/about" element={<AboutPage />} />
+                      <Route path="/contact" element={<ContactPage />} />
+                      <Route path="/checkout" element={<Checkout />} />
+                      <Route path="/wishlist" element={<Wishlist />} />
+                      <Route path="/login" element={<AuthPage />} />
+                      <Route path="/collection" element={<CollectionPage />} />
+                      <Route path="/category" element={<ProductCategoryPage />} />
+                      <Route path="/blog" element={<BlogPage />} />
+                      <Route path="/blog/:slug" element={<BlogArticlePage />} />
+                      <Route path="/profile" element={<UserProfile />} />
+                      <Route path="/orders" element={<OrderHistory />} />
+                      <Route path="/forgot-password" element={<ForgotPassword />} />
+                      <Route path="/reset-password/:token" element={<ResetPassword />} />
+                    </Routes>
+                  </FrontendLayout>
+                }
+              />
 
-            {/* Admin routes */}
-            <Route path="/admin/*"
-              element={
-                <AdminRoute>
-                  <AdminLayout />
-                </AdminRoute>
-              } />
-            <Route path="/login/admin" element={<AdminLoginForm />} />
-          </Routes>
-        </Suspense>
+              {/* Admin routes */}
+              <Route path="/admin/*"
+                element={
+                  <AdminRoute>
+                    <AdminLayout />
+                  </AdminRoute>
+                } />
+              <Route path="/login/admin" element={<AdminLoginForm />} />
+            </Routes>
+          </Suspense>
         </CartProvider>
       </AuthProvider>
     </Router>

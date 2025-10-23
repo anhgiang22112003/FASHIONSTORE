@@ -46,7 +46,6 @@ const AdminSettingsPage = () => {
     // You would typically send a request to your API here
     // Cập nhật thông tin cá nhân thành công hoặc thất bại
   };
-
   const handleChangePassword = (e) => {
     e.preventDefault();
     // Logic to change password

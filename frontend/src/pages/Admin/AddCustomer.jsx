@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { UserCircleIcon, CheckCircleIcon, XMarkIcon } from '@heroicons/react/24/solid'
-import api from '@/service/api'
 import { toast } from 'react-toastify'
+import apiAdmin from '@/service/apiAdmin'
 
 const AddCustomerPage = ({ onBack, refreshCustomers }) => {
   const [formData, setFormData] = useState({
@@ -90,7 +90,7 @@ const AddCustomerPage = ({ onBack, refreshCustomers }) => {
 
   const handleSave = async () => {
     try {
-      const response = await api.post('/users', formData)
+      const response = await apiAdmin.post('/users', formData)
       if (response.status === 201) {
         toast.success("Thêm khách hàng thành công!")
         await refreshCustomers() // Tải lại danh sách khách hàng

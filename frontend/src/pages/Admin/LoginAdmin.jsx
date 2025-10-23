@@ -1,4 +1,4 @@
-import api from '@/service/api'
+import apiAdmin from '@/service/apiAdmin'
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
@@ -10,10 +10,10 @@ const AdminLoginForm = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault()
-        try {
-            const res = await api.post("/auth/login-admin", { email, password })                        
-            localStorage.setItem("accessToken", res?.data?.accessToken)
-            localStorage.setItem("user", JSON.stringify(res.data.user))
+        try {            
+            const res = await apiAdmin.post("/auth/login-admin", { email, password })                        
+            sessionStorage.setItem("accessToken", res?.data?.accessToken)
+            sessionStorage.setItem("user", JSON.stringify(res.data.user))
             toast.success("Đăng nhập thành công!")
             navigate("/admin")
         } catch (err) {

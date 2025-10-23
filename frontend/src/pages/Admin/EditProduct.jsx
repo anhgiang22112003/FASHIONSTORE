@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import ProductVariations from './ProductVariations'
-import api from '@/service/api'
 import { toast } from 'react-toastify'
+import apiAdmin from '@/service/apiAdmin'
 
 // Dữ liệu sản phẩm giả lập, sẽ được tải từ API trong thực tế
 
@@ -35,7 +35,7 @@ const EditProduct = ({ productId, onBack, fetchProducts }) => {
     useEffect(() => {
         const getProductById = async (productId) => {
             try {
-                const res = await api.get(`/products/${productId}`)
+                const res = await apiAdmin.get(`/products/${productId}`)
                 const data = res.data
                 setCollection(data.collection?._id || data.collection || '')
                 setProductName(data.name)
@@ -66,9 +66,9 @@ const EditProduct = ({ productId, onBack, fetchProducts }) => {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const res = await api.get("/categories")
+                const res = await apiAdmin.get("/categories")
                 setCategories(res.data)
-                const collRes = await api.get("/collection")
+                const collRes = await apiAdmin.get("/collection")
                 setCollections(collRes.data)
             } catch (error) {
                 console.error("Lỗi khi load categories:", error)
@@ -110,7 +110,7 @@ const EditProduct = ({ productId, onBack, fetchProducts }) => {
         formDataUpload.append("file", file)
 
         try {
-            const res = await api.post("/upload", formDataUpload, {
+            const res = await apiAdmin.post("/upload", formDataUpload, {
                 headers: { "Content-Type": "multipart/form-data" },
             })
 
@@ -147,7 +147,7 @@ const EditProduct = ({ productId, onBack, fetchProducts }) => {
                 const formData = new FormData()
                 formData.append("file", files[i])
 
-                const res = await api.post("/upload", formData, {
+                const res = await apiAdmin.post("/upload", formData, {
                     headers: { "Content-Type": "multipart/form-data" },
                 })
                 uploadedUrls.push(res.data.url)
@@ -212,7 +212,7 @@ const EditProduct = ({ productId, onBack, fetchProducts }) => {
                 productData.stock = Number(stock)
             }
 
-            const response = await api.put(`/products/${productId}`, productData)
+            const response = await apiAdmin.put(`/products/${productId}`, productData)
 
             if (response.status !== 201) {
                 toast.success("Sửa sản phẩm thành công!")

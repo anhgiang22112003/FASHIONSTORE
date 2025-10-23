@@ -1,18 +1,17 @@
-// api.js
+// src/service/apiUser.js
 import axios from "axios"
-import { useNavigate } from "react-router-dom"
 
-const api = axios.create({
-  baseURL: "http://localhost:4000", // thay bằng API backend của bạn
+const apiUser = axios.create({
+  baseURL: "http://localhost:4000",
   headers: {
     "Content-Type": "application/json",
   },
 })
 
-// Interceptor cho request -> tự gắn token vào header
-api.interceptors.request.use(
+// Gắn token từ localStorage
+apiUser.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("accessToken") // hoặc sessionStorage
+    const token = localStorage.getItem("accessToken")
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
@@ -21,19 +20,16 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 )
 
-// Interceptor cho response -> bắt lỗi 401
-api.interceptors.response.use(
+apiUser.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
-      // token hết hạn hoặc không hợp lệ
       localStorage.removeItem("accessToken")
-      localStorage.removeItem("user") 
-
-      window.location.href = "/login" // điều hướng về login
+      localStorage.removeItem("user")
+      // window.location.href = "/login"
     }
     return Promise.reject(error)
   }
 )
 
-export default api
+export default apiUser

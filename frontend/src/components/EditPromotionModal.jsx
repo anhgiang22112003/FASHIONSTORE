@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { XMarkIcon } from '@heroicons/react/24/outline'
-import api from '@/service/api'
+import apiAdmin from '@/service/apiAdmin'
 import { toast } from 'react-toastify'
 
 // Modal chung
@@ -43,7 +43,7 @@ const EditPromotionModal = ({ title, isOpen, onClose, onSave, promotion = null }
   useEffect(() => {
     const fetCategories = async () => {
       try {
-        const response = await api.get("/categories")
+        const response = await apiAdmin.get("/categories")
         setCategories(response.data)
       } catch (err) {
         console.error("API Error:", err)
@@ -91,10 +91,10 @@ const EditPromotionModal = ({ title, isOpen, onClose, onSave, promotion = null }
     try {
       let response
       if (promotion) {
-        response = await api.patch(`/vouchers/${promotion._id}`, formData) // sửa
+        response = await apiAdmin.patch(`/vouchers/${promotion._id}`, formData) // sửa
         toast.success('Cập nhật voucher thành công!')
       } else {
-        response = await api.post("/vouchers", formData) // thêm      
+        response = await apiAdmin.post("/vouchers", formData) // thêm      
         toast.success('Thêm voucher thành công!')
       }
       onSave()
