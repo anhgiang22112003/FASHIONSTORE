@@ -1,10 +1,15 @@
 import React, { useState, useEffect, useContext } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Heart, ShoppingBag, Minus, Plus, Truck, RefreshCw, Shield } from 'lucide-react'
-import { Button } from '../components/ui/button'
+import { Button } from '../components/ui/button' // Đảm bảo đường dẫn đúng
 import { toast } from 'react-toastify'
 import api from '@/service/api'
 import { CartContext } from '@/context/CartContext'
+import RelatedProducts from '@/components/fashion/RelatedProducts'
+import ProductReviews from '@/components/fashion/ProductReviews'
+
+// ✅ Import 2 component mới
+
 
 const ProductPage = () => {
   const { id } = useParams()
@@ -86,6 +91,11 @@ const ProductPage = () => {
       return
     }
 
+    if (quantity > currentStock) {
+      toast.warning(`Không đủ hàng, chỉ còn ${currentStock} sản phẩm.`)
+      return
+    }
+    
     if (!product?._id) {
       toast.error('Không tìm thấy sản phẩm')
       return
@@ -99,6 +109,7 @@ const ProductPage = () => {
         size: selectedSize,
       }
       await addToCart(body)
+      toast.success('Đã thêm sản phẩm vào giỏ hàng!')
     } catch (error) {
       console.error(error)
       toast.error(error?.response?.data?.message || 'Thêm vào giỏ hàng thất bại')
@@ -124,13 +135,13 @@ const ProductPage = () => {
         <div className="space-y-4">
           <div className="aspect-square overflow-hidden rounded-lg bg-gray-100">
             <img
-              src={product?.subImages?.[selectedImage] || product?.mainImage}
+              src={ product?.mainImage}
               alt={product?.name}
               className="w-full h-full object-cover"
             />
           </div>
 
-          {product?.subImages?.length > 1 && (
+          {product?.subImages?.length  && (
             <div className="flex gap-4">
               {product?.subImages?.map((image, index) => (
                 <button
@@ -219,10 +230,12 @@ const ProductPage = () => {
                   <button
                     key={size}
                     onClick={() => setSelectedSize(size)}
+                    disabled={!isAvailable}
                     className={`px-4 py-2 border rounded-lg ${selectedSize === size
                       ? 'border-pink-500 bg-pink-50 text-pink-500'
                       : 'border-gray-300 hover:border-gray-400'
-                      }`}
+                      } ${!isAvailable ? 'opacity-50 cursor-not-allowed' : ''}
+                      `}
                   >
                     {size}
                   </button>
@@ -238,19 +251,21 @@ const ProductPage = () => {
               <div className="flex items-center border rounded-lg">
                 <button
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="p-2 hover:bg-gray-100"
+                  className="p-2 hover:bg-gray-100 disabled:opacity-50"
+                  disabled={quantity <= 1}
                 >
                   <Minus className="w-4 h-4" />
                 </button>
                 <span className="px-4 py-2 min-w-[60px] text-center">{quantity}</span>
                 <button
-                  onClick={() => setQuantity(quantity + 1)}
-                  className="p-2 hover:bg-gray-100"
+                  onClick={() => setQuantity(Math.min(currentStock, quantity + 1))}
+                  className="p-2 hover:bg-gray-100 disabled:opacity-50"
+                  disabled={quantity >= currentStock}
                 >
                   <Plus className="w-4 h-4" />
                 </button>
               </div>
-              <span className="text-green-600">{product.status}</span>
+              <span className="text-green-600">{currentStock > 0 ? product.status : 'Hết hàng'}</span>
             </div>
           </div>
 
@@ -260,6 +275,7 @@ const ProductPage = () => {
               onClick={handleAddToCart}
               className="flex-1 bg-pink-500 hover:bg-pink-600 text-white"
               size="lg"
+              disabled={currentStock === 0 || quantity > currentStock}
             >
               <ShoppingBag className="w-5 h-5 mr-2" />
               Thêm vào giỏ hàng
@@ -291,6 +307,26 @@ const ProductPage = () => {
           </div>
         </div>
       </div>
+      
+      {/* ========================================================= */}
+      {/* ✅ Bổ sung 2 component mới ở cuối trang */}
+      {/* ========================================================= */}
+      
+      {/* Sản phẩm cùng loại */}
+      <RelatedProducts
+        title={`Sản phẩm cùng danh mục: ${product?.category?.name || '...'}` }
+        // Trong thực tế, bạn sẽ cần fetch products dựa trên product.category.Id hoặc product.collection.Id
+        // products={fetchedRelatedProducts} 
+        category={product.category._id}
+        collection={product.collection._id}
+        productId={id}
+      />
+      
+      <div className="my-12 border-t"></div>
+
+      {/* Đánh giá và Sản phẩm được yêu thích */}
+      <ProductReviews  productId={id}/>
+
     </div>
   )
 }
