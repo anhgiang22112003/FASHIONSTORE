@@ -2,7 +2,7 @@
 import axios from "axios"
 
 const apiAdmin = axios.create({
-  baseURL: "http://localhost:4000",
+   baseURL:  process.env.REACT_APP_API_URL || "http://localhost:4000",
   headers: {
     "Content-Type": "application/json",
   },
