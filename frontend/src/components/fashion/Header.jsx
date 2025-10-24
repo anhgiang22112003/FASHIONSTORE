@@ -17,16 +17,19 @@ import {
 import { ChatBubbleBottomCenterTextIcon } from '@heroicons/react/24/solid'
 import { AuthContext } from '@/context/Authcontext'
 import { CartContext } from '@/context/CartContext'
+import { WishlistContext } from '@/context/WishlistContext'
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const navigate = useNavigate()
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
   const [isMessagesOpen, setIsMessagesOpen] = useState(false)
-
+  const { wishlist } = useContext(WishlistContext)
   const { user, logout } = useContext(AuthContext)
   const { cart } = useContext(CartContext)
   const totalItems = cart?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0
+  const wishlistCount = wishlist?.length
+
   const toggleNotifications = () => {
     setIsNotificationsOpen(!isNotificationsOpen)
     setIsProfileMenuOpen(false)
@@ -97,9 +100,14 @@ const Header = () => {
 
           {/* Actions */}
           <div className="flex items-center space-x-4">
-            <Link to={"/wishlist"}>
-              <Button variant="ghost" size="sm" className="hidden sm:flex">
-                <Heart className="w-8 h-8" />
+            <Link to="/wishlist">
+              <Button variant="ghost" size="sm" className="relative hidden sm:flex">
+                <Heart className="w-8 h-8 text-pink-500" />
+                {wishlistCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-pink-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    {wishlistCount}
+                  </span>
+                )}
               </Button>
             </Link>
             {user ? <>

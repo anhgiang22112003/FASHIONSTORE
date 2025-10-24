@@ -1,10 +1,11 @@
-import React, { useEffect } from 'react'
+import React, { useContext, useEffect } from 'react'
 import { Star, ShoppingBag, Heart } from 'lucide-react'
 import { Button } from '../ui/button'
 import api from '@/service/api'
 import { Link } from 'react-router-dom'
 import SideCartDrawer from './SideCartDrawer'
 import { toast } from 'react-toastify'
+import { WishlistContext } from '@/context/WishlistContext'
 
 const VariantSelectionModal = React.lazy(() => import('./VariantSelectionModal'))
 const BestSellers = () => {
@@ -13,6 +14,7 @@ const BestSellers = () => {
   const [isVariantModalOpen, setIsVariantModalOpen] = React.useState(false)
   const [isCartDrawerOpen, setIsCartDrawerOpen] = React.useState(false)
     const [favorites, setFavorites] = React.useState([]) // ✅ Danh sách yêu thích
+  const { fetchWishlist } = useContext(WishlistContext)
 
   const handleSuccessAndOpenCart = () => {
     setIsCartDrawerOpen(true) // Mở Drawer giỏ hàng
@@ -42,16 +44,16 @@ const BestSellers = () => {
       if (already) {
         await api.delete(`/users/favorites/${productId}`)
         toast.info('Đã xóa khỏi danh sách yêu thích 💔')
+        fetchWishlist()
       } else {
         await api.post(`/users/favorites/${productId}`, {})
         toast.success('Đã thêm vào danh sách yêu thích ❤️')
+        fetchWishlist()
       }
       await getFavorites()
     } catch (error) {
       console.error('Error toggling favorite:', error)
       toast.error('Có lỗi xảy ra, vui lòng thử lại')
-
-      // Nếu lỗi thì rollback optimistic update bằng cách re-fetch
       await getFavorites()
     }
   }

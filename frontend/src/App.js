@@ -12,6 +12,7 @@ import OrderHistory from "./pages/OrderHistory"
 import { socket } from "./service/socket"
 import { ShoppingBag } from 'lucide-react'
 import SideCartDrawer from "./components/fashion/SideCartDrawer"
+import { WishlistProvider } from "./context/WishlistContext"
 // Giả định SideCartDrawer nằm trong đường dẫn này
 
 const AdminLoginForm = lazy(() => import("./pages/Admin/LoginAdmin"))
@@ -124,6 +125,7 @@ function App() {
     <Router>
       <AuthProvider>
         <CartProvider>
+          <WishlistProvider> 
           {/* Suspense hiển thị fallback khi đang load component */}
           <Suspense fallback={<div className="p-8 text-center">Đang tải...</div>}>
             <ToastContainer position="top-right" autoClose={3000} />
@@ -174,6 +176,7 @@ function App() {
               <Route path="/login/admin" element={<AdminLoginForm />} />
             </Routes>
           </Suspense>
+           </WishlistProvider>
         </CartProvider>
       </AuthProvider>
     </Router>
