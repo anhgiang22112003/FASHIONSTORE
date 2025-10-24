@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useEffect } from "react"
+import React, { Suspense, lazy, useEffect, useState } from "react"
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
 import "./index.css"
 import Header from "./components/fashion/Header"
@@ -7,9 +7,13 @@ import { toast, ToastContainer } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
 import { AdminRoute } from "./service/AdminRoute"
 import { AuthProvider } from "./context/Authcontext"
-import { CartProvider } from "./context/CartContext"
+import { CartProvider, CartContext } from "./context/CartContext" // Thêm CartContext vào import
 import OrderHistory from "./pages/OrderHistory"
 import { socket } from "./service/socket"
+import { ShoppingBag } from 'lucide-react'
+import SideCartDrawer from "./components/fashion/SideCartDrawer"
+// Giả định SideCartDrawer nằm trong đường dẫn này
+
 const AdminLoginForm = lazy(() => import("./pages/Admin/LoginAdmin"))
 // Lazy load các page
 const HomePage = lazy(() => import("./pages/HomePage"))
@@ -29,7 +33,7 @@ const UserProfile = lazy(() => import("./pages/UserProfile"))
 const ResetPassword = lazy(() => import("./pages/ResetPassword"))
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"))
 
-// Blog article inline
+// Blog article inline (Giữ nguyên)
 const BlogArticlePage = () => {
   return (
     <div className="container mx-auto px-4 py-16">
@@ -51,25 +55,50 @@ const BlogArticlePage = () => {
 }
 
 // Layout Frontend có Header & Footer
-const FrontendLayout = ({ children }) => {
-
+// Đã được cập nhật để nhận props quản lý Drawer
+const FrontendLayout = ({ children, isCartDrawerOpen, setIsCartDrawerOpen }) => {
+  // Lấy dữ liệu giỏ hàng để tính số lượng và hiển thị badge
+  const { cart } = React.useContext(CartContext)
+  // Tính tổng số lượng sản phẩm trong giỏ
+  const totalCartItems = cart?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0
 
   return (
     <div className="min-h-screen bg-white">
       <Header />
       <main>{children}</main>
       <Footer />
+
+      {/* ⭐️ ICON GIỎ HÀNG NỔI (Floating Cart Icon) */}
+      <button
+        onClick={() => setIsCartDrawerOpen(true)}
+        className="fixed bottom-6 right-6 z-50 p-4 rounded-full bg-pink-600 text-white shadow-xl hover:bg-pink-700 transition-all duration-300 transform hover:scale-105"
+        aria-label="Mở giỏ hàng"
+      >
+        <ShoppingBag className="w-6 h-6" />
+
+        {/* Badge số lượng sản phẩm */}
+        {totalCartItems > 0 && (
+          <span className="absolute top-0 right-0 transform translate-x-1/4 -translate-y-1/4 bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-white">
+            {totalCartItems > 99 ? '99+' : totalCartItems}
+          </span>
+        )}
+      </button>
+
+      {/* ⭐️ SIDE CART DRAWER */}
+      <SideCartDrawer
+        isOpen={isCartDrawerOpen}
+        onClose={() => setIsCartDrawerOpen(false)}
+      />
     </div>
   )
 }
 
 function App() {
+  const [isCartDrawerOpen, setIsCartDrawerOpen] = useState(false)
 
   const currentUser = JSON.parse(localStorage.getItem("user"))
-  console.log(currentUser);
-  
-  useEffect(() => {
 
+  useEffect(() => {
     socket.on("updateReview", (review) => {
       if (review?.userId?._id === currentUser?.id) {
         toast.info(`Trạng thái đánh giá của bạn #${review._id} đã đổi thành ${review.status}`)
@@ -89,6 +118,7 @@ function App() {
 
     return () => socket.off("ReplyReview")
   }, [])
+  // Hết Logic Socket
 
   return (
     <Router>
@@ -103,10 +133,17 @@ function App() {
               <Route
                 path="/*"
                 element={
-                  <FrontendLayout>
+                  // ⭐️ TRUYỀN STATE CHO LAYOUT
+                  <FrontendLayout
+                    isCartDrawerOpen={isCartDrawerOpen}
+                    setIsCartDrawerOpen={setIsCartDrawerOpen}
+                  >
                     <Routes>
                       <Route path="/" element={<HomePage />} />
-                      <Route path="/product/:id" element={<ProductPage />} />
+                      {/* Truyền hàm mở Cart cho ProductPage để dùng sau khi thêm hàng thành công */}
+                      <Route path="/product/:id" element={<ProductPage
+                        setIsCartDrawerOpen={setIsCartDrawerOpen}
+                      />} />
                       <Route path="/category/:category" element={<CategoryPage />} />
                       <Route path="/cart" element={<CartPage />} />
                       <Route path="/about" element={<AboutPage />} />

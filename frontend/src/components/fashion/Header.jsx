@@ -99,7 +99,7 @@ const Header = () => {
           <div className="flex items-center space-x-4">
             <Link to={"/wishlist"}>
               <Button variant="ghost" size="sm" className="hidden sm:flex">
-                <Heart className="w-5 h-5" />
+                <Heart className="w-8 h-8" />
               </Button>
             </Link>
             {user ? <>
@@ -186,7 +186,7 @@ const Header = () => {
               className="relative"
               onClick={() => navigate('/cart')}
             >
-              <ShoppingBag className="w-5 h-5" />
+              <ShoppingBag className="w-8 h-8" />
               {totalItems > 0 && (
                 <span className="absolute -top-1 -right-1 bg-pink-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                   {totalItems}

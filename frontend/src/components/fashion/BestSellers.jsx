@@ -1,21 +1,68 @@
-import React, { useEffect } from 'react';
-import { Star, ShoppingBag, Heart } from 'lucide-react';
-import { Button } from '../ui/button';
+import React, { useEffect } from 'react'
+import { Star, ShoppingBag, Heart } from 'lucide-react'
+import { Button } from '../ui/button'
 import api from '@/service/api'
 import { Link } from 'react-router-dom'
+import SideCartDrawer from './SideCartDrawer'
+import { toast } from 'react-toastify'
 
+const VariantSelectionModal = React.lazy(() => import('./VariantSelectionModal'))
 const BestSellers = () => {
   const [products, setProducts] = React.useState()
+  const [selectedProduct, setSelectedProduct] = React.useState(null)
+  const [isVariantModalOpen, setIsVariantModalOpen] = React.useState(false)
+  const [isCartDrawerOpen, setIsCartDrawerOpen] = React.useState(false)
+    const [favorites, setFavorites] = React.useState([]) // ✅ Danh sách yêu thích
 
+  const handleSuccessAndOpenCart = () => {
+    setIsCartDrawerOpen(true) // Mở Drawer giỏ hàng
+  }
   const getBestSellers = async () => {
     try {
-      const response = await api.get('/products'); 
-      setProducts(response.data.products);
+      const response = await api.get('/products')
+      setProducts(response.data.products)
     } catch (error) {
-      console.error('Error fetching best sellers:', error);
+      console.error('Error fetching best sellers:', error)
     }
   }
-    useEffect(() => {getBestSellers()}, [])
+  const getFavorites = async () => {
+    try {
+      const res = await api.get('/users/favorites')
+      const ids = (res.data || []).map((p) => p._id ?? p.id)
+      setFavorites(ids)
+    } catch (error) {
+      console.error('Error fetching favorites:', error)
+    }
+  }
+
+  const toggleFavorite = async (productId) => {
+    try {
+      const already = favorites.includes(productId)
+      setFavorites(prev => already ? prev.filter(id => id !== productId) : [...prev, productId])
+      if (already) {
+        await api.delete(`/users/favorites/${productId}`)
+        toast.info('Đã xóa khỏi danh sách yêu thích 💔')
+      } else {
+        await api.post(`/users/favorites/${productId}`, {})
+        toast.success('Đã thêm vào danh sách yêu thích ❤️')
+      }
+      await getFavorites()
+    } catch (error) {
+      console.error('Error toggling favorite:', error)
+      toast.error('Có lỗi xảy ra, vui lòng thử lại')
+
+      // Nếu lỗi thì rollback optimistic update bằng cách re-fetch
+      await getFavorites()
+    }
+  }
+  useEffect(() => {
+    const init = async () => {
+      await getBestSellers()
+      await getFavorites()
+    }
+    init()
+  }, [])
+    // Hàm mở giỏ hàng từ icon
 
   return (
     <section className="py-16 bg-white">
@@ -42,7 +89,7 @@ const BestSellers = () => {
                   alt={product?.name}
                   className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                 />
-                
+
                 {/* Sale Badge */}
                 {product?.originalPrice > product?.price && (
                   <div className="absolute top-3 left-3 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-semibold">
@@ -51,15 +98,42 @@ const BestSellers = () => {
                 )}
 
                 {/* Action Buttons */}
-                <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Button size="sm" variant="secondary" className="w-8 h-8 p-0 rounded-full">
-                    <Heart className="w-4 h-4" />
+               <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    className={`w-8 h-8 p-0 rounded-full ${
+                      favorites.includes(product._id)
+                        ? 'bg-pink-100 text-pink-500'
+                        : 'bg-white text-gray-700'
+                    }`}
+                    onClick={(e) => {
+                      e.preventDefault()
+                      toggleFavorite(product._id)
+                    }}
+                  >
+                    <Heart
+                      className={`w-4 h-4 ${
+                        favorites.includes(product._id)
+                          ? 'fill-pink-500'
+                          : 'fill-transparent'
+                      }`}
+                    />
                   </Button>
                 </div>
 
                 {/* Add to Cart Button */}
                 <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all">
-                  <Button size="sm" className="w-full bg-pink-500 hover:bg-pink-600">
+                  <Button
+                    size="sm"
+                    className="w-full bg-pink-500 hover:bg-pink-600"
+                    // Thay đổi: Mở modal thay vì thêm trực tiếp
+                    onClick={(e) => {
+                      // e.preventDefault(); // Có thể cần chặn nếu nút nằm trong thẻ Link
+                      setSelectedProduct(product)
+                      setIsVariantModalOpen(true)
+                    }}
+                  >
                     <ShoppingBag className="w-4 h-4 mr-2" />
                     Thêm vào giỏ
                   </Button>
@@ -69,22 +143,21 @@ const BestSellers = () => {
               {/* Product Info */}
               <div className="p-4">
                 <Link to={`product/${product?._id}`}>
-                <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">
-                  {product?.name}
-                </h3>
+                  <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">
+                    {product?.name}
+                  </h3>
                 </Link>
-                
+
                 {/* Rating */}
                 <div className="flex items-center gap-1 mb-2">
                   <div className="flex items-center">
                     {[...Array(5)].map((_, i) => (
                       <Star
                         key={i}
-                        className={`w-4 h-4 ${
-                          i < Math.floor(product?.rating)
-                            ? 'text-yellow-400 fill-current'
-                            : 'text-gray-300'
-                        }`}
+                        className={`w-4 h-4 ${i < Math.floor(product?.rating)
+                          ? 'text-yellow-400 fill-current'
+                          : 'text-gray-300'
+                          }`}
                       />
                     ))}
                   </div>
@@ -115,8 +188,24 @@ const BestSellers = () => {
           </Button>
         </div>
       </div>
-    </section>
-  );
-};
+      
+      {isVariantModalOpen && selectedProduct && (
+        <React.Suspense fallback={<div>Đang tải...</div>}>
+          <VariantSelectionModal
+            product={selectedProduct}
+            isOpen={isVariantModalOpen}
+            onClose={() => setIsVariantModalOpen(false)}
+            onSuccessAndOpenCart={handleSuccessAndOpenCart}
 
-export default BestSellers;
+          />
+        </React.Suspense>
+      )}
+      <SideCartDrawer
+        isOpen={isCartDrawerOpen}
+        onClose={() => setIsCartDrawerOpen(false)}
+      />
+    </section>
+  )
+}
+
+export default BestSellers
