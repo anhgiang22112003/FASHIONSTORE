@@ -2,8 +2,8 @@
 import axios from "axios"
 
 const apiAdmin = axios.create({
-   // baseURL:  process.env.REACT_APP_API_URL || "http://localhost:4000",
-  baseURL: "http://localhost:4000",
+   baseURL:  process.env.REACT_APP_API_URL || "http://localhost:4000",
+  // baseURL: "http://localhost:4000",
   headers: {
     "Content-Type": "application/json",
   },
@@ -25,9 +25,9 @@ apiAdmin.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
-    //   sessionStorage.removeItem("accessToken")
-    //   sessionStorage.removeItem("user")
-    //   window.location.href = "/admin/login"
+      sessionStorage.removeItem("accessToken")
+      sessionStorage.removeItem("user")
+      window.location.href = "/admin/login"
     }
     return Promise.reject(error)
   }
