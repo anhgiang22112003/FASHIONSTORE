@@ -199,6 +199,35 @@ const Checkout = () => {
   const handlePaymentChange = (method) => {
     setForm((prev) => ({ ...prev, paymentMethod: method }))
   }
+  const handleBankPayment = async (invoiceNumber, totalAmount) => {
+    try {
+      const res = await api.post("/sepay-webhook/create-payment", {
+        invoiceNumber,
+        amount: totalAmount,
+        description: `Thanh toán đơn hàng ${invoiceNumber}`,
+      })
+
+      const { checkoutURL, formFields } = res.data
+
+      // Tạo form và submit tự động
+      const formEl = document.createElement("form")
+      formEl.action = checkoutURL
+      formEl.method = "POST"
+      Object.keys(formFields).forEach(key => {
+        const input = document.createElement("input")
+        input.type = "hidden"
+        input.name = key
+        input.value = formFields[key]
+        formEl.appendChild(input)
+      })
+      document.body.appendChild(formEl)
+      formEl.submit()
+    } catch (err) {
+      toast.error("Tạo thanh toán thất bại")
+      console.error(err)
+    }
+  }
+
 
   const handleOrder = async () => {
     if (!form.address || !form.provinceCode || !form.districtCode || !form.wardCode) {
@@ -230,48 +259,19 @@ const Checkout = () => {
       }
       const res = await api.post("/orders", orderPayload)
       const invoiceNumber = res.data._id
-      const total = res.data.total 
-      console.log(res , invoiceNumber , total);
-      
-      if (form.paymentMethod === "BANK") {
-      // Tạo form SePay
-      const client = new SePayPgClient({
-        env: 'production',
-        merchant_id: 'SP-TEST-NH948389',
-        secret_key: 'spsk_test_B7BJcrunzh4tJvx1dd3ZsFTCaeJ1X9XS'
-      })
-      const checkoutURL = client.checkout.initCheckoutUrl()
-      const formFields = client.checkout.initOneTimePaymentFields({
-        payment_method: 'BANK_TRANSFER',
-        order_invoice_number: invoiceNumber,
-        order_amount: total,
-        currency: 'VND',
-        order_description: `Thanh toán đơn hàng ${invoiceNumber}`,
-        success_url: `${process.env.FRONTEND_URL}/orders/${invoiceNumber}?payment=success`,
-        error_url: `${process.env.FRONTEND_URL}/orders/${invoiceNumber}?payment=error`,
-        cancel_url: `${process.env.FRONTEND_URL}/orders/${invoiceNumber}?payment=cancel`,
-      })
+      const total = res.data.total
+      console.log(res, invoiceNumber, total)
 
-      // Tạo form và submit tự động
-      const formEl = document.createElement("form")
-      formEl.action = checkoutURL
-      formEl.method = "POST"
-      Object.keys(formFields).forEach(key => {
-        const input = document.createElement("input")
-        input.type = "hidden"
-        input.name = key
-        input.value = formFields[key]
-        formEl.appendChild(input)
-      })
-      document.body.appendChild(formEl)
-      formEl.submit()
-      fetchCart()
-    } else {
-      // Nếu COD, vẫn thông báo thành công
-      fetchCart()
-      toast.success("Đặt hàng thành công 🎉")
-      navigate("/orders")
-    }
+      if (form.paymentMethod === "BANK") {
+        // Tạo form SePay
+        await handleBankPayment(invoiceNumber, total)
+        fetchCart()
+      } else {
+        // Nếu COD, vẫn thông báo thành công
+        fetchCart()
+        toast.success("Đặt hàng thành công 🎉")
+        navigate("/orders")
+      }
     } catch (err) {
       toast.error(err?.response?.data?.message || "Đặt hàng thất bại")
     }
