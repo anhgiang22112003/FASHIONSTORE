@@ -8,6 +8,7 @@ import 'react-lazy-load-image-component/src/effects/blur.css'
 import debounce from "lodash.debounce"
 import ConfirmBulkDeleteModal from "@/components/ConfirmBulkDeleteModal"
 import apiAdmin from "@/service/apiAdmin"
+import { Switch } from "@headlessui/react"
 
 const statusColors = {
     "Còn hàng": "bg-green-100 text-green-600",
@@ -63,6 +64,20 @@ const ProductsContent = ({ setActiveTab, onEditProduct, onViewProductDetail, dat
         )
     }
 
+    const handleToggleFeatured = async (id, currentStatus) => {
+        try {
+            const res = await apiAdmin.patch(`/products/${id}/toggle-featured`)            
+            toast.success(
+                res.data.product.isFeatured
+                    ? "✅ Sản phẩm đã được đánh dấu nổi bật!"
+                    : "❌ Đã tắt nổi bật cho sản phẩm này."
+            )
+            fetchProducts(page, filters, searchTerm)
+        } catch (err) {
+            console.error(err)
+            toast.error("Không thể thay đổi trạng thái nổi bật ❌")
+        }
+    }
     // ✅ Bulk Update Status
     const handleBulkUpdateStatus = async (status) => {
         if (selectedProducts.length === 0) return toast.info("Vui lòng chọn sản phẩm trước.")
@@ -484,6 +499,8 @@ const ProductsContent = ({ setActiveTab, onEditProduct, onViewProductDetail, dat
                             <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">Bộ sưu tập</th>
                             <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">Giá</th>
                             <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">Tồn kho</th>
+                            <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">Nổi bật</th>
+
                             <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">Trạng thái</th>
                             <th className="px-6 py-3 text-left text-sm font-medium text-gray-500">Thao tác</th>
                         </tr>
@@ -518,6 +535,19 @@ const ProductsContent = ({ setActiveTab, onEditProduct, onViewProductDetail, dat
                                     {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product?.originalPrice)}
                                 </td>
                                 <td className="px-6 py-4">{product?.stock}</td>
+                                <td className="px-6 py-4">
+                                    <Switch
+                                        checked={product.isFeatured}
+                                        onChange={() => handleToggleFeatured(product._id, !product.isFeatured)}
+                                        className={`${product.isFeatured ? "bg-pink-600" : "bg-gray-300"
+                                            } relative inline-flex h-6 w-11 items-center rounded-full transition`}
+                                    >
+                                        <span
+                                            className={`${product.isFeatured ? "translate-x-6" : "translate-x-1"
+                                                } inline-block h-4 w-4 transform rounded-full bg-white transition`}
+                                        />
+                                    </Switch>
+                                </td>
                                 <td className="px-6 py-4">
                                     <span className={`px-2 py-1 rounded-full text-xs ${statusColors[product?.status]}`}>
                                         {product?.status}

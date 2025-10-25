@@ -30,7 +30,7 @@ const statusColors = {
   "Ngừng bán": "bg-blue-100 text-blue-700 border-blue-300",
 }
 
-const ProductDetailContent = ({ setActiveTab, productId, onEditProduct }) => {
+const ProductDetailContent = ({ onBack, productId, onEditProduct }) => {
   const [productDetail, setProductDetail] = useState(null)
   const [loading, setLoading] = useState(true)
 
@@ -43,7 +43,7 @@ const ProductDetailContent = ({ setActiveTab, productId, onEditProduct }) => {
     } catch (error) {
       console.error("Lỗi tải chi tiết sản phẩm:", error)
       toast.error("Không thể tải chi tiết sản phẩm.")
-      setActiveTab("products")
+      onBack()
     } finally {
       setLoading(false)
     }
@@ -73,7 +73,7 @@ const ProductDetailContent = ({ setActiveTab, productId, onEditProduct }) => {
         {/* Header */}
         <div className="flex justify-between items-center mb-6 border-b pb-4">
           <button
-            onClick={() => setActiveTab("products")}
+            onClick={onBack}
             className="text-gray-600 hover:text-pink-600 flex items-center space-x-1 font-medium transition-colors"
           >
             <ArrowLeftIcon className="w-5 h-5" />

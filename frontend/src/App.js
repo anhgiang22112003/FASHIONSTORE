@@ -55,12 +55,8 @@ const BlogArticlePage = () => {
   )
 }
 
-// Layout Frontend có Header & Footer
-// Đã được cập nhật để nhận props quản lý Drawer
 const FrontendLayout = ({ children, isCartDrawerOpen, setIsCartDrawerOpen }) => {
-  // Lấy dữ liệu giỏ hàng để tính số lượng và hiển thị badge
   const { cart } = React.useContext(CartContext)
-  // Tính tổng số lượng sản phẩm trong giỏ
   const totalCartItems = cart?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0
 
   return (
@@ -68,8 +64,6 @@ const FrontendLayout = ({ children, isCartDrawerOpen, setIsCartDrawerOpen }) => 
       <Header />
       <main>{children}</main>
       <Footer />
-
-      {/* ⭐️ ICON GIỎ HÀNG NỔI (Floating Cart Icon) */}
       <button
         onClick={() => setIsCartDrawerOpen(true)}
         className="fixed bottom-6 right-6 z-50 p-4 rounded-full bg-pink-600 text-white shadow-xl hover:bg-pink-700 transition-all duration-300 transform hover:scale-105"
@@ -77,15 +71,12 @@ const FrontendLayout = ({ children, isCartDrawerOpen, setIsCartDrawerOpen }) => 
       >
         <ShoppingBag className="w-6 h-6" />
 
-        {/* Badge số lượng sản phẩm */}
         {totalCartItems > 0 && (
           <span className="absolute top-0 right-0 transform translate-x-1/4 -translate-y-1/4 bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-white">
             {totalCartItems > 99 ? '99+' : totalCartItems}
           </span>
         )}
       </button>
-
-      {/* ⭐️ SIDE CART DRAWER */}
       <SideCartDrawer
         isOpen={isCartDrawerOpen}
         onClose={() => setIsCartDrawerOpen(false)}
