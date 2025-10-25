@@ -4,6 +4,7 @@ import api from "@/service/api"
 import { toast } from "react-toastify"
 import { CartContext } from "@/context/CartContext"
 import AddproductSearch from "@/components/fashion/AddProductSearch"
+import { SePayPgClient } from "sepay-pg-node"
 // import { Loader2 } from "lucide-react"
 const ShippingMethodEnum = {
   STANDARD: 'NHANH',
@@ -84,48 +85,48 @@ const Checkout = () => {
     }
   }
   const handleSelectVoucher = async (code) => {
-  setVoucherCode(code)
-  setIsVoucherPopupOpen(false)
-  try {
-    setIsApplying(true)
-    const res = await api.post("/vouchers/apply-voucher", { code })
+    setVoucherCode(code)
+    setIsVoucherPopupOpen(false)
+    try {
+      setIsApplying(true)
+      const res = await api.post("/vouchers/apply-voucher", { code })
 
-    // Lấy phí ship hiện tại
-    const shippingFee = shippingMethod === "express" ? 50000 : 30000
+      // Lấy phí ship hiện tại
+      const shippingFee = shippingMethod === "express" ? 50000 : 30000
+      const subtotal = cart?.subtotal || 0
+      const discount = res.data.discount || 0
+      const newTotal = subtotal - discount + shippingFee
+
+      // ✅ Cập nhật cart mà không làm sai shippingMethod
+      setCart(prev => ({
+        ...prev,
+        voucherCode: res.data.code,
+        discount: discount,
+        total: newTotal,
+        shipping: shippingFee,
+      }))
+
+      toast.success(res.data.message || "Áp dụng mã giảm giá thành công 🎉")
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Mã giảm giá không hợp lệ")
+    } finally {
+      setIsApplying(false)
+    }
+  }
+
+
+  useEffect(() => {
+    const newShippingFee = shippingMethod === "express" ? 50000 : 30000
     const subtotal = cart?.subtotal || 0
-    const discount = res.data.discount || 0
-    const newTotal = subtotal - discount + shippingFee
+    const discount = cart?.discount || 0
+    const newTotal = subtotal - discount + newShippingFee
 
-    // ✅ Cập nhật cart mà không làm sai shippingMethod
     setCart(prev => ({
       ...prev,
-      voucherCode: res.data.code,
-      discount: discount,
+      shipping: newShippingFee,
       total: newTotal,
-      shipping: shippingFee,
     }))
-
-    toast.success(res.data.message || "Áp dụng mã giảm giá thành công 🎉")
-  } catch (err) {
-    toast.error(err?.response?.data?.message || "Mã giảm giá không hợp lệ")
-  } finally {
-    setIsApplying(false)
-  }
-}
-
-
-useEffect(() => {
-  const newShippingFee = shippingMethod === "express" ? 50000 : 30000
-  const subtotal = cart?.subtotal || 0
-  const discount = cart?.discount || 0
-  const newTotal = subtotal - discount + newShippingFee
-
-  setCart(prev => ({
-    ...prev,
-    shipping: newShippingFee,
-    total: newTotal,
-  }))
-}, [shippingMethod, cart?.discount, cart?.subtotal])
+  }, [shippingMethod, cart?.discount, cart?.subtotal])
 
   useEffect(() => {
     fetch("https://provinces.open-api.vn/api/?depth=3")
@@ -204,7 +205,6 @@ useEffect(() => {
       toast.warning("Vui lòng nhập đầy đủ địa chỉ giao hàng (Số nhà, Tỉnh/Thành, Quận/Huyện, Phường/Xã)")
       return
     }
-
     const provinceName = provinces.find(p => p.code == form.provinceCode)?.name || ""
     const districtName = districts.find(d => d.code == form.districtCode)?.name || ""
     const wardName = wards.find(w => w.code == form.wardCode)?.name || ""
@@ -212,8 +212,6 @@ useEffect(() => {
     const fullAddress = `${form.address}, ${wardName}, ${districtName}, ${provinceName}`.replace(/,\s*,/g, ", ")
     const selectedShippingOption = shippingOptions.find(opt => opt.id === shippingMethod)
     const backendShippingMethod = selectedShippingOption ? selectedShippingOption.backendValue : ShippingMethodEnum.NHANH
-
-
     try {
       // Dữ liệu gửi lên server
       const orderPayload = {
@@ -230,12 +228,50 @@ useEffect(() => {
           note: form.note,
         },
       }
-      console.log(orderPayload);
-      
       const res = await api.post("/orders", orderPayload)
-      toast.success("Đặt hàng thành công 🎉")
+      const invoiceNumber = res.data._id
+      const total = res.data.total 
+      console.log(res , invoiceNumber , total);
+      
+      if (form.paymentMethod === "BANK") {
+      // Tạo form SePay
+      const client = new SePayPgClient({
+        env: 'production',
+        merchant_id: 'SP-TEST-NH948389',
+        secret_key: 'spsk_test_B7BJcrunzh4tJvx1dd3ZsFTCaeJ1X9XS'
+      })
+      const checkoutURL = client.checkout.initCheckoutUrl()
+      const formFields = client.checkout.initOneTimePaymentFields({
+        payment_method: 'BANK_TRANSFER',
+        order_invoice_number: invoiceNumber,
+        order_amount: total,
+        currency: 'VND',
+        order_description: `Thanh toán đơn hàng ${invoiceNumber}`,
+        success_url: `${process.env.FRONTEND_URL}/orders/${invoiceNumber}?payment=success`,
+        error_url: `${process.env.FRONTEND_URL}/orders/${invoiceNumber}?payment=error`,
+        cancel_url: `${process.env.FRONTEND_URL}/orders/${invoiceNumber}?payment=cancel`,
+      })
+
+      // Tạo form và submit tự động
+      const formEl = document.createElement("form")
+      formEl.action = checkoutURL
+      formEl.method = "POST"
+      Object.keys(formFields).forEach(key => {
+        const input = document.createElement("input")
+        input.type = "hidden"
+        input.name = key
+        input.value = formFields[key]
+        formEl.appendChild(input)
+      })
+      document.body.appendChild(formEl)
+      formEl.submit()
       fetchCart()
+    } else {
+      // Nếu COD, vẫn thông báo thành công
+      fetchCart()
+      toast.success("Đặt hàng thành công 🎉")
       navigate("/orders")
+    }
     } catch (err) {
       toast.error(err?.response?.data?.message || "Đặt hàng thất bại")
     }
