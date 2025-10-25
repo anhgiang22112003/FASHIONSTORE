@@ -13,6 +13,13 @@ const statusOptions = [
   { value: "CANCELLED", label: "Đã hủy" },
 ]
 
+const paymentStatusColors = {
+  PENDING: "bg-yellow-100 text-yellow-600",
+  APPROVED: "bg-green-100 text-green-600",
+  DECLINED: "bg-red-100 text-red-600",
+  CANCELLED: "bg-gray-100 text-gray-600",
+}
+
 const statusColors = {
   PENDING: "bg-yellow-100 text-yellow-600",
   PROCESSING: "bg-blue-100 text-blue-600",
@@ -530,11 +537,7 @@ const OrdersContent = ({ data, onEditOrder }) => {
             <thead className="bg-pink-50">
               <tr>
                 <th className="px-4 py-3">
-                  <input
-                    type="checkbox"
-                    checked={isAllSelected}
-                    onChange={handleSelectAll}
-                  />
+                  <input type="checkbox" checked={isAllSelected} onChange={handleSelectAll} />
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Mã đơn</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Khách hàng</th>
@@ -542,6 +545,8 @@ const OrdersContent = ({ data, onEditOrder }) => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Địa chỉ giao hàng</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Tổng tiền</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Trạng thái</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Hình thức thanh toán</th> {/* mới */}
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Trạng thái thanh toán</th> {/* mới */}
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Thao tác</th>
               </tr>
             </thead>
@@ -606,7 +611,16 @@ const OrdersContent = ({ data, onEditOrder }) => {
                           {statusOptions.find(s => s.value === order.status)?.label || order.status}
                         </span>
                       )}
+
+
                     </td>
+                    <td className="px-6 py-4 text-sm text-gray-600">{order?.paymentMethod || 'Chưa chọn'}</td>
+                    <td className="px-6 py-4 text-sm text-gray-600">
+                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${paymentStatusColors[order?.paymentStatus] || 'bg-gray-100 text-gray-600'}`}>
+                        {order?.paymentStatus || 'Chưa thanh toán'}
+                      </span>
+                    </td>
+
 
                     {/* Cột Thao tác */}
                     <td className="px-6 py-4">
