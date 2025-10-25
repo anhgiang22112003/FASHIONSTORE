@@ -4,8 +4,6 @@ import api from "@/service/api"
 import { toast } from "react-toastify"
 import { CartContext } from "@/context/CartContext"
 import AddproductSearch from "@/components/fashion/AddProductSearch"
-import { SePayPgClient } from "sepay-pg-node"
-// import { Loader2 } from "lucide-react"
 const ShippingMethodEnum = {
   STANDARD: 'NHANH',
   EXPRESS: 'HOA_TOC',
