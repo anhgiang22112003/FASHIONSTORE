@@ -4,6 +4,8 @@ import Header from "@/components/layoutAdmin/HeaderAdmin"
 import { toast } from "react-toastify"
 import ProductDetailContent from "@/components/ProductDetailContent"
 import apiAdmin from "@/service/apiAdmin"
+import { io } from 'socket.io-client'
+import { socket } from "@/service/socket"
 
 // ✅ Lazy load các tab lớn (chỉ load khi cần)
 const Dashboard = React.lazy(() => import("./AdminDasbroad"))
@@ -30,7 +32,23 @@ const AdminLayout = () => {
   const [viewProductId, setViewProductId] = useState(null)
   const [editingOrder, setEditingOrder] = useState(null)
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
+  const userId = JSON.parse(sessionStorage.getItem("user"))
 
+  useEffect(() => {
+    if (!userId) return
+
+    const handleNoti = (noti) => {
+      if (noti.userId === userId || !noti.userId) {
+        // setNotifications(prev => [noti, ...prev])
+        toast.info(`🔔 Có thông báo mới: ${noti.message}`)
+      }
+    }
+
+    socket.on('notification', handleNoti)
+    return () => {
+      socket.off('notification', handleNoti)
+    }
+  }, [userId])
   // ✅ Dữ liệu cache từng tab
   const [tabData, setTabData] = useState({
     products: null,
@@ -71,6 +89,14 @@ const AdminLayout = () => {
   }
 
   useEffect(() => {
+    socket.on("newOrder", (newOrder) => {
+      toast.info(`🆕 Có đơn hàng mới từ ${newOrder.user?.name || "khách hàng"}`)
+      fetchOrders()
+    })
+    return () => socket.off("newOrder")
+  }, [])
+
+  useEffect(() => {
     if (activeTab === "products" && !tabData.products) fetchProducts()
     if (activeTab === "orders" && !tabData.orders) fetchOrders()
     if (activeTab === "customers" && !tabData.customers) fetchCustomers()
@@ -81,7 +107,7 @@ const AdminLayout = () => {
     setEditingProductId(productId)
     setActiveTab("edit-product")
   }
-    const handleViewProduct = (productId) => {
+  const handleViewProduct = (productId) => {
     setViewProductId(productId)
     setActiveTab("view-product")
   }
@@ -107,7 +133,7 @@ const AdminLayout = () => {
       <div className="flex-1 flex flex-col">
         {/* Header */}
         <div className="sticky top-0 z-40 h-[70px] px-2.5  items-center bg-white shadow-sm sticky top-0 z-40 px-4">
-          <Header toggleSidebar={toggleSidebar} setActiveTab={setActiveTab} />
+          <Header toggleSidebar={toggleSidebar} setActiveTab={setActiveTab} setEditingProductId={setEditingProductId} setEditingOrder ={setEditingOrder}/>
         </div>
 
         {/* Nội dung chính */}
@@ -136,7 +162,7 @@ const AdminLayout = () => {
               />
             )}
 
-             {activeTab === "view-product" && (
+            {activeTab === "view-product" && (
               <ProductDetailContent
                 productId={viewProductId}
                 onEditProduct={handleEditProduct}

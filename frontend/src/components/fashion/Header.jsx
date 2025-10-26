@@ -5,7 +5,7 @@ import { Input } from '../ui/input'
 import { Link, useNavigate } from 'react-router-dom'
 import {
   UserCircleIcon,
-
+  BellIcon,
   Cog6ToothIcon,
   ArrowRightStartOnRectangleIcon,
   QuestionMarkCircleIcon,
@@ -128,38 +128,54 @@ const Header = () => {
             </Button>
 
             {/* User */}
+
             {user ? (
-              <div className="relative">
-                <button
-                  onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-                  className="p-1 rounded-full text-gray-700 hover:bg-gray-100 transition-colors"
-                >
-                  <UserCircleIcon className="w-8 h-8 text-gray-600" />
-                </button>
-                {isProfileMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl py-2 z-50">
-                    <div className="px-4 py-2 border-b border-gray-200">
-                      <p className="font-semibold text-gray-800">{user?.name}</p>
+              <>
+                <div className="relative">
+                  <button
+                    onClick={toggleNotifications}
+                    //  onBlur={() => setIsNotificationsOpen(null)} // 👈 Khi click ra ngoài sẽ đóng select
+                    //   autoFocus // 👈 Tự focus khi hiển thị
+                    className="p-2 rounded-full text-gray-500 hover:bg-gray-100 hover:text-pink-600 transition-colors"
+                  >
+                    <BellIcon className="w-6 h-6" />
+                    <span className="absolute top-2 right-2 block h-2 w-2 rounded-full ring-2 ring-white bg-red-500"></span>
+                  </button>
+
+                  {isNotificationsOpen && <NotificationDropdown setActiveTab={setActiveTab} setEditingOrder={setEditingOrder} setEditingProductId={setEditingProductId} userId={userId?.id} />}
+
+                </div>
+                <div className="relative">
+                  <button
+                    onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+                    className="p-1 rounded-full text-gray-700 hover:bg-gray-100 transition-colors"
+                  >
+                    <UserCircleIcon className="w-8 h-8 text-gray-600" />
+                  </button>
+                  {isProfileMenuOpen && (
+                    <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl py-2 z-50">
+                      <div className="px-4 py-2 border-b border-gray-200">
+                        <p className="font-semibold text-gray-800">{user?.name}</p>
+                      </div>
+                      <div className="py-2 space-y-1">
+                        <a
+                          onClick={() => navigate('/profile')}
+                          className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
+                        >
+                          <Cog6ToothIcon className="w-5 h-5 mr-2 text-gray-500" />
+                          Cài đặt tài khoản
+                        </a>
+                        <a
+                          onClick={logout}
+                          className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
+                        >
+                          <ArrowRightStartOnRectangleIcon className="w-5 h-5 mr-2 text-gray-500" />
+                          Đăng xuất
+                        </a>
+                      </div>
                     </div>
-                    <div className="py-2 space-y-1">
-                      <a
-                        onClick={() => navigate('/profile')}
-                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
-                      >
-                        <Cog6ToothIcon className="w-5 h-5 mr-2 text-gray-500" />
-                        Cài đặt tài khoản
-                      </a>
-                      <a
-                        onClick={logout}
-                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
-                      >
-                        <ArrowRightStartOnRectangleIcon className="w-5 h-5 mr-2 text-gray-500" />
-                        Đăng xuất
-                      </a>
-                    </div>
-                  </div>
-                )}
-              </div>
+                  )}
+                </div></>
             ) : (
               <Link to="/login">
                 <Button variant="ghost" size="sm">

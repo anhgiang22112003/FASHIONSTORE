@@ -109,7 +109,7 @@ const ProductPage = () => {
         size: selectedSize,
       }
       await addToCart(body)
-      toast.success('Đã thêm sản phẩm vào giỏ hàng!')
+      // toast.success('Đã thêm sản phẩm vào giỏ hàng!')
     } catch (error) {
       console.error(error)
       toast.error(error?.response?.data?.message || 'Thêm vào giỏ hàng thất bại')
