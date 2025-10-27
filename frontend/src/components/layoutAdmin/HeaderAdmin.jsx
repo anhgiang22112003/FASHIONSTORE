@@ -22,9 +22,26 @@ const Header = ({ toggleSidebar, setActiveTab, setEditingProductId, setEditingOr
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
   const [isMessagesOpen, setIsMessagesOpen] = useState(false)
   const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0)
-
+  const [loading, setLoading] = useState()
   const userId = JSON.parse(sessionStorage.getItem('user'))
-
+  const [stats, setStats] = useState({
+    pendingOrders: 0,
+    revenue: 0,
+    newCustomers: 0,
+  })
+ console.log(stats);
+ 
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await apiAdmin.get("/auth/stats/quick") // 👈 chỉnh baseURL theo API backend
+        setStats(res.data)
+      } catch (err) {
+        console.error("Failed to load quick stats", err)
+      }
+    }
+    fetchStats()
+  }, [])
   // Fetch số thông báo chưa đọc khi component mount
   useEffect(() => {
     const fetchUnreadCount = async () => {
@@ -145,20 +162,53 @@ const Header = ({ toggleSidebar, setActiveTab, setEditingProductId, setEditingOr
         </div>
 
         {/* Profile Menu Icon */}
-        <div className="relative">
+        {userId ? (<div className="relative">
           <button
             onClick={toggleProfileMenu}
             className="flex items-center space-x-2 px-2 py-1 rounded-full text-gray-700 hover:bg-gray-200 transition-colors"
           >
-            <UserCircleIcon className="w-8 h-8 text-gray-600" />
-            <span className="font-medium hidden md:block">Admin</span>
+            {/* Ảnh đại diện admin */}
+            <img
+              src={userId?.image || 'https://placehold.co/40x40'}
+              alt="Admin Avatar"
+              className="w-8 h-8 rounded-full object-cover border"
+            />
+            <span className="font-medium hidden md:block">{userId?.name || 'Admin'}</span>
           </button>
+
           {isProfileMenuOpen && (
-            <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl py-2 z-10">
-              <div className="px-4 py-2 border-b border-gray-200">
-                <p className="font-semibold text-gray-800">Admin</p>
-                <p className="text-sm text-gray-500">Vai trò: Quản trị viên</p>
+            <div className="absolute right-0 mt-2 w-72 bg-white rounded-lg shadow-xl py-2 z-10">
+              {/* Thông tin Admin */}
+              <div className="flex items-center space-x-3 px-4 py-3 border-b border-gray-200">
+                <img
+                  src={userId?.image || 'https://placehold.co/60x60'}
+                  alt="Admin Avatar"
+                  className="w-12 h-12 rounded-full object-cover border"
+                />
+                <div>
+                  <p className="font-semibold text-gray-800">{userId?.name || 'Admin'}</p>
+                  <p className="text-xs text-gray-500">{userId?.email}</p>
+                  <p className="text-xs text-gray-500 capitalize">Vai trò: Quản trị viên</p>
+                </div>
               </div>
+
+              {/* Thông tin cá nhân */}
+              <div className="px-4 py-2 text-sm text-gray-600 space-y-1 border-b border-gray-200">
+                {userId?.phone && (
+                  <div className="flex items-center justify-between">
+                    <span>Số điện thoại:</span>
+                    <span className="font-medium">{userId.phone}</span>
+                  </div>
+                )}
+                {userId?.address && (
+                  <div className="flex items-center justify-between">
+                    <span>Địa chỉ:</span>
+                    <span className="font-medium truncate max-w-[150px]">{userId.address}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Các nút hành động */}
               <div className="py-2 space-y-1">
                 <a
                   onClick={() => setActiveTab('admin-setting')}
@@ -168,13 +218,7 @@ const Header = ({ toggleSidebar, setActiveTab, setEditingProductId, setEditingOr
                   <Cog6ToothIcon className="w-5 h-5 mr-2 text-gray-500" />
                   Cài đặt tài khoản
                 </a>
-                <a
-                  href="#"
-                  className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
-                >
-                  <QuestionMarkCircleIcon className="w-5 h-5 mr-2 text-gray-500" />
-                  Hỗ trợ
-                </a>
+
                 <a
                   onClick={handleLogout}
                   href="#"
@@ -184,6 +228,8 @@ const Header = ({ toggleSidebar, setActiveTab, setEditingProductId, setEditingOr
                   Đăng xuất
                 </a>
               </div>
+
+              {/* Thống kê nhanh */}
               <div className="px-4 py-2 border-t border-gray-200">
                 <p className="text-sm font-semibold text-gray-800">Thống kê nhanh</p>
                 <div className="mt-2 text-xs text-gray-600 space-y-1">
@@ -191,26 +237,29 @@ const Header = ({ toggleSidebar, setActiveTab, setEditingProductId, setEditingOr
                     <span className="flex items-center space-x-1">
                       <TicketIcon className="w-4 h-4 text-pink-500" /> Đơn hàng chờ xử lý:
                     </span>
-                    <span className="font-bold">12</span>
+                    <span className="font-bold">{stats.pendingOrders}</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="flex items-center space-x-1">
-                      <CurrencyDollarIcon className="w-4 h-4 text-green-500" /> Doanh thu hôm
-                      nay:
+                      <CurrencyDollarIcon className="w-4 h-4 text-green-500" /> Doanh thu hôm nay:
                     </span>
-                    <span className="font-bold">5.000.000đ</span>
+                    <span className="font-bold">{stats.revenue}</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="flex items-center space-x-1">
                       <UserPlusIcon className="w-4 h-4 text-blue-500" /> Khách hàng mới:
                     </span>
-                    <span className="font-bold">5</span>
+                    <span className="font-bold">{stats.newCustomers}</span>
                   </div>
                 </div>
               </div>
             </div>
           )}
         </div>
+        ) : (
+          <></>
+
+        )}
       </div>
     </header>
   )

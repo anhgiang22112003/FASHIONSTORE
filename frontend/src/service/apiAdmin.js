@@ -29,7 +29,7 @@ apiAdmin.interceptors.response.use(
     if (error.response && error.response.status === 401) {
       sessionStorage.removeItem("accessToken")
       sessionStorage.removeItem("user")
-      window.location.href = "/admin/login"
+      // window.location.href = "/login/admin"
     }
     return Promise.reject(error)
   }

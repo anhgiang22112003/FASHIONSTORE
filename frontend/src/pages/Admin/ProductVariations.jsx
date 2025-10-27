@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
 
+// Danh sách màu sắc cố định (cho bảng chọn nhanh)
 const colors = [
     { name: 'Đỏ', hex: '#EF4444', ring: 'ring-red-500' },
     { name: 'Hồng', hex: '#EC4899', ring: 'ring-pink-500' },
@@ -12,6 +13,21 @@ const colors = [
     { name: 'Trắng', hex: '#F9FAFB', ring: 'ring-gray-300' },
 ]
 
+// Danh sách kích thước phổ biến (để gợi ý chọn nhanh)
+const commonSizes = ['S', 'M', 'L', 'XL', 'XXL', 'Freesize', '35', '36', '37', '38', '39', '40']
+
+// Hàm kiểm tra và lấy mã hex cho màu sắc
+const getColorHex = (colorNameOrHex) => {
+    // 1. Kiểm tra nếu là mã Hex hợp lệ
+    const hexPattern = /^#([0-9A-F]{3}){1,2}$/i
+    if (hexPattern.test(colorNameOrHex)) {
+        return colorNameOrHex
+    }
+    // 2. Kiểm tra nếu là tên màu có sẵn
+    const colorInfo = colors.find(c => c.name === colorNameOrHex)
+    return colorInfo ? colorInfo.hex : 'transparent' 
+}
+
 const ProductVariations = ({ variations, setVariations, setStock }) => {
     // State cho form thêm/chỉnh sửa
     const [newColor, setNewColor] = useState('')
@@ -19,7 +35,8 @@ const ProductVariations = ({ variations, setVariations, setStock }) => {
     const [newStock, setNewStock] = useState('')
     const [isFormVisible, setIsFormVisible] = useState(false)
     const [isColorPickerOpen, setIsColorPickerOpen] = useState(false)
-    const [editingIndex, setEditingIndex] = useState(null) // null: đang thêm mới, index: đang chỉnh sửa
+    const [isSizePickerOpen, setIsSizePickerOpen] = useState(false) // State mới cho bảng chọn Size
+    const [editingIndex, setEditingIndex] = useState(null)
 
     // Cập nhật tổng tồn kho mỗi khi variations thay đổi
     useEffect(() => {
@@ -31,14 +48,17 @@ const ProductVariations = ({ variations, setVariations, setStock }) => {
     const isDuplicate = (color, size, currentIndex = -1) => {
         return variations.some((v, index) => 
             index !== currentIndex && 
-            v.color === color && 
-            v.size === size
+            v.color.trim().toLowerCase() === color.trim().toLowerCase() && 
+            v.size.trim().toLowerCase() === size.trim().toLowerCase()
         )
     }
 
     // Hàm xử lý Thêm/Cập nhật biến thể
     const handleSaveVariation = () => {
-        if (!newColor || !newSize || !newStock) {
+        const trimmedColor = newColor.trim()
+        const trimmedSize = newSize.trim()
+
+        if (!trimmedColor || !trimmedSize || newStock === '') {
             toast.error('Vui lòng điền đầy đủ thông tin biến thể.')
             return
         }
@@ -50,14 +70,14 @@ const ProductVariations = ({ variations, setVariations, setStock }) => {
             return
         }
 
-        if (isDuplicate(newColor, newSize, editingIndex)) {
+        if (isDuplicate(trimmedColor, trimmedSize, editingIndex)) {
             toast.error('Lỗi: Biến thể với Màu sắc và Kích thước này đã tồn tại.')
             return
         }
 
         const newVariation = {
-            color: newColor,
-            size: newSize,
+            color: trimmedColor,
+            size: trimmedSize,
             stock: stockValue
         }
 
@@ -78,6 +98,8 @@ const ProductVariations = ({ variations, setVariations, setStock }) => {
         setNewStock('')
         setIsFormVisible(false)
         setEditingIndex(null)
+        setIsColorPickerOpen(false)
+        setIsSizePickerOpen(false)
     }
 
     const handleEditVariation = (index) => {
@@ -88,26 +110,28 @@ const ProductVariations = ({ variations, setVariations, setStock }) => {
         setEditingIndex(index)
         setIsFormVisible(true) 
         setIsColorPickerOpen(false) 
+        setIsSizePickerOpen(false)
     }
 
     const handleDeleteVariation = (index) => {
-       
-            const updatedVariations = variations.filter((_, i) => i !== index)
-            setVariations(updatedVariations)
-            if (editingIndex === index) {
-                setNewColor('')
-                setNewSize('')
-                setNewStock('')
-                setEditingIndex(null)
-                setIsFormVisible(false)
-            }
-        
+        const updatedVariations = variations.filter((_, i) => i !== index)
+        setVariations(updatedVariations)
+        if (editingIndex === index) {
+            handleCloseForm()
+        }
     }
 
     const handleColorSelect = (colorName) => {
         setNewColor(colorName)
         setIsColorPickerOpen(false) 
     }
+    
+    // Hàm chọn nhanh kích thước
+    const handleSizeSelect = (size) => {
+        setNewSize(size)
+        setIsSizePickerOpen(false)
+    }
+
     const handleCloseForm = () => {
         setNewColor('')
         setNewSize('')
@@ -115,6 +139,7 @@ const ProductVariations = ({ variations, setVariations, setStock }) => {
         setEditingIndex(null)
         setIsFormVisible(false)
         setIsColorPickerOpen(false)
+        setIsSizePickerOpen(false)
     }
 
     return (
@@ -135,13 +160,13 @@ const ProductVariations = ({ variations, setVariations, setStock }) => {
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
                             {variations.map((v, index) => {
-                                const colorInfo = colors.find(c => c.name === v.color)
+                                const hexColor = getColorHex(v.color)
                                 return (
                                     <tr key={index} className={editingIndex === index ? 'bg-pink-50' : ''}>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 flex items-center space-x-2">
                                             <div
                                                 className="w-4 h-4 rounded-full border border-gray-400"
-                                                style={{ backgroundColor: colorInfo?.hex || 'transparent' }}
+                                                style={{ backgroundColor: hexColor }}
                                                 title={v.color}
                                             ></div>
                                             <span>{v.color}</span>
@@ -168,25 +193,20 @@ const ProductVariations = ({ variations, setVariations, setStock }) => {
                 </div>
             )}
 
-            ---
+            <hr className="border-gray-200" />
 
             {/* Form thêm/chỉnh sửa biến thể mới */}
             <div className="space-y-4">
                 <button
                     onClick={() => {
-                        if (isFormVisible && editingIndex !== null) {
-                            // Đang chỉnh sửa và nhấn nút để đóng
+                        if (isFormVisible) {
                             handleCloseForm()
-                        } else if (isFormVisible) {
-                             // Đang thêm mới và nhấn nút để đóng
-                             handleCloseForm()
                         } else {
-                            // Mở form thêm mới
                             setIsFormVisible(true)
-                            setEditingIndex(null) // Đảm bảo là chế độ thêm mới
+                            setEditingIndex(null) 
                         }
                     }}
-                    className="px-4 py-2 bg-pink-600 text-white rounded-lg font-semibold hover:bg-pink-700 transition-colors"
+                    className="px-4 py-2 bg-pink-600 text-white rounded-lg font-semibold hover:bg-pink-700 transition-colors shadow-md"
                 >
                     {isFormVisible 
                         ? (editingIndex !== null ? 'Hủy chỉnh sửa' : 'Đóng') 
@@ -195,24 +215,39 @@ const ProductVariations = ({ variations, setVariations, setStock }) => {
 
                 {isFormVisible && (
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-gray-50 p-6 rounded-xl border border-pink-200">
+                        
+                        {/* TRƯỜNG NHẬP/CHỌN MÀU SẮC */}
                         <div className="space-y-1 relative">
-                            <span className="text-sm font-medium text-gray-600">Màu sắc {editingIndex !== null && '*'}</span>
-                            {/* Nút để mở bảng màu */}
+                            <span className="text-sm font-medium text-gray-600">Màu sắc (Tên hoặc Hex) {editingIndex !== null && '*'}</span>
+                            
+                            <input
+                                type="text"
+                                value={newColor}
+                                onChange={(e) => {
+                                    setNewColor(e.target.value)
+                                    setIsColorPickerOpen(false) 
+                                }}
+                                placeholder="VD: Xanh navy hoặc #000080"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-pink-500 h-10"
+                            />
+
                             <button
                                 type="button"
                                 onClick={() => setIsColorPickerOpen(!isColorPickerOpen)}
-                                className="w-full h-10 flex items-center justify-between px-3 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-pink-200"
+                                className="absolute right-2 top-7 flex items-center p-1 bg-white border border-gray-300 rounded-full shadow-sm hover:shadow-md transition-shadow z-10"
+                                title="Mở bảng màu nhanh"
                             >
-                                <span className="text-gray-900">{newColor || 'Chọn màu'}</span>
                                 <div
-                                    className="w-6 h-6 rounded-full border border-gray-400"
-                                    style={{ backgroundColor: colors.find(c => c.name === newColor)?.hex || 'transparent' }}
+                                    className="w-4 h-4 rounded-full border border-gray-400"
+                                    style={{ backgroundColor: getColorHex(newColor) }}
                                 ></div>
                             </button>
 
-                            {/* Bảng màu */}
+
+                            {/* Bảng màu - Color Picker */}
                             {isColorPickerOpen && (
-                                <div className="absolute top-full left-0 mt-2 z-10 p-4 bg-white border border-gray-300 rounded-lg shadow-xl grid grid-cols-4 gap-2">
+                                <div className="absolute top-full left-0 mt-2 z-20 p-4 bg-white border border-gray-300 rounded-lg shadow-xl grid grid-cols-4 gap-2 w-full max-w-xs">
+                                    <p className='col-span-4 text-xs text-gray-500 mb-2 font-medium'>Chọn màu có sẵn:</p>
                                     {colors.map((color) => (
                                         <button
                                             key={color.name}
@@ -221,23 +256,62 @@ const ProductVariations = ({ variations, setVariations, setStock }) => {
                                             className={`w-8 h-8 rounded-full border border-gray-300 transition-all ${newColor === color.name ? `ring-2 ring-offset-2 ${color.ring}` : ''
                                                 }`}
                                             style={{ backgroundColor: color.hex }}
-                                            aria-label={`Chọn màu ${color.name}`}
+                                            title={color.name}
                                         ></button>
                                     ))}
                                 </div>
                             )}
                         </div>
 
-                        <label className="space-y-1">
-                            <span className="text-sm font-medium text-gray-600">Kích thước {editingIndex !== null && '*'}</span>
+                        {/* TRƯỜNG NHẬP/CHỌN KÍCH THƯỚC (Đã cập nhật để cho phép nhập tùy chỉnh) */}
+                        <div className="space-y-1 relative">
+                            <span className="text-sm font-medium text-gray-600">Kích thước (Tùy chỉnh) {editingIndex !== null && '*'}</span>
                             <input
                                 type="text"
                                 value={newSize}
-                                onChange={(e) => setNewSize(e.target.value)}
-                                placeholder="VD: M, L, XL"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
+                                onChange={(e) => {
+                                    setNewSize(e.target.value)
+                                    setIsSizePickerOpen(e.target.value.length === 0) // Mở gợi ý khi input rỗng
+                                }}
+                                onFocus={() => setIsSizePickerOpen(newSize.length === 0)}
+                                onBlur={() => setTimeout(() => setIsSizePickerOpen(false), 200)} // Đóng sau một chút trễ
+                                placeholder="VD: M, XL, Size 32"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-pink-500 h-10"
                             />
-                        </label>
+                            
+                            {/* Nút mở/đóng gợi ý kích thước */}
+                            <button
+                                type="button"
+                                onClick={() => setIsSizePickerOpen(!isSizePickerOpen)}
+                                className="absolute right-2 top-7 flex items-center p-1 bg-white border border-gray-300 rounded-full shadow-sm hover:shadow-md transition-shadow z-10"
+                                title="Mở gợi ý kích thước"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
+                                </svg>
+                            </button>
+
+
+                            {/* Bảng gợi ý kích thước phổ biến */}
+                            {isSizePickerOpen && (
+                                <div className="absolute top-full left-0 mt-2 z-20 p-4 bg-white border border-gray-300 rounded-lg shadow-xl grid grid-cols-4 gap-2 w-full max-w-xs">
+                                    <p className='col-span-4 text-xs text-gray-500 mb-2 font-medium'>Chọn nhanh:</p>
+                                    {commonSizes.map((size) => (
+                                        <button
+                                            key={size}
+                                            type="button"
+                                            onClick={() => handleSizeSelect(size)}
+                                            className={`px-3 py-1 text-sm rounded-lg border transition-all ${newSize === size ? 'bg-pink-500 text-white border-pink-500' : 'bg-gray-100 text-gray-800 border-gray-300 hover:bg-gray-200'
+                                                }`}
+                                        >
+                                            {size}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* TRƯỜNG NHẬP TỒN KHO */}
                         <label className="space-y-1">
                             <span className="text-sm font-medium text-gray-600">Tồn kho {editingIndex !== null && '*'}</span>
                             <input
@@ -246,12 +320,12 @@ const ProductVariations = ({ variations, setVariations, setStock }) => {
                                 onChange={(e) => setNewStock(e.target.value)}
                                 placeholder="0"
                                 min="0"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 h-10"
                             />
                         </label>
                         <button
                             onClick={handleSaveVariation}
-                            className={`w-full self-end px-4 py-2 text-white rounded-lg font-semibold transition-colors ${
+                            className={`w-full self-end px-4 py-2 text-white rounded-lg font-semibold transition-colors shadow-md ${
                                 editingIndex !== null ? 'bg-blue-500 hover:bg-blue-600' : 'bg-pink-500 hover:bg-pink-600'
                             }`}
                         >
