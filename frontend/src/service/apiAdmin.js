@@ -1,9 +1,11 @@
 // src/service/apiAdmin.js
 import axios from "axios"
-
+const baseURL =
+  process.env.NODE_ENV === "development"
+    ? "http://localhost:4000"
+    : process.env.REACT_APP_API_URL || "http://localhost:4000"
 const apiAdmin = axios.create({
-   baseURL:  process.env.REACT_APP_API_URL || "http://localhost:4000",
-  // baseURL: "http://localhost:4000",
+  baseURL,
   headers: {
     "Content-Type": "application/json",
   },
