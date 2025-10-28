@@ -24,6 +24,7 @@ const ReviewManagementPage = React.lazy(() => import("./Reviews"))
 const PromotionManagementPage = React.lazy(() => import("./Promotions"))
 const Settings = React.lazy(() => import("./SettingsContent"))
 const AdminSettingsPage = React.lazy(() => import("@/components/layoutAdmin/AdminSettingPage"))
+const AdminChatDashboard = React.lazy(() => import("./AdminChatDashboard"))
 
 const AdminLayout = () => {
   const [activeTab, setActiveTab] = useState("dashboard")
@@ -133,13 +134,14 @@ const AdminLayout = () => {
       <div className="flex-1 flex flex-col">
         {/* Header */}
         <div className="sticky top-0 z-40 h-[70px] px-2.5  items-center bg-white shadow-sm sticky top-0 z-40 px-4">
-          <Header toggleSidebar={toggleSidebar} setActiveTab={setActiveTab} setEditingProductId={setEditingProductId} setEditingOrder ={setEditingOrder}/>
+          <Header toggleSidebar={toggleSidebar} setActiveTab={setActiveTab} setEditingProductId={setEditingProductId} setEditingOrder={setEditingOrder} />
         </div>
 
         {/* Nội dung chính */}
         <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
           <Suspense fallback={<div className="text-center p-10">⏳ Đang tải...</div>}>
             {activeTab === "dashboard" && <Dashboard />}
+            {activeTab === "chat" && <AdminChatDashboard adminId={userId?.id} />}
 
             {activeTab === "products" && (
               <Products

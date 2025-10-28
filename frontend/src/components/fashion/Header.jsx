@@ -15,6 +15,7 @@ import { ChatBubbleBottomCenterTextIcon } from '@heroicons/react/24/solid'
 import { AuthContext } from '@/context/Authcontext'
 import { CartContext } from '@/context/CartContext'
 import { WishlistContext } from '@/context/WishlistContext'
+import NotificationUser from './NotificationUser'
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const navigate = useNavigate()
@@ -24,8 +25,11 @@ const Header = () => {
   const { wishlist } = useContext(WishlistContext)
   const { user, logout } = useContext(AuthContext)
   const { cart } = useContext(CartContext)
+  const [unreadCount, setUnreadCount] = useState(0)
+  const [showDropdown, setShowDropdown] = useState(false)
   const totalItems = cart?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0
   const wishlistCount = wishlist?.length
+  const userId = JSON.parse(localStorage.getItem("user"))
 
   const toggleNotifications = () => {
     setIsNotificationsOpen(!isNotificationsOpen)
@@ -133,16 +137,19 @@ const Header = () => {
               <>
                 <div className="relative">
                   <button
-                    onClick={toggleNotifications}
+                    onClick={() => setShowDropdown(!showDropdown)}
                     //  onBlur={() => setIsNotificationsOpen(null)} // 👈 Khi click ra ngoài sẽ đóng select
                     //   autoFocus // 👈 Tự focus khi hiển thị
                     className="p-2 rounded-full text-gray-500 hover:bg-gray-100 hover:text-pink-600 transition-colors"
                   >
                     <BellIcon className="w-6 h-6" />
-                    <span className="absolute top-2 right-2 block h-2 w-2 rounded-full ring-2 ring-white bg-red-500"></span>
-                  </button>
+                    {unreadCount > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-1">
+                        {unreadCount}
+                      </span>
+                    )}                  </button>
 
-                  {isNotificationsOpen && <NotificationDropdown setActiveTab={setActiveTab} setEditingOrder={setEditingOrder} setEditingProductId={setEditingProductId} userId={userId?.id} />}
+                  {showDropdown && <NotificationUser userId={userId?.id} onNotificationsChange={setUnreadCount} />}
 
                 </div>
                 <div className="relative">

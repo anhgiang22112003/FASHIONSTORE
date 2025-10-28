@@ -60,9 +60,25 @@ const Statistics = () => {
     fetchStatistics();
   }, []);
 
-  const handleExport = () => {
-    alert(`Xuất báo cáo từ ${startDate || "đầu"} đến ${endDate || "nay"}`);
-  };
+ const handleExport = async () => {
+  try {
+    const response = await apiAdmin.get(`/statistics/export`, {
+      params: { from: startDate, to: endDate },
+      responseType: "blob",
+    });
+
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "bao_cao_thong_ke.xlsx");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } catch (error) {
+    console.error("Lỗi khi xuất báo cáo:", error);
+  }
+};
+
 
   return (
     <div className="space-y-8">
@@ -96,7 +112,7 @@ const Statistics = () => {
         </div>
 
         <button
-          onClick={handleExport}
+         onClick={handleExport}
           className="flex items-center space-x-2 px-6 py-3 bg-pink-600 text-white rounded-xl font-semibold hover:bg-pink-700 transition-colors"
         >
           <svg

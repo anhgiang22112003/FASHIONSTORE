@@ -42,6 +42,18 @@ const Sidebar = ({ activeTab, setActiveTab, isOpen, toggleSidebar }) => {
             )
         },
         {
+            id: 'chat', name: 'Chat với khách', icon: (
+                <svg
+                    className="w-5 h-5"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path d="M2 5a2 2 0 012-2h16a2 2 0 012 2v11a2 2 0 01-2 2H6l-4 4V5z" />
+                </svg>
+            )
+        },
+
+        {
             id: 'statistics', name: 'Thống kê', icon: (
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17 11c.55 0 1 .45 1 1v7c0 .55-.45 1-1 1H7c-.55 0-1-.45-1-1v-7c0-.55.45-1 1-1h10zM7 9V6c0-1.1.9-2 2-2h6c1.1 0 2 .9 2 2v3h-2V6h-6v3H7zm11-4V3h-4V1h-4v2H6v2h12zm-8 4v2h2v-2h-2z"></path></svg>
             )

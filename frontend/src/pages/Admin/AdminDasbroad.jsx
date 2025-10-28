@@ -1,13 +1,7 @@
 import React, { useEffect, useState } from "react"
 import apiAdmin from "@/service/apiAdmin"
 import OrderStatusChart from "@/components/OrderStatusChart"
-const STATUS_MAP = {
-  PENDING: { label: "Chờ xác nhận", color: "bg-yellow-100 text-yellow-700" },
-  PROCESSING: { label: "Đang xử lý", color: "bg-blue-100 text-blue-700" },
-  SHIPPED: { label: "Đã giao hàng", color: "bg-green-100 text-green-700" },
-  COMPLETED: { label: "Hoàn thành", color: "bg-emerald-100 text-emerald-700" },
-  CANCELLED: { label: "Đã hủy", color: "bg-red-100 text-red-700" },
-}
+
 const AdminDashboard = () => {
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)

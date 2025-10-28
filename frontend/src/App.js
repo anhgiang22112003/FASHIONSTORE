@@ -13,6 +13,7 @@ import { socket } from "./service/socket"
 import { ShoppingBag } from 'lucide-react'
 import SideCartDrawer from "./components/fashion/SideCartDrawer"
 import { WishlistProvider } from "./context/WishlistContext"
+import ChatBot from "./pages/ChatBot"
 // Giả định SideCartDrawer nằm trong đường dẫn này
 
 const AdminLoginForm = lazy(() => import("./pages/Admin/LoginAdmin"))
@@ -34,6 +35,21 @@ const UserProfile = lazy(() => import("./pages/UserProfile"))
 const ResetPassword = lazy(() => import("./pages/ResetPassword"))
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"))
 
+
+const orderStatusText = {
+  PENDING: "Chờ xác nhận",
+  PROCESSING: "Đang xử lý",
+  SHIPPED: "Đang giao hàng",
+  COMPLETED: "Hoàn thành",
+  CANCELLED: "Đã hủy",
+}
+
+// 💬 Map trạng thái đánh giá sang tiếng Việt
+const reviewStatusText = {
+  pending: "Chờ duyệt",
+  approved: "Đã duyệt",
+  rejected: "Bị từ chối",
+}
 // Blog article inline (Giữ nguyên)
 const BlogArticlePage = () => {
   return (
@@ -93,12 +109,26 @@ function App() {
   useEffect(() => {
     socket.on("updateReview", (review) => {
       if (review?.userId?._id === currentUser?.id) {
-        toast.info(`Trạng thái đánh giá của bạn #${review._id} đã đổi thành ${review.status}`)
+        const statusText = reviewStatusText[review.status] || review.status
+        toast.info(`Đánh giá #${review._id} của bạn đã được cập nhật: ${statusText}`)
       }
     })
 
     return () => socket.off("updateReview")
-  }, [])
+  }, [currentUser])
+
+
+  useEffect(() => {
+    socket.on("orderStatusUpdated", (order) => {
+      if (order.user === currentUser?.id) {
+        const statusText = orderStatusText[order.status] || order.status
+        toast.info(`Đơn hàng #${order._id} đã được cập nhật: ${statusText}`)
+      }
+    })
+
+    return () => socket.off("orderStatusUpdated")
+  }, [currentUser])
+
 
 
   useEffect(() => {
@@ -110,64 +140,61 @@ function App() {
 
     return () => socket.off("ReplyReview")
   }, [])
-  // Hết Logic Socket
 
   return (
     <Router>
       <AuthProvider>
         <CartProvider>
-          <WishlistProvider> 
-          {/* Suspense hiển thị fallback khi đang load component */}
-          <Suspense fallback={<div className="p-8 text-center">Đang tải...</div>}>
-            <ToastContainer position="top-right" autoClose={3000} />
+          <WishlistProvider>
+            {/* Suspense hiển thị fallback khi đang load component */}
+            <Suspense fallback={<div className="p-8 text-center">Đang tải...</div>}>
+              <ToastContainer position="top-right" autoClose={3000} />
+              <Routes>
+                <Route
+                  path="/*"
+                  element={
+                    <FrontendLayout
+                      isCartDrawerOpen={isCartDrawerOpen}
+                      setIsCartDrawerOpen={setIsCartDrawerOpen}
+                    >
+                      <ChatBot userId={currentUser?.id} />
 
-            <Routes>
-              {/* Frontend routes */}
-              <Route
-                path="/*"
-                element={
-                  // ⭐️ TRUYỀN STATE CHO LAYOUT
-                  <FrontendLayout
-                    isCartDrawerOpen={isCartDrawerOpen}
-                    setIsCartDrawerOpen={setIsCartDrawerOpen}
-                  >
-                    <Routes>
-                      <Route path="/" element={<HomePage />} />
-                      {/* Truyền hàm mở Cart cho ProductPage để dùng sau khi thêm hàng thành công */}
-                      <Route path="/product/:id" element={<ProductPage
-                        setIsCartDrawerOpen={setIsCartDrawerOpen}
-                      />} />
-                      <Route path="/category/:category" element={<CategoryPage />} />
-                      <Route path="/cart" element={<CartPage />} />
-                      <Route path="/about" element={<AboutPage />} />
-                      <Route path="/contact" element={<ContactPage />} />
-                      <Route path="/checkout" element={<Checkout />} />
-                      <Route path="/wishlist" element={<Wishlist />} />
-                      <Route path="/login" element={<AuthPage />} />
-                      <Route path="/collection" element={<CollectionPage />} />
-                      <Route path="/category" element={<ProductCategoryPage />} />
-                      <Route path="/blog" element={<BlogPage />} />
-                      <Route path="/blog/:slug" element={<BlogArticlePage />} />
-                      <Route path="/profile" element={<UserProfile />} />
-                      <Route path="/orders" element={<OrderHistory />} />
-                      <Route path="/forgot-password" element={<ForgotPassword />} />
-                      <Route path="/reset-password/:token" element={<ResetPassword />} />
-                    </Routes>
-                  </FrontendLayout>
-                }
-              />
+                      <Routes>
+                        <Route path="/" element={<HomePage />} />
+                        <Route path="/product/:id" element={<ProductPage
+                          setIsCartDrawerOpen={setIsCartDrawerOpen}
+                        />} />
+                        <Route path="/category/:category" element={<CategoryPage />} />
+                        <Route path="/cart" element={<CartPage />} />
+                        <Route path="/about" element={<AboutPage />} />
+                        <Route path="/contact" element={<ContactPage />} />
+                        <Route path="/checkout" element={<Checkout />} />
+                        <Route path="/wishlist" element={<Wishlist />} />
+                        <Route path="/login" element={<AuthPage />} />
+                        <Route path="/collection" element={<CollectionPage />} />
+                        <Route path="/category" element={<ProductCategoryPage />} />
+                        <Route path="/blog" element={<BlogPage />} />
+                        <Route path="/blog/:slug" element={<BlogArticlePage />} />
+                        <Route path="/profile" element={<UserProfile />} />
+                        <Route path="/orders" element={<OrderHistory />} />
+                        <Route path="/forgot-password" element={<ForgotPassword />} />
+                        <Route path="/reset-password/:token" element={<ResetPassword />} />
+                      </Routes>
+                    </FrontendLayout>
+                  }
+                />
 
-              {/* Admin routes */}
-              <Route path="/admin/*"
-                element={
-                  <AdminRoute>
-                    <AdminLayout />
-                  </AdminRoute>
-                } />
-              <Route path="/login/admin" element={<AdminLoginForm />} />
-            </Routes>
-          </Suspense>
-           </WishlistProvider>
+                {/* Admin routes */}
+                <Route path="/admin/*"
+                  element={
+                    <AdminRoute>
+                      <AdminLayout />
+                    </AdminRoute>
+                  } />
+                <Route path="/login/admin" element={<AdminLoginForm />} />
+              </Routes>
+            </Suspense>
+          </WishlistProvider>
         </CartProvider>
       </AuthProvider>
     </Router>

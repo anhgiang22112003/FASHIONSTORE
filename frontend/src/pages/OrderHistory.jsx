@@ -45,16 +45,7 @@ const OrderHistory = () => {
   const [loading, setLoading] = useState(true)
   const [selectedOrder, setSelectedOrder] = useState(null) // State để lưu đơn hàng được chọn
   const currentUser = JSON.parse(localStorage.getItem("user"))
-  useEffect(() => {
-    socket.on("orderStatusUpdated", (order) => {
-      if (order.user === currentUser?.id) {
-        fetchOrders()
-        toast.info(`Trạng thái đơn #${order._id} đã đổi thành ${order.status}`)
-      }
-    })
 
-    return () => socket.off("orderStatusUpdated")
-  }, [])
   const fetchOrders = async () => {
     try {
       // Giả định API trả về danh sách đơn hàng của người dùng hiện tại
