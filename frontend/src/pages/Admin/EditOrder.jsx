@@ -6,6 +6,7 @@ import { toast } from "react-toastify"
 import OrderProductList from "../../components/adminOrder/OrderProductList"
 import OrderSummaryCard from "../../components/adminOrder/OrderSummaryCard"
 import OrderCustomerShippingInfo from "../../components/adminOrder/OrderCustomerShippingInfo"
+import InvoicePrint from "@/components/InvoicePrint"
 
 // --- HẰNG SỐ CHUNG ---
 const statusOptions = [
@@ -191,7 +192,6 @@ const OrderEditPage = ({ orderId }) => {
         }))
     }
 
-
     if (isLoading) return (
         <div className="fixed inset-0 flex items-center justify-center bg-white/70 backdrop-blur-sm z-50">
             <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
@@ -263,10 +263,8 @@ const OrderEditPage = ({ orderId }) => {
                         <PencilIcon className="w-5 h-5" />
                         <span>Chỉnh sửa</span>
                     </button>
-                    <button className="flex items-center space-x-1 px-4 py-2 bg-pink-100 text-pink-600 rounded-xl font-semibold hover:bg-pink-200 transition-colors">
-                        <PrinterIcon className="w-5 h-5" />
-                        <span>In đơn hàng</span>
-                    </button>
+                 <InvoicePrint order={editedOrder} />
+
                     <button className="flex items-center space-x-1 px-4 py-2 bg-gray-200 text-gray-800 rounded-xl font-semibold hover:bg-gray-300 transition-colors">
                         <PaperAirplaneIcon className="w-5 h-5" />
                         <span>Gửi email</span>
@@ -280,7 +278,9 @@ const OrderEditPage = ({ orderId }) => {
     return (
         <div className="min-h-screen bg-gray-50 font-sans antialiased p-8">
             <div className="max-w-full mx-auto space-y-10">
-                <div className="flex justify-between items-center pb-4 border-b border-gray-200">
+
+                {/* Header */}
+                <div className="flex justify-between items-center pb-4 border-b no-print border-gray-200">
                     <div>
                         <h1 className="text-3xl font-bold text-gray-800">Chi tiết đơn hàng</h1>
                         <p className="text-gray-500 mt-1">Mã đơn hàng: {editedOrder.orderId}</p>
@@ -288,71 +288,75 @@ const OrderEditPage = ({ orderId }) => {
                     {renderHeaderButtons()}
                 </div>
 
-                {/* Main Content Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {/* Left Column */}
-                    <div className="lg:col-span-2 space-y-6">
-                        {/* Status Section */}
-                        <div className="bg-white rounded-2xl shadow-md p-6">
-                            <h2 className="text-lg font-semibold text-gray-800 mb-4">Trạng thái đơn hàng</h2>
-                            {isEditMode && canEditFull ? (
-                                <select
-                                    value={editedOrder.status}
-                                    onChange={(e) => setEditedOrder({ ...editedOrder, status: e.target.value })}
-                                    className="w-full px-4 py-2 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all"
-                                >
-                                    {statusOptions.map((status) => (
-                                        <option key={status.value} value={status.value}>
-                                            {status.label}
-                                        </option>
-                                    ))}
-                                </select>
-                            ) : (
-                                <div className="flex items-center space-x-2">
-                                    <span className={`px-3 py-1 rounded-full font-semibold text-sm ${statusColors[currentStatusLabel] || "bg-gray-100 text-gray-600"}`}>
-                                        {currentStatusLabel}
-                                    </span>
-                                    <span className="text-sm text-gray-500">#{editedOrder.orderId}</span>
-                                </div>
-                            )}
+                {/* 📦 Container riêng cho phần nội dung đơn hàng */}
+                <div className="order-container bg-white shadow-lg rounded-2xl p-8 border border-gray-100">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        {/* Left Column */}
+                        <div className="lg:col-span-2 space-y-6">
+                            {/* Status Section */}
+                            <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
+                                <h2 className="text-lg font-semibold text-gray-800 mb-4">Trạng thái đơn hàng</h2>
+                                {isEditMode && canEditFull ? (
+                                    <select
+                                        value={editedOrder.status}
+                                        onChange={(e) => setEditedOrder({ ...editedOrder, status: e.target.value })}
+                                        className="w-full px-4 py-2 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all"
+                                    >
+                                        {statusOptions.map((status) => (
+                                            <option key={status.value} value={status.value}>
+                                                {status.label}
+                                            </option>
+                                        ))}
+                                    </select>
+                                ) : (
+                                    <div className="flex items-center space-x-2">
+                                        <span
+                                            className={`px-3 py-1 rounded-full font-semibold text-sm ${statusColors[currentStatusLabel] || "bg-gray-100 text-gray-600"
+                                                }`}
+                                        >
+                                            {currentStatusLabel}
+                                        </span>
+                                        <span className="text-sm text-gray-500">#{editedOrder.orderId}</span>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Customer & Shipping Info */}
+                            <OrderCustomerShippingInfo
+                                editedOrder={editedOrder}
+                                handleChange={handleChange}
+                                isEditMode={isEditMode}
+                                canEditFull={canEditFull}
+                                renderEditableField={renderEditableField}
+                                paymentMethods={paymentMethods}
+                                shippingTypes={shippingTypes}
+                            />
+
+                            {/* Product List */}
+                            <OrderProductList
+                                editedOrder={editedOrder}
+                                setEditedOrder={setEditedOrder}
+                                isEditMode={isEditMode}
+                                canEditProductList={canEditProductList}
+                                canEditFull={canEditFull}
+                                fetchOrder={fetchOrder}
+                            />
+
+                            {/* Note section */}
+                            <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
+                                <h2 className="text-lg font-semibold text-gray-800 mb-4">Ghi chú của khách</h2>
+                                {renderEditableField("Ghi chú", "shippingInfo.note", editedOrder.shippingInfo.note)}
+                            </div>
                         </div>
 
-                        {/* Customer & Shipping Info */}
-                        <OrderCustomerShippingInfo
-                            editedOrder={editedOrder}
-                            handleChange={handleChange}
-                            isEditMode={isEditMode}
-                            canEditFull={canEditFull}
-                            renderEditableField={renderEditableField}
-                            paymentMethods={paymentMethods}
-                            shippingTypes={shippingTypes}
-                        />
-
-                        {/* Product List */}
-                        <OrderProductList
-                            editedOrder={editedOrder}
-                            setEditedOrder={setEditedOrder}
-                            isEditMode={isEditMode}
-                            canEditProductList={canEditProductList}
-                            canEditFull={canEditFull}
-                            fetchOrder={fetchOrder}
-                        />
-
-                        {/* Note section */}
-                        <div className="bg-white rounded-2xl shadow-md p-6">
-                            <h2 className="text-lg font-semibold text-gray-800 mb-4">Ghi chú của khách</h2>
-                            {renderEditableField("Ghi chú", "shippingInfo.note", editedOrder.shippingInfo.note)}
+                        {/* Right Column */}
+                        <div className="lg:col-span-1 space-y-6">
+                            <OrderSummaryCard
+                                totals={currentTotals}
+                                trackingHistory={editedOrder.trackingHistory || []}
+                                editHistory={editedOrder.editHistory || []}
+                            />
                         </div>
-                    </div>
-
-                    {/* Right Column */}
-                    <div className="lg:col-span-1 space-y-6">
-                        {/* Order Summary */}
-                        <OrderSummaryCard
-                            totals={currentTotals}
-                            trackingHistory={editedOrder.trackingHistory || []}
-                            editHistory={editedOrder.editHistory || []}
-                        />
                     </div>
                 </div>
             </div>
