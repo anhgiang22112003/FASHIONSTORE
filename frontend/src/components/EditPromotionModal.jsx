@@ -74,12 +74,35 @@ const EditPromotionModal = ({ title, isOpen, onClose, onSave, promotion = null }
   }, [promotion])
 
   const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target
+    const { name, value, type, checked } = e.target;
+
+    let newValue = value;
+
+    // Ngăn nhập số âm cho tất cả các trường số (optional, nhưng tốt hơn)
+    if (type === "number") {
+      const numValue = Number(value);
+      if (numValue < 0) {
+        newValue = "0";
+      }
+    }
+
+    if (name === "discountValue" && formData.type === "percent") {
+      const numValue = Number(value);
+      if (numValue > 100) {
+        toast.error("Phần trăm giảm không được lớn hơn 100%.");
+        return;
+      }
+
+      if (numValue < 0) {
+        newValue = "0";
+      }
+    }
+
     setFormData((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }))
-  }
+      [name]: type === "checkbox" ? checked : newValue, // Dùng newValue đã được kiểm tra
+    }));
+  };
 
   const handleGenerateCode = () => {
     const newCode = Math.random().toString(36).substring(2, 8).toUpperCase()

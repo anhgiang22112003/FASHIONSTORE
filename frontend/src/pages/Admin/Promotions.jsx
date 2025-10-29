@@ -144,6 +144,14 @@ const PromotionManagementPage = () => {
       setIsDeleteModalOpen(false)
     }
   }
+   const checkVoucherExpirationOrUsage = (promo) => {
+    const now = new Date();
+    const endDate = new Date(promo.endDate);
+    const isExpired = now > endDate;
+    const isMaxUsage =
+      promo.usageLimit > 0 && promo.usedCount >= promo.usageLimit;
+    return isExpired || isMaxUsage;
+  };
 
   const fetVoucher = async () => {
     setLoading(true)
@@ -242,6 +250,11 @@ const PromotionManagementPage = () => {
                   <span className="px-2 py-1 text-xs font-medium rounded-full bg-pink-200 text-pink-700">{promo.code}</span>
                 </div>
                 <p className="text-sm text-gray-600 mt-2">{promo.description}</p>
+                 {checkVoucherExpirationOrUsage(promo) && (
+                  <span className="text-red-600 text-sm font-semibold">
+                    Hết hạn hoặc hết lượt sử dụng
+                  </span>
+                )}
                 <div className="mt-4 text-sm">
                   {promo?.type === "free_shipping" ? (
                     <p><span className="font-medium">Giá trị giảm:</span> Miễn phí vận chuyển</p>
