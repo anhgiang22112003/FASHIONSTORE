@@ -29,7 +29,8 @@ const Header = () => {
   const [showDropdown, setShowDropdown] = useState(false)
   const totalItems = cart?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0
   const wishlistCount = wishlist?.length
-  const userId = JSON.parse(localStorage.getItem("user"))
+
+  
 
   const toggleNotifications = () => {
     setIsNotificationsOpen(!isNotificationsOpen)
@@ -149,7 +150,7 @@ const Header = () => {
                       </span>
                     )}                  </button>
 
-                  {showDropdown && <NotificationUser userId={userId?.id} onNotificationsChange={setUnreadCount} />}
+                  {showDropdown && <NotificationUser userId={user?.id} onNotificationsChange={setUnreadCount} />}
 
                 </div>
                 <div className="relative">

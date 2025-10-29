@@ -1,5 +1,6 @@
+import { AuthContext } from '@/context/Authcontext'
 import { socket } from '@/service/socket'
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useContext } from 'react'
 
 const ChatBot = ({ userId }) => {
   const [messages, setMessages] = useState([])
@@ -8,10 +9,11 @@ const ChatBot = ({ userId }) => {
   const [isTyping, setIsTyping] = useState(false)
   const [isChatOpen, setIsChatOpen] = useState(false)
   const messagesEndRef = useRef(null)
-  console.log(userId);
-  
+  const { user } = useContext(AuthContext)
+  console.log(user)
+
   useEffect(() => {
-    // if (!userId) return
+    if (!userId) return
 
     const handleConnect = () => {
       console.log("✅ Connected to chat server")
@@ -33,6 +35,15 @@ const ChatBot = ({ userId }) => {
       setMessages(prev => [...prev, msg])
       setIsTyping(false)
     }
+    const sendMessage = (content) => {
+      if (!socket || !content.trim()) return
+      setIsTyping(true)
+
+      socket.emit("sendMessage", { userId, content })
+
+      // nếu sau 6s không có phản hồi thì tự tắt typing
+      setTimeout(() => setIsTyping(false), 6000)
+    }
 
     const handleAdminJoined = (data) => {
       setMessages(prev => [
@@ -50,7 +61,7 @@ const ChatBot = ({ userId }) => {
     const handleTyping = () => {
       setIsTyping(true)
     }
-
+    socket.on("sendMessage", sendMessage)
     socket.on("connect", handleConnect)
     socket.on("disconnect", handleDisconnect)
     socket.on("newMessages", handleNewMessages)
@@ -65,12 +76,25 @@ const ChatBot = ({ userId }) => {
       socket.off("newMessage", handleNewMessage)
       socket.off("adminJoined", handleAdminJoined)
       socket.off("typing", handleTyping)
+      socket.off("sendMessage", sendMessage)
     }
   }, [userId])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages, isTyping])
+
+  useEffect(() => {
+  if (isChatOpen && messages.length === 0) {
+    setMessages([{
+      _id: 'init',
+      sender: 'BOT',
+      content: 'Xin chào 👋 Tôi là trợ lý mua sắm AI. Tôi có thể giúp gì cho bạn?',
+      type: 'TEXT',
+      createdAt: new Date().toISOString()
+    }])
+  }
+}, [isChatOpen])
 
   const sendMessage = (content) => {
     if (!socket || !content.trim()) return
@@ -98,9 +122,8 @@ const ChatBot = ({ userId }) => {
 
     return (
       <div key={msg._id} className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`}>
-        <div className={`max-w-[70%] rounded-2xl px-4 py-2 ${
-          isUser ? 'bg-blue-500 text-white' : isAdmin ? 'bg-green-100 text-gray-800 border border-green-300' : 'bg-gray-100 text-gray-800'
-        }`}>
+        <div className={`max-w-[70%] rounded-2xl px-4 py-2 ${isUser ? 'bg-blue-500 text-white' : isAdmin ? 'bg-green-100 text-gray-800 border border-green-300' : 'bg-gray-100 text-gray-800'
+          }`}>
           {!isUser && isAdmin && <div className="text-xs font-semibold mb-1 text-green-700">👤 Nhân viên hỗ trợ</div>}
           {!isUser && isBot && <div className="text-xs font-semibold mb-1 text-gray-700">🤖 Bot</div>}
 
@@ -195,7 +218,7 @@ const ChatBot = ({ userId }) => {
           {/* Input */}
           <div className="p-4 bg-white border-t">
             <form onSubmit={e => { e.preventDefault(); sendMessage(inputMessage) }} className="flex space-x-2">
-              <input type="text" value={inputMessage} onChange={e => setInputMessage(e.target.value)} placeholder="Nhập tin nhắn..." className="flex-1 px-4 py-2 border rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500" disabled={!isConnected}/>
+              <input type="text" value={inputMessage} onChange={e => setInputMessage(e.target.value)} placeholder="Nhập tin nhắn..." className="flex-1 px-4 py-2 border rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500" disabled={!isConnected} />
               <button type="submit" disabled={!isConnected || !inputMessage.trim()} className="bg-blue-500 text-white px-6 py-2 rounded-full hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Gửi</button>
             </form>
           </div>
