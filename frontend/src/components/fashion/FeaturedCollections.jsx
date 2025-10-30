@@ -3,7 +3,6 @@ import { ArrowRight } from 'lucide-react'
 import { Button } from '../ui/button'
 import { Link } from 'react-router-dom'
 import api from '@/service/api'
-import { toast } from 'react-toastify'
 
 const FeaturedCollections = () => {
   const [collection , setCollection] = React.useState([])
@@ -13,7 +12,7 @@ const FeaturedCollections = () => {
      const activeCollection = response?.data.filter(item => item.isActive)
       setCollection(activeCollection);
     } catch (error) {
-      toast.error('Error fetching featured collections:', error);
+      console.log('Error fetching featured collections:', error);
     }
   }
   

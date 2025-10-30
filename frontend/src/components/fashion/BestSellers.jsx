@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom'
 import SideCartDrawer from './SideCartDrawer'
 import { toast } from 'react-toastify'
 import { WishlistContext } from '@/context/WishlistContext'
+import { AuthContext } from '@/context/Authcontext'
 
 const VariantSelectionModal = React.lazy(() => import('./VariantSelectionModal'))
 const BestSellers = () => {
@@ -15,6 +16,7 @@ const BestSellers = () => {
   const [isCartDrawerOpen, setIsCartDrawerOpen] = React.useState(false)
     const [favorites, setFavorites] = React.useState([]) // ✅ Danh sách yêu thích
   const { fetchWishlist } = useContext(WishlistContext)
+   const {user} = useContext(AuthContext)
 
   const handleSuccessAndOpenCart = () => {
     setIsCartDrawerOpen(true) // Mở Drawer giỏ hàng
@@ -60,10 +62,14 @@ const BestSellers = () => {
   useEffect(() => {
     const init = async () => {
       await getBestSellers()
-      await getFavorites()
     }
     init()
   }, [])
+   useEffect(()=>{
+          if(user){
+            getFavorites()
+          }
+   },[user])
     // Hàm mở giỏ hàng từ icon
 
   return (

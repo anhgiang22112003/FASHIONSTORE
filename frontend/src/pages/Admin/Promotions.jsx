@@ -158,7 +158,7 @@ const PromotionManagementPage = () => {
     try {
       const response = await apiAdmin.get('/vouchers')
 
-      setPromotionsData(response.data || [])
+      setPromotionsData(response.data.data || [])
     } catch (error) {
       console.error('Error fetching promotions:', error)
     } finally {

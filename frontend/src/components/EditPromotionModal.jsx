@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { XMarkIcon } from '@heroicons/react/24/outline'
 import apiAdmin from '@/service/apiAdmin'
 import { toast } from 'react-toastify'
+import UserSelectionTable from './UserSelectionTablePromotions'
 
 // Modal chung
 const CommonModal = ({ title, isOpen, onClose, children, className = '' }) => {
@@ -38,8 +39,24 @@ const EditPromotionModal = ({ title, isOpen, onClose, onSave, promotion = null }
     endDate: "",
     usageLimit: "",
     applicableCategories: [],
+    applicableUsers: [],         // ✅ người dùng cụ thể
+    autoCondition: "",
   })
 
+  const [users, setUsers] = useState([])
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const res = await apiAdmin.get("/users")
+        setUsers(res.data.data)
+      } catch (err) {
+        console.error(err)
+        toast.error("Không tải được danh sách người dùng.")
+      }
+    }
+    fetchUsers()
+  }, [])
   useEffect(() => {
     const fetCategories = async () => {
       try {
@@ -69,40 +86,40 @@ const EditPromotionModal = ({ title, isOpen, onClose, onSave, promotion = null }
         endDate: promotion.endDate?.slice(0, 16) || "",
         usageLimit: promotion.usageLimit || "",
         applicableCategories: promotion.applicableCategories || "Tất cả danh mục",
+        applicableUsers: promotion.applicableUsers || "Tất cả user",
+        autoCondition :promotion.autoCondition || ""
       })
     }
   }, [promotion])
 
   const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value, type, checked } = e.target
 
-    let newValue = value;
-
-    // Ngăn nhập số âm cho tất cả các trường số (optional, nhưng tốt hơn)
+    let newValue = value
     if (type === "number") {
-      const numValue = Number(value);
+      const numValue = Number(value)
       if (numValue < 0) {
-        newValue = "0";
+        newValue = "0"
       }
     }
 
     if (name === "discountValue" && formData.type === "percent") {
-      const numValue = Number(value);
+      const numValue = Number(value)
       if (numValue > 100) {
-        toast.error("Phần trăm giảm không được lớn hơn 100%.");
-        return;
+        toast.error("Phần trăm giảm không được lớn hơn 100%.")
+        return
       }
 
       if (numValue < 0) {
-        newValue = "0";
+        newValue = "0"
       }
     }
 
     setFormData((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : newValue, // Dùng newValue đã được kiểm tra
-    }));
-  };
+      [name]: type === "checkbox" ? checked : newValue,
+    }))
+  }
 
   const handleGenerateCode = () => {
     const newCode = Math.random().toString(36).substring(2, 8).toUpperCase()
@@ -130,7 +147,7 @@ const EditPromotionModal = ({ title, isOpen, onClose, onSave, promotion = null }
 
 
   return (
-    <CommonModal title={title} isOpen={isOpen} onClose={onClose} className="w-full max-w-4xl">
+    <CommonModal title={title} isOpen={isOpen} onClose={onClose} className="w-full max-w-7xl">
       <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Cột trái */}
         <div className="space-y-4">
@@ -309,6 +326,33 @@ const EditPromotionModal = ({ title, isOpen, onClose, onSave, promotion = null }
               placeholder="VD: 100"
             />
           </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Loại voucher</label>
+            <select
+              name="autoCondition"
+              value={formData.autoCondition}
+              onChange={handleInputChange}
+              className="mt-1 block w-full px-4 py-2 border rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#ff69b4]"
+            >
+              <option value="">Tất cả người dùng</option>
+              <option value="new_user">Chỉ người dùng mới</option>
+              <option value="vip_user">Chỉ người dùng VIP</option>
+              <option value="birthday">Voucher sinh nhật</option>
+              <option value="manual">Chọn người dùng cụ thể</option>
+            </select>
+          </div>
+
+          {/* Nếu chọn manual thì hiển thị danh sách chọn user */}
+          {formData.autoCondition === "manual" && (
+            <UserSelectionTable
+              users={users}
+              selected={formData.applicableUsers}
+              onChange={(list) =>
+                setFormData((prev) => ({ ...prev, applicableUsers: list }))
+              }
+            />
+          )}
+
           {/* Danh mục */}
           <div>
             <label className="block text-sm font-medium text-gray-700">Áp dụng cho danh mục</label>

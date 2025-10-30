@@ -115,7 +115,7 @@ const CartPage = () => {
                     <span>Màu: {item.color}</span>
                   </div>
                   <div className="text-lg font-bold text-pink-500">
-                    {item?.product?.originalPrice?.toLocaleString('vi-VN')}đ
+                    {item?.product?.sellingPrice?.toLocaleString('vi-VN')}đ
                   </div>
                 </div>
 

@@ -85,16 +85,16 @@ const ChatBot = ({ userId }) => {
   }, [messages, isTyping])
 
   useEffect(() => {
-  if (isChatOpen && messages.length === 0) {
-    setMessages([{
-      _id: 'init',
-      sender: 'BOT',
-      content: 'Xin chào 👋 Tôi là trợ lý mua sắm AI. Tôi có thể giúp gì cho bạn?',
-      type: 'TEXT',
-      createdAt: new Date().toISOString()
-    }])
-  }
-}, [isChatOpen])
+    if (isChatOpen && messages.length === 0) {
+      setMessages([{
+        _id: 'init',
+        sender: 'BOT',
+        content: 'Xin chào 👋 Tôi là trợ lý mua sắm AI. Tôi có thể giúp gì cho bạn?',
+        type: 'TEXT',
+        createdAt: new Date().toISOString()
+      }])
+    }
+  }, [isChatOpen])
 
   const sendMessage = (content) => {
     if (!socket || !content.trim()) return
@@ -174,56 +174,65 @@ const ChatBot = ({ userId }) => {
       </button>
 
       {/* Chat Window */}
-      {isChatOpen && (
-        <div className="fixed bottom-24 right-6 w-96 h-[600px] bg-white rounded-2xl shadow-2xl z-50 flex flex-col overflow-hidden">
-          {/* Header */}
-          <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-4 flex items-center justify-between">
-            <div className="flex items-center">
-              <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center mr-3">🤖</div>
-              <div>
-                <h3 className="font-semibold">Trợ lý AI</h3>
-                <p className="text-xs opacity-90">{isConnected ? '● Đang hoạt động' : '○ Đang kết nối...'}</p>
-              </div>
-            </div>
-            <button onClick={() => setIsChatOpen(false)} className="hover:bg-white/20 p-1 rounded-lg transition-colors">✖</button>
-          </div>
-
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
-            {messages.length === 0 && !isTyping && (
-              <div className="text-center text-gray-500 mt-10">
-                <div className="text-5xl mb-4">💬</div>
-                <p>Chào mừng bạn đến với trợ lý mua sắm AI!</p>
-                <p className="text-sm mt-2">Hãy bắt đầu trò chuyện...</p>
-              </div>
-            )}
-            {messages.map(renderMessage)}
-
-            {/* Typing indicator */}
-            {isTyping && (
-              <div className="flex justify-start mb-4">
-                <div className="bg-gray-100 rounded-2xl px-4 py-3">
-                  <div className="flex space-x-2">
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+      {user ? (
+        <>
+          {isChatOpen && (
+            <div className="fixed bottom-24 right-6 w-96 h-[600px] bg-white rounded-2xl shadow-2xl z-50 flex flex-col overflow-hidden">
+              {/* Header */}
+              <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-4 flex items-center justify-between">
+                <div className="flex items-center">
+                  <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center mr-3">🤖</div>
+                  <div>
+                    <h3 className="font-semibold">Trợ lý AI</h3>
+                    <p className="text-xs opacity-90">{isConnected ? '● Đang hoạt động' : '○ Đang kết nối...'}</p>
                   </div>
                 </div>
+                <button onClick={() => setIsChatOpen(false)} className="hover:bg-white/20 p-1 rounded-lg transition-colors">✖</button>
               </div>
-            )}
 
-            <div ref={messagesEndRef} />
-          </div>
+              {/* Messages */}
+              <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
+                {messages.length === 0 && !isTyping && (
+                  <div className="text-center text-gray-500 mt-10">
+                    <div className="text-5xl mb-4">💬</div>
+                    <p>Chào mừng bạn đến với trợ lý mua sắm AI!</p>
+                    <p className="text-sm mt-2">Hãy bắt đầu trò chuyện...</p>
+                  </div>
+                )}
+                {messages.map(renderMessage)}
 
-          {/* Input */}
-          <div className="p-4 bg-white border-t">
-            <form onSubmit={e => { e.preventDefault(); sendMessage(inputMessage) }} className="flex space-x-2">
-              <input type="text" value={inputMessage} onChange={e => setInputMessage(e.target.value)} placeholder="Nhập tin nhắn..." className="flex-1 px-4 py-2 border rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500" disabled={!isConnected} />
-              <button type="submit" disabled={!isConnected || !inputMessage.trim()} className="bg-blue-500 text-white px-6 py-2 rounded-full hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Gửi</button>
-            </form>
-          </div>
+                {/* Typing indicator */}
+                {isTyping && (
+                  <div className="flex justify-start mb-4">
+                    <div className="bg-gray-100 rounded-2xl px-4 py-3">
+                      <div className="flex space-x-2">
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div ref={messagesEndRef} />
+              </div>
+
+              {/* Input */}
+              <div className="p-4 bg-white border-t">
+                <form onSubmit={e => { e.preventDefault(); sendMessage(inputMessage) }} className="flex space-x-2">
+                  <input type="text" value={inputMessage} onChange={e => setInputMessage(e.target.value)} placeholder="Nhập tin nhắn..." className="flex-1 px-4 py-2 border rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500" disabled={!isConnected} />
+                  <button type="submit" disabled={!isConnected || !inputMessage.trim()} className="bg-blue-500 text-white px-6 py-2 rounded-full hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Gửi</button>
+                </form>
+              </div>
+            </div>
+          )}
+        </>
+      ) : (
+        <div>
+          Bạn cần đăng nhập
         </div>
       )}
+
     </>
   )
 }
