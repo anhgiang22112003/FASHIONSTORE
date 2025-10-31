@@ -229,7 +229,7 @@ const ChatBot = ({ userId }) => {
         </>
       ) : (
         <div>
-          Bạn cần đăng nhập
+        
         </div>
       )}
 

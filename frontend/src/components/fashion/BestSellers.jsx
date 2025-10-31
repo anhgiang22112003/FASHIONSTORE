@@ -157,22 +157,24 @@ const BestSellers = () => {
                 </Link>
 
                 {/* Rating */}
-                <div className="flex items-center gap-1 mb-2">
-                  <div className="flex items-center">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`w-4 h-4 ${i < Math.floor(product?.rating)
-                          ? 'text-yellow-400 fill-current'
-                          : 'text-gray-300'
-                          }`}
-                      />
-                    ))}
-                  </div>
-                  <span className="text-sm text-gray-600">
-                    {product?.rating} ({product?.stock})
-                  </span>
-                </div>
+              <div className="flex items-center gap-1 mb-2">
+  <div className="flex items-center">
+    {[...Array(5)].map((_, i) => (
+      <Star
+        key={i}
+        className={`w-4 h-4 ${
+          i < Math.floor(product?.ratingAverage || 0)
+            ? 'text-yellow-400 fill-current'
+            : 'text-gray-300'
+        }`}
+      />
+    ))}
+  </div>
+  <span className="text-sm text-gray-600">
+    {product?.ratingAverage?.toFixed(1) ?? 0} ({product?.reviewCount ?? 0})
+  </span>
+</div>
+
 
                 {/* Price */}
                 <div className="flex items-center gap-2">
