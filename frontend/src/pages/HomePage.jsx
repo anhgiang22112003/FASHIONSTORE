@@ -6,12 +6,15 @@ import BestSellers from '../components/fashion/BestSellers';
 import AboutSection from '../components/fashion/AboutSection';
 import Testimonials from '../components/fashion/Testimonials';
 import Newsletter from '../components/fashion/Newsletter';
+import FlashSaleBanner from '@/components/fashion/FlashSaleBanner';
 
 const HomePage = () => {
   return (
     <div>
       <HeroSection />
+      <FlashSaleBanner/>
       <FeaturedCollections />
+      
       <ProductCategories />
       <BestSellers />
       <AboutSection />

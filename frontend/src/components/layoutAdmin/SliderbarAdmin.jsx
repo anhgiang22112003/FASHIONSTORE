@@ -13,6 +13,8 @@ const Sidebar = ({ activeTab, setActiveTab, isOpen, toggleSidebar }) => {
             )
         },
 
+
+
         {
             id: 'orders', name: 'Đơn hàng', icon: (
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 18a8 8 0 110-16 8 8 0 010 16zm-1-10v4h-2v-4h2zm2 0h2v4h-2v-4z"></path></svg>
@@ -35,6 +37,11 @@ const Sidebar = ({ activeTab, setActiveTab, isOpen, toggleSidebar }) => {
         {
             id: 'promotion', name: 'Khuyến mại', icon: (
                 <svg className="w-5 h-5" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g id="Layer_2" data-name="Layer 2"> <g id="invisible_box" data-name="invisible box"> <rect width="48" height="48" fill="none"></rect> </g> <g id="Layer_7" data-name="Layer 7"> <path d="M43,7H38a2,2,0,0,0-1.4.6L34,10.2,31.4,7.6A2,2,0,0,0,30,7H5a2.9,2.9,0,0,0-3,3V38a3,3,0,0,0,3,3H30a2,2,0,0,0,1.4-.6L34,37.8l2.6,2.6A2,2,0,0,0,38,41h5a3,3,0,0,0,3-3V10A2.9,2.9,0,0,0,43,7ZM14,18a2,2,0,1,1-2,2A2,2,0,0,1,14,18Zm8,12a2,2,0,1,1,2-2A2,2,0,0,1,22,30Zm2.4-9.6-10,10a1.9,1.9,0,0,1-2.8,0,1.9,1.9,0,0,1,0-2.8l10-10a2,2,0,0,1,2.8,2.8ZM36,33a2,2,0,0,1-4,0V31a2,2,0,0,1,4,0Zm0-8a2,2,0,0,1-4,0V23a2,2,0,0,1,4,0Zm0-8a2,2,0,0,1-4,0V15a2,2,0,0,1,4,0Z"></path> </g> </g> </g></svg>)
+        },
+            {
+            id: 'flash-sale', name: 'Flash Sale', icon: (
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+            )
         },
         {
             id: 'customers', name: 'Khách hàng', icon: (

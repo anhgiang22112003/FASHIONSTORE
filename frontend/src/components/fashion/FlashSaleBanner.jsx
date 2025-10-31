@@ -10,8 +10,8 @@ import confetti from 'canvas-confetti'
 dayjs.extend(duration)
 
 const FlashSaleBanner = () => {
-  const [sale, setSale] = useState<any>(null)
-  const [timeLeft, setTimeLeft] = useState<string>("00:00:00")
+  const [sale, setSale] = useState(null)
+  const [timeLeft, setTimeLeft] = useState("00:00:00")
   const [isActive, setIsActive] = useState(false)
 
   useEffect(() => {
@@ -22,12 +22,15 @@ const FlashSaleBanner = () => {
 
   const fetchSale = async () => {
     const res = await apiUser.get("/flash-sales/active")
+    console.log(res);
+    
     if (res.data) {
       setSale(res.data)
       updateCountdown(res.data)
     }
   }
-
+ console.log(sale);
+ 
   const updateCountdown = (saleData) => {
     const now = new Date().getTime()
     const start = new Date(saleData.startTime).getTime()
@@ -107,19 +110,19 @@ const FlashSaleBanner = () => {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-        {sale.items.map((it) => (
+        {sale?.items?.map((it) => (
           <div key={it._id} className="bg-white text-black rounded-xl shadow p-2">
             <img
-              src={it.productId.image}
-              alt={it.productId.name}
+              src={it.productId?.image}
+              alt={it.productId?.name}
               className="w-full h-40 object-cover rounded-md"
             />
-            <h3 className="text-sm font-semibold mt-1 line-clamp-2">{it.productId.name}</h3>
+            <h3 className="text-sm font-semibold mt-1 line-clamp-2">{it?.productId?.name}</h3>
             <div className="text-red-600 font-bold text-lg mt-1">
-              {it.salePrice.toLocaleString()}đ
+              {it?.salePrice?.toLocaleString()}đ
             </div>
             <div className="text-gray-500 text-xs line-through">
-              {it.productId.sellingPrice.toLocaleString()}đ
+              {it?.productId?.sellingPrice?.toLocaleString()}đ
             </div>
             <div className="mt-2 w-full bg-gray-200 h-2 rounded-full">
               <div

@@ -25,6 +25,8 @@ const PromotionManagementPage = React.lazy(() => import("./Promotions"))
 const Settings = React.lazy(() => import("./SettingsContent"))
 const AdminSettingsPage = React.lazy(() => import("@/components/layoutAdmin/AdminSettingPage"))
 const AdminChatDashboard = React.lazy(() => import("./AdminChatDashboard"))
+const AddFlashSalePage = React.lazy(() => import("./AddFlashSalePage"))
+const FlashSaleListPage = React.lazy(() => import("./FlashSaleListPage"))
 
 const AdminLayout = () => {
   const [activeTab, setActiveTab] = useState("dashboard")
@@ -238,6 +240,13 @@ const AdminLayout = () => {
                 setData={(data) => setTabData((prev) => ({ ...prev, reviews: data }))}
               />
             )}
+            {activeTab === "add-flashsale" && (
+              <AddFlashSalePage setActiveTab={setActiveTab} />
+            )}
+
+            {activeTab === "flash-sale" && <FlashSaleListPage setActiveTab={setActiveTab} />}
+
+
 
             {activeTab === "promotion" && (
               <PromotionManagementPage
