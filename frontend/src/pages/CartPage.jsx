@@ -183,7 +183,7 @@ const CartPage = () => {
             <Button
               className="w-full bg-pink-500 hover:bg-pink-600 text-white"
               size="lg"
-              onClick={() => navigate("/checkout", { state: { cart } })}
+              onClick={() => navigate("/checkout")}
             >
               Thanh toán
               <ArrowRight className="w-5 h-5 ml-2" />

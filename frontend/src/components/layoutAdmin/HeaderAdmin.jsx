@@ -28,9 +28,7 @@ const Header = ({ toggleSidebar, setActiveTab, setEditingProductId, setEditingOr
     pendingOrders: 0,
     revenue: 0,
     newCustomers: 0,
-  })
- console.log(stats);
- 
+  }) 
   useEffect(() => {
     const fetchStats = async () => {
       try {

@@ -30,15 +30,10 @@ const VariantSelectionModal = ({ product, isOpen, onClose,onSuccessAndOpenCart})
   const currentVariant = useMemo(() => {
     return product?.variations?.find(v => v.color === selectedColor && v.size === selectedSize);
   }, [product, selectedColor, selectedSize]);
-  console.log(currentVariant);
-  
   const currentStock = currentVariant?.stock || 0;
-  console.log(currentStock);
-  
-  const isOutOfStock = currentStock <= 0;
-  console.log(currentVariant);
-  
 
+  const isOutOfStock = currentStock <= 0;
+  
   // 3. Hàm xử lý thêm vào giỏ hàng
   const handleAddToCart = useCallback(async () => {
     if (!selectedColor || !selectedSize) {

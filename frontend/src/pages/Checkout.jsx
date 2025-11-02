@@ -10,6 +10,8 @@ const ShippingMethodEnum = {
 }
 const Checkout = () => {
   const navigate = useNavigate()
+  const location = useLocation()
+  const buyNowData = location.state
   const { cart, fetchCart, setCart } = useContext(CartContext)
   const [provinces, setProvinces] = useState([])
   const [districts, setDistricts] = useState([])
@@ -19,6 +21,7 @@ const Checkout = () => {
   const [isVoucherPopupOpen, setIsVoucherPopupOpen] = useState(false)
   const [availableVouchers, setAvailableVouchers] = useState([])
   const [isFormInitialized, setIsFormInitialized] = useState(false)
+  const [buyNowDiscountAmount, setBuyNowDiscountAmount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
   const [shippingMethod, setShippingMethod] = useState("standard")
   const [form, setForm] = useState({
@@ -87,22 +90,31 @@ const Checkout = () => {
     setIsVoucherPopupOpen(false)
     try {
       setIsApplying(true)
-      const res = await api.post("/vouchers/apply-voucher", { code })
+      const res = await api.post("/vouchers/apply-voucher", {
+        code,
+        ...(buyNowData?.mode === "buyNow" ? {
+          product: buyNowData.product,
+          quantity: buyNowData.quantity,
+          basePrice: buyNowData.product.originalPrice,
+        } : {})
+      })
 
-      // Lấy phí ship hiện tại
-      const shippingFee = shippingMethod === "express" ? 50000 : 30000
-      const subtotal = cart?.subtotal || 0
-      const discount = res.data.discount || 0
-      const newTotal = subtotal - discount + shippingFee
+      if (isBuyNow) {
+        setBuyNowDiscountAmount(res.data.discount || 0)
+      } else {
+        const shippingFee = shippingMethod === "express" ? 50000 : 30000
+        const subtotal = cart?.subtotal || 0
+        const discount = res.data.discount || 0
+        const newTotal = subtotal - discount + shippingFee
 
-      // ✅ Cập nhật cart mà không làm sai shippingMethod
-      setCart(prev => ({
-        ...prev,
-        voucherCode: res.data.code,
-        discount: discount,
-        total: newTotal,
-        shipping: shippingFee,
-      }))
+        setCart(prev => ({
+          ...prev,
+          voucherCode: res.data.code,
+          discount: discount,
+          total: newTotal,
+          shipping: shippingFee,
+        }))
+      }
 
       toast.success(res.data.message || "Áp dụng mã giảm giá thành công 🎉")
     } catch (err) {
@@ -111,6 +123,16 @@ const Checkout = () => {
       setIsApplying(false)
     }
   }
+
+  // 🧮 Tính tạm tính và tổng cộng cho chế độ "Mua ngay"
+  const isBuyNow = buyNowData?.mode === "buyNow"
+
+  const buyNowSubtotal = isBuyNow
+    ? (buyNowData.product?.sellingPrice || 0) * (buyNowData.quantity || 1)
+    : cart?.subtotal || 0
+
+  const shippingFee = shippingMethod === "express" ? 50000 : 30000
+  const buyNowTotal = buyNowSubtotal - (buyNowData ? buyNowDiscountAmount : cart.discount) + shippingFee
 
 
   useEffect(() => {
@@ -235,37 +257,51 @@ const Checkout = () => {
     const provinceName = provinces.find(p => p.code == form.provinceCode)?.name || ""
     const districtName = districts.find(d => d.code == form.districtCode)?.name || ""
     const wardName = wards.find(w => w.code == form.wardCode)?.name || ""
-
     const fullAddress = `${form.address}, ${wardName}, ${districtName}, ${provinceName}`.replace(/,\s*,/g, ", ")
     const selectedShippingOption = shippingOptions.find(opt => opt.id === shippingMethod)
     const backendShippingMethod = selectedShippingOption ? selectedShippingOption.backendValue : ShippingMethodEnum.NHANH
     try {
       // Dữ liệu gửi lên server
-      const orderPayload = {
-        shippingMethod: backendShippingMethod,
-        paymentMethod: form.paymentMethod,
-        address: fullAddress,
-        voucherCode: cart.voucherCode,
-        note: form.note,
-        shippingInfo: {
-          name: form.name,
-          phone: form.phone,
+      let res
+
+      if (buyNowData?.mode === "buyNow") {
+        res = await api.post("/orders/buy-now", {
+          productId: buyNowData.product._id,
+          quantity: buyNowData.quantity,
+          color: buyNowData.color,
+          size: buyNowData.size,
           address: fullAddress,
-          city: provinceName,
+          paymentMethod: form.paymentMethod,
+          shippingMethod: backendShippingMethod,
+          voucherCode: voucherCode,
+          discount:buyNowDiscountAmount,
           note: form.note,
-        },
+          shippingInfo: {
+            name: form.name,
+            phone: form.phone,
+            address: fullAddress,
+          },
+        })
+      } else {
+        res = await api.post("/orders", {
+          address: fullAddress,
+          paymentMethod: form.paymentMethod,
+          shippingMethod: backendShippingMethod,
+          voucherCode: cart.voucherCode,
+          note: form.note,
+          shippingInfo: {
+            name: form.name,
+            phone: form.phone,
+            address: fullAddress,
+          },
+        })
       }
-      const res = await api.post("/orders", orderPayload)
       const invoiceNumber = res.data._id
       const total = res.data.total
-      console.log(res, invoiceNumber, total)
-
       if (form.paymentMethod === "BANK") {
-        // Tạo form SePay
         await handleBankPayment(invoiceNumber, total)
         fetchCart()
       } else {
-        // Nếu COD, vẫn thông báo thành công
         fetchCart()
         toast.success("Đặt hàng thành công 🎉")
         navigate("/orders")
@@ -283,7 +319,18 @@ const Checkout = () => {
     }
     try {
       setIsApplying(true)
-      const res = await api.post("/vouchers/apply-voucher", { code: voucherCode })
+      const res = await api.post("/vouchers/apply-voucher", {
+        code: voucherCode,
+        ...(buyNowData?.mode === "buyNow" ? {
+          product: buyNowData.product,
+          quantity: buyNowData.quantity,
+          basePrice: buyNowData.product.originalPrice,
+        } : {})
+
+      })
+      if (isBuyNow) {
+        setBuyNowDiscountAmount(res.data.discount || 0)
+      }
       toast.success(res.data.message || "Áp dụng mã giảm giá thành công 🎉")
       fetchCart() // Cập nhật lại giỏ hàng
     } catch (err) {
@@ -296,7 +343,6 @@ const Checkout = () => {
   const displayShippingFee = cart?.shipping ?? (
     shippingMethod === "express" ? 50000 : 30000
   )
-
 
   if (!cart) {
     return <p className="text-center text-gray-600 mt-10">Không có sản phẩm trong giỏ hàng</p>
@@ -466,46 +512,65 @@ const Checkout = () => {
 
           {/* Danh sách sản phẩm */}
           <div className="space-y-4 max-h-[300px] lg:max-h-[400px] overflow-y-auto pr-2">
-            {cart?.items?.map((item, index) => (
-              <div
-                key={index}
-                className="flex items-center justify-between p-3 bg-white rounded-lg shadow-sm"
-              >
+            {buyNowData?.mode === "buyNow" ? (
+              <div className="flex items-center justify-between p-3 bg-white rounded-lg shadow-sm">
                 <div className="flex items-center gap-4">
                   <img
-                    src={item?.product?.mainImage || "placeholder.png"}
-                    alt={item?.product?.name}
+                    src={buyNowData?.product?.mainImage || "placeholder.png"}
+                    alt={buyNowData?.product?.name}
                     className="w-14 h-14 rounded-lg object-cover border"
                   />
-                  <div className='flex-1 min-w-0'>
-                    <p className="font-semibold text-gray-800 truncate">{item?.product?.name}</p>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-gray-800 truncate">{buyNowData?.product?.name}</p>
                     <p className="text-xs text-gray-500">
-                      Size: {item?.size} | Màu: {item?.color}
+                      Size: {buyNowData?.size} | Màu: {buyNowData?.color}
                     </p>
                     <p className="text-pink-600 font-semibold mt-1">
-                      {item?.product?.originalPrice?.toLocaleString("vi-VN")}₫
+                      {buyNowData?.product?.sellingPrice?.toLocaleString("vi-VN")}₫
                     </p>
                   </div>
                 </div>
-
-                {/* Tăng giảm số lượng */}
                 <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => updateQuantity(item?._id, item?.quantity - 1)}
-                    className="p-1 border border-gray-300 rounded-full w-6 h-6 flex items-center justify-center text-sm text-gray-600 hover:bg-gray-100"
-                  >
-                    −
-                  </button>
-                  <span className="min-w-[20px] text-center font-medium">{item.quantity}</span>
-                  <button
-                    onClick={() => updateQuantity(item?._id, item?.quantity + 1)}
-                    className="p-1 border border-gray-300 rounded-full w-6 h-6 flex items-center justify-center text-sm text-gray-600 hover:bg-gray-100"
-                  >
-                    +
-                  </button>
+                  <span className="min-w-[20px] text-center font-medium">{buyNowData?.quantity}</span>
                 </div>
               </div>
-            ))}
+            ) : (
+              cart?.items?.map((item, index) => (
+                <div key={index} className="flex items-center justify-between p-3 bg-white rounded-lg shadow-sm">
+                  <div className="flex items-center gap-4">
+                    <img
+                      src={item?.product?.mainImage || "placeholder.png"}
+                      alt={item?.product?.name}
+                      className="w-14 h-14 rounded-lg object-cover border"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-gray-800 truncate">{item?.product?.name}</p>
+                      <p className="text-xs text-gray-500">
+                        Size: {item?.size} | Màu: {item?.color}
+                      </p>
+                      <p className="text-pink-600 font-semibold mt-1">
+                        {item?.product?.sellingPrice?.toLocaleString("vi-VN")}₫
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => updateQuantity(item?._id, item?.quantity - 1)}
+                      className="p-1 border border-gray-300 rounded-full w-6 h-6 flex items-center justify-center text-sm text-gray-600 hover:bg-gray-100"
+                    >
+                      −
+                    </button>
+                    <span className="min-w-[20px] text-center font-medium">{item.quantity}</span>
+                    <button
+                      onClick={() => updateQuantity(item?._id, item?.quantity + 1)}
+                      className="p-1 border border-gray-300 rounded-full w-6 h-6 flex items-center justify-center text-sm text-gray-600 hover:bg-gray-100"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
 
           {/* Mã giảm giá */}
@@ -540,28 +605,31 @@ const Checkout = () => {
             <div className="flex justify-between items-center">
               <p className="text-gray-600">Tạm tính:</p>
               <p className="font-medium text-gray-800">
-                {cart?.subtotal?.toLocaleString("vi-VN")}₫
+                {buyNowSubtotal.toLocaleString("vi-VN")}₫
               </p>
             </div>
             <div className="flex justify-between items-center">
               <p className="text-gray-600">Giảm giá:</p>
               <p className="font-medium text-green-600">
-                -{cart?.discount?.toLocaleString("vi-VN")}₫
+                -{buyNowData ? buyNowDiscountAmount.toLocaleString("vi-VN") : cart?.discount?.toLocaleString("vi-VN")}₫
               </p>
             </div>
             <div className="flex justify-between items-center">
-              <p className="text-gray-600">Phí vận chuyển ({shippingOptions.find(opt => opt.id === shippingMethod)?.name}):</p>
+              <p className="text-gray-600">
+                Phí vận chuyển ({shippingOptions.find(opt => opt.id === shippingMethod)?.name}):
+              </p>
               <p className="font-medium text-gray-800">
-                {displayShippingFee.toLocaleString("vi-VN")}₫
+                {buyNowData ? shippingFee.toLocaleString("vi-VN") : displayShippingFee.toLocaleString("vi-VN")}₫
               </p>
             </div>
             <div className="flex justify-between items-center text-xl font-bold pt-4 border-t-2 border-dashed border-pink-300">
               <p className="text-gray-800">Tổng cộng:</p>
               <p className="text-pink-600">
-                {cart?.total?.toLocaleString("vi-VN")}₫
+                {buyNowData ? buyNowTotal.toLocaleString("vi-VN") : buyNowTotal.toLocaleString("vi-VN")}₫
               </p>
             </div>
           </div>
+
 
           <button
             onClick={handleOrder}

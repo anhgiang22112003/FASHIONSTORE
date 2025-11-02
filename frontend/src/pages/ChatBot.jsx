@@ -10,8 +10,6 @@ const ChatBot = ({ userId }) => {
   const [isChatOpen, setIsChatOpen] = useState(false)
   const messagesEndRef = useRef(null)
   const { user } = useContext(AuthContext)
-  console.log(user)
-
   useEffect(() => {
     if (!userId) return
 

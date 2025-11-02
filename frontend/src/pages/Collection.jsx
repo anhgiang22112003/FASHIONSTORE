@@ -34,8 +34,6 @@ const CollectionPage = () => {
   const fetchFeaturedProducts = async () => {
     try {
       const res = await apiUser.get(`/products/featured?featured=true`);
-      console.log(res.data);
-
       setFeaturedProducts(res.data);
     } catch (err) {
       console.error('Lỗi lấy sản phẩm nổi bật:', err);

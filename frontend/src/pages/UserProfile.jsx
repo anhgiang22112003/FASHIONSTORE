@@ -154,8 +154,6 @@ const UserProfile = () => {
 
     const GetUserId = async () => {
         const id = user?.id
-        console.log(id)
-
         try {
             const res = await api.get(`/users/${id}`)
             setUsers(res?.data)

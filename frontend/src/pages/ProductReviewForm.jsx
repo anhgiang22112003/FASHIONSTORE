@@ -7,7 +7,6 @@ const ProductReviewForm = ({ item, userId, orderId }) => {
     const [rating, setRating] = useState(5)
     const [content, setContent] = useState("")
     const [loading, setLoading] = useState(false)
-    console.log(item)
 
     const handleSubmit = async (e) => {
         e.preventDefault()

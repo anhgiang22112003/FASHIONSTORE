@@ -36,7 +36,6 @@ const ProductPage = () => {
     getProductsDetails()
   }, [id])
 
-  // ✅ Khi có sản phẩm => set màu & size mặc định
   useEffect(() => {
     if (product?.variations?.length > 0) {
       const firstColor = product.variations[0].color
@@ -46,13 +45,10 @@ const ProductPage = () => {
     }
   }, [product])
 
-  // ✅ Lấy tất cả màu có trong variations
   const allColors = [...new Set(product?.variations?.map((v) => v.color) || [])]
 
-  // ✅ Lấy tất cả size có trong variations
   const allSizes = [...new Set(product?.variations?.map((v) => v.size) || [])]
 
-  // ✅ Chỉ lấy size có tồn tại trong màu hiện tại
   const availableSizes = product?.variations
     ?.filter((v) => v.color === selectedColor)
     ?.map((v) => v.size) || []
@@ -84,6 +80,21 @@ const ProductPage = () => {
       </div>
     )
   }
+  // Ví dụ trong ProductDetail.jsx
+  const handleBuyNow = async () => {
+    const res = await api.get(`/products/${id}`)
+    const product = res.data
+    navigate("/checkout", {
+      state: {
+        mode: "buyNow",
+        product,
+        quantity: quantity,
+        color: selectedColor,
+        size: selectedSize,
+      },
+    })
+  }
+
 
   const handleAddToCart = async () => {
     if (!selectedColor || !selectedSize) {
@@ -95,7 +106,7 @@ const ProductPage = () => {
       toast.warning(`Không đủ hàng, chỉ còn ${currentStock} sản phẩm.`)
       return
     }
-    
+
     if (!product?._id) {
       toast.error('Không tìm thấy sản phẩm')
       return
@@ -109,7 +120,6 @@ const ProductPage = () => {
         size: selectedSize,
       }
       await addToCart(body)
-      // toast.success('Đã thêm sản phẩm vào giỏ hàng!')
     } catch (error) {
       console.error(error)
       toast.error(error?.response?.data?.message || 'Thêm vào giỏ hàng thất bại')
@@ -135,13 +145,13 @@ const ProductPage = () => {
         <div className="space-y-4">
           <div className="aspect-square overflow-hidden rounded-lg bg-gray-100">
             <img
-              src={ product?.mainImage}
+              src={product?.mainImage}
               alt={product?.name}
               className="w-full h-full object-cover"
             />
           </div>
 
-          {product?.subImages?.length  && (
+          {product?.subImages?.length && (
             <div className="flex gap-4">
               {product?.subImages?.map((image, index) => (
                 <button
@@ -280,6 +290,19 @@ const ProductPage = () => {
               <ShoppingBag className="w-5 h-5 mr-2" />
               Thêm vào giỏ hàng
             </Button>
+
+
+            <Button
+              className="flex-1 bg-pink-500 hover:bg-pink-600 text-white"
+              size="lg"
+              disabled={currentStock === 0 || quantity > currentStock}
+
+              onClick={handleBuyNow}
+            >
+              Mua ngay
+            </Button>
+
+
             <Button
               onClick={() => setIsLiked(!isLiked)}
               variant="outline"
@@ -307,25 +330,25 @@ const ProductPage = () => {
           </div>
         </div>
       </div>
-      
+
       {/* ========================================================= */}
       {/* ✅ Bổ sung 2 component mới ở cuối trang */}
       {/* ========================================================= */}
-      
+
       {/* Sản phẩm cùng loại */}
       <RelatedProducts
-        title={`Sản phẩm cùng danh mục: ${product?.category?.name || '...'}` }
+        title={`Sản phẩm cùng danh mục: ${product?.category?.name || '...'}`}
         // Trong thực tế, bạn sẽ cần fetch products dựa trên product.category.Id hoặc product.collection.Id
         // products={fetchedRelatedProducts} 
         category={product.category._id}
         collection={product.collection._id}
         productId={id}
       />
-      
+
       <div className="my-12 border-t"></div>
 
       {/* Đánh giá và Sản phẩm được yêu thích */}
-      <ProductReviews  productId={id}/>
+      <ProductReviews productId={id} />
 
     </div>
   )

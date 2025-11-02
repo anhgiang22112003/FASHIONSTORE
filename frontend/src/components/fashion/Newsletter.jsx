@@ -9,7 +9,6 @@ const Newsletter = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     // Handle newsletter signup
-    console.log('Newsletter signup:', email);
     setEmail('');
     alert('Cảm ơn bạn đã đăng ký nhận tin!');
   };

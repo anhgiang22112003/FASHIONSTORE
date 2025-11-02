@@ -34,6 +34,7 @@ const AdminLayout = () => {
   const [editingProductId, setEditingProductId] = useState(null)
   const [viewProductId, setViewProductId] = useState(null)
   const [editingOrder, setEditingOrder] = useState(null)
+  const [editData, setEditData] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const userId = JSON.parse(sessionStorage.getItem("user"))
 
@@ -241,10 +242,10 @@ const AdminLayout = () => {
               />
             )}
             {activeTab === "add-flashsale" && (
-              <AddFlashSalePage setActiveTab={setActiveTab} />
+              <AddFlashSalePage setActiveTab={setActiveTab} editData={editData} />
             )}
 
-            {activeTab === "flash-sale" && <FlashSaleListPage setActiveTab={setActiveTab} />}
+            {activeTab === "flash-sale" && <FlashSaleListPage setActiveTab={setActiveTab} setEditData={setEditData}/>}
 
 
 

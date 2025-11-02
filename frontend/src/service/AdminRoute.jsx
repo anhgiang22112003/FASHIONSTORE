@@ -19,8 +19,6 @@ export const AdminRoute = ({ children }) => {
     }
     
   }, []);
-  console.log(loading);
-  
 
   if (loading) return <div>Đang kiểm tra quyền...</div>;
   if (!isAdmin) return <Navigate to="/login/admin" />;

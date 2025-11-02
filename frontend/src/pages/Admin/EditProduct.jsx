@@ -104,7 +104,6 @@ const EditProduct = ({ productId, onBack, fetchProducts }) => {
     // Hàm tải ảnh chính
     const handleFileChange = async (event, index = null) => {
         const file = event.target.files[0]
-        console.log(file);        
         if (!file) return
         const formDataUpload = new FormData()
         formDataUpload.append("file", file)
