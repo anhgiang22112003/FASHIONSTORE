@@ -75,10 +75,12 @@ export default function AuthPage() {
         const res = await api.post("/auth/login", {
           email: formData.email,
           password: formData.password,
-        })        
+        })
         if (res?.status === 201) {
           localStorage.setItem("accessToken", res?.data?.accessToken)
           localStorage.setItem("user", JSON.stringify(res?.data?.user))
+          console.log(res.data.user);
+          
           login(res.data.user) // ✅ Cập nhật context
 
           toast.success("Đăng nhập thành công 🎉")
@@ -118,7 +120,9 @@ export default function AuthPage() {
             {isLogin ? "Đăng nhập" : "Đăng ký"}
           </h2>
           <p className="text-gray-500 text-sm">
-            {isLogin ? "Chào mừng bạn quay trở lại!" : "Tạo tài khoản mới để bắt đầu mua sắm"}
+            {isLogin
+              ? "Chào mừng bạn quay trở lại!"
+              : "Tạo tài khoản mới để bắt đầu mua sắm"}
           </p>
         </div>
 
@@ -176,6 +180,30 @@ export default function AuthPage() {
           {loading ? "Đang xử lý..." : isLogin ? "Đăng nhập" : "Đăng ký"}
         </button>
 
+        {/* --- Đăng nhập Google --- */}
+        {isLogin && (
+          <button
+            type="button"
+            onClick={() => {
+              window.location.href =
+                process.env.NODE_ENV === "development"
+                  ? "http://localhost:4000/auth/google"
+                  : ((process.env.REACT_APP_API_URL || "http://localhost:4000") + "/auth/google")
+            }}
+
+            className="w-full flex items-center justify-center gap-2 py-3 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors"
+          >
+            <img
+              src="https://developers.google.com/identity/images/g-logo.png"
+              alt="Google"
+              className="w-5 h-5"
+            />
+            <span className="font-medium text-gray-700">
+              Đăng nhập bằng Google
+            </span>
+          </button>
+        )}
+
         <p className="text-center text-gray-600 text-sm">
           {isLogin ? "Chưa có tài khoản?" : "Đã có tài khoản?"}{" "}
           <span
@@ -184,15 +212,9 @@ export default function AuthPage() {
           >
             {isLogin ? "Đăng ký ngay" : "Đăng nhập ngay"}
           </span>
-          <Link to="/forgot-password">
-            <p className="text-pink-600 font-semibold cursor-pointer">
-              {isLogin ? "Quên mật khẩu" : ""}{" "}
-
-            </p>
-          </Link>
         </p>
-
       </form>
+
     </div>
   )
 }

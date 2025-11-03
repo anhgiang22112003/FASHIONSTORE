@@ -49,10 +49,7 @@ const Checkout = () => {
 
 
   useEffect(() => {
-    // Nếu chưa có dữ liệu user hoặc tỉnh thì đợi
     if (!cart?.user || provinces.length === 0) return
-
-    // Tự động fill dữ liệu khi có user lần đầu
     const savedProvince = provinces.find(p => p.name === cart.user.province)
     const savedDistrict = savedProvince?.districts.find(d => d.name === cart.user.district)
     const savedWard = savedDistrict?.wards.find(w => w.name === cart.user.ward)
@@ -132,7 +129,7 @@ const Checkout = () => {
     : cart?.subtotal || 0
 
   const shippingFee = shippingMethod === "express" ? 50000 : 30000
-  const buyNowTotal = buyNowSubtotal - (buyNowData ? buyNowDiscountAmount : cart.discount) + shippingFee
+  const buyNowTotal = buyNowSubtotal - (buyNowData ? buyNowDiscountAmount : cart?.discount) + shippingFee
 
 
   useEffect(() => {

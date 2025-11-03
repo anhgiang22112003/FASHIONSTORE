@@ -34,6 +34,8 @@ const AdminLayout = lazy(() => import("./pages/Admin/Adminlayout"))
 const UserProfile = lazy(() => import("./pages/UserProfile"))
 const ResetPassword = lazy(() => import("./pages/ResetPassword"))
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"))
+const AuthCallback = lazy(() => import("./pages/AuthCallback"))
+
 
 
 const orderStatusText = {
@@ -171,6 +173,7 @@ function App() {
                         <Route path="/checkout" element={<Checkout />} />
                         <Route path="/wishlist" element={<Wishlist />} />
                         <Route path="/login" element={<AuthPage />} />
+                        <Route path="/auth/callback" element={<AuthCallback />} />
                         <Route path="/collection" element={<CollectionPage />} />
                         <Route path="/category" element={<ProductCategoryPage />} />
                         <Route path="/blog" element={<BlogPage />} />
