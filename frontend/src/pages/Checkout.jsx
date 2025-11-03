@@ -300,7 +300,6 @@ const Checkout = () => {
       const total = res.data.total
       if (form.paymentMethod === "BANK") {
         await handleBankPayment(invoiceNumber, total)
-        fetchCart()
       } else {
         fetchCart()
         toast.success("Đặt hàng thành công 🎉")
