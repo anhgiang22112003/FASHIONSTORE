@@ -155,7 +155,34 @@ const FlashSaleCheckoutModal = ({ item, onClose, onSuccess }) => {
     if (form.shippingMethod === "NHANH") setShippingFee(30000)
     else if (form.shippingMethod === "HOA_TOC") setShippingFee(50000)
   }, [form.shippingMethod])
+  const handleBankPayment = async (invoiceNumber, totalAmount) => {
+    try {
+      const res = await apiUser.post("/sepay-webhook/create-payment", {
+        invoiceNumber,
+        amount: totalAmount,
+        description: `Thanh toán đơn hàng ${invoiceNumber}`,
+      })
 
+      const { checkoutURL, formFields } = res.data
+
+      // Tạo form và submit tự động
+      const formEl = document.createElement("form")
+      formEl.action = checkoutURL
+      formEl.method = "POST"
+      Object.keys(formFields).forEach(key => {
+        const input = document.createElement("input")
+        input.type = "hidden"
+        input.name = key
+        input.value = formFields[key]
+        formEl.appendChild(input)
+      })
+      document.body.appendChild(formEl)
+      formEl.submit()
+    } catch (err) {
+      toast.error("Tạo thanh toán thất bại")
+      console.error(err)
+    }
+  }
   const handleSubmit = async () => {
     if (!form.name || !form.phone || !form.address)
       return toast.error("Vui lòng nhập đủ thông tin giao hàng")
@@ -173,7 +200,7 @@ const FlashSaleCheckoutModal = ({ item, onClose, onSuccess }) => {
       color: selectedColor,
       size: selectedSize,
       address: fullAddress,
-      discount:discount,
+      discount: discount,
       paymentMethod: form.paymentMethod,
       shippingMethod: form.shippingMethod,
       voucherCode: form.voucherCode || undefined,
@@ -186,8 +213,15 @@ const FlashSaleCheckoutModal = ({ item, onClose, onSuccess }) => {
     }
     try {
       setLoading(true)
-      await apiUser.post("/flash-sales/purchase", payload)
-      toast.success("🎉 Đặt hàng thành công!")
+
+       const res =  await apiUser.post("/flash-sales/purchase", payload)
+       console.log(res);
+       
+      const invoiceNumber = res.data._id
+      const total = res.data.total
+      if (form.paymentMethod === "BANK") {
+        await handleBankPayment(invoiceNumber, total)
+      }
       onSuccess?.()
       onClose()
     } catch (err) {

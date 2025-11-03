@@ -1,117 +1,25 @@
 import React, { useContext, useEffect, useState } from 'react'
-import OrderDetails from "./OrderDetail" // Import component chi tiết đơn hàng
 import { CameraIcon, LockClosedIcon, UserCircleIcon, XMarkIcon, CheckCircleIcon, PencilIcon, ArrowLeftIcon } from '@heroicons/react/24/solid'
 import { toast } from 'react-toastify'
 import api from '@/service/api'
 import { AuthContext } from '@/context/Authcontext'
 import OrderDetail from './OrderDetail'
+import OrderDetails from '@/components/OrderDetails'
 
-// Giả lập dữ liệu người dùng
-const userData = {
-    name: "Nguyễn Văn A",
-    email: "nguyenvana@example.com",
-    phone: "0912345678",
-    address: "245 Đường Tôn Đức Thắng, Phường Hàng Bột, Quận Đống Đa, Hà Nội",
-    avatar: "https://placehold.co/150x150/f472b6/ffffff?text=AVT",
-    orders: [
-        {
-            id: "12345",
-            date: "20/10/2023",
-            total: 590000,
-            status: "Đang giao",
-            shippingMethod: "Giao hàng tiêu chuẩn",
-            totalQuantity: 1,
-            buyerInfo: { name: "Nguyễn Văn A", phone: "0912345678", address: "245 Đường Tôn Đức Thắng, Quận Đống Đa, Hà Nội" },
-            sellerInfo: { name: "PinkFashion Shop", phone: "0987654321" },
-            deliveryHistory: [
-                { status: "Đơn hàng đã được xác nhận", timestamp: "20/10/2023, 10:00 AM" },
-                { status: "Đang đóng gói và chuẩn bị giao hàng", timestamp: "20/10/2023, 11:30 AM" },
-                { status: "Đang trên đường giao đến bạn", timestamp: "20/10/2023, 02:00 PM" }
-            ],
-            items: [
-                { name: "Váy xòe hoa nhí", quantity: 1, price: 590000, image: "https://placehold.co/100x100/f472b6/ffffff?text=Váy" }
-            ]
-        },
-        {
-            id: "12344",
-            date: "15/10/2023",
-            total: 350000,
-            status: "Đã giao",
-            shippingMethod: "Giao hàng nhanh",
-            totalQuantity: 3,
-            buyerInfo: { name: "Nguyễn Văn A", phone: "0912345678", address: "245 Đường Tôn Đức Thắng, Quận Đống Đa, Hà Nội" },
-            sellerInfo: { name: "PinkFashion Shop", phone: "0987654321" },
-            deliveryHistory: [
-                { status: "Đơn hàng đã được xác nhận", timestamp: "15/10/2023, 09:00 AM" },
-                { status: "Đã giao thành công", timestamp: "15/10/2023, 05:00 PM" }
-            ],
-            items: [
-                { name: "Áo phông oversize", quantity: 2, price: 150000, image: "https://placehold.co/100x100/f472b6/ffffff?text=Áo" },
-                { name: "Quần jeans rách", quantity: 1, price: 200000, image: "https://placehold.co/100x100/f472b6/ffffff?text=Quần" }
-            ]
-        },
-        {
-            id: "12343",
-            date: "10/10/2023",
-            total: 1200000,
-            status: "Đã giao",
-            shippingMethod: "Giao hàng tiêu chuẩn",
-            totalQuantity: 1,
-            buyerInfo: { name: "Nguyễn Văn A", phone: "0912345678", address: "245 Đường Tôn Đức Thắng, Quận Đống Đa, Hà Nội" },
-            sellerInfo: { name: "PinkFashion Shop", phone: "0987654321" },
-            deliveryHistory: [
-                { status: "Đơn hàng đã được xác nhận", timestamp: "10/10/2023, 08:00 AM" },
-                { status: "Đã giao thành công", timestamp: "12/10/2023, 11:00 AM" }
-            ],
-            items: [
-                { name: "Đồng hồ dây da", quantity: 1, price: 1200000, image: "https://placehold.co/100x100/f472b6/ffffff?text=ĐH" }
-            ]
-        },
-    ],
+const OrderStatusVN = {
+    PENDING: 'Chờ xử lý',
+    PROCESSING: 'Đang xử lý',
+    SHIPPED: 'Đang giao',
+    COMPLETED: 'Hoàn tất',
+    CANCELLED: 'Đã hủy',
 }
 
-// Dữ liệu đơn hàng chi tiết giả lập tương tự file OrderDetails.jsx
-const detailedOrderData = {
-    id: "PF0001",
-    status: "Đang giao",
-    orderDate: "10/10/2023, 10:00",
-    deliveryHistory: [
-        { status: "Đã tiếp nhận", time: "10/10/2023, 10:05" },
-        { status: "Đã lấy hàng", time: "10/10/2023, 10:30" },
-        { status: "Đang xử lý tại kho", time: "10/10/2023, 11:45" },
-        { status: "Đang giao", time: "10/10/2023, 14:00" },
-    ],
-    shippingInfo: {
-        name: "Nguyễn Thị Mai",
-        phone: "0912 345 678",
-        address: "123 Đường Lê Lợi, Phường Bến Nghé, Quận 1, TP.HCM",
-        shippingMethod: "Giao hàng tiêu chuẩn",
-    },
-    buyerInfo: {
-        name: "Nguyễn Thị Lan",
-        phone: "0909 876 543",
-        address: "456 Đường Nguyễn Huệ, Phường Bến Nghé, Quận 1, TP.HCM",
-    },
-    paymentSummary: {
-        subtotal: 1200000,
-        shippingFee: 30000,
-        discount: 0,
-        total: 1230000,
-        paymentMethod: "Thanh toán khi nhận hàng (COD)",
-    },
-    products: [
-        { name: "Váy hoa vintage", quantity: 1, price: 900000, image: "https://placehold.co/100x100/f0d1de/ffffff?text=Váy" },
-        { name: "Áo sơ mi thanh lịch", quantity: 1, price: 300000, image: "https://placehold.co/100x100/f0d1de/ffffff?text=Áo" }
-    ],
-    notes: "Khách hàng yêu cầu gói quà.",
-}
 
 const UserProfile = () => {
-    // State để quản lý tab đang hoạt động
     const [activeTab, setActiveTab] = useState('profile')
     const [selectedOrder, setSelectedOrder] = useState(null)
-    const [orders, setOrders] = useState(userData.orders)
-    const [profilePic, setProfilePic] = useState(userData.avatar)
+    const [orders, setOrders] = useState([])
+    const [profilePic, setProfilePic] = useState()
     const [oldPassword, setOldPassword] = useState('')
     const [newPassword, setNewPassword] = useState('')
     const [users, setUsers] = useState()
@@ -120,6 +28,13 @@ const UserProfile = () => {
     const [provinces, setProvinces] = useState([]) // Danh sách Tỉnh/Thành phố
     const [districts, setDistricts] = useState([]) // Danh sách Quận/Huyện của Tỉnh đã chọn
     const [wards, setWards] = useState([])
+    const [selectedOrderId, setSelectedOrderId] = useState(null)
+
+    const handleOrderClick = (order) => {
+        setSelectedOrderId(order._id)
+        setActiveTab('orderDetails') 
+    }
+
     const [userProfile, setUserProfile] = useState({
         name: '',
         email: '',
@@ -148,6 +63,21 @@ const UserProfile = () => {
             })
         }
     }, [users])
+
+    useEffect(() => {
+        const fetchOrders = async () => {
+            try {
+                const res = await api.get('/orders/detail') // Gọi API lấy đơn hàng
+                setOrders(res.data) // Set danh sách đơn hàng vào state
+            } catch (error) {
+                toast.error('Lỗi khi tải danh sách đơn hàng!')
+                console.error(error)
+            }
+        }
+
+        fetchOrders()
+    }, [])
+
 
 
     const { user } = useContext(AuthContext)
@@ -225,12 +155,6 @@ const UserProfile = () => {
         } catch (err) {
             toast.error(err.response?.data?.message || 'Có lỗi xảy ra')
         }
-    }
-
-    const handleOrderClick = (order) => {
-        const fullOrderDetails = order.id === '12345' ? detailedOrderData : null
-        setSelectedOrder(fullOrderDetails)
-        setActiveTab('orderDetails')
     }
 
     const handleBackToOrders = () => {
@@ -574,18 +498,32 @@ const UserProfile = () => {
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
-                                    {orders.map(order => (
+                                    {orders?.map(order => (
                                         <tr
                                             key={order.id}
                                             onClick={() => handleOrderClick(order)}
                                             className="cursor-pointer hover:bg-pink-50 transition-colors"
                                         >
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#{order.id}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{order.date}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-pink-600 font-semibold">{order.total.toLocaleString()}đ</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#{order?._id}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                {new Date(order.createdAt).toLocaleString('vi-VN', {
+                                                    year: 'numeric',
+                                                    month: '2-digit',
+                                                    day: '2-digit',
+                                                    hour: '2-digit',
+                                                    minute: '2-digit',
+                                                    second: '2-digit'
+                                                })}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-pink-600 font-semibold">{order?.total.toLocaleString()}đ</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${order.status === 'Đang giao' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}`}>
-                                                    {order.status}
+                                                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${order.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
+                                                    order.status === 'PROCESSING' ? 'bg-blue-100 text-blue-800' :
+                                                        order.status === 'SHIPPED' ? 'bg-orange-100 text-orange-800' :
+                                                            order.status === 'COMPLETED' ? 'bg-green-100 text-green-800' :
+                                                                'bg-red-100 text-red-800'
+                                                    }`}>
+                                                    {OrderStatusVN[order.status]}
                                                 </span>
                                             </td>
                                         </tr>
@@ -596,9 +534,9 @@ const UserProfile = () => {
                     </div>
                 )
             case 'orderDetails':
-                if (selectedOrder) {
+                if (selectedOrderId) {
                     return (
-                        <OrderDetail order={selectedOrder} onBack={() => setSelectedOrder(null)} />
+                        <OrderDetails id={selectedOrderId} onBack={() => setSelectedOrder(null)} />
                     )
                 }
                 return null
@@ -616,8 +554,6 @@ const UserProfile = () => {
         // { name: 'Địa chỉ', tab: 'address' },
         { name: 'Cài đặt', tab: 'settings' },
     ]
-
-    // Lọc lại navItems nếu đang ở tab orderDetails hoặc editProfile, để sidebar không bị chọn 
     const isNavActive = (tab) => activeTab === tab || (activeTab === 'orderDetails' && tab === 'orders')
 
     return (

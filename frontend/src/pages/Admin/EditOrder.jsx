@@ -7,6 +7,7 @@ import OrderProductList from "../../components/adminOrder/OrderProductList"
 import OrderSummaryCard from "../../components/adminOrder/OrderSummaryCard"
 import OrderCustomerShippingInfo from "../../components/adminOrder/OrderCustomerShippingInfo"
 import InvoicePrint from "@/components/InvoicePrint"
+import OrderStatusProgress from "@/components/adminOrder/OrderStatusProgress"
 
 // --- HẰNG SỐ CHUNG ---
 const statusOptions = [
@@ -39,15 +40,15 @@ export const formatCurrency = (amount) => {
     return new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND", }).format(amount)
 }
 
-// Hàm tính toán tổng tiền trên Frontend
 export const calculateTotals = (products, fixedTotals) => {
     const subtotal = products.reduce((acc, p) => acc + p.unitPrice * p.quantity, 0)
-    // Giữ lại phí vận chuyển và giảm giá từ API để hiển thị nhất quán
     const shippingFee = fixedTotals?.shippingFee || 0
     const discount = fixedTotals?.discount || 0
     const total = subtotal + shippingFee - discount
     return { subtotal, shippingFee, discount, total }
 }
+
+// --- NEW COMPONENT: CẢI THIỆN STATUS TIMELINE ---
 const OrderEditPage = ({ orderId }) => {
     const [isEditMode, setIsEditMode] = useState(false)
     const [editedOrder, setEditedOrder] = useState(initialOrderState)
@@ -55,6 +56,7 @@ const OrderEditPage = ({ orderId }) => {
     const [isLoading, setIsLoading] = useState(true)
     const canEditFull = editedOrder.status === 'PENDING' || editedOrder.status === 'PROCESSING'
     const canEditProductList = editedOrder.status !== 'COMPLETED' && editedOrder.status !== 'CANCELLED'
+    
     const fetchOrder = async () => {
         setIsLoading(true)
         try {
@@ -64,6 +66,7 @@ const OrderEditPage = ({ orderId }) => {
                 _id: order._id, // Giữ lại _id để gửi API
                 orderId: order._id,
                 status: order.status,
+                paymentStatus: order.paymentStatus,
                 customerInfo: {
                     name: order.shippingInfo.name,
                     phone: order.shippingInfo.phone,
@@ -120,21 +123,15 @@ const OrderEditPage = ({ orderId }) => {
     }, [orderId])
 
     useEffect(() => {
-        if (editedOrder.shippingInfo.type === "Giao hàng hỏa tốc") {
-            setEditedOrder((prev) => ({
-                ...prev,
-                totals: { ...prev.totals, shippingFee: 50000 },
-            }))
-        } else {
-            setEditedOrder((prev) => ({
-                ...prev,
-                totals: { ...prev.totals, shippingFee: 30000 },
-            }))
-        }
+        // Giữ nguyên logic tính lại phí vận chuyển
+        const newShippingFee = editedOrder.shippingInfo.type === "Giao hàng hỏa tốc" ? 50000 : 30000;
+        setEditedOrder((prev) => ({
+            ...prev,
+            totals: { ...prev.totals, shippingFee: newShippingFee },
+        }));
     }, [editedOrder.shippingInfo.type])
 
 
-    // 🔥 HÀM LƯU ĐƠN HÀNG
     const handleSaveClick = async () => {
         if (!canEditFull && !canEditProductList) {
             toast.error("Trạng thái đơn hàng này không cho phép chỉnh sửa.")
@@ -144,7 +141,7 @@ const OrderEditPage = ({ orderId }) => {
         try {
             const updateData = {
                 status: editedOrder.status,
-                voucherCode: canEditFull ? editedOrder.paymentInfo.voucher : originalOrder.paymentInfo.voucher, // Chỉ cho sửa voucher khi canEditFull
+                voucherCode: canEditFull ? editedOrder.paymentInfo.voucher : originalOrder.paymentInfo.voucher, 
                 note: editedOrder.shippingInfo.note,
                 shippingMethod: editedOrder.shippingInfo.type.includes("hỏa tốc") ? "HOA_TOC" : "NHANH",
                 paymentMethod: editedOrder.paymentInfo.method.includes("COD") ? "COD" : editedOrder.paymentInfo.method,
@@ -164,7 +161,6 @@ const OrderEditPage = ({ orderId }) => {
             }
 
             const res = await apiAdmin.patch(`/orders/${editedOrder._id}/edit`, updateData)
-            // Sau khi backend tính toán lại, fetch lại dữ liệu mới nhất
             fetchOrder()
             setIsEditMode(false)
             toast.success("Cập nhật đơn hàng thành công 🎉")
@@ -179,7 +175,6 @@ const OrderEditPage = ({ orderId }) => {
         setIsEditMode(false)
     }
 
-    // Hàm chung cho các trường đơn giản
     const handleChange = (e) => {
         const { name, value } = e.target
         const [section, field] = name.split(".")
@@ -203,7 +198,7 @@ const OrderEditPage = ({ orderId }) => {
     const statusObj = statusOptions.find(s => s.value === editedOrder.status || s.label === editedOrder.status)
     const currentStatusLabel = statusObj ? statusObj.label : String(editedOrder.status || "")
 
-    // --- RENDERING SUB-COMPONENTS ---
+    // --- RENDERING SUB-COMPONENTS (Giữ nguyên renderEditableField và renderHeaderButtons) ---
     const renderEditableField = (label, name, value, inputType = "text", options = [], disabled = false) => (
         <div className="flex-1 space-y-1">
             <label htmlFor={name} className="block text-sm font-medium text-gray-500">{label}</label>
@@ -263,7 +258,7 @@ const OrderEditPage = ({ orderId }) => {
                         <PencilIcon className="w-5 h-5" />
                         <span>Chỉnh sửa</span>
                     </button>
-                 <InvoicePrint order={editedOrder} />
+                    <InvoicePrint order={editedOrder} />
 
                     <button className="flex items-center space-x-1 px-4 py-2 bg-gray-200 text-gray-800 rounded-xl font-semibold hover:bg-gray-300 transition-colors">
                         <PaperAirplaneIcon className="w-5 h-5" />
@@ -287,6 +282,10 @@ const OrderEditPage = ({ orderId }) => {
                     </div>
                     {renderHeaderButtons()}
                 </div>
+
+                {/* 🔥 THANH TRẠNG THÁI ĐƠN HÀNG ĐÃ CẢI THIỆN */}
+                <OrderStatusProgress currentStatus={editedOrder.status} />
+
 
                 {/* 📦 Container riêng cho phần nội dung đơn hàng */}
                 <div className="order-container bg-white shadow-lg rounded-2xl p-8 border border-gray-100">
