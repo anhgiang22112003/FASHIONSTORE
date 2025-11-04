@@ -28,43 +28,37 @@ const AddCustomerPage = ({ onBack, refreshCustomers }) => {
   const [wards, setWards] = useState([])
 
   // ✅ Lấy danh sách tỉnh/thành Việt Nam khi mở form
-  useEffect(() => {
-    fetch('https://provinces.open-api.vn/api/p/')
-      .then(res => res.json())
-      .then(data => setProvinces(data))
-      .catch(err => console.error('Lỗi tải tỉnh thành:', err))
-  }, [])
+ useEffect(() => {
+    import('@/data/provinces.json')
+      .then((module) => setProvinces(module.default))
+      .catch((err) => console.error('Lỗi tải tỉnh thành từ JSON:', err));
+  }, []);
 
-  // ✅ Khi chọn tỉnh thì tải quận/huyện tương ứng
+  // ✅ Khi chọn tỉnh thì load quận/huyện
   useEffect(() => {
     if (formData.province) {
-      const province = provinces.find(p => p.name === formData.province)
-      if (province) {
-        fetch(`https://provinces.open-api.vn/api/p/${province.code}?depth=2`)
-          .then(res => res.json())
-          .then(data => setDistricts(data.districts || []))
-          .catch(err => console.error('Lỗi tải quận huyện:', err))
-      }
+      const province = provinces.find((p) => p.name === formData.province);
+      setDistricts(province?.districts || []);
+      setFormData((prev) => ({ ...prev, district: '', ward: '' }));
+      setWards([]);
     } else {
-      setDistricts([])
-      setWards([])
+      setDistricts([]);
+      setWards([]);
+      setFormData((prev) => ({ ...prev, district: '', ward: '' }));
     }
-  }, [formData.province])
+  }, [formData.province, provinces]);
 
-  // ✅ Khi chọn quận/huyện thì tải phường/xã tương ứng
+  // ✅ Khi chọn quận/huyện thì load phường/xã
   useEffect(() => {
     if (formData.district) {
-      const district = districts.find(d => d.name === formData.district)
-      if (district) {
-        fetch(`https://provinces.open-api.vn/api/d/${district.code}?depth=2`)
-          .then(res => res.json())
-          .then(data => setWards(data.wards || []))
-          .catch(err => console.error('Lỗi tải phường xã:', err))
-      }
+      const district = districts.find((d) => d.name === formData.district);
+      setWards(district?.wards || []);
+      setFormData((prev) => ({ ...prev, ward: '' }));
     } else {
-      setWards([])
+      setWards([]);
+      setFormData((prev) => ({ ...prev, ward: '' }));
     }
-  }, [formData.district])
+  }, [formData.district, districts]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target

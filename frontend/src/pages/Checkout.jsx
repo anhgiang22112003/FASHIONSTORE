@@ -145,11 +145,11 @@ const Checkout = () => {
     }))
   }, [shippingMethod, cart?.discount, cart?.subtotal])
 
-  useEffect(() => {
-    fetch("https://provinces.open-api.vn/api/?depth=3")
-      .then(res => res.json())
-      .then(data => setProvinces(data))
-  }, [])
+ useEffect(() => {
+  import('@/data/provinces.json').then((data) => setProvinces(data.default));
+}, []);
+
+
 
   const removeItem = async (itemId) => {
     try {
@@ -271,7 +271,7 @@ const Checkout = () => {
           paymentMethod: form.paymentMethod,
           shippingMethod: backendShippingMethod,
           voucherCode: voucherCode,
-          discount:buyNowDiscountAmount,
+          discount: buyNowDiscountAmount,
           note: form.note,
           shippingInfo: {
             name: form.name,
@@ -293,11 +293,25 @@ const Checkout = () => {
           },
         })
       }
+      const order = res.data
+      const orderId = order._id
       const invoiceNumber = res.data._id
       const total = res.data.total
+      console.log(total, orderId)
+
       if (form.paymentMethod === "BANK") {
         await handleBankPayment(invoiceNumber, total)
-      } else {
+      } else if (form.paymentMethod === "VNPAY") {
+        const vnpayRes = await api.post("/vnpay/create-payment", {
+          orderId,
+          amount: total,
+        })
+        if (vnpayRes.data?.url) {
+          window.location.href = vnpayRes.data.url // Redirect sang VNPAY
+          return
+        }
+      }
+      else {
         fetchCart()
         toast.success("Đặt hàng thành công 🎉")
         navigate("/orders")
@@ -494,6 +508,23 @@ const Checkout = () => {
                 />
                 <label htmlFor="momo" className="ml-3 font-bold text-gray-800 cursor-pointer">
                   Ví điện tử MoMo
+                </label>
+              </div>
+              <div
+                onClick={() => handlePaymentChange("VNPAY")}
+                className={`relative flex items-center p-4 border rounded-lg cursor-pointer transition ${form.paymentMethod === "VNPAY" ? "border-pink-500 bg-pink-50" : "border-gray-300 hover:bg-gray-50"
+                  }`}
+              >
+                <input
+                  type="radio"
+                  name="payment_method"
+                  id="vnpay"
+                  checked={form.paymentMethod === "VNPAY"}
+                  onChange={() => handlePaymentChange("VNPAY")}
+                  className="w-5 h-5 text-pink-600 border-gray-300 focus:ring-pink-500"
+                />
+                <label htmlFor="vnpay" className="ml-3 font-bold text-gray-800 cursor-pointer">
+                  Thanh toán qua VNPAY
                 </label>
               </div>
             </div>

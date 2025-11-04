@@ -161,19 +161,9 @@ const UserProfile = () => {
         setSelectedOrder(null)
         setActiveTab('orders')
     }
-    useEffect(() => {
-        const fetchProvinces = async () => {
-            try {
-                // Sử dụng fetch API để tải dữ liệu địa lý
-                const res = await fetch('https://provinces.open-api.vn/api/?depth=3')
-                const data = await res.json()
-                setProvinces(data)
-            } catch (error) {
-                console.error('Lỗi khi tải danh sách tỉnh/thành:', error)
-            }
-        }
-        fetchProvinces()
-    }, [])
+ useEffect(() => {
+  import('@/data/provinces.json').then((data) => setProvinces(data.default));
+}, []);
 
     // 2. Khởi tạo danh sách Huyện và Xã dựa trên dữ liệu người dùng đã có
     useEffect(() => {

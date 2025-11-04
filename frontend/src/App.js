@@ -14,6 +14,7 @@ import { ShoppingBag } from 'lucide-react'
 import SideCartDrawer from "./components/fashion/SideCartDrawer"
 import { WishlistProvider } from "./context/WishlistContext"
 import ChatBot from "./pages/ChatBot"
+import OrderReturn from "./pages/OrderReturn"
 // Giả định SideCartDrawer nằm trong đường dẫn này
 
 const AdminLoginForm = lazy(() => import("./pages/Admin/LoginAdmin"))
@@ -182,6 +183,8 @@ function App() {
                         <Route path="/orders" element={<OrderHistory />} />
                         <Route path="/forgot-password" element={<ForgotPassword />} />
                         <Route path="/reset-password/:token" element={<ResetPassword />} />
+                        <Route path="/order/return" element={<OrderReturn />} />
+
                       </Routes>
                     </FrontendLayout>
                   }

@@ -163,19 +163,9 @@ const OrdersContent = ({ data, onEditOrder }) => {
   }
 
   useEffect(() => { fetchCustomers() }, [])
-  useEffect(() => {
-    const fetchProvinces = async () => {
-      try {
-        const res = await fetch('https://provinces.open-api.vn/api/?depth=3')
-        const data = await res.json()
-        setProvinces(data)
-      } catch (error) {
-        console.error('Lỗi tải tỉnh/thành:', error)
-        toast.error('Không tải được danh sách tỉnh/thành!')
-      }
-    }
-    fetchProvinces()
-  }, [])
+ useEffect(() => {
+  import('@/data/provinces.json').then((data) => setProvinces(data.default));
+}, []);
 
   const handleProvinceChange = (e) => {
     const selectedProvinceName = e.target.value

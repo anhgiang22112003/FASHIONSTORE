@@ -65,18 +65,9 @@ const CustomerEdit = ({ customer: initialCustomerData, onBack, refreshCustomers 
   const [districts, setDistricts] = useState([])
   const [wards, setWards] = useState([])
 
-  React.useEffect(() => {
-    const fetchProvinces = async () => {
-      try {
-        const res = await fetch('https://provinces.open-api.vn/api/?depth=3')
-        const data = await res.json()
-        setProvinces(data)
-      } catch (error) {
-        console.error('Lỗi khi tải danh sách tỉnh/thành:', error)
-      }
-    }
-    fetchProvinces()
-  }, [])
+ useEffect(() => {
+  import('@/data/provinces.json').then((data) => setProvinces(data.default));
+}, []);
 
   useEffect(() => {
     if (provinces.length > 0 && initialCustomerData?.province) {
