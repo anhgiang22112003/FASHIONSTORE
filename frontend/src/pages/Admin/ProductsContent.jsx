@@ -8,7 +8,7 @@ import 'react-lazy-load-image-component/src/effects/blur.css'
 import debounce from "lodash.debounce"
 import ConfirmBulkDeleteModal from "@/components/ConfirmBulkDeleteModal"
 import apiAdmin from "@/service/apiAdmin"
-import { Switch } from "@headlessui/react"
+import Switch from "@/components/ui/switch"
 
 const statusColors = {
     "Còn hàng": "bg-green-100 text-green-600",
@@ -66,7 +66,7 @@ const ProductsContent = ({ setActiveTab, onEditProduct, onViewProductDetail, dat
 
     const handleToggleFeatured = async (id, currentStatus) => {
         try {
-            const res = await apiAdmin.patch(`/products/${id}/toggle-featured`)            
+            const res = await apiAdmin.patch(`/products/${id}/toggle-featured`)
             toast.success(
                 res.data.product.isFeatured
                     ? "✅ Sản phẩm đã được đánh dấu nổi bật!"
@@ -539,14 +539,8 @@ const ProductsContent = ({ setActiveTab, onEditProduct, onViewProductDetail, dat
                                     <Switch
                                         checked={product.isFeatured}
                                         onChange={() => handleToggleFeatured(product._id, !product.isFeatured)}
-                                        className={`${product.isFeatured ? "bg-pink-600" : "bg-gray-300"
-                                            } relative inline-flex h-6 w-11 items-center rounded-full transition`}
-                                    >
-                                        <span
-                                            className={`${product.isFeatured ? "translate-x-6" : "translate-x-1"
-                                                } inline-block h-4 w-4 transform rounded-full bg-white transition`}
-                                        />
-                                    </Switch>
+                                    />
+                                    
                                 </td>
                                 <td className="px-6 py-4">
                                     <span className={`px-2 py-1 rounded-full text-xs ${statusColors[product?.status]}`}>
