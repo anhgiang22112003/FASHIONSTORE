@@ -25,6 +25,8 @@ const ChatBot = ({ userId }) => {
     }
 
     const handleNewMessages = (msgs) => {
+        console.log("🧠 Tin nhắn mới từ server:", msgs)
+
       setMessages(msgs)
       setIsTyping(false)
     }

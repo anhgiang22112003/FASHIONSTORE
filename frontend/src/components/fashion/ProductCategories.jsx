@@ -50,7 +50,7 @@ const ProductCategories = () => {
                     {category?.name}
                   </h3>
                   <p className="text-pink-500 font-medium">
-                    {category?.productCount}
+                    Sản phẩm liên quan({category?.productCount})
                   </p>
                 </div>
               </Link>
