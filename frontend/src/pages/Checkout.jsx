@@ -4,6 +4,7 @@ import api from "@/service/api"
 import { toast } from "react-toastify"
 import { CartContext } from "@/context/CartContext"
 import AddproductSearch from "@/components/fashion/AddProductSearch"
+import BankPaymentModal from "@/components/BankPaymentSection"
 const ShippingMethodEnum = {
   STANDARD: 'NHANH',
   EXPRESS: 'HOA_TOC',
@@ -11,6 +12,10 @@ const ShippingMethodEnum = {
 const Checkout = () => {
   const navigate = useNavigate()
   const location = useLocation()
+  const [showBankModal, setShowBankModal] = useState(false)
+  const [selectedBank, setSelectedBank] = useState(null)
+  const [orderData, setOrderData] = useState(null)
+
   const buyNowData = location.state
   const { cart, fetchCart, setCart } = useContext(CartContext)
   const [provinces, setProvinces] = useState([])
@@ -20,7 +25,6 @@ const Checkout = () => {
   const [isApplying, setIsApplying] = useState(false)
   const [isVoucherPopupOpen, setIsVoucherPopupOpen] = useState(false)
   const [availableVouchers, setAvailableVouchers] = useState([])
-  const [isFormInitialized, setIsFormInitialized] = useState(false)
   const [buyNowDiscountAmount, setBuyNowDiscountAmount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
   const [shippingMethod, setShippingMethod] = useState("standard")
@@ -69,7 +73,6 @@ const Checkout = () => {
     setDistricts(savedProvince?.districts || [])
     setWards(savedDistrict?.wards || [])
 
-    setIsFormInitialized(true)
   }, [cart?.user, provinces])
 
 
@@ -145,9 +148,9 @@ const Checkout = () => {
     }))
   }, [shippingMethod, cart?.discount, cart?.subtotal])
 
- useEffect(() => {
-  import('@/data/provinces.json').then((data) => setProvinces(data.default));
-}, []);
+  useEffect(() => {
+    import('@/data/provinces.json').then((data) => setProvinces(data.default))
+  }, [])
 
 
 
@@ -307,12 +310,16 @@ const Checkout = () => {
           amount: total,
         })
         if (vnpayRes.data?.url) {
-          window.location.href = vnpayRes.data.url 
+          window.location.href = vnpayRes.data.url
           return
         }
         fetchCart()
       }
-      else {
+      else if (form.paymentMethod === "BANK") {
+        setOrderData(order)
+        setShowBankModal(true)
+        return
+      } {
         fetchCart()
         toast.success("Đặt hàng thành công 🎉")
         navigate("/orders")
@@ -493,8 +500,6 @@ const Checkout = () => {
                   Ví điện tử Sepay
                 </label>
               </div>
-
-              {/* MoMo */}
               <div
                 onClick={() => handlePaymentChange("BANK")}
                 className={`relative flex items-center p-4 border rounded-lg cursor-pointer transition ${form.paymentMethod === "BANK" ? "border-pink-500 bg-pink-50" : "border-gray-300 hover:bg-gray-50"}`}
@@ -717,6 +722,14 @@ const Checkout = () => {
         )}
 
       </div>
+      {showBankModal && (
+        <BankPaymentModal
+          order={orderData}
+          onClose={() => setShowBankModal(false)}
+          selectedBank={selectedBank}
+          setSelectedBank={setSelectedBank}
+        />
+      )}
     </div>
   )
 }
