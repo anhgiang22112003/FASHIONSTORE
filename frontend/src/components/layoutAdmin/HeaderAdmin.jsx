@@ -17,16 +17,8 @@ import {
 import NotificationDropdown from '@/pages/Admin/NotificationDropdown'
 import apiAdmin from '@/service/apiAdmin'
 import SwitchAdminHeader from '../ui/switchAdminHeader'
-import { ThemeProvider, createGlobalStyle } from "styled-components"
-import { lightTheme, darkTheme } from "@/theme/adminTheme"
 
-const GlobalStyle = createGlobalStyle`
-  body {
-    background-color: ${({ theme }) => theme.background};
-    color: ${({ theme }) => theme.text};
-    transition: all 0.4s ease;
-  }
-`
+
 const Header = ({ toggleSidebar, setActiveTab, setEditingProductId, setEditingOrder }) => {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
@@ -34,10 +26,7 @@ const Header = ({ toggleSidebar, setActiveTab, setEditingProductId, setEditingOr
   const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0)
   const [loading, setLoading] = useState()
   const userId = JSON.parse(sessionStorage.getItem('user'))
-  const [theme, setTheme] = useState("light") // 🌗
-  const toggleTheme = () => {
-    setTheme(prev => (prev === "light" ? "dark" : "light"))
-  }
+
   const [stats, setStats] = useState({
     pendingOrders: 0,
     revenue: 0,
@@ -98,9 +87,7 @@ const Header = ({ toggleSidebar, setActiveTab, setEditingProductId, setEditingOr
   }
 
   return (
-    <ThemeProvider theme={theme === "light" ? lightTheme : darkTheme}>
-      <GlobalStyle />
-      <header className="flex items-center justify-between h-full px-2.5">
+      <header style={{ backgroundColor: "var(--bg-color)", color: "var(--text-color)" }} className="flex items-center justify-between h-full ">
         {/* Nút toggle cho mobile */}
         <button
           onClick={toggleSidebar}
@@ -110,11 +97,10 @@ const Header = ({ toggleSidebar, setActiveTab, setEditingProductId, setEditingOr
         </button>
 
         {/* Tiêu đề */}
-        <h1 className="text-3xl font-bold text-gray-800 hidden lg:block ml-4">Quản trị</h1>
+        <h1 className="text-3xl font-bold text-var(--text-color) hidden lg:block ml-4">Quản trị</h1>
 
         <div className="flex items-center justify-end p-4">
-          <SwitchAdminHeader checked={theme === "dark"}
-            onChange={toggleTheme} />
+          <SwitchAdminHeader />
         </div>
         {/* Icon người dùng và thông báo */}
         <div className="flex items-center space-x-4 ml-auto">
@@ -183,7 +169,7 @@ const Header = ({ toggleSidebar, setActiveTab, setEditingProductId, setEditingOr
           {userId ? (<div className="relative">
             <button
               onClick={toggleProfileMenu}
-              className="flex items-center space-x-2 px-2 py-1 rounded-full text-gray-700 hover:bg-gray-200 transition-colors"
+              className="flex items-center space-x-2 px-2 py-1 rounded-full text-var(--text-color) hover:bg-gray-200 transition-colors"
             >
               {/* Ảnh đại diện admin */}
               <img
@@ -191,7 +177,7 @@ const Header = ({ toggleSidebar, setActiveTab, setEditingProductId, setEditingOr
                 alt="Admin Avatar"
                 className="w-8 h-8 rounded-full object-cover border"
               />
-              <span className="font-medium hidden md:block">{userId?.name || 'Admin'}</span>
+              <span className="font-medium hidden  md:block">{userId?.name || 'Admin'}</span>
             </button>
 
             {isProfileMenuOpen && (
@@ -280,7 +266,6 @@ const Header = ({ toggleSidebar, setActiveTab, setEditingProductId, setEditingOr
           )}
         </div>
       </header>
-    </ThemeProvider>
   )
 }
 

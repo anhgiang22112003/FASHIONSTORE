@@ -209,7 +209,7 @@ const OrderEditPage = ({ orderId }) => {
                         name={name}
                         value={value}
                         onChange={handleChange}
-                        className="w-full px-4 py-2 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all"
+                        className="w-full px-4 py-2 text-black rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all"
                     >
                         {options.map(option => (
                             <option key={option} value={option}>{option}</option>
@@ -222,7 +222,7 @@ const OrderEditPage = ({ orderId }) => {
                         name={name}
                         value={value}
                         onChange={handleChange}
-                        className="w-full px-4 py-2 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all"
+                        className="w-full px-4 py-2 text-black rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all"
                     />
                 )
             ) : (
@@ -271,14 +271,14 @@ const OrderEditPage = ({ orderId }) => {
 
 
     return (
-        <div className="min-h-screen bg-gray-50 font-sans antialiased p-8">
+        <div style={{ backgroundColor: "var(--bg-color)", color: "var(--text-color)" }} className="min-h-screen  font-sans antialiased p-8">
             <div className="max-w-full mx-auto space-y-10">
 
                 {/* Header */}
                 <div className="flex justify-between items-center pb-4 border-b no-print border-gray-200">
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-800">Chi tiết đơn hàng</h1>
-                        <p className="text-gray-500 mt-1">Mã đơn hàng: {editedOrder.orderId}</p>
+                        <h1 className="text-3xl font-bold ">Chi tiết đơn hàng</h1>
+                        <p className=" mt-1">Mã đơn hàng: {editedOrder.orderId}</p>
                     </div>
                     {renderHeaderButtons()}
                 </div>
@@ -299,7 +299,7 @@ const OrderEditPage = ({ orderId }) => {
                                     <select
                                         value={editedOrder.status}
                                         onChange={(e) => setEditedOrder({ ...editedOrder, status: e.target.value })}
-                                        className="w-full px-4 py-2 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all"
+                                        className="w-full text-black px-4 py-2 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all"
                                     >
                                         {statusOptions.map((status) => (
                                             <option key={status.value} value={status.value}>

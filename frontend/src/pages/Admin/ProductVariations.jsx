@@ -228,7 +228,7 @@ const ProductVariations = ({ variations, setVariations, setStock }) => {
                                     setIsColorPickerOpen(false) 
                                 }}
                                 placeholder="VD: Xanh navy hoặc #000080"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-pink-500 h-10"
+                                className="w-full px-3 py-2 border text-black border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-pink-500 h-10"
                             />
 
                             <button
@@ -276,7 +276,7 @@ const ProductVariations = ({ variations, setVariations, setStock }) => {
                                 onFocus={() => setIsSizePickerOpen(newSize.length === 0)}
                                 onBlur={() => setTimeout(() => setIsSizePickerOpen(false), 200)} // Đóng sau một chút trễ
                                 placeholder="VD: M, XL, Size 32"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-pink-500 h-10"
+                                className="w-full px-3 py-2 text-black border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-pink-500 h-10"
                             />
                             
                             {/* Nút mở/đóng gợi ý kích thước */}
@@ -320,7 +320,7 @@ const ProductVariations = ({ variations, setVariations, setStock }) => {
                                 onChange={(e) => setNewStock(e.target.value)}
                                 placeholder="0"
                                 min="0"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 h-10"
+                                className="w-full text-black px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 h-10"
                             />
                         </label>
                         <button

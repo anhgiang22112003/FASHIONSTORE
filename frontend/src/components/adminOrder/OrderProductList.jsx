@@ -29,7 +29,7 @@ const AddProductToOrder = ({ orderId, fetchOrder, onClose }) => {
     const fetchResults = async (query) => {
         try {
             setLoading(true)
-            const res = await apiAdmin.get(`/products/search?query=${query}`)
+            const res = await apiAdmin.get(`/products/search?query=${encodeURIComponent(query)}`)
             setResults(res.data || [])
         } catch (err) {
             console.error(err)
@@ -62,7 +62,7 @@ const AddProductToOrder = ({ orderId, fetchOrder, onClose }) => {
     }
 
     return (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+        <div style={{ color: "var(--text-color)" }} className="  fixed inset-0 bg-black/40 flex items-center justify-center z-50">
             <div className="bg-white p-6 rounded-2xl shadow-lg w-full max-w-lg relative">
                 {/* Nút đóng */}
                 <button
@@ -82,7 +82,7 @@ const AddProductToOrder = ({ orderId, fetchOrder, onClose }) => {
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         placeholder="Tìm sản phẩm..."
-                        className="pl-10 pr-3 py-2 border rounded-lg w-full"
+                        className="pl-10 pr-3 text-black py-2 border rounded-lg w-full"
                     />
                     {loading && (
                         <div className="absolute right-3 top-2 text-gray-400 text-sm animate-pulse">
@@ -91,12 +91,12 @@ const AddProductToOrder = ({ orderId, fetchOrder, onClose }) => {
                     )}
                 </div>
                 {results.length > 0 && !selectedProduct && (
-                    <ul className="max-h-48 overflow-y-auto border rounded-md divide-y">
+                    <ul className="max-h-48 text-black overflow-y-auto border rounded-md divide-y">
                         {results.map((product) => (
                             <li
                                 key={product._id}
                                 onClick={() => setSelectedProduct(product)}
-                                className={`p-3 cursor-pointer hover:bg-gray-100 rounded-md ${selectedProduct?._id === product._id ? "bg-pink-50" : ""
+                                className={`p-3 cursor-pointer hover:bg-gray-100 rounded-md ${selectedProduct?._id === product._id ? "" : ""
                                     }`}
                             >
                                 <div className="flex items-center space-x-3">
@@ -106,7 +106,7 @@ const AddProductToOrder = ({ orderId, fetchOrder, onClose }) => {
                                     />
                                     <div>
                                         <p className="font-semibold">{product.name}</p>
-                                        <p className="text-gray-500 text-sm">
+                                        <p className=" text-sm">
                                             {product?.sellingPrice?.toLocaleString()}đ
                                         </p>
                                     </div>
@@ -202,7 +202,7 @@ const AddProductToOrder = ({ orderId, fetchOrder, onClose }) => {
                                 min="1"
                                 value={quantity}
                                 onChange={(e) => setQuantity(Math.max(1, Number(e.target.value)))}
-                                className="border border-gray-300 rounded-lg px-3 py-1.5 w-24 text-center focus:border-pink-500 focus:ring-pink-500"
+                                className="border text-black border-gray-300 rounded-lg px-3 py-1.5 w-24 text-center focus:border-pink-500 focus:ring-pink-500"
                             />
                         </div>
 

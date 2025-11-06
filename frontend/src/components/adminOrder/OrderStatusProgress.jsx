@@ -40,7 +40,7 @@ const OrderStatusProgress = ({ currentStatus }) => {
     }
 
     return (
-        <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+        <div className=" rounded-2xl p-6 border border-gray-100 shadow-sm">
             <h3 className="text-lg font-semibold text-gray-800 mb-6">Tiến trình đơn hàng</h3>
 
             <div className="relative">
@@ -125,8 +125,8 @@ const OrderStatusProgress = ({ currentStatus }) => {
             </div>
 
             {/* Status Message */}
-            <div className="mt-6 p-4 bg-gray-50 rounded-xl">
-                <p className="text-sm text-gray-600">
+            <div className="mt-6 p-4  rounded-xl">
+                <p className="text-sm ">
                     {isCancelled ? (
                         <span className="text-red-600 font-semibold">⚠️ Đơn hàng đã bị hủy</span>
                     ) : currentIndex === 3 ? (

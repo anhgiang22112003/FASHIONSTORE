@@ -47,22 +47,22 @@ const OrderSummaryCard = ({ totals, trackingHistory, editHistory }) => {
 
       {/* 🛠️ Lịch sử chỉnh sửa */}
       {editHistory?.length > 0 && (
-        <div className="bg-white rounded-2xl shadow-md p-6 mt-6">
+        <div className=" text-black rounded-2xl shadow-md p-6 mt-6">
           <h2 className="text-lg font-semibold text-gray-800 mb-4">Lịch sử chỉnh sửa</h2>
           <ol className="relative border-l border-gray-200 ml-4 space-y-4">
             {editHistory.map((edit, i) => (
               <li key={i} className="ml-6">
                 <div className="absolute w-3 h-3 bg-blue-400 rounded-full -left-1.5 border-2 border-white"></div>
                 {typeof edit.changes === "object" ? (
-                  <div className="bg-gray-50 rounded-lg p-3 border border-gray-100">
+                  <div className=" rounded-lg p-3  border border-gray-100">
                     <p>📝 <b>{edit.changes.field}</b></p>
-                    <p className="text-gray-500">Từ: <span className="italic">{edit.changes.old}</span></p>
-                    <p className="text-green-600">Thành: <b>{edit.changes.new}</b></p>
+                    <p className="">Từ: <span className="italic">{edit.changes.old}</span></p>
+                    <p className="">Thành: <b>{edit.changes.new}</b></p>
                   </div>
                 ) : (
-                  <p className="bg-gray-50 rounded-lg p-3 border border-gray-100">{edit.changes}</p>
+                  <p className=" rounded-lg p-3 border border-gray-100">{edit.changes}</p>
                 )}
-                <p className="text-xs text-gray-400 mt-1">
+                <p className="text-xs  mt-1">
                   {new Date(edit.editedAt).toLocaleString('vi-VN')}
                 </p>
               </li>

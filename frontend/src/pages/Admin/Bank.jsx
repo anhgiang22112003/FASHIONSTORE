@@ -1,0 +1,297 @@
+import DeleteConfirmationModal from '@/components/DeleteConfirmationModal'
+import React, { useEffect, useState } from 'react'
+import { toast } from 'react-toastify'
+import { Switch } from '@headlessui/react'
+import { LazyLoadImage } from 'react-lazy-load-image-component'
+import 'react-lazy-load-image-component/src/effects/blur.css'
+import apiAdmin from '@/service/apiAdmin'
+import { set } from 'date-fns'
+const Bank = () => {
+    const [isFormOpen, setIsFormOpen] = useState(false)
+    const [editBank, setEditBank] = useState(null)
+    const [isNewBank, setIsNewBank] = useState(true)
+    const [name, setName] = useState("")
+    const [dec, setdec] = useState("")
+    const [app, setApp] = useState("")
+    const [sms, setSms] = useState("")
+    const [bank, setBank] = useState([])
+    const [isLoading, setIsLoading] = useState(false)
+    const [isModalOpen, setIsModalOpen] = useState(false)
+    const [itemToDelete, setItemToDelete] = useState(null)
+
+    useEffect(() => {
+        if (editBank) {
+            setName(editBank.name)
+            setdec(editBank.description)
+            setIsNewBank(editBank.status)
+            setApp(editBank.app)
+            setSms(editBank.sms)
+        }
+    }, [editBank])
+
+    const fetchBank = async () => {
+        try {
+            setIsLoading(true) // bật loading
+            const response = await apiAdmin.get("bank")
+            setBank(response?.data || [])
+        } catch (error) {
+            toast.error("Lỗi khi lấy danh sách ngân hàng!")
+        } finally {
+            setIsLoading(false) // tắt loading
+        }
+    }
+
+    useEffect(() => {
+        fetchBank()
+    }, [editBank])
+
+    const handleSubmit = async (e) => {
+        e.preventDefault()
+        setIsLoading(true) // bật loading khi submit
+
+        let bankdata = {
+            name: name,
+            description: dec,
+            app,
+            sms,
+            status: isNewBank
+        }
+
+        try {
+            if (editBank) {
+                await apiAdmin.patch(`/bank/${editBank._id}`, bankdata)
+                toast.success("Cập nhật ngân hàng thành công")
+            } else {
+                await apiAdmin.post("/bank", bankdata)
+                toast.success("Thêm ngân hàng thành công")
+            }
+            fetchBank()
+        } catch (error) {
+            toast.error(error.response?.data?.message || "Có lỗi xảy ra!")
+        } finally {
+            setIsLoading(false)
+        }
+
+        setIsFormOpen(false)
+        setEditBank(null)
+    }
+
+    const handleDeleteClick = (type, id, name) => {
+        setItemToDelete({ type, id, name })
+        setIsModalOpen(true)
+    }
+
+
+    const handleConfirmDelete = async () => {
+        if (itemToDelete) {
+            try {
+                setIsLoading(true)
+                if (itemToDelete.type === 'bank') {
+                    const res = await apiAdmin.delete(`/bank/${itemToDelete.id}`)
+                    if (res.status === 200) {
+                        toast.success("Xóa ngân hàng thành công")
+                        fetchBank()
+                    }
+                }
+            } catch (err) {
+                toast.error(err.response?.data?.message || "Lỗi khi xóa!")
+            } finally {
+                setIsLoading(false)
+            }
+        }
+        setIsModalOpen(false)
+        setItemToDelete(null)
+    }
+
+    const handleCloseModal = () => {
+        setIsModalOpen(false)
+        setItemToDelete(null)
+    }
+
+    const modalTitle = itemToDelete ? `Xác nhận xóa ${itemToDelete.type === 'bank' ? 'ngân hàng' : 'bộ sưu tập'}` : ''
+    const modalMessage = itemToDelete ? `Bạn có chắc chắn muốn xóa "${itemToDelete.name}"? Thao tác này không thể hoàn tác.` : ''
+
+    const handleOpenForm = (bank = null) => {
+        setEditBank(bank)
+        setIsFormOpen(true)
+    }
+
+    const handleCloseForm = () => {
+        setIsFormOpen(false)
+        setEditBank(null)
+        setName('')
+        setdec('')
+        setApp('')
+        setSms('')
+        setIsNewBank(true)
+    }
+
+    return (
+        <div style={{ backgroundColor: "var(--bg-color)", color: "var(--text-color)" }} className=" min-h-screen  font-sans antialiased">
+
+            <div className="space-y-6 p-6">
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-2xl font-bold text-var(--text-color)">Danh sách ngân hàng</h2>
+                    <button
+                        onClick={() => handleOpenForm()}
+                        className="px-6 py-3 bg-pink-600 text-white rounded-xl font-semibold hover:bg-pink-700 transition-colors"
+                    >
+                        + Thêm ngân hàng mới
+                    </button>
+                </div>
+
+                {/* FORM */}
+                {isFormOpen && (
+                    <div className="bg-white p-8 rounded-2xl shadow-xl mb-6">
+                        <h3 className="text-xl font-bold text-gray-800 mb-4">
+                            {editBank ? 'Chỉnh sửa ngân hàng' : 'Thêm ngân hàng mới'}
+                        </h3>
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            {/* inputs ... */}
+                            <label className="block">
+                                <span className="text-gray-600">Tên ngân hàng</span>
+                                <input
+                                    type="text"
+                                    name="name"
+                                    onChange={(e) => setName(e.target.value)}
+                                    defaultValue={editBank?.name || ''}
+                                    className="w-full text-black px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
+                                    required
+                                />
+                            </label>
+                            <label className="block">
+                                <span className="text-gray-600">Mô tả</span>
+                                <textarea
+                                    name="description"
+                                    onChange={(e) => setdec(e.target.value)}
+                                    defaultValue={editBank?.description || ''}
+                                    rows="3"
+                                    className="w-full text-black px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200 resize-none"
+                                ></textarea>
+                            </label>
+
+                            <label className="block">
+                                <span className="text-gray-600">App</span>
+                                <textarea
+                                    name="app"
+                                    onChange={(e) => setApp(e.target.value)}
+                                    defaultValue={editBank?.app || ''}
+                                    rows="3"
+                                    className="w-full text-black px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200 resize-none"
+                                ></textarea>
+                            </label>
+                            <label className="block">
+                                <span className="text-gray-600">SMS</span>
+                                <textarea
+                                    name="sms"
+                                    onChange={(e) => setSms(e.target.value)}
+                                    defaultValue={editBank?.sms || ''}
+                                    rows="3"
+                                    className="w-full text-black px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200 resize-none"
+                                ></textarea>
+                            </label>
+                            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                <span className="text-gray-700 font-medium">Trạng thái: {isNewBank ? 'Đang hoạt động' : 'Ngừng hoạt động'}</span>
+                                <Switch
+                                    checked={isNewBank}
+                                    onChange={setIsNewBank} // 👈 Cập nhật state khi click
+                                    className={`${isNewBank ? 'bg-pink-600' : 'bg-gray-200'
+                                        } relative inline-flex h-6 w-11 items-center rounded-full transition-colors`}
+                                >
+                                    <span className="sr-only">Bật/tắt trạng thái danh mục</span>
+                                    <span
+                                        className={`${isNewBank ? 'translate-x-6' : 'translate-x-1'
+                                            } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+                                    />
+                                </Switch>
+                            </div>
+
+
+                            <div className="flex justify-end space-x-4 mt-6">
+                                <button
+                                    type="button"
+                                    onClick={handleCloseForm}
+                                    className="px-6 py-3 bg-white text-gray-600 rounded-xl font-semibold border border-gray-300 hover:bg-gray-100 transition-colors"
+                                >
+                                    Hủy
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={isLoading} // disable khi đang loading
+                                    className={`px-6 py-3 rounded-xl font-semibold transition-colors ${isLoading
+                                        ? 'bg-gray-400 text-white cursor-not-allowed'
+                                        : 'bg-pink-600 text-white hover:bg-pink-700'
+                                        }`}
+                                >
+                                    {isLoading ? "Đang xử lý..." : editBank ? 'Lưu thay đổi' : 'Thêm ngân hàng'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                )}
+
+                {/* TABLE */}
+                <div className="bg-white p-6 rounded-2xl shadow-xl overflow-x-auto">
+                    {isLoading ? (
+                        <div className="text-center py-6 text-gray-500">Đang tải dữ liệu...</div>
+                    ) : (
+                        <table className="min-w-full divide-y divide-gray-200">
+                            <thead className="bg-pink-50">
+                                <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Id</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tên ngân hàng</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">App(pagkage)</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Chi tiết ngân hàng</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Trạng thái</th>
+                                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Hành động</th>
+                                </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                                {bank.map(bank => (
+                                    <tr key={bank._id}>
+                                        {/* Trong bảng */}
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{bank?._id}</td>
+
+                                        </td>
+
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{bank?.name}</td>
+                                        <td className="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">{bank?.app}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{bank?.description}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{bank?.status ? "Hoạt động" : "Không hoạt động"}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                                            <button
+                                                onClick={() => handleOpenForm(bank)}
+                                                className="text-pink-600 hover:text-pink-900 transition-colors"
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 inline-block" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" /><path fillRule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clipRule="evenodd" /></svg>
+                                            </button>
+                                            <button
+                                                onClick={() => handleDeleteClick('bank', bank._id, bank.name)}
+
+                                                className="text-red-600 hover:text-red-900 transition-colors"
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 inline-block" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    )}
+                </div>
+
+                <DeleteConfirmationModal
+                    title={modalTitle}
+                    message={modalMessage}
+                    isOpen={isModalOpen}
+                    onClose={handleCloseModal}
+                    onConfirm={handleConfirmDelete}
+                    id={itemToDelete?.id}
+                />
+            </div>
+        </div>
+    )
+}
+
+export default Bank

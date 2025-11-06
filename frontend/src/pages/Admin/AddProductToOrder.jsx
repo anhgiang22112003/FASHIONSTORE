@@ -27,8 +27,8 @@ const AddProductToOrder = ({ orderId, fetchOrder }) => {
   const fetchResults = async (query) => {
     try {
       setLoading(true)
-      const res = await apiAdmin.get(`/products/search?query=${query}`)
-      setResults(res.data)
+      const res = await apiAdmin.get(`/products/search?query=${encodeURIComponent(query)}`)
+      setResults(res.data.products || [])
     } catch (err) {
       console.error(err)
     } finally {

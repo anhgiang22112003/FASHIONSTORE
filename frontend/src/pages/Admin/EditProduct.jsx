@@ -3,8 +3,6 @@ import ProductVariations from './ProductVariations'
 import { toast } from 'react-toastify'
 import apiAdmin from '@/service/apiAdmin'
 
-// Dữ liệu sản phẩm giả lập, sẽ được tải từ API trong thực tế
-
 
 const EditProduct = ({ productId, onBack, fetchProducts }) => {
     const [productName, setProductName] = useState('')
@@ -247,15 +245,15 @@ const EditProduct = ({ productId, onBack, fetchProducts }) => {
                     <h3 className="text-xl font-bold text-gray-800">Thông tin cơ bản</h3>
                     <label className="block space-y-2">
                         <span className="text-gray-600">Tên sản phẩm</span>
-                        <input type="text" value={productName} onChange={(e) => setProductName(e.target.value)} placeholder="Nhập tên sản phẩm" className="w-full px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200" />
+                        <input type="text" value={productName} onChange={(e) => setProductName(e.target.value)} placeholder="Nhập tên sản phẩm" className="w-full text-black px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200" />
                     </label>
                     <label className="block space-y-2">
                         <span className="text-gray-600">Mô tả ngắn gọn về sản phẩm</span>
-                        <input type="text" value={shortDesc} onChange={(e) => setShortDesc(e.target.value)} placeholder="Mô tả ngắn gọn" className="w-full px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200" />
+                        <input type="text" value={shortDesc} onChange={(e) => setShortDesc(e.target.value)} placeholder="Mô tả ngắn gọn" className="w-full px-4 py-3 text-black border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200" />
                     </label>
                     <label className="block space-y-2">
                         <span className="text-gray-600">Mô tả chi tiết</span>
-                        <textarea value={detailedDesc} onChange={(e) => setDetailedDesc(e.target.value)} placeholder="Mô tả chi tiết sản phẩm, chất liệu, cách sử dụng..." rows="5" className="w-full px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200 resize-none"></textarea>
+                        <textarea value={detailedDesc} onChange={(e) => setDetailedDesc(e.target.value)} placeholder="Mô tả chi tiết sản phẩm, chất liệu, cách sử dụng..." rows="5" className="w-full text-black px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200 resize-none"></textarea>
                     </label>
                 </div>
 
@@ -270,7 +268,7 @@ const EditProduct = ({ productId, onBack, fetchProducts }) => {
                                 value={formatCurrency(originalPrice)}
                                 onChange={(e) => setOriginalPrice(parseCurrency(e.target.value))}
                                 placeholder="₫"
-                                className="w-full px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
+                                className="w-full text-black px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
                             />
                         </label>
                         <label className="block space-y-2">
@@ -280,12 +278,12 @@ const EditProduct = ({ productId, onBack, fetchProducts }) => {
                                 value={formatCurrency(sellingPrice)}
                                 onChange={(e) => setSellingPrice(parseCurrency(e.target.value))}
                                 placeholder="₫"
-                                className="w-full px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
+                                className="w-full text-black px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
                             />
                         </label>
                         <label className="block space-y-2">
                             <span className="text-gray-600">Phần trăm giảm giá</span>
-                            <input type="number" value={discount} onChange={(e) => setDiscount(e.target.value)} placeholder="%" className="w-full px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200" />
+                            <input type="number" value={discount} onChange={(e) => setDiscount(e.target.value)} placeholder="%" className="w-full text-black px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200" />
                         </label>
                     </div>
                 </div>
@@ -299,7 +297,7 @@ const EditProduct = ({ productId, onBack, fetchProducts }) => {
                             <select
                                 value={category}
                                 onChange={(e) => setCategory(e.target.value)}
-                                className="w-full px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
+                                className="w-full text-black px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
                             >
                                 <option value="">Chọn danh mục</option>
                                 {categories.map((item) => (
@@ -314,7 +312,7 @@ const EditProduct = ({ productId, onBack, fetchProducts }) => {
                             <select
                                 value={collection}
                                 onChange={(e) => setCollection(e.target.value)}
-                                className="w-full px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
+                                className="w-full text-black px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
                             >
                                 <option value="">Không</option>
                                 {collections.map((item) => (
@@ -326,7 +324,7 @@ const EditProduct = ({ productId, onBack, fetchProducts }) => {
                         </label>
                         <label className="block space-y-2">
                             <span className="text-gray-600">Xuất xứ</span>
-                            <input type="text" value={origin} onChange={(e) => setOrigin(e.target.value)} placeholder="Nhập Xuất xứ " className="w-full px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200" />
+                            <input type="text" value={origin} onChange={(e) => setOrigin(e.target.value)} placeholder="Nhập Xuất xứ " className="w-full text-black px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200" />
                         </label>
                     </div>
                     {/* ... (Phần Tags tương tự AddProduct) */}
@@ -354,7 +352,7 @@ const EditProduct = ({ productId, onBack, fetchProducts }) => {
                                         handleAddTag()
                                     }
                                 }}
-                                className="w-full px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
+                                className="w-full text-black px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
                             />
                             <button onClick={handleAddTag} className="p-3 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition-colors">
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
@@ -371,11 +369,11 @@ const EditProduct = ({ productId, onBack, fetchProducts }) => {
                 <div className="bg-white p-8 rounded-2xl shadow-xl space-y-6">
                     <h3 className="text-xl font-bold text-gray-800">Quản lý kho hàng</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <label className="block space-y-2">
+                        <label className="block text-black space-y-2">
                             <span className="text-gray-600">Số lượng tồn kho</span>
                             <input type="number" value={stock} onChange={(e) => setStock(e.target.value)} placeholder="0" className="w-full px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200" />
                         </label>
-                        <label className="block space-y-2">
+                        <label className="block text-black space-y-2">
                             <span className="text-gray-600">Mã (SKU) sản phẩm</span>
                             <input type="text" value={sku} onChange={(e) => setSku(e.target.value)} placeholder="PF001" className="w-full px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200" />
                         </label>
@@ -383,15 +381,15 @@ const EditProduct = ({ productId, onBack, fetchProducts }) => {
                     <div className="space-y-2">
                         <span className="text-gray-600">Trạng thái</span>
                         <div className="flex items-center space-x-6">
-                            <label className="inline-flex items-center space-x-2">
+                            <label className="inline-flex text-black items-center space-x-2">
                                 <input type="radio" name="status" value="Còn hàng" checked={status === 'Còn hàng'} onChange={(e) => setStatus(e.target.value)} className="text-pink-600 focus:ring-pink-500" />
                                 <span>Còn hàng</span>
                             </label>
-                            <label className="inline-flex items-center space-x-2">
+                            <label className="inline-flex text-black items-center space-x-2">
                                 <input type="radio" name="status" value="Hết hàng" checked={status === 'Hết hàng'} onChange={(e) => setStatus(e.target.value)} className="text-pink-600 focus:ring-pink-500" />
                                 <span>Hết hàng</span>
                             </label>
-                            <label className="inline-flex items-center space-x-2">
+                            <label className="inline-flex text-black items-center space-x-2">
                                 <input type="radio" name="status" value="Ngừng bán" checked={status === 'Ngừng bán'} onChange={(e) => setStatus(e.target.value)} className="text-pink-600 focus:ring-pink-500" />
                                 <span>Ngừng bán</span>
                             </label>

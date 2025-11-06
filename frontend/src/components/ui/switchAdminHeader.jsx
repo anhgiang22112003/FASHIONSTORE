@@ -1,13 +1,16 @@
+import { useTheme } from "@/context/ThemeContext"
 import React from "react"
 
 const Switch = ({ checked, onChange }) => {
+    const { theme, toggleTheme } = useTheme()
+
   return (
     <label className="inline-flex items-center relative cursor-pointer select-none">
-      <input
+     <input
         type="checkbox"
         className="peer hidden"
-        checked={checked}
-        onChange={onChange}
+        checked={theme === "dark"}
+        onChange={toggleTheme}
       />
 
       {/* Nền switch */}

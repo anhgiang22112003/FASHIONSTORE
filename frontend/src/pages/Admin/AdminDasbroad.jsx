@@ -48,28 +48,29 @@ const AdminDashboard = () => {
   return (
     <div className="p-8 space-y-8">
       {/* Bộ lọc ngày */}
-      <div className="flex flex-wrap items-center gap-4">
+      <div  style={{ backgroundColor: "var(--bg-color)", color: "var(--text-color)" }} className="flex flex-wrap items-center gap-4">
         <div className="flex items-center gap-2">
           <label>Từ:</label>
           <input
             type="date"
             value={from}
             onChange={(e) => setFrom(e.target.value)}
-            className="border rounded-md px-3 py-1"
+            className="border text-black rounded-md px-3 py-1"
           />
         </div>
         <div className="flex items-center gap-2">
           <label>Đến:</label>
           <input
+              
             type="date"
             value={to}
             onChange={(e) => setTo(e.target.value)}
-            className="border rounded-md px-3 py-1"
+            className="border text-black rounded-md px-3 py-1"
           />
         </div>
         <button
           onClick={fetchDashboard}
-          className="bg-pink-600 text-white px-4 py-2 rounded-lg hover:bg-pink-700"
+          className="bg-pink-600 text-var(--text-color) px-4 py-2 rounded-lg hover:bg-pink-700"
         >
           Lọc
         </button>
@@ -77,13 +78,13 @@ const AdminDashboard = () => {
 
       {/* Thống kê */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white p-6 rounded-xl shadow flex justify-between items-center">
+        <div className=" p-6 rounded-xl shadow flex justify-between items-center">
           <div>
-            <p className="text-sm text-gray-500">Tổng doanh thu</p>
+            <p className="text-sm text-var(--text-color)">Tổng doanh thu</p>
             <p className="text-2xl font-bold text-pink-600">
               {summary.revenue.toLocaleString()}đ
             </p>
-            <p className="text-xs text-gray-400 mt-1">
+            <p className="text-xs text-var(--text-color) mt-1">
               {new Date(summary.from).toLocaleDateString()} -{" "}
               {new Date(summary.to).toLocaleDateString()}
             </p>
@@ -91,9 +92,9 @@ const AdminDashboard = () => {
           <div className="text-3xl">📈</div>
         </div>
 
-        <div className="bg-white p-6 rounded-xl shadow flex justify-between items-center">
+        <div className=" p-6 rounded-xl shadow flex justify-between items-center">
           <div>
-            <p className="text-sm text-gray-500">Đơn hàng</p>
+            <p className="text-sm text-var(--text-color)">Đơn hàng</p>
             <p className="text-2xl font-bold text-pink-600">
               {summary.orders}
             </p>
@@ -101,9 +102,9 @@ const AdminDashboard = () => {
           <div className="text-3xl">🛒</div>
         </div>
 
-        <div className="bg-white p-6 rounded-xl shadow flex justify-between items-center">
+        <div className=" p-6 rounded-xl shadow flex justify-between items-center">
           <div>
-            <p className="text-sm text-gray-500">Khách hàng</p>
+            <p className="text-sm text-var(--text-color)">Khách hàng</p>
             <p className="text-2xl font-bold text-pink-600">
               {summary.customers}
             </p>
@@ -111,9 +112,9 @@ const AdminDashboard = () => {
           <div className="text-3xl">👤</div>
         </div>
 
-        <div className="bg-white p-6 rounded-xl shadow flex justify-between items-center">
+        <div className="p-6 rounded-xl shadow flex justify-between items-center">
           <div>
-            <p className="text-sm text-gray-500">Sản phẩm</p>
+            <p className="text-sm text-var(--text-color)">Sản phẩm</p>
             <p className="text-2xl font-bold text-pink-600">
               {summary.products}
             </p>
@@ -127,7 +128,7 @@ const AdminDashboard = () => {
       {/* Orders & Best Selling */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Đơn hàng gần đây */}
-        <div className="bg-white p-6 rounded-xl shadow">
+        <div className="  p-6 rounded-xl shadow">
           <h2 className="text-lg font-semibold mb-4">Đơn hàng gần đây</h2>
           <ul className="space-y-4">
             {recentOrders.map((order, idx) => (
@@ -138,7 +139,7 @@ const AdminDashboard = () => {
                 <div className="flex items-center space-x-2">
                   <span className="text-xl">🛒</span>
                   <div>
-                    <p className="font-semibold">
+                    <p className="font-semibold text-black">
                       {order.user.name || "Khách hàng"}
                     </p>
                     <p className="text-sm text-gray-500">
@@ -174,7 +175,7 @@ const AdminDashboard = () => {
         </div>
 
         {/* Sản phẩm bán chạy */}
-        <div className="bg-white p-6 rounded-xl shadow">
+        <div className=" p-6 rounded-xl shadow">
           <h2 className="text-lg font-semibold mb-4">Sản phẩm bán chạy</h2>
           <ul className="space-y-4">
             {bestSellingProducts.map((product, idx) => (
@@ -185,7 +186,7 @@ const AdminDashboard = () => {
                 <div className="flex items-center space-x-2">
                   <span className="text-xl">🏷️</span>
                   <div>
-                    <p className="font-semibold">{product.name}</p>
+                    <p className="font-semibold text-black">{product.name}</p>
                     <p className="text-sm text-gray-500">
                       {product.totalSold} đã bán
                     </p>

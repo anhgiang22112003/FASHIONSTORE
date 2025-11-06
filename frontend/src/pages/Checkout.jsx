@@ -297,19 +297,20 @@ const Checkout = () => {
       const orderId = order._id
       const invoiceNumber = res.data._id
       const total = res.data.total
-      console.log(total, orderId)
 
-      if (form.paymentMethod === "BANK") {
+      if (form.paymentMethod === "SEPAY") {
         await handleBankPayment(invoiceNumber, total)
+        fetchCart()
       } else if (form.paymentMethod === "VNPAY") {
         const vnpayRes = await api.post("/vnpay/create-payment", {
           orderId,
           amount: total,
         })
         if (vnpayRes.data?.url) {
-          window.location.href = vnpayRes.data.url // Redirect sang VNPAY
+          window.location.href = vnpayRes.data.url 
           return
         }
+        fetchCart()
       }
       else {
         fetchCart()
@@ -477,6 +478,24 @@ const Checkout = () => {
 
               {/* Bank transfer */}
               <div
+                onClick={() => handlePaymentChange("SEPAY")}
+                className={`relative flex items-center p-4 border rounded-lg cursor-pointer transition ${form.paymentMethod === "SEPAY" ? "border-pink-500 bg-pink-50" : "border-gray-300 hover:bg-gray-50"}`}
+              >
+                <input
+                  type="radio"
+                  name="payment_method"
+                  id="sepay"
+                  checked={form.paymentMethod === "SEPAY"}
+                  onChange={() => handlePaymentChange("SEPAY")}
+                  className="w-5 h-5 text-pink-600 border-gray-300 focus:ring-pink-500"
+                />
+                <label htmlFor="sepay" className="ml-3 font-bold text-gray-800 cursor-pointer">
+                  Ví điện tử Sepay
+                </label>
+              </div>
+
+              {/* MoMo */}
+              <div
                 onClick={() => handlePaymentChange("BANK")}
                 className={`relative flex items-center p-4 border rounded-lg cursor-pointer transition ${form.paymentMethod === "BANK" ? "border-pink-500 bg-pink-50" : "border-gray-300 hover:bg-gray-50"}`}
               >
@@ -490,24 +509,6 @@ const Checkout = () => {
                 />
                 <label htmlFor="bank" className="ml-3 font-bold text-gray-800 cursor-pointer">
                   Chuyển khoản ngân hàng
-                </label>
-              </div>
-
-              {/* MoMo */}
-              <div
-                onClick={() => handlePaymentChange("MOMO")}
-                className={`relative flex items-center p-4 border rounded-lg cursor-pointer transition ${form.paymentMethod === "MOMO" ? "border-pink-500 bg-pink-50" : "border-gray-300 hover:bg-gray-50"}`}
-              >
-                <input
-                  type="radio"
-                  name="payment_method"
-                  id="momo"
-                  checked={form.paymentMethod === "MOMO"}
-                  onChange={() => handlePaymentChange("MOMO")}
-                  className="w-5 h-5 text-pink-600 border-gray-300 focus:ring-pink-500"
-                />
-                <label htmlFor="momo" className="ml-3 font-bold text-gray-800 cursor-pointer">
-                  Ví điện tử MoMo
                 </label>
               </div>
               <div

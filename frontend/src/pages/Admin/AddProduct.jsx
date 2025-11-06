@@ -270,7 +270,7 @@ const AddProduct = ({ setActiveTab, fetchProducts }) => {
 
 
     return (
-        <div className="flex flex-col lg:flex-row lg:space-x-8 h-full">
+        <div style={{ backgroundColor: "var(--bg-color)" }} className="flex flex-col lg:flex-row lg:space-x-8 h-full">
             {/* Main content - Left side with scroll on desktop, full on mobile */}
             <div className="flex-1 lg:overflow-y-auto lg:pr-4 space-y-8 pb-8 scrollbar-hidden">
                 {/* Product Info Section */}
@@ -278,15 +278,15 @@ const AddProduct = ({ setActiveTab, fetchProducts }) => {
                     <h3 className="text-xl font-bold text-gray-800">Thông tin cơ bản</h3>
                     <label className="block space-y-2">
                         <span className="text-gray-600">Tên sản phẩm</span>
-                        <input type="text" placeholder="Nhập tên sản phẩm" value={productName} onChange={(e) => setProductName(e.target.value)} className="w-full px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200" />
+                        <input type="text" placeholder="Nhập tên sản phẩm" value={productName} onChange={(e) => setProductName(e.target.value)} className="w-full px-4 py-3 border text-black border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200" />
                     </label>
                     <label className="block space-y-2">
                         <span className="text-gray-600">Mô tả ngắn gọn về sản phẩm</span>
-                        <input type="text" placeholder="Mô tả ngắn gọn" value={shortDescription} onChange={(e) => setShortDescription(e.target.value)} className="w-full px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200" />
+                        <input type="text" placeholder="Mô tả ngắn gọn" value={shortDescription} onChange={(e) => setShortDescription(e.target.value)} className="w-full px-4 py-3 border text-black border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200" />
                     </label>
                     <label className="block space-y-2">
                         <span className="text-gray-600">Mô tả chi tiết</span>
-                        <textarea placeholder="Mô tả chi tiết sản phẩm, chất liệu, cách sử dụng..." rows="5" value={detailedDescription} onChange={(e) => setDetailedDescription(e.target.value)} className="w-full px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200 resize-none"></textarea>
+                        <textarea placeholder="Mô tả chi tiết sản phẩm, chất liệu, cách sử dụng..." rows="5" value={detailedDescription} onChange={(e) => setDetailedDescription(e.target.value)} className="w-full text-black px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200 resize-none"></textarea>
                     </label>
                 </div>
 
@@ -301,7 +301,7 @@ const AddProduct = ({ setActiveTab, fetchProducts }) => {
                                 placeholder="₫"
                                 value={formatCurrency(originalPrice)} // DÙNG formatCurrency ĐỂ HIỂN THỊ
                                 onChange={(e) => setOriginalPrice(parseCurrency(e.target.value))} // DÙNG parseCurrency ĐỂ LƯU SỐ NGUYÊN
-                                className="w-full px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
+                                className="w-full px-4 py-3 text-black border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
                             />
                         </label>
                         <label className="block space-y-2">
@@ -311,7 +311,7 @@ const AddProduct = ({ setActiveTab, fetchProducts }) => {
                                 placeholder="₫"
                                 value={formatCurrency(sellingPrice)} // DÙNG formatCurrency ĐỂ HIỂN THỊ
                                 onChange={(e) => setSellingPrice(parseCurrency(e.target.value))} // DÙNG parseCurrency ĐỂ LƯU SỐ NGUYÊN
-                                className="w-full px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
+                                className="w-full px-4 py-3 text-black border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
                             />
                         </label>
                         {/* ... discountPercentage giữ nguyên type="number" vì nó là phần trăm ... */}
@@ -322,7 +322,7 @@ const AddProduct = ({ setActiveTab, fetchProducts }) => {
                                 placeholder="%"
                                 value={discountPercentage}
                                 onChange={(e) => setDiscountPercentage(e.target.value)}
-                                className="w-full px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
+                                className="w-full text-black px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
                             />
                         </label>
                     </div>
@@ -339,7 +339,7 @@ const AddProduct = ({ setActiveTab, fetchProducts }) => {
                             <select
                                 value={category}
                                 onChange={(e) => setCategory(e.target.value)}
-                                className="w-full px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
+                                className="w-full text-black px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
                             >
                                 <option value="">Chọn danh mục</option>
                                 {categories?.map((item) => (
@@ -358,7 +358,7 @@ const AddProduct = ({ setActiveTab, fetchProducts }) => {
                                 placeholder="Nhập thương hiệu"
                                 value={brand}
                                 onChange={(e) => setBrand(e.target.value)}
-                                className="w-full px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
+                                className="w-full text-black px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
                             />
                         </label>
 
@@ -368,7 +368,7 @@ const AddProduct = ({ setActiveTab, fetchProducts }) => {
                             <select
                                 value={collection}
                                 onChange={(e) => setCollection(e.target.value)}
-                                className="w-full px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
+                                className="w-full text-black px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
                             >
                                 <option value="">Chọn bộ sưu tập</option>
                                 {collections.map((item) => (
@@ -420,7 +420,7 @@ const AddProduct = ({ setActiveTab, fetchProducts }) => {
                                         handleAddTag()
                                     }
                                 }}
-                                className="w-full px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
+                                className="w-full text-black px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
                             />
                             <button
                                 onClick={handleAddTag}
@@ -448,11 +448,11 @@ const AddProduct = ({ setActiveTab, fetchProducts }) => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <label className="block space-y-2">
                             <span className="text-gray-600">Số lượng tồn kho</span>
-                            <input type="number" placeholder="0" value={stock} onChange={(e) => setStock(e.target.value)} className="w-full px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200" />
+                            <input type="number" placeholder="0" value={stock} onChange={(e) => setStock(e.target.value)} className="w-full px-4 text-black py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200" />
                         </label>
                         <label className="block space-y-2">
                             <span className="text-gray-600">Mã (SKU) sản phẩm</span>
-                            <input type="text" placeholder="PF001" value={sku} onChange={(e) => setSku(e.target.value)} className="w-full px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200" />
+                            <input type="text" placeholder="PF001" value={sku} onChange={(e) => setSku(e.target.value)} className="w-full px-4 py-3 border text-black border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200" />
                         </label>
                     </div>
                     <div className="space-y-2">
@@ -460,13 +460,13 @@ const AddProduct = ({ setActiveTab, fetchProducts }) => {
                         <div className="flex items-center space-x-6">
                             <label className="inline-flex items-center space-x-2">
                                 <input type="radio" name="status" value="Còn hàng" checked={status === 'Còn hàng'} onChange={(e) => setStatus(e.target.value)} className="text-pink-600 focus:ring-pink-500" />
-                                <span>Còn hàng</span>
+                                <span className='text-black'>Còn hàng</span>
                             </label>
                             <label className="inline-flex items-center space-x-2">
                                 <input type="radio" name="status" value="Hết hàng" checked={status === 'Hết hàng'} onChange={(e) => setStatus(e.target.value)} className="text-pink-600 focus:ring-pink-500" />
-                                <span>Hết hàng</span>
+                                <span className='text-black' >Hết hàng</span>
                             </label>
-                            <label className="inline-flex items-center space-x-2">
+                            <label className="inline-flex items-center text-black space-x-2">
                                 <input type="radio" name="status" value="Ngừng bán" checked={status === 'Ngừng bán'} onChange={(e) => setStatus(e.target.value)} className="text-pink-600 focus:ring-pink-500" />
                                 <span>Ngừng bán</span>
                             </label>

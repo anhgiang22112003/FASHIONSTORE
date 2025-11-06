@@ -176,6 +176,29 @@ code {
     }
 }
 
+:root {
+  --bg-color: #f9fafb; /* nền sáng */
+  --text-color: #111827;
+  --switch-active: #ec4899; /* hồng */
+  --switch-inactive: #d1d5db;
+}
+
+[data-theme="dark"] {
+  --bg-color: #1f2937; /* nền tối */
+  --text-color: #f9fafb;
+  --switch-active: #3b82f6; /* xanh */
+  --switch-inactive: #4b5563;
+}
+
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+
+
 @layer base {
   * {
     @apply border-border;

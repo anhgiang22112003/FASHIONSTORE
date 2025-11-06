@@ -282,7 +282,8 @@ const ProductsContent = ({ setActiveTab, onEditProduct, onViewProductDetail, dat
         setIsModalOpen(false)
     }
 
-
+ console.log(product);
+ 
     const handleCloseModal = () => {
         setIsModalOpen(false)
         setProductToDelete(null)
@@ -300,17 +301,19 @@ const ProductsContent = ({ setActiveTab, onEditProduct, onViewProductDetail, dat
         setDisplayMaxPrice("")
     }
     return (
-        <div className="p-6 bg-gray-50 min-h-screen">
+        <div style={{ backgroundColor: "var(--bg-color)", color: "var(--text-color)" }} className="p-6  min-h-screen">
+                        <h1 className="text-3xl font-bold mb-4 ">Danh sách Sản phẩm</h1>
+
             {selectedProducts.length > 0 && (
-                <div className="bg-white p-4 mb-4 rounded-xl shadow flex justify-between items-center border border-pink-200">
-                    <p className="text-gray-700 font-medium">
+                <div className="p-4 mb-4 rounded-xl shadow flex justify-between items-center border border-pink-200">
+                    <p className=" font-medium">
                         Đã chọn <span className="font-bold text-pink-600">{selectedProducts.length}</span> sản phẩm
                     </p>
                     <div className="flex space-x-3 items-center">
                         <select
                             onChange={(e) => handleBulkUpdateStatus(e.target.value)}
                             defaultValue=""
-                            className="border rounded-xl px-3 py-2 focus:ring-pink-500"
+                            className="border text-black rounded-xl px-3 py-2 focus:ring-pink-500"
                         >
                             <option value="" disabled>Đổi trạng thái...</option>
                             <option value="Còn hàng">Còn hàng</option>
@@ -365,18 +368,18 @@ const ProductsContent = ({ setActiveTab, onEditProduct, onViewProductDetail, dat
             </div>
 
             {isFilterVisible && (
-                <div className="mt-4 p-5 border rounded-xl bg-white shadow-lg mb-6">
-                    <h4 className="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Bộ lọc nâng cao</h4>
+                <div className="mt-4 p-5 border rounded-xl shadow-lg mb-6">
+                    <h4 className="text-lg font-semibold  mb-4 border-b pb-2">Bộ lọc nâng cao</h4>
                     <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
 
                         {/* Danh mục */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-600 mb-1">Danh mục</label>
+                            <label className="block text-sm font-medium  mb-1">Danh mục</label>
                             <select
                                 name="category"
                                 value={filters.category}
                                 onChange={handleFilterChange}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500/50"
+                                className="w-full px-3 text-black py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500/50"
                             >
                                 <option value="">Tất cả danh mục</option>
                                 {categories.map((cat) => (
@@ -389,12 +392,12 @@ const ProductsContent = ({ setActiveTab, onEditProduct, onViewProductDetail, dat
 
                         {/* Bộ sưu tập */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-600 mb-1">Bộ sưu tập</label>
+                            <label className="block text-sm font-medium  mb-1">Bộ sưu tập</label>
                             <select
                                 name="collection"
                                 value={filters.collection}
                                 onChange={handleFilterChange}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500/50"
+                                className="w-full px-3 py-2 text-black border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500/50"
                             >
                                 <option value="">Tất cả bộ sưu tập</option>
                                 {collections.map((col) => (
@@ -407,12 +410,12 @@ const ProductsContent = ({ setActiveTab, onEditProduct, onViewProductDetail, dat
 
                         {/* Trạng thái */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-600 mb-1">Trạng thái</label>
+                            <label className="block text-sm font-medium  mb-1">Trạng thái</label>
                             <select
                                 name="status"
                                 value={filters.status}
                                 onChange={handleFilterChange}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500/50"
+                                className="w-full text-black px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500/50"
                             >
                                 <option value="">Tất cả trạng thái</option>
                                 <option value="Còn hàng">Còn hàng</option>
@@ -423,7 +426,7 @@ const ProductsContent = ({ setActiveTab, onEditProduct, onViewProductDetail, dat
 
                         {/* Giá tối thiểu */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-600 mb-1">Giá tối thiểu (VND)</label>
+                            <label className="block text-sm font-medium mb-1">Giá tối thiểu (VND)</label>
                             <input
                                 type="text"
                                 name="minPrice"
@@ -432,13 +435,13 @@ const ProductsContent = ({ setActiveTab, onEditProduct, onViewProductDetail, dat
                                 onChange={handlePriceChange}
                                 onFocus={handlePriceFocus}
                                 onBlur={handlePriceBlur}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500/50"
+                                className="w-full text-black px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500/50"
                             />
                         </div>
 
                         {/* Giá tối đa */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-600 mb-1">Giá tối đa (VND)</label>
+                            <label className="block text-sm font-medium  mb-1">Giá tối đa (VND)</label>
                             <input
                                 type="text"
                                 name="maxPrice"
@@ -447,7 +450,7 @@ const ProductsContent = ({ setActiveTab, onEditProduct, onViewProductDetail, dat
                                 onChange={handlePriceChange}
                                 onFocus={handlePriceFocus}
                                 onBlur={handlePriceBlur}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500/50"
+                                className="w-full text-black px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500/50"
                             />
                         </div>
                     </div>
@@ -456,12 +459,12 @@ const ProductsContent = ({ setActiveTab, onEditProduct, onViewProductDetail, dat
                     <div className="flex justify-between items-end mt-4 pt-4 border-t border-gray-100">
                         {/* Sắp xếp */}
                         <div className="w-1/3">
-                            <label className="block text-sm font-medium text-gray-600 mb-1">Sắp xếp theo</label>
+                            <label className="block text-sm font-medium  mb-1">Sắp xếp theo</label>
                             <select
                                 name="sortBy"
                                 value={filters.sortBy}
                                 onChange={handleFilterChange}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500/50"
+                                className="w-full px-3 text-black py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500/50"
                             >
                                 <option value="newest">Mới nhất</option>
                                 <option value="oldest">Cũ nhất</option>
@@ -474,7 +477,7 @@ const ProductsContent = ({ setActiveTab, onEditProduct, onViewProductDetail, dat
 
                         <button
                             onClick={handleResetFilters}
-                            className="px-4 py-2 bg-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-300 transition-colors"
+                            className="px-4 py-2 bg-gray-200 text-black rounded-xl font-semibold hover:bg-gray-300 transition-colors"
                         >
                             Xóa bộ lọc
                         </button>
@@ -482,7 +485,7 @@ const ProductsContent = ({ setActiveTab, onEditProduct, onViewProductDetail, dat
                 </div>
             )}
 
-            <div className="overflow-x-auto bg-white rounded-xl shadow">
+            <div className="overflow-x-auto  rounded-xl shadow">
                 <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-pink-50">
                         <tr>
@@ -507,7 +510,7 @@ const ProductsContent = ({ setActiveTab, onEditProduct, onViewProductDetail, dat
                     </thead>
                     <tbody className="divide-y divide-gray-100">
                         {product?.map((product) => (
-                            <tr key={product.Id} className="hover:bg-pink-50">
+                            <tr key={product.Id} className="hover:bg-pink-50 hover:text-black">
                                 <td className="px-4 py-4">
                                     <input
                                         type="checkbox"
@@ -540,7 +543,7 @@ const ProductsContent = ({ setActiveTab, onEditProduct, onViewProductDetail, dat
                                         checked={product.isFeatured}
                                         onChange={() => handleToggleFeatured(product._id, !product.isFeatured)}
                                     />
-                                    
+
                                 </td>
                                 <td className="px-6 py-4">
                                     <span className={`px-2 py-1 rounded-full text-xs ${statusColors[product?.status]}`}>

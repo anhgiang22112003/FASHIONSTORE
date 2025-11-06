@@ -68,13 +68,13 @@ const ProductDetailContent = ({ onBack, productId, onEditProduct }) => {
     )
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div style={{ backgroundColor: "var(--bg-color)", color: "var(--text-color)" }} className="p-6  min-h-screen">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex justify-between items-center mb-6 border-b pb-4">
           <button
             onClick={onBack}
-            className="text-gray-600 hover:text-pink-600 flex items-center space-x-1 font-medium transition-colors"
+            className=" hover:text-pink-600 flex items-center space-x-1 font-medium transition-colors"
           >
             <ArrowLeftIcon className="w-5 h-5" />
             <span>Quay lại Danh sách Sản phẩm</span>
@@ -88,15 +88,15 @@ const ProductDetailContent = ({ onBack, productId, onEditProduct }) => {
           </button>
         </div>
 
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">
+        <h1 className="text-3xl font-bold  mb-6">
           {productDetail.name}
         </h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Cột trái */}
           <div className="lg:col-span-2 space-y-6">
-            <div className="bg-white p-6 rounded-xl shadow-lg">
-              <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center space-x-2">
+            <div className="p-6 rounded-xl shadow-lg">
+              <h2 className="text-xl font-semibold  mb-4 flex items-center space-x-2">
                 <InformationCircleIcon className="w-6 h-6 text-pink-500" />
                 <span>Thông tin Sản phẩm</span>
               </h2>
@@ -124,9 +124,9 @@ const ProductDetailContent = ({ onBack, productId, onEditProduct }) => {
             </div>
 
             {/* Mô tả */}
-            <div className="bg-white p-6 rounded-xl shadow-lg">
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">Mô tả chi tiết</h2>
-              <p className="text-gray-600">{productDetail.detailedDescription || "Chưa có mô tả chi tiết."}</p>
+            <div className=" p-6 rounded-xl shadow-lg">
+              <h2 className="text-xl font-semibold  mb-4">Mô tả chi tiết</h2>
+              <p className="">{productDetail.detailedDescription || "Chưa có mô tả chi tiết."}</p>
               <div
                 className="prose max-w-none text-gray-600 mt-4"
                 dangerouslySetInnerHTML={{
@@ -136,11 +136,11 @@ const ProductDetailContent = ({ onBack, productId, onEditProduct }) => {
             </div>
 
             {/* Biến thể sản phẩm */}
-            <div className="bg-white p-6 rounded-xl shadow-lg">
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">Phân loại (Màu / Size)</h2>
+            <div className=" p-6 rounded-xl shadow-lg">
+              <h2 className="text-xl font-semibold  mb-4">Phân loại (Màu / Size)</h2>
               {productDetail.variations?.length > 0 ? (
                 <table className="w-full text-sm text-left border">
-                  <thead className="bg-gray-100">
+                  <thead className="">
                     <tr>
                       <th className="py-2 px-4 border">Màu sắc</th>
                       <th className="py-2 px-4 border">Kích thước</th>
@@ -166,8 +166,8 @@ const ProductDetailContent = ({ onBack, productId, onEditProduct }) => {
           {/* Cột phải */}
           <div>
             {/* Ảnh chính */}
-            <div className="bg-white p-6 rounded-xl shadow-lg mb-6">
-              <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center space-x-2">
+            <div className="p-6 rounded-xl shadow-lg mb-6">
+              <h2 className="text-xl font-semibold t mb-4 flex items-center space-x-2">
                 <PhotoIcon className="w-6 h-6 text-pink-500" />
                 <span>Ảnh chính</span>
               </h2>
@@ -181,8 +181,8 @@ const ProductDetailContent = ({ onBack, productId, onEditProduct }) => {
 
             {/* Ảnh phụ */}
             {productDetail.subImages?.length > 0 && (
-              <div className="bg-white p-6 rounded-xl shadow-lg mb-6">
-                <h2 className="text-xl font-semibold text-gray-800 mb-4">Ảnh phụ</h2>
+              <div className=" p-6 rounded-xl shadow-lg mb-6">
+                <h2 className="text-xl font-semibold  mb-4">Ảnh phụ</h2>
                 <div className="grid grid-cols-2 gap-3">
                   {productDetail.subImages.map((img, idx) => (
                     <LazyLoadImage
@@ -198,9 +198,9 @@ const ProductDetailContent = ({ onBack, productId, onEditProduct }) => {
             )}
 
             {/* Lịch sử */}
-            <div className="bg-white p-6 rounded-xl shadow-lg">
-              <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center space-x-2">
-                <CalendarIcon className="w-6 h-6 text-pink-500" />
+            <div className=" p-6 rounded-xl shadow-lg">
+              <h2 className="text-xl font-semibold mb-4 flex items-center space-x-2">
+                <CalendarIcon className="w-6 h-6 " />
                 <span>Lịch sử</span>
               </h2>
               <div className="space-y-3">
@@ -215,11 +215,11 @@ const ProductDetailContent = ({ onBack, productId, onEditProduct }) => {
   )
 }
 
-const DetailItem = ({ label, value, icon: Icon, valueColor = "text-gray-800", customValue }) => (
+const DetailItem = ({ label, value, icon: Icon, valueColor = "text-var(--text-color)", customValue }) => (
   <div className="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
-    <div className="flex items-center space-x-2 text-gray-600">
+    <div className="flex items-center space-x-2 ">
       {Icon && <Icon className="w-5 h-5 text-pink-400" />}
-      <span className="font-medium">{label}:</span>
+      <span className="font-medium  ">{label}:</span>
     </div>
     {customValue || <span className={`font-semibold ${valueColor}`}>{value}</span>}
   </div>

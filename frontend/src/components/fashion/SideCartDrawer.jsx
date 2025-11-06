@@ -7,6 +7,7 @@ import { CartContext } from '@/context/CartContext'
 // Import Link từ react-router-dom nếu bạn dùng để chuyển hướng
 import { Link, useNavigate } from 'react-router-dom'
 import api from '@/service/api' // Giả định có api service
+import { toast } from 'react-toastify'
 
 const SideCartDrawer = ({ isOpen, onClose }) => {
     // Lấy dữ liệu và hàm từ CartContext

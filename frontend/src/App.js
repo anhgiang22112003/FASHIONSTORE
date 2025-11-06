@@ -191,6 +191,7 @@ function App() {
                 />
 
                 {/* Admin routes */}
+                
                 <Route path="/admin/*"
                   element={
                     <AdminRoute>

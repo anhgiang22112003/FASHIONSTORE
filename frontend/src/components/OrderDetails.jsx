@@ -105,7 +105,7 @@ const OrderDetails = ({ id, onBack }) => {
     const handleConfirmCancel = async (reason) => {
         setIsCancelling(true);
         try {
-            await apiUser.patch(`/orders/${id}/status`, {
+            await apiUser.patch(`/orders/${id}/status/user`, {
                 status: "CANCELLED",
                 note: reason,
             });
@@ -121,7 +121,7 @@ const OrderDetails = ({ id, onBack }) => {
     const handleConfirmComplete = async () => {
         setIsCompleting(true);
         try {
-            await apiUser.patch(`/orders/${id}/status`, {
+            await apiUser.patch(`/orders/${id}/status/user`, {
                 status: "COMPLETED",
                 note: "Khách hàng xác nhận đã nhận hàng.",
             });

@@ -6,8 +6,8 @@ import ProductDetailContent from "@/components/ProductDetailContent"
 import apiAdmin from "@/service/apiAdmin"
 import { io } from 'socket.io-client'
 import { socket } from "@/service/socket"
-import { ThemeProvider, createGlobalStyle } from "styled-components"
-import { lightTheme, darkTheme } from "@/theme/adminTheme"
+import { ThemeProvider } from "@/context/ThemeContext"
+import Bank from "./Bank"
 
 // ✅ Lazy load các tab lớn (chỉ load khi cần)
 const Dashboard = React.lazy(() => import("./AdminDasbroad"))
@@ -38,10 +38,7 @@ const AdminLayout = () => {
   const [editingOrder, setEditingOrder] = useState(null)
   const [editData, setEditData] = useState(null)
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
-  const [theme, setTheme] = useState("light") // 🌗
-  const toggleTheme = () => {
-    setTheme(prev => (prev === "light" ? "dark" : "light"))
-  }
+
   const userId = JSON.parse(sessionStorage.getItem("user"))
 
   useEffect(() => {
@@ -97,7 +94,14 @@ const AdminLayout = () => {
       console.error("Lỗi khi fetch orders:", err)
     }
   }
-
+   
+    useEffect(() => {
+    socket.on("admin_payment_success", (newOrder) => {
+      toast.info(`🆕 đơn hàng mới  ${newOrder.user?.name || "khách hàng"} thanh toán thành công`)
+      fetchOrders()
+    })
+    return () => socket.off("newOrder")
+  }, [])
   useEffect(() => {
     socket.on("newOrder", (newOrder) => {
       toast.info(`🆕 Có đơn hàng mới từ ${newOrder.user?.name || "khách hàng"}`)
@@ -130,26 +134,24 @@ const AdminLayout = () => {
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen)
 
   return (
+    <ThemeProvider>
       <div className="flex h-screen">
-        {/* Sidebar */}
+
+
         <Sidebar
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           isOpen={isSidebarOpen}
           toggleSidebar={toggleSidebar}
         />
-        
-
-        {/* Main */}
         <div className="flex-1 flex flex-col">
-          {/* Header */}
-          <div className="sticky top-0 z-40 h-[70px] px-2.5  items-center bg-white shadow-sm sticky top-0 z-40 px-4">
+          <div className="sticky top-0 z-40 h-[70px]   items-center  shadow-sm sticky top-0 z-40 ">
             <Header toggleSidebar={toggleSidebar} setActiveTab={setActiveTab} setEditingProductId={setEditingProductId} setEditingOrder={setEditingOrder} />
 
           </div>
 
           {/* Nội dung chính */}
-          <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
+          <div className="flex-1 overflow-y-auto">
             <Suspense fallback={<div className="text-center p-10">⏳ Đang tải...</div>}>
               {activeTab === "dashboard" && <Dashboard />}
               {activeTab === "chat" && <AdminChatDashboard adminId={userId?.id} />}
@@ -265,11 +267,13 @@ const AdminLayout = () => {
               )}
 
               {activeTab === "settings" && <Settings />}
+              {activeTab === "bank" && <Bank />}
               {activeTab === "admin-setting" && <AdminSettingsPage />}
             </Suspense>
           </div>
         </div>
       </div>
+    </ThemeProvider>
   )
 }
 

@@ -20,8 +20,8 @@ export default function OrderStatusSummary({ statusSummary = {} }) {
   }
 
   return (
-    <div className="bg-white p-6 rounded-xl shadow space-y-4">
-      <h2 className="text-lg font-semibold text-gray-800">
+    <div className=" p-6 rounded-xl shadow space-y-4">
+      <h2 className="text-lg font-semibold text-var(--text-color)0">
         Trạng thái đơn hàng
       </h2>
 

@@ -27,7 +27,7 @@ const AddFlashSalePage = ({ setActiveTab, editData }) => {
             setLoadingSearch(true)
             try {
                 const res = await apiAdmin.get(`/products/search?query=${encodeURIComponent(searchQuery)}`)
-                setSearchResults(res?.data?.products || [])
+                setSearchResults(res?.data || [])
             } catch (err) {
                 toast.error("Lỗi khi tìm kiếm sản phẩm")
             } finally {

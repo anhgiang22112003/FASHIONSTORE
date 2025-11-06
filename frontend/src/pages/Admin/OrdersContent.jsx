@@ -314,13 +314,13 @@ const OrdersContent = ({ data, onEditOrder }) => {
 }
 
   return (
-    <div className="flex min-h-screen bg-gray-50 font-sans antialiased">
+    <div style={{ backgroundColor: "var(--bg-color)", color: "var(--text-color)" }}  className="flex  min-h-screen  font-sans antialiased">
       <main className="flex-1 p-6">
 
         {/* TIÊU ĐỀ & NÚT HÀNH ĐỘNG */}
         <div className="mb-6">
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-3xl font-bold text-gray-800">Danh sách Đơn hàng</h1>
+            <h1 className="text-3xl font-bold">Danh sách Đơn hàng</h1>
             <div className="flex space-x-2">
               <button
                 onClick={toggleFilter}
@@ -354,7 +354,7 @@ const OrdersContent = ({ data, onEditOrder }) => {
 
           {/* BULK ACTIONS */}
           {selectedOrders.length > 0 && (
-            <div className="flex items-center justify-between bg-pink-50 border border-pink-200 rounded-xl px-4 py-3 mb-4">
+            <div className="flex items-center justify-between border border-pink-200 rounded-xl px-4 py-3 mb-4">
               <span className="text-pink-700 font-medium">
                 Đã chọn {selectedOrders.length} đơn hàng
               </span>
@@ -362,7 +362,7 @@ const OrdersContent = ({ data, onEditOrder }) => {
                 <select
                   value={bulkStatus}
                   onChange={(e) => setBulkStatus(e.target.value)}
-                  className="border border-pink-400 rounded-lg p-1 text-sm bg-white"
+                  className="border text-black border-pink-400 rounded-lg p-1 text-sm bg-white"
                 >
                   <option value="">-- Chọn trạng thái --</option>
                   {statusOptions.map(opt => (
@@ -435,17 +435,17 @@ const OrdersContent = ({ data, onEditOrder }) => {
 
 
         {isFilterVisible && (
-          <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-            <h3 className="text-xl font-semibold text-gray-700 mb-4 border-b pb-2">Bộ lọc nâng cao</h3>
+          <div className=" rounded-xl shadow-lg p-6 mb-6">
+            <h3 className="text-xl font-semibold  mb-4 border-b pb-2">Bộ lọc nâng cao</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
 
               <div className="lg:col-span-3">
-                <label className="block text-sm font-medium text-gray-600 mb-1">Khách hàng</label>
+                <label className="block text-sm font-medium  mb-1">Khách hàng</label>
                 <select
                   name="userId"
                   value={filters.userId}
                   onChange={handleFilterChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500"
+                  className="w-full px-3 text-black py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500"
                   ref={customerListRef}
                   onScroll={handleCustomerScroll}
                 >
@@ -459,12 +459,12 @@ const OrdersContent = ({ data, onEditOrder }) => {
               </div>
 
               <div className="lg:col-span-1">
-                <label className="block text-sm font-medium text-gray-600 mb-1">Trạng thái</label>
+                <label className="block text-sm font-medium mb-1">Trạng thái</label>
                 <select
                   name="status"
                   value={filters.status}
                   onChange={handleFilterChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500"
+                  className="w-full px-3 py-2 border text-black  border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500"
                 >
                   <option value="">-- Tất cả --</option>
                   {statusOptions.map(opt => (
@@ -474,7 +474,7 @@ const OrdersContent = ({ data, onEditOrder }) => {
               </div>
 
               <div className="lg:col-span-2">
-                <label className="block text-sm font-medium text-gray-600 mb-1">Khoảng tiền</label>
+                <label className="block text-sm font-medium  mb-1">Khoảng tiền</label>
                 <div className="flex space-x-2">
                   <input
                     type="number"
@@ -482,7 +482,7 @@ const OrdersContent = ({ data, onEditOrder }) => {
                     placeholder="Từ (₫)"
                     value={filters.minTotal}
                     onChange={handleFilterChange}
-                    className="w-1/2 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500"
+                    className="w-1/2 px-3 py-2 border text-black  border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500"
                   />
                   <input
                     type="number"
@@ -490,18 +490,18 @@ const OrdersContent = ({ data, onEditOrder }) => {
                     placeholder="Đến (₫)"
                     value={filters.maxTotal}
                     onChange={handleFilterChange}
-                    className="w-1/2 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500"
+                    className="w-1/2 px-3 py-2 border text-black  border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500"
                   />
                 </div>
               </div>
 
               <div className="lg:col-span-2">
-                <label className="block text-sm font-medium text-gray-600 mb-1">Tỉnh / Thành phố</label>
+                <label className="block text-sm font-medium  mb-1">Tỉnh / Thành phố</label>
                 <select
                   name="province"
                   value={filters.province}
                   onChange={handleProvinceChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500"
+                  className="w-full text-black  px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500"
                 >
                   <option value="">-- Chọn Tỉnh / Thành phố --</option>
                   {provinces.map((p) => (
@@ -511,13 +511,13 @@ const OrdersContent = ({ data, onEditOrder }) => {
               </div>
 
               <div className="lg:col-span-2">
-                <label className="block text-sm font-medium text-gray-600 mb-1">Quận / Huyện</label>
+                <label className="block text-sm font-medium mb-1">Quận / Huyện</label>
                 <select
                   name="district"
                   value={filters.district}
                   onChange={handleDistrictChange}
                   disabled={!filters.province}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 disabled:bg-gray-100 disabled:text-gray-500"
+                  className="w-full px-3 text-black py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 disabled:bg-gray-100 disabled:text-gray-500"
                 >
                   <option value="">-- Chọn Quận / Huyện --</option>
                   {districts.map((d) => (
@@ -527,13 +527,13 @@ const OrdersContent = ({ data, onEditOrder }) => {
               </div>
 
               <div className="lg:col-span-2">
-                <label className="block text-sm font-medium text-gray-600 mb-1">Phường / Xã</label>
+                <label className="block text-sm font-medium mb-1">Phường / Xã</label>
                 <select
                   name="ward"
                   value={filters.ward}
                   onChange={handleWardChange}
                   disabled={!filters.district}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 disabled:bg-gray-100 disabled:text-gray-500"
+                  className="w-full text-black  px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 disabled:bg-gray-100 disabled:text-gray-500"
                 >
                   <option value="">-- Chọn Phường / Xã --</option>
                   {wards.map((w) => (
@@ -551,13 +551,13 @@ const OrdersContent = ({ data, onEditOrder }) => {
         )}
 
         {/* TABLE WITH HORIZONTAL SCROLL & STICKY HEADER */}
-        <div className="bg-white rounded-xl shadow-lg">
+        <div className=" rounded-xl shadow-lg">
           <div className="overflow-x-auto">
-            <div className="max-h-[calc(100vh-300px)] overflow-y-auto">
+            <div className="max-h-[calc(100vh-160px)] overflow-y-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-pink-50 sticky top-0 z-10">
                   <tr>
-                    <th className="px-4 py-3 whitespace-nowrap bg-pink-50">
+                    <th className="px-4 py-3 whitespace-nowrap ">
                       <input type="checkbox" checked={isAllSelected} onChange={handleSelectAll} />
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider whitespace-nowrap bg-pink-50">Mã đơn</th>
@@ -571,11 +571,11 @@ const OrdersContent = ({ data, onEditOrder }) => {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider whitespace-nowrap sticky right-0 bg-pink-50 shadow-[-2px_0_4px_rgba(0,0,0,0.05)]">Thao tác</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100 bg-white">
+                <tbody className="divide-y divide-gray-100 ">
                   {filteredOrders.length > 0 ? (
                     filteredOrders.map((order) => (
                       <tr key={order?._id} className="hover:bg-pink-50/50 transition-colors">
-                        <td className="px-4 py-4 text-center whitespace-nowrap bg-white">
+                        <td className="px-4 py-4 text-center whitespace-nowrap ">
                           <input
                             type="checkbox"
                             checked={selectedOrders.includes(order?._id)}
@@ -583,32 +583,32 @@ const OrdersContent = ({ data, onEditOrder }) => {
                           />
                         </td>
 
-                        <td className="px-6 py-4 font-bold text-pink-600 text-sm whitespace-nowrap bg-white">#{order._id.slice(-6).toUpperCase()}</td>
+                        <td className="px-6 py-4 font-bold  text-sm whitespace-nowrap">#{order._id.slice(-6).toUpperCase()}</td>
 
-                        <td className="px-6 py-4 whitespace-nowrap bg-white">
-                          <p className="font-semibold text-gray-800">{order.user?.name || order.shippingInfo?.name || 'Khách vãng lai'}</p>
-                          <p className="text-gray-500 text-xs">{order.user?.email || order.shippingInfo?.phone || ''}</p>
+                        <td className="px-6 py-4 whitespace-nowrap ">
+                          <p className="font-semibold ">{order.user?.name || order.shippingInfo?.name || 'Khách vãng lai'}</p>
+                          <p className=" text-xs">{order.user?.email || order.shippingInfo?.phone || ''}</p>
                         </td>
 
-                        <td className="px-6 py-4 text-sm text-gray-600 whitespace-nowrap bg-white">
+                        <td className="px-6 py-4 text-sm  whitespace-nowrap">
                           <p>{new Date(order.createdAt).toLocaleDateString("vi-VN")}</p>
                           <p className="text-xs text-gray-400">{new Date(order.createdAt).toLocaleTimeString("vi-VN")}</p>
                         </td>
 
-                        <td className="px-6 py-4 text-sm text-gray-600 max-w-xs bg-white">
+                        <td className="px-6 py-4 text-sm  max-w-xs ">
                           <p className="line-clamp-2" title={order.address}>
                             {order.address || order.shippingInfo?.address || 'Chưa có địa chỉ'}
                           </p>
                         </td>
 
-                        <td className="px-6 py-4 font-bold text-lg text-red-500 whitespace-nowrap bg-white">
+                        <td className="px-6 py-4 text-pink-600 font-bold text-lg whitespace-nowrap ">
                           {order?.total?.toLocaleString("vi-VN")}₫
                         </td>
 
-                        <td className="px-6 py-4 whitespace-nowrap bg-white">
+                        <td className="px-6 py-4 whitespace-nowrap ">
                           {editingId === order._id ? (
                             <select
-                              className="border border-pink-400 rounded-lg p-1 text-sm bg-white shadow-sm"
+                              className="border border-pink-400 text-black rounded-lg p-1 text-sm  shadow-sm"
                               defaultValue={order.status}
                               onChange={(e) => handleStatusChange(order._id, e.target.value)}
                               onBlur={() => setEditingId(null)}
@@ -629,17 +629,17 @@ const OrdersContent = ({ data, onEditOrder }) => {
                           )}
                         </td>
 
-                        <td className="px-6 py-4 text-sm text-gray-600 whitespace-nowrap bg-white">
+                        <td className="px-6 py-4 text-sm  whitespace-nowrap ">
                           {paymentMethodOptions[order?.paymentMethod] || order?.paymentMethod || 'Chưa chọn'}
                         </td>
 
-                        <td className="px-6 py-4 text-sm text-gray-600 whitespace-nowrap bg-white">
+                        <td className="px-6 py-4 text-sm  whitespace-nowrap ">
                           <span className={`px-2 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${paymentStatusColors[order?.paymentStatus] || 'bg-gray-100 text-gray-600'}`}>
                             {paymentStatusOptions[order?.paymentStatus] || 'Chưa thanh toán'}
                           </span>
                         </td>
 
-                        <td className="px-6 py-4 whitespace-nowrap sticky right-0 bg-white shadow-[-2px_0_4px_rgba(0,0,0,0.05)]">
+                        <td className="px-6 py-4 whitespace-nowrap sticky right-0  shadow-[-2px_0_4px_rgba(0,0,0,0.05)]">
                           <button
                             onClick={() => onEditOrder(order?._id)}
                             className="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors shadow-sm"
@@ -667,7 +667,7 @@ const OrdersContent = ({ data, onEditOrder }) => {
             <button
               onClick={() => setPage(prev => Math.max(prev - 1, 1))}
               disabled={page === 1}
-              className="px-3 py-1 border rounded-lg bg-gray-100 hover:bg-gray-200 disabled:opacity-50"
+              className="px-3 py-1 border rounded-lg  hover:bg-gray-200 disabled:opacity-50"
             >
               ← Trước
             </button>
@@ -677,8 +677,8 @@ const OrdersContent = ({ data, onEditOrder }) => {
                 key={i}
                 onClick={() => setPage(i + 1)}
                 className={`px-3 py-1 border rounded-lg font-semibold ${page === i + 1
-                  ? "bg-pink-600 text-white"
-                  : "bg-white hover:bg-gray-100"
+                  ? "bg-pink-600 text-black "
+                  : "bg-white text-black hover:bg-gray-100"
                   }`}
               >
                 {i + 1}
@@ -688,7 +688,7 @@ const OrdersContent = ({ data, onEditOrder }) => {
             <button
               onClick={() => setPage(prev => prev + 1)}
               disabled={page >= Math.ceil(total / limit)}
-              className="px-3 py-1 border rounded-lg bg-gray-100 hover:bg-gray-200 disabled:opacity-50"
+              className="px-3 py-1 border rounded-lg  hover:bg-gray-200 disabled:opacity-50"
             >
               Sau →
             </button>

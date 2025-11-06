@@ -158,11 +158,11 @@ const ProductCategories = () => {
     }
 
     return (
-        <div className=" min-h-screen bg-gray-50 font-sans antialiased">
+        <div style={{ backgroundColor: "var(--bg-color)", color: "var(--text-color)" }} className=" min-h-screen  font-sans antialiased">
 
             <div className="space-y-6 p-6">
                 <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold text-gray-800">Danh mục sản phẩm</h2>
+                    <h2 className="text-2xl font-bold text-var(--text-color)">Danh mục sản phẩm</h2>
                     <button
                         onClick={() => handleOpenForm()}
                         className="px-6 py-3 bg-pink-600 text-white rounded-xl font-semibold hover:bg-pink-700 transition-colors"
