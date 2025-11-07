@@ -74,40 +74,9 @@ const BlogArticlePage = () => {
   )
 }
 
-const FrontendLayout = ({ children, isCartDrawerOpen, setIsCartDrawerOpen }) => {
+const FrontendLayout = ({ children, isCartDrawerOpen, setIsCartDrawerOpen,currentUser  }) => {
   const { cart } = React.useContext(CartContext)
   const totalCartItems = cart?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0
-
-  return (
-    <div className="min-h-screen bg-white">
-      <Header />
-      <main>{children}</main>
-      <Footer />
-      <button
-        onClick={() => setIsCartDrawerOpen(true)}
-        className="fixed bottom-6 right-6 z-50 p-4 rounded-full bg-pink-600 text-white shadow-xl hover:bg-pink-700 transition-all duration-300 transform hover:scale-105"
-        aria-label="Mở giỏ hàng"
-      >
-        <ShoppingBag className="w-6 h-6" />
-
-        {totalCartItems > 0 && (
-          <span className="absolute top-0 right-0 transform translate-x-1/4 -translate-y-1/4 bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-white">
-            {totalCartItems > 99 ? '99+' : totalCartItems}
-          </span>
-        )}
-      </button>
-      <SideCartDrawer
-        isOpen={isCartDrawerOpen}
-        onClose={() => setIsCartDrawerOpen(false)}
-      />
-    </div>
-  )
-}
-
-function App() {
-  const [isCartDrawerOpen, setIsCartDrawerOpen] = useState(false)
-
-  const currentUser = JSON.parse(localStorage.getItem("user"))
 
   useEffect(() => {
     socket.on("updateReview", (review) => {
@@ -143,6 +112,37 @@ function App() {
 
     return () => socket.off("ReplyReview")
   }, [])
+  return (
+    <div className="min-h-screen bg-white">
+      <Header />
+      <main>{children}</main>
+      <Footer />
+      <button
+        onClick={() => setIsCartDrawerOpen(true)}
+        className="fixed bottom-6 right-6 z-50 p-4 rounded-full bg-pink-600 text-white shadow-xl hover:bg-pink-700 transition-all duration-300 transform hover:scale-105"
+        aria-label="Mở giỏ hàng"
+      >
+        <ShoppingBag className="w-6 h-6" />
+
+        {totalCartItems > 0 && (
+          <span className="absolute top-0 right-0 transform translate-x-1/4 -translate-y-1/4 bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-white">
+            {totalCartItems > 99 ? '99+' : totalCartItems}
+          </span>
+        )}
+      </button>
+      <SideCartDrawer
+        isOpen={isCartDrawerOpen}
+        onClose={() => setIsCartDrawerOpen(false)}
+      />
+    </div>
+  )
+}
+
+function App() {
+  const [isCartDrawerOpen, setIsCartDrawerOpen] = useState(false)
+
+  const currentUser = JSON.parse(localStorage.getItem("user"))
+
 
   return (
     <Router>
@@ -159,6 +159,7 @@ function App() {
                     <FrontendLayout
                       isCartDrawerOpen={isCartDrawerOpen}
                       setIsCartDrawerOpen={setIsCartDrawerOpen}
+                      currentUser={currentUser}
                     >
                       <ChatBot userId={currentUser?.id} />
 
@@ -191,7 +192,7 @@ function App() {
                 />
 
                 {/* Admin routes */}
-                
+
                 <Route path="/admin/*"
                   element={
                     <AdminRoute>

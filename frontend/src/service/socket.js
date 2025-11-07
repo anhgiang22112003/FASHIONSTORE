@@ -1,5 +1,7 @@
 import { io } from "socket.io-client";
 
+const user = JSON.parse(localStorage.getItem("user"))
+
 const URL =
   process.env.NODE_ENV === "development"
     ? "http://localhost:4000"
@@ -8,4 +10,5 @@ const URL =
 
 export const socket = io(URL, {
   transports: ["websocket"],
+  query: { userId: user?.id },
 });
