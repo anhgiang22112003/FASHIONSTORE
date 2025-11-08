@@ -28,14 +28,13 @@ const BankPaymentModal = ({ order, onClose, selectedBank, setSelectedBank }) => 
 
   // ✅ Gửi userId lên để join room
   socket.emit("join_user", user.id)
-  console.log("Joined room:", user.id)
 
   socket.on("user_payment_success", (data) => {
     console.log("Received:", data)
 
     if (data.order._id === order._id) {
       setIsPaid(true)
-      toast.success("Thanh toán thành công 🎉")
+      toast.success("Thanh toán thành công qua ngân hàng!")
       setTimeout(() => window.location.href = "/orders", 1000)
     }
   })

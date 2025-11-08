@@ -27,6 +27,8 @@ const ProductCollections = () => {
             setIsLoading(false)
         }
     }
+    console.log(collections);
+    
 
     useEffect(() => {
         fetchCollections()

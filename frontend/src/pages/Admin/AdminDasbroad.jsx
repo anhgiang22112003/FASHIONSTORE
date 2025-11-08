@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react"
 import apiAdmin from "@/service/apiAdmin"
 import OrderStatusChart from "@/components/OrderStatusChart"
-
+import DatePicker from "react-datepicker"
+import "react-datepicker/dist/react-datepicker.css"
 const AdminDashboard = () => {
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -23,6 +24,7 @@ const AdminDashboard = () => {
       setLoading(false)
     }
   }
+
 
   useEffect(() => {
     fetchDashboard()
@@ -46,31 +48,38 @@ const AdminDashboard = () => {
   const { summary, recentOrders, bestSellingProducts } = data
 
   return (
-    <div className="p-8 space-y-8">
+    <div style={{ backgroundColor: "var(--bg-color)", color: "var(--text-color)" }} className="p-8 space-y-8">
       {/* Bộ lọc ngày */}
-      <div  style={{ backgroundColor: "var(--bg-color)", color: "var(--text-color)" }} className="flex flex-wrap items-center gap-4">
+      <div className="flex flex-wrap items-center gap-4">
         <div className="flex items-center gap-2">
           <label>Từ:</label>
-          <input
-            type="date"
-            value={from}
-            onChange={(e) => setFrom(e.target.value)}
+          <DatePicker
+            selected={from}
+            onChange={(date) => setFrom(date)}
             className="border text-black rounded-md px-3 py-1"
+            dateFormat="dd/MM/yyyy"
+            showTimeSelect
+            timeFormat="HH:mm"
+            placeholderText="Chọn ngày từ"
           />
         </div>
+
         <div className="flex items-center gap-2">
           <label>Đến:</label>
-          <input
-              
-            type="date"
-            value={to}
-            onChange={(e) => setTo(e.target.value)}
+          <DatePicker
+            selected={to}
+            onChange={(date) => setTo(date)}
             className="border text-black rounded-md px-3 py-1"
+            dateFormat="dd/MM/yyyy"
+            showTimeSelect
+            timeFormat="HH:mm"
+            placeholderText="Chọn ngày đến"
           />
         </div>
+
         <button
           onClick={fetchDashboard}
-          className="bg-pink-600 text-var(--text-color) px-4 py-2 rounded-lg hover:bg-pink-700"
+          className="bg-pink-600 text-white px-4 py-2 rounded-lg hover:bg-pink-700"
         >
           Lọc
         </button>

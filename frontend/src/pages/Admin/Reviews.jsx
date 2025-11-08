@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"
+import React, { useCallback, useEffect, useState } from "react"
 import {
   MagnifyingGlassIcon,
   ArrowDownTrayIcon,
@@ -12,6 +12,8 @@ import { ExclamationCircleIcon } from "@heroicons/react/24/solid"
 import apiAdmin from "@/service/apiAdmin"
 import { toast } from "react-toastify"
 import { socket } from "@/service/socket"
+import AsyncSelect from "react-select/async"
+import debounce from "lodash.debounce"
 
 // ===== Modal dùng chung =====
 const CommonModal = ({ title, isOpen, onClose, children }) => {
@@ -147,8 +149,29 @@ const ReviewManagementPage = () => {
   const [limit, setLimit] = useState(5)
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(false)
+  const [productFilter, setProductFilter] = useState("")
+  const [selectedProduct, setSelectedProduct] = useState(null)
 
-  // Gọi API lấy danh sách đánh giá
+  // Hàm gọi API fetch product
+  const fetchProducts = async (inputValue) => {
+    const res = await apiAdmin.get("/products", {
+      params: { search: inputValue, limit: 20 },
+    })
+    return res.data.products.map((p) => ({ value: p._id, label: p.name }))
+  }
+
+  // Dùng debounce để delay khi người dùng gõ
+  const loadOptions = useCallback(
+    debounce((inputValue, callback) => {
+      fetchProducts(inputValue).then(callback)
+    }, 500), // 500ms delay
+    []
+  )
+
+  const handleChange = (selected) => {
+    setSelectedProduct(selected)
+    setProductFilter(selected?.value || "")
+  }
   const fetchReviews = async () => {
     try {
       setLoading(true)
@@ -158,6 +181,7 @@ const ReviewManagementPage = () => {
         search: searchTerm || undefined,
         rating: starFilter || undefined,
         status: statusFilter || undefined,
+        productId: productFilter || undefined,
       }
       const res = await apiAdmin.get("/reviews", { params })
       setReviews(res.data.data || [])
@@ -169,9 +193,11 @@ const ReviewManagementPage = () => {
     }
   }
 
+
+
   useEffect(() => {
     fetchReviews()
-  }, [page, starFilter, statusFilter])
+  }, [page, starFilter, statusFilter, productFilter])
 
   useEffect(() => {
     socket.on("newReview", (review) => {
@@ -280,6 +306,18 @@ const ReviewManagementPage = () => {
               onBlur={fetchReviews}
             />
           </div>
+          <AsyncSelect
+            cacheOptions
+            defaultOptions // load mặc định ban đầu
+            loadOptions={loadOptions}
+            value={selectedProduct}
+            onChange={handleChange}
+            isClearable
+            placeholder="Chọn sản phẩm..."
+            styles={{
+              container: (provided) => ({ ...provided, width: 300 }),
+            }}
+          />
           <div className="flex space-x-2 items-center">
             <select
               className="px-4 py-2 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-pink-300"
