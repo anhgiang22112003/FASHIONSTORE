@@ -20,6 +20,13 @@ const paymentStatusOptions = {
   CANCELLED: "Đã hủy",
 }
 
+const paymentStatusColors = {
+  PENDING: "bg-yellow-100 text-yellow-600",
+  APPROVED: "bg-green-100 text-green-600",
+  DECLINED: "bg-red-100 text-red-600",
+  CANCELLED: "bg-gray-100 text-gray-600",
+}
+
 const paymentMethodOptions = {
   COD: "Thanh toán khi nhận hàng",
   BANK: "Chuyển khoản ngân hàng",
@@ -28,12 +35,6 @@ const paymentMethodOptions = {
   VNPAY: "VNPay",
 }
 
-const paymentStatusColors = {
-  PENDING: "bg-yellow-100 text-yellow-600",
-  APPROVED: "bg-green-100 text-green-600",
-  DECLINED: "bg-red-100 text-red-600",
-  CANCELLED: "bg-gray-100 text-gray-600",
-}
 
 const statusColors = {
   PENDING: "bg-yellow-100 text-yellow-600",
@@ -51,6 +52,7 @@ const OrdersContent = ({ data, onEditOrder }) => {
   const fileInputRef = useRef(null)
   const [selectedOrders, setSelectedOrders] = useState([])
   const [bulkStatus, setBulkStatus] = useState("")
+  const [editingPaymentId, setEditingPaymentId] = useState(null)
 
   const [filters, setFilters] = useState({
     userId: "",
@@ -75,7 +77,7 @@ const OrdersContent = ({ data, onEditOrder }) => {
   const [page, setPage] = useState(1)
   const [total, setTotal] = useState(0)
   const limit = 20
-  
+
   useEffect(() => {
     fetchOrders(page)
   }, [data, page])
@@ -163,9 +165,9 @@ const OrdersContent = ({ data, onEditOrder }) => {
   }
 
   useEffect(() => { fetchCustomers() }, [])
- useEffect(() => {
-  import('@/data/provinces.json').then((data) => setProvinces(data.default));
-}, []);
+  useEffect(() => {
+    import('@/data/provinces.json').then((data) => setProvinces(data.default))
+  }, [])
 
   const handleProvinceChange = (e) => {
     const selectedProvinceName = e.target.value
@@ -213,6 +215,20 @@ const OrdersContent = ({ data, onEditOrder }) => {
       setLoading(false)
     }
   }
+  const handlePaymentStatusChange = async (orderId, newStatus) => {
+    try {
+      setLoading(true)
+      const res = await apiAdmin.patch(`/orders/${orderId}/payment-status`, { status: newStatus })
+      toast.success('Cập nhật trạng thái thanh toán thành công!')
+      fetchOrders()
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Lỗi khi cập nhật trạng thái thanh toán')
+    } finally {
+      setLoading(false)
+      setEditingPaymentId(null)
+    }
+  }
+
 
   const handleFilterChange = (e) => {
     setFilters({ ...filters, [e.target.name]: e.target.value })
@@ -264,57 +280,57 @@ const OrdersContent = ({ data, onEditOrder }) => {
 
   const isAllSelected = filteredOrders.length > 0 && selectedOrders.length === filteredOrders.length
   const handleBulkStatusUpdate = async () => {
-  if (selectedOrders.length === 0 || !bulkStatus) {
-    return toast.warn("Vui lòng chọn đơn và trạng thái!")
-  }
-
-  try {
-    setLoading(true)
-    
-    // Giả định apiAdmin.patch trả về data có cấu trúc { message: "...", summary: [...] }
-    const response = await apiAdmin.patch("/orders/bulk-status", {
-      orderIds: selectedOrders,
-      status: bulkStatus
-    })
-    
-    const { message, summary } = response.data
-
-    // 1. Phân loại kết quả
-    const successCount = summary.filter(item => item.success).length
-    const failedItems = summary.filter(item => !item.success)
-    const totalCount = summary.length
-
-    if (successCount > 0) {
-      toast.success(`Cập nhật thành công ${successCount}/${totalCount} đơn hàng ✅`)
-    } 
-    
-    if (failedItems.length > 0) {
-      toast.error(`CÓ LỖI: ${failedItems.length}/${totalCount} đơn hàng thất bại ❌`)
-            failedItems.forEach(item => {
-        const errorMessage = item.error || "Lỗi không xác định."
-        toast.error(`Đơn #${item.id.substring(0, 6)}: ${errorMessage}`, {
-          autoClose: false, 
-          closeOnClick: false,
-          className: 'toast-error-bulk-update'
-        })
-      })
+    if (selectedOrders.length === 0 || !bulkStatus) {
+      return toast.warn("Vui lòng chọn đơn và trạng thái!")
     }
 
-    // 4. Reset và làm mới dữ liệu
-    setSelectedOrders([])
-    setBulkStatus("")
-    fetchOrders()
+    try {
+      setLoading(true)
 
-  } catch (err) {
-    // Xử lý các lỗi HTTP chung (ví dụ: mất kết nối, lỗi 500 trước khi xử lý logic)
-    toast.error(err?.response?.data?.message || "Lỗi hệ thống khi cập nhật hàng loạt ❌")
-  } finally {
-    setLoading(false)
+      // Giả định apiAdmin.patch trả về data có cấu trúc { message: "...", summary: [...] }
+      const response = await apiAdmin.patch("/orders/bulk-status", {
+        orderIds: selectedOrders,
+        status: bulkStatus
+      })
+
+      const { message, summary } = response.data
+
+      // 1. Phân loại kết quả
+      const successCount = summary.filter(item => item.success).length
+      const failedItems = summary.filter(item => !item.success)
+      const totalCount = summary.length
+
+      if (successCount > 0) {
+        toast.success(`Cập nhật thành công ${successCount}/${totalCount} đơn hàng ✅`)
+      }
+
+      if (failedItems.length > 0) {
+        toast.error(`CÓ LỖI: ${failedItems.length}/${totalCount} đơn hàng thất bại ❌`)
+        failedItems.forEach(item => {
+          const errorMessage = item.error || "Lỗi không xác định."
+          toast.error(`Đơn #${item.id.substring(0, 6)}: ${errorMessage}`, {
+            autoClose: false,
+            closeOnClick: false,
+            className: 'toast-error-bulk-update'
+          })
+        })
+      }
+
+      // 4. Reset và làm mới dữ liệu
+      setSelectedOrders([])
+      setBulkStatus("")
+      fetchOrders()
+
+    } catch (err) {
+      // Xử lý các lỗi HTTP chung (ví dụ: mất kết nối, lỗi 500 trước khi xử lý logic)
+      toast.error(err?.response?.data?.message || "Lỗi hệ thống khi cập nhật hàng loạt ❌")
+    } finally {
+      setLoading(false)
+    }
   }
-}
 
   return (
-    <div style={{ backgroundColor: "var(--bg-color)", color: "var(--text-color)" }}  className="flex  min-h-screen  font-sans antialiased">
+    <div style={{ backgroundColor: "var(--bg-color)", color: "var(--text-color)" }} className="flex  min-h-screen  font-sans antialiased">
       <main className="flex-1 p-6">
 
         {/* TIÊU ĐỀ & NÚT HÀNH ĐỘNG */}
@@ -633,11 +649,30 @@ const OrdersContent = ({ data, onEditOrder }) => {
                           {paymentMethodOptions[order?.paymentMethod] || order?.paymentMethod || 'Chưa chọn'}
                         </td>
 
-                        <td className="px-6 py-4 text-sm  whitespace-nowrap ">
-                          <span className={`px-2 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${paymentStatusColors[order?.paymentStatus] || 'bg-gray-100 text-gray-600'}`}>
-                            {paymentStatusOptions[order?.paymentStatus] || 'Chưa thanh toán'}
-                          </span>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {editingPaymentId === order._id ? (
+                            <select
+                              className="border border-pink-400 text-black rounded-lg p-1 text-sm shadow-sm"
+                              defaultValue={order.paymentStatus}
+                              onChange={(e) => handlePaymentStatusChange(order._id, e.target.value)}
+                              onBlur={() => setEditingPaymentId(null)}
+                              autoFocus
+                              disabled={loading}
+                            >
+                              {Object.entries(paymentStatusOptions).map(([value, label]) => (
+                                <option key={value} value={value}>{label}</option>
+                              ))}
+                            </select>
+                          ) : (
+                            <span
+                              className={`px-3 py-1 rounded-full text-xs font-semibold cursor-pointer transition-colors shadow-sm whitespace-nowrap ${paymentStatusColors[order.paymentStatus]}`}
+                              onClick={() => setEditingPaymentId(order._id)}
+                            >
+                              {paymentStatusOptions[order.paymentStatus] || 'Chưa thanh toán'}
+                            </span>
+                          )}
                         </td>
+
 
                         <td className="px-6 py-4 whitespace-nowrap sticky right-0  shadow-[-2px_0_4px_rgba(0,0,0,0.05)]">
                           <button
