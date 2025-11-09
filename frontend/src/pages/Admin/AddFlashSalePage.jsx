@@ -85,11 +85,23 @@ const AddFlashSalePage = ({ setActiveTab, editData }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault()
+        const startMoment = dayjs(startTime)
+        const endMoment = dayjs(endTime)
 
+        // 💡 BƯỚC THÊM: Kiểm tra logic thời gian ở Front-end
+        if (!startMoment.isValid() || !endMoment.isValid()) {
+            toast.error("Vui lòng chọn đầy đủ và hợp lệ Thời gian bắt đầu và kết thúc.")
+            return
+        }
+
+        if (startMoment.isSame(endMoment) || startMoment.isAfter(endMoment)) {
+            toast.error("⚠️ Thời gian bắt đầu phải NHỎ HƠN Thời gian kết thúc.")
+            return
+        }
         const payload = {
             title,
-            startTime: new Date(startTime),
-            endTime: new Date(endTime),
+            startTime: startMoment.toDate(),
+            endTime: endMoment.toDate(),
             items: selectedItems.map((item) => ({
                 productId: item.productId,
                 salePrice: item.salePrice,
@@ -247,7 +259,7 @@ const AddFlashSalePage = ({ setActiveTab, editData }) => {
                     type="submit"
                     className="w-full bg-rose-600 text-white px-6 py-3 rounded-xl font-bold text-lg hover:bg-rose-700 transition-all shadow-lg mt-6 transform hover:scale-[1.01]"
                 >
-                   {editData?._id ? "Cập nhật Flash Sale" : "Tạo Flash Sale"}
+                    {editData?._id ? "Cập nhật Flash Sale" : "Tạo Flash Sale"}
                 </button>
             </form>
         </div>

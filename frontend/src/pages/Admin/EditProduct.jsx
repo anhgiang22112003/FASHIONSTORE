@@ -65,9 +65,9 @@ const EditProduct = ({ productId, onBack, fetchProducts }) => {
         const fetchCategories = async () => {
             try {
                 const res = await apiAdmin.get("/categories")
-                setCategories(res.data)
+                setCategories(res.data.data||[])
                 const collRes = await apiAdmin.get("/collection")
-                setCollections(collRes.data)
+                setCollections(collRes.data.data||[])
             } catch (error) {
                 console.error("Lỗi khi load categories:", error)
             }

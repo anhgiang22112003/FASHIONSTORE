@@ -8,7 +8,7 @@ const ProductCategories = () => {
   const Category = async () => {
     try {
       const response = await api.get('/categories')
-      const activeCategories = response.data.filter(item => item.isActive)
+      const activeCategories = response?.data?.data.filter(item => item.isActive)
 
       setCategory(activeCategories)
     } catch (error) {

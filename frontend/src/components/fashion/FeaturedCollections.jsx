@@ -9,7 +9,7 @@ const FeaturedCollections = () => {
   const featuredCollections = async () => {
     try {
       const response = await api.get('/collection');
-     const activeCollection = response?.data.filter(item => item.isActive)
+     const activeCollection = response?.data?.data?.filter(item => item.isActive)
       setCollection(activeCollection);
     } catch (error) {
       console.log('Error fetching featured collections:', error);

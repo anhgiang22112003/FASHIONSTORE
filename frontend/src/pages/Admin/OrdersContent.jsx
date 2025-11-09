@@ -590,7 +590,7 @@ const OrdersContent = ({ data, onEditOrder }) => {
                 <tbody className="divide-y divide-gray-100 ">
                   {filteredOrders.length > 0 ? (
                     filteredOrders.map((order) => (
-                      <tr key={order?._id} className="hover:bg-pink-50/50 transition-colors">
+                      <tr key={order?._id} className="hover:bg-pink-50 hover:text-black">
                         <td className="px-4 py-4 text-center whitespace-nowrap ">
                           <input
                             type="checkbox"

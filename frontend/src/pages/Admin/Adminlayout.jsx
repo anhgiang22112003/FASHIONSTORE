@@ -145,13 +145,13 @@ const AdminLayout = () => {
           toggleSidebar={toggleSidebar}
         />
         <div className="flex-1 flex flex-col">
-          <div className="sticky top-0 z-40 h-[70px]   items-center  shadow-sm sticky top-0 z-40 ">
+          <div className="sticky  h-[70px]   items-center  shadow-sm sticky top-0 z-40 ">
             <Header toggleSidebar={toggleSidebar} setActiveTab={setActiveTab} setEditingProductId={setEditingProductId} setEditingOrder={setEditingOrder} />
 
           </div>
 
           {/* Nội dung chính */}
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 -m-1 overflow-y-auto">
             <Suspense fallback={<div className="text-center p-10">⏳ Đang tải...</div>}>
               {activeTab === "dashboard" && <Dashboard />}
               {activeTab === "chat" && <AdminChatDashboard adminId={userId?.id} />}

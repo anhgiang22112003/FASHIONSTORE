@@ -14,34 +14,104 @@ const ProductCategories = () => {
     const [dec, setdec] = useState("")
     const [category, setCategory] = useState([])
     const [isLoading, setIsLoading] = useState(false) // 👈 STATE loading
-
+    const [page, setPage] = useState(1)
+    const [total, setTotal] = useState(0)
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [itemToDelete, setItemToDelete] = useState(null)
+    const [filterName, setFilterName] = useState("")
+    const [filterId, setFilterId] = useState("")
+    const [filterActive, setFilterActive] = useState("")
+    const [minProducts, setMinProducts] = useState("")
+    const [maxProducts, setMaxProducts] = useState("")
+    const [sortBy, setSortBy] = useState("")
+    const [isFilterVisible, setIsFilterVisible] = useState(false)
+    const [debouncedFilterName, setDebouncedFilterName] = useState(filterName)
+    const [debouncedFilterId, setDebouncedFilterId] = useState(filterId)
+    const [debouncedMinProducts, setDebouncedMinProducts] = useState(minProducts)
+    const [debouncedMaxProducts, setDebouncedMaxProducts] = useState(maxProducts)
+    const limit = 5
 
+    // Debounce filterName
     useEffect(() => {
-        if (editCategory) {
-            setName(editCategory.name)
-            setdec(editCategory.description)
-            setIsNewCategoryActive(editCategory.isActive)
-            setImagePreview(editCategory.image || null)
-        }
-    }, [editCategory])
+        const handler = setTimeout(() => {
+            setDebouncedFilterName(filterName)
+        }, 500)
+        return () => clearTimeout(handler)
+    }, [filterName])
 
-    const fetchCategories = async () => {
+    // Debounce filterId
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedFilterId(filterId)
+        }, 500)
+        return () => clearTimeout(handler)
+    }, [filterId])
+
+    // Debounce minProducts
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedMinProducts(minProducts)
+        }, 500)
+        return () => clearTimeout(handler)
+    }, [minProducts])
+
+    // Debounce maxProducts
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedMaxProducts(maxProducts)
+        }, 500)
+        return () => clearTimeout(handler)
+    }, [maxProducts])
+    const fetchCategories = async (paramsObj = {}) => {
         try {
-            setIsLoading(true) // bật loading
-            const response = await apiAdmin.get("categories")
-            setCategory(response?.data || [])
+            setIsLoading(true)
+            const params = new URLSearchParams()
+
+            // Chỉ append khi có giá trị
+            if (paramsObj.name) params.append("name", paramsObj.name)
+            if (paramsObj.Id) params.append("Id", paramsObj.Id)
+            if (paramsObj.minProducts) params.append("minProducts", paramsObj.minProducts)
+            if (paramsObj.maxProducts) params.append("maxProducts", paramsObj.maxProducts)
+            if (paramsObj.isActive) params.append("isActive", paramsObj.isActive)
+            if (paramsObj.sortBy) params.append("sortBy", paramsObj.sortBy)
+            if (paramsObj.page) params.append("page", paramsObj.page)
+            if (paramsObj.limit) params.append("limit", paramsObj.limit)
+
+            const response = await apiAdmin.get(`/categories?${params.toString()}`)
+            setTotal(response.data.total || 0)
+            setCategory(response.data.data || [])
         } catch (error) {
             toast.error("Lỗi khi lấy danh mục")
         } finally {
-            setIsLoading(false) // tắt loading
+            setIsLoading(false)
         }
     }
 
     useEffect(() => {
-        fetchCategories()
-    }, [editCategory])
+        fetchCategories({
+            name: debouncedFilterName || undefined,
+            Id: debouncedFilterId || undefined,
+            minProducts: debouncedMinProducts || undefined,
+            maxProducts: debouncedMaxProducts || undefined,
+            isActive: filterActive || undefined,
+            sortBy: sortBy || undefined,
+            page,
+            limit
+        })
+    }, [debouncedFilterName, debouncedFilterId, debouncedMinProducts, debouncedMaxProducts, filterActive, sortBy, page])
+
+    const handleResetFilter = () => {
+        setFilterName("")
+        setFilterId("")
+        setFilterActive("")
+        setMinProducts("")
+        setMaxProducts("")
+        setSortBy("")
+        setPage(1)
+    }
+    const toggleFilterDropdown = () => {
+        setIsFilterVisible(!isFilterVisible)
+    }
 
     const handleSubmit = async (e) => {
         e.preventDefault()
@@ -162,7 +232,24 @@ const ProductCategories = () => {
 
             <div className="space-y-6 p-6">
                 <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold text-var(--text-color)">Danh mục sản phẩm</h2>
+                    <div className="flex items-center space-x-4">
+                        <h2 className="text-2xl font-bold text-var(--text-color)">Danh mục sản phẩm</h2>
+
+                        <button
+                            onClick={toggleFilterDropdown}
+                            className={`px-4 py-2 rounded-xl flex items-center space-x-1 font-medium transition-all ${isFilterVisible
+                                ? 'bg-pink-600 text-white hover:bg-pink-700'
+                                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100'}`}
+                        >
+                            {/* Thay thế bằng icon thực tế của bạn, ví dụ: <FunnelIcon className="w-5 h-5" /> */}
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
+                                <path fillRule="evenodd" d="M2.5 3A1.5 1.5 0 001 4.5v1.5a1 1 0 002 0v-1.5a.5.5 0 01.5-.5h15a.5.5 0 01.5.5v1.5a1 1 0 002 0v-1.5A1.5 1.5 0 0017.5 3h-15zM4 9a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zm3 5a1 1 0 011-1h4a1 1 0 110 2H8a1 1 0 01-1-1z" clipRule="evenodd" />
+                            </svg>
+                            <span>Bộ lọc</span>
+                        </button>
+                    </div>
+
+                    {/* Nút Thêm danh mục mới vẫn giữ nguyên vị trí bên phải */}
                     <button
                         onClick={() => handleOpenForm()}
                         className="px-6 py-3 bg-pink-600 text-white rounded-xl font-semibold hover:bg-pink-700 transition-colors"
@@ -173,35 +260,35 @@ const ProductCategories = () => {
 
                 {/* FORM */}
                 {isFormOpen && (
-                    <div className="bg-white p-8 rounded-2xl shadow-xl mb-6">
+                    <div className=" p-8 rounded-2xl shadow-xl mb-6">
                         <h3 className="text-xl font-bold text-gray-800 mb-4">
                             {editCategory ? 'Chỉnh sửa danh mục' : 'Thêm danh mục mới'}
                         </h3>
                         <form onSubmit={handleSubmit} className="space-y-4">
                             {/* inputs ... */}
                             <label className="block">
-                                <span className="text-gray-600">Tên danh mục</span>
+                                <span className="">Tên danh mục</span>
                                 <input
                                     type="text"
                                     name="name"
                                     onChange={(e) => setName(e.target.value)}
                                     defaultValue={editCategory?.name || ''}
-                                    className="w-full px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
+                                    className="w-full text-black px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
                                     required
                                 />
                             </label>
                             <label className="block">
-                                <span className="text-gray-600">Mô tả</span>
+                                <span className="">Mô tả</span>
                                 <textarea
                                     name="description"
                                     onChange={(e) => setdec(e.target.value)}
                                     defaultValue={editCategory?.description || ''}
                                     rows="3"
-                                    className="w-full px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200 resize-none"
+                                    className="w-full text-black px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200 resize-none"
                                 ></textarea>
                             </label>
-                            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                                <span className="text-gray-700 font-medium">Trạng thái: {isNewCategoryActive ? 'Đang hoạt động' : 'Ngừng hoạt động'}</span>
+                            <div className="flex items-center justify-between p-4  rounded-lg">
+                                <span className=" font-medium">Trạng thái: {isNewCategoryActive ? 'Đang hoạt động' : 'Ngừng hoạt động'}</span>
                                 <Switch
                                     checked={isNewCategoryActive}
                                     onChange={setIsNewCategoryActive} // 👈 Cập nhật state khi click
@@ -266,14 +353,113 @@ const ProductCategories = () => {
                     </div>
                 )}
 
+
+                {isFilterVisible && (
+                    <div className="mt-4 p-5 border rounded-2xl shadow-lg ">
+                        <h4 className="text-lg font-semibold  mb-4 border-b pb-2">Bộ lọc danh mục</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+
+                            {/* Tên danh mục */}
+                            <div>
+                                <label className="block text-sm font-medium  mb-1">Tên danh mục</label>
+                                <input
+                                    type="text"
+                                    value={filterName}
+                                    onChange={(e) => setFilterName(e.target.value)}
+                                    placeholder="Nhập tên..."
+                                    className="w-full text-black px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500/50"
+                                />
+                            </div>
+
+                            {/* Mã danh mục */}
+                            <div>
+                                <label className="block text-sm font-medium  mb-1">Mã danh mục</label>
+                                <input
+                                    type="text"
+                                    value={filterId}
+                                    onChange={(e) => setFilterId(e.target.value)}
+                                    placeholder="Nhập mã ID..."
+                                    className="w-full text-black px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500/50"
+                                />
+                            </div>
+
+                            {/* Trạng thái */}
+                            <div>
+                                <label className="block text-sm font-medium  mb-1">Trạng thái</label>
+                                <select
+                                    value={filterActive}
+                                    onChange={(e) => setFilterActive(e.target.value)}
+                                    className="w-full text-black px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500/50"
+                                >
+                                    <option value="">Tất cả</option>
+                                    <option value="true">Hoạt động</option>
+                                    <option value="false">Ngừng hoạt động</option>
+                                </select>
+                            </div>
+
+                            {/* Sắp xếp */}
+                            <div>
+                                <label className="block text-sm font-medium  mb-1">Sắp xếp</label>
+                                <select
+                                    value={sortBy}
+                                    onChange={(e) => setSortBy(e.target.value)}
+                                    className="w-full text-black px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500/50"
+                                >
+                                    <option value="">Mặc định</option>
+                                    <option value="nameAsc">Tên A→Z</option>
+                                    <option value="nameDesc">Tên Z→A</option>
+                                    <option value="productAsc">Số sản phẩm tăng dần</option>
+                                    <option value="productDesc">Số sản phẩm giảm dần</option>
+                                </select>
+                            </div>
+
+                            {/* Số sản phẩm từ */}
+                            <div>
+                                <label className="block text-sm font-medium  mb-1">Số SP tối thiểu</label>
+                                <input
+                                    type="number"
+                                    value={minProducts}
+                                    onChange={(e) => setMinProducts(e.target.value)}
+                                    placeholder="Từ"
+                                    className="w-full text-black px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500/50"
+                                />
+                            </div>
+
+                            {/* Số sản phẩm đến */}
+                            <div>
+                                <label className="block text-sm font-medium  mb-1">Số SP tối đa</label>
+                                <input
+                                    type="number"
+                                    value={maxProducts}
+                                    onChange={(e) => setMaxProducts(e.target.value)}
+                                    placeholder="Đến"
+                                    className="w-full text-black px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500/50"
+                                />
+                            </div>
+
+                            <div className="hidden lg:block"></div>
+
+                            <div className="flex items-end justify-end">
+                                <button
+                                    onClick={handleResetFilter}
+                                    className="w-full md:w-auto px-6 py-2 bg-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-300 transition-colors"
+                                >
+                                    Xóa bộ lọc
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+                )}
                 {/* TABLE */}
-                <div className="bg-white p-6 rounded-2xl shadow-xl overflow-x-auto">
+                <div className=" p-6 rounded-2xl shadow-xl overflow-x-auto">
                     {isLoading ? (
                         <div className="text-center py-6 text-gray-500">Đang tải dữ liệu...</div>
                     ) : (
                         <table className="min-w-full divide-y divide-gray-200">
                             <thead className="bg-pink-50">
                                 <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Hình ảnh</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tên danh mục</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Mô tả</th>
@@ -282,16 +468,18 @@ const ProductCategories = () => {
                                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Hành động</th>
                                 </tr>
                             </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
+                            <tbody className=" divide-y divide-gray-200">
                                 {category.map(category => (
-                                    <tr key={category._id}>
+                                    <tr className='hover:bg-pink-50 hover:text-black' key={category._id}>
                                         {/* Trong bảng */}
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm ">{category?.Id}</td>
+
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <picture>
                                                 <source srcSet={category.image?.replace(/\.(jpg|jpeg|png)$/i, ".webp")} type="image/webp" />
-                                             
+
                                                 <LazyLoadImage
-                                                    src={category.image|| "https://placehold.co/100x100"}
+                                                    src={category.image || "https://placehold.co/100x100"}
                                                     alt={category.name}
                                                     effect="blur"
                                                     width={48}
@@ -301,10 +489,10 @@ const ProductCategories = () => {
                                             </picture>
                                         </td>
 
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{category?.name}</td>
-                                        <td className="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">{category?.description}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{category?.productCount}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{category?.isActive ? "Hoạt động" : "Không hoạt động"}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium ">{category?.name}</td>
+                                        <td className="px-6 py-4 text-sm  max-w-xs truncate">{category?.description}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm ">{category?.productCount}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm ">{category?.isActive ? "Hoạt động" : "Không hoạt động"}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
                                             <button
                                                 onClick={() => handleOpenForm(category)}
@@ -324,6 +512,39 @@ const ProductCategories = () => {
                                 ))}
                             </tbody>
                         </table>
+
+                    )}
+                    {total > limit && (
+                        <div className="flex justify-center items-center mt-6 space-x-2">
+                            <button
+                                onClick={() => setPage(prev => Math.max(prev - 1, 1))}
+                                disabled={page === 1}
+                                className="px-3 py-1 border rounded-lg  hover:bg-pink-200 disabled:opacity-50"
+                            >
+                                ← Trước
+                            </button>
+
+                            {Array.from({ length: Math.ceil(total / limit) }, (_, i) => (
+                                <button
+                                    key={i}
+                                    onClick={() => setPage(i + 1)}
+                                    className={`px-3 py-1 border rounded-lg font-semibold ${page === i + 1
+                                        ? "bg-pink-600 text-white"
+                                        : "hover:bg-gray-100"
+                                        }`}
+                                >
+                                    {i + 1}
+                                </button>
+                            ))}
+
+                            <button
+                                onClick={() => setPage(prev => prev + 1)}
+                                disabled={page >= Math.ceil(total / limit)}
+                                className="px-3 text-black py-1 border rounded-lg  hover:bg-pink-200 disabled:opacity-50"
+                            >
+                                Sau →
+                            </button>
+                        </div>
                     )}
                 </div>
 

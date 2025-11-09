@@ -25,10 +25,10 @@ const CategoryPage = () => {
     const fetchCategoriesAndCollections = async () => {
       try {
         const categoriesRes = await api.get('/categories')
-        setCategories(categoriesRes?.data || [])
+        setCategories(categoriesRes?.data?.data || [])
         
         const collectionsRes = await api.get('/collection')
-        setCollections(collectionsRes?.data || [])
+        setCollections(collectionsRes?.data?.data || [])
       } catch (error) {
         toast.error("Lỗi khi lấy danh mục và bộ sưu tập")
       }

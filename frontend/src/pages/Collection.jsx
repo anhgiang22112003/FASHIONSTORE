@@ -25,7 +25,7 @@ const CollectionPage = () => {
   const fetchCollections = async () => {
     try {
       const res = await apiUser.get(`/collection`);
-      setCollections(res.data);
+      setCollections(res.data.data  || []);
     } catch (err) {
       console.error('Lỗi lấy collection:', err);
     }

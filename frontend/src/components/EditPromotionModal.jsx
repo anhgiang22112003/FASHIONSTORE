@@ -61,7 +61,7 @@ const EditPromotionModal = ({ title, isOpen, onClose, onSave, promotion = null }
     const fetCategories = async () => {
       try {
         const response = await apiAdmin.get("/categories")
-        setCategories(response.data)
+        setCategories(response.data.data)
       } catch (err) {
         console.error("API Error:", err)
         toast.error('Không tải được danh mục. Vui lòng thử lại.')

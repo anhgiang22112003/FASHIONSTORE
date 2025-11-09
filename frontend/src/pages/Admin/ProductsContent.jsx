@@ -129,8 +129,8 @@ const ProductsContent = ({ setActiveTab, onEditProduct, onViewProductDetail, dat
                 apiAdmin.get("/categories"),
                 apiAdmin.get("/collection"),
             ])
-            setCategories(cats.data)
-            setCollections(cols.data)
+            setCategories(cats.data.data ||[])
+            setCollections(cols.data.data||[])
         } catch (err) {
             console.error("Lỗi tải danh mục hoặc bộ sưu tập:", err)
         }
@@ -485,7 +485,7 @@ const ProductsContent = ({ setActiveTab, onEditProduct, onViewProductDetail, dat
                 </div>
             )}
 
-            <div className="overflow-x-auto  rounded-xl shadow">
+            <div className="overflow-x-auto   shadow">
                 <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-pink-50">
                         <tr>

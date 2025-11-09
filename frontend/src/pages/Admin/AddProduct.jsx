@@ -29,7 +29,7 @@ const AddProduct = ({ setActiveTab, fetchProducts }) => {
         const fetchCollections = async () => {
             try {
                 const res = await apiAdmin.get("/collection")
-                setCollections(res.data)
+                setCollections(res.data.data || [])
             }
             catch (error) {
                 toast.error("Lỗi khi load collections:", error)
@@ -42,7 +42,7 @@ const AddProduct = ({ setActiveTab, fetchProducts }) => {
         const fetchCategories = async () => {
             try {
                 const res = await apiAdmin.get("/categories") // đổi endpoint đúng backend bạn
-                setCategories(res.data) // gán mảng categories
+                setCategories(res?.data?.data||[]) // gán mảng categories
             } catch (error) {
                 console.error("Lỗi khi load categories:", error)
             }
