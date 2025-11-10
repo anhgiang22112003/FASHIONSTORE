@@ -129,8 +129,8 @@ const ProductsContent = ({ setActiveTab, onEditProduct, onViewProductDetail, dat
                 apiAdmin.get("/categories"),
                 apiAdmin.get("/collection"),
             ])
-            setCategories(cats.data.data ||[])
-            setCollections(cols.data.data||[])
+            setCategories(cats.data.data || [])
+            setCollections(cols.data.data || [])
         } catch (err) {
             console.error("Lỗi tải danh mục hoặc bộ sưu tập:", err)
         }
@@ -282,8 +282,8 @@ const ProductsContent = ({ setActiveTab, onEditProduct, onViewProductDetail, dat
         setIsModalOpen(false)
     }
 
- console.log(product);
- 
+    console.log(product)
+
     const handleCloseModal = () => {
         setIsModalOpen(false)
         setProductToDelete(null)
@@ -301,9 +301,8 @@ const ProductsContent = ({ setActiveTab, onEditProduct, onViewProductDetail, dat
         setDisplayMaxPrice("")
     }
     return (
-        <div style={{ backgroundColor: "var(--bg-color)", color: "var(--text-color)" }} className="p-6  min-h-screen">
-                        <h1 className="text-3xl font-bold mb-4 ">Danh sách Sản phẩm</h1>
-
+        <div style={{ backgroundColor: "var(--bg-color)", color: "var(--text-color)" }} className=" p-5  min-h-screen">
+            <h1 className="text-3xl font-bold mb-4 ">Danh sách Sản phẩm</h1>
             {selectedProducts.length > 0 && (
                 <div className="p-4 mb-4 rounded-xl shadow flex justify-between items-center border border-pink-200">
                     <p className=" font-medium">

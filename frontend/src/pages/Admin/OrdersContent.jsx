@@ -3,6 +3,7 @@ import { EyeIcon, FunnelIcon, ArrowDownTrayIcon, ArrowUpTrayIcon } from "@heroic
 import { toast } from "react-toastify"
 import { socket } from "@/service/socket"
 import apiAdmin from "@/service/apiAdmin"
+import { useDebounce } from "@/hooks/useDebounce"
 
 
 const statusOptions = [
@@ -77,10 +78,20 @@ const OrdersContent = ({ data, onEditOrder }) => {
   const [page, setPage] = useState(1)
   const [total, setTotal] = useState(0)
   const limit = 20
+  const debouncedMinTotal = useDebounce(filters.minTotal, 500)
+  const debouncedMaxTotal = useDebounce(filters.maxTotal, 500)
+
+  const debouncedFilters = useMemo(() => ({
+    ...filters,
+    minTotal: debouncedMinTotal,
+    maxTotal: debouncedMaxTotal
+  }), [filters, debouncedMinTotal, debouncedMaxTotal])
 
   useEffect(() => {
-    fetchOrders(page)
-  }, [data, page])
+    fetchOrders(page, debouncedFilters)
+  }, [page, debouncedFilters])
+
+
 
 
   const handleExportExcel = async () => {
@@ -142,16 +153,27 @@ const OrdersContent = ({ data, onEditOrder }) => {
     }
   }
 
-  const fetchOrders = async (pageNum = 1) => {
+  const fetchOrders = async (pageNum = 1, appliedFilters = filters) => {
     try {
-      const res = await apiAdmin.get(`/orders/all?page=${pageNum}&limit=${limit}`)
-      setOrders(res?.data.data || [])
+      setLoading(true)
+      const res = await apiAdmin.get("/orders/all", {
+        params: {
+          page: pageNum,
+          limit,
+          ...appliedFilters
+        }
+      })
+      setOrders(res.data.data || [])
       setTotal(res.data.total || 0)
       setPage(res.data.page || 1)
-    } catch {
+    } catch (err) {
+      console.error(err)
       toast.error("Không thể tải danh sách đơn hàng")
+    } finally {
+      setLoading(false)
     }
   }
+
 
   const fetchCustomers = async (page = 1) => {
     try {
@@ -235,31 +257,24 @@ const OrdersContent = ({ data, onEditOrder }) => {
   }
 
   const toggleFilter = () => setIsFilterVisible(!isFilterVisible)
-  const applyFilter = async () => {
-    try {
-      const res = await apiAdmin.get("/orders/filter", { params: filters })
-      setOrders(res.data)
-      toast.success("Lọc thành công ✅")
-    } catch {
-      toast.error("Không thể lọc đơn hàng")
-    }
-  }
+
 
   const clearFilters = () => {
-    setFilters({
+    const emptyFilters = {
       userId: "",
       status: "",
       minDate: "",
       maxDate: "",
       minTotal: "",
       maxTotal: "",
-      city: "",
+      province: "",
       district: "",
       ward: "",
-      province: ""
-    })
-    fetchOrders()
+    }
+    setFilters(emptyFilters)
+    fetchOrders(1, emptyFilters)
   }
+
   const filteredOrders = useMemo(() => orders, [orders])
 
   const handleSelectOrder = (orderId) => {
@@ -331,7 +346,7 @@ const OrdersContent = ({ data, onEditOrder }) => {
 
   return (
     <div style={{ backgroundColor: "var(--bg-color)", color: "var(--text-color)" }} className="flex  min-h-screen  font-sans antialiased">
-      <main className="flex-1 p-6">
+      <main className="flex-1  p-5">
 
         {/* TIÊU ĐỀ & NÚT HÀNH ĐỘNG */}
         <div className="mb-6">
@@ -493,22 +508,31 @@ const OrdersContent = ({ data, onEditOrder }) => {
                 <label className="block text-sm font-medium  mb-1">Khoảng tiền</label>
                 <div className="flex space-x-2">
                   <input
-                    type="number"
+                    type="text"
+                    inputMode="numeric"
                     name="minTotal"
                     placeholder="Từ (₫)"
-                    value={filters.minTotal}
-                    onChange={handleFilterChange}
-                    className="w-1/2 px-3 py-2 border text-black  border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500"
+                    value={filters.minTotal ? new Intl.NumberFormat('vi-VN').format(filters.minTotal) : ''}
+                    onChange={(e) => {
+                      const raw = e.target.value.replace(/[^\d]/g, '')
+                      handleFilterChange({ target: { name: 'minTotal', value: raw ? Number(raw) : '' } })
+                    }}
+                    className="w-1/2 px-3 py-2 border text-black border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500"
                   />
                   <input
-                    type="number"
+                    type="text"
+                    inputMode="numeric"
                     name="maxTotal"
                     placeholder="Đến (₫)"
-                    value={filters.maxTotal}
-                    onChange={handleFilterChange}
-                    className="w-1/2 px-3 py-2 border text-black  border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500"
+                    value={filters.maxTotal ? new Intl.NumberFormat('vi-VN').format(filters.maxTotal) : ''}
+                    onChange={(e) => {
+                      const raw = e.target.value.replace(/[^\d]/g, '')
+                      handleFilterChange({ target: { name: 'maxTotal', value: raw ? Number(raw) : '' } })
+                    }}
+                    className="w-1/2 px-3 py-2 border text-black border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500"
                   />
                 </div>
+
               </div>
 
               <div className="lg:col-span-2">
@@ -561,7 +585,6 @@ const OrdersContent = ({ data, onEditOrder }) => {
 
             <div className="flex justify-end space-x-3 pt-6 border-t mt-4">
               <button onClick={clearFilters} className="px-4 py-2 rounded-xl text-gray-700 bg-gray-100 font-semibold hover:bg-gray-200 transition-colors">Xóa lọc</button>
-              <button onClick={applyFilter} className="px-4 py-2 rounded-xl bg-pink-600 text-white font-semibold hover:bg-pink-700 transition-colors">Áp dụng bộ lọc</button>
             </div>
           </div>
         )}

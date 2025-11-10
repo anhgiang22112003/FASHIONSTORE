@@ -100,9 +100,9 @@ const PromotionManagementPage = () => {
     startDateTo: '',
     endDateFrom: '',
     endDateTo: '',
-  });
+  })
   const toggleFilterPanel = () => {
-    setIsFilterPanelOpen(prev => !prev);
+    setIsFilterPanelOpen(prev => !prev)
   }
   const handleResumeClick = (promotion) => {
     setSelectedPromotion(promotion)
@@ -175,61 +175,60 @@ const PromotionManagementPage = () => {
   }
 
   const fetVoucher = async (filters = {}) => {
-    setLoading(true);
+    setLoading(true)
     try {
-      const params = new URLSearchParams();
+      const params = new URLSearchParams()
 
-      params.append('page', page);
-      params.append('limit', limit);
+      params.append('page', page)
+      params.append('limit', limit)
 
       if (filters.searchTerm) {
-        params.append('name', filters.searchTerm);
-        params.append('code', filters.searchTerm);
+        params.append('name', filters.searchTerm)
+        params.append('code', filters.searchTerm)
       }
-      if (filters.type) params.append('type', filters.type);
+      if (filters.type) params.append('type', filters.type)
 
       if (filters.status && filters.status !== 'Tất cả') {
-        if (filters.status === 'Đang hoạt động') params.append('status', 'active');
-        else if (filters.status === 'Bị tạm dừng') params.append('status', 'paused');
-        else if (filters.status === 'Hết hạn') params.append('status', 'expired');
+        if (filters.status === 'Đang hoạt động') params.append('status', 'active')
+        else if (filters.status === 'Bị tạm dừng') params.append('status', 'paused')
+        else if (filters.status === 'Hết hạn') params.append('status', 'expired')
       }
-      if (filters.autoCondition) params.append('autoCondition', filters.autoCondition);
+      if (filters.autoCondition) params.append('autoCondition', filters.autoCondition)
 
       if (filters.minDiscountValue)
-        params.append('minDiscountValue', filters.minDiscountValue);
+        params.append('minDiscountValue', filters.minDiscountValue)
       if (filters.maxDiscountValue)
-        params.append('maxDiscountValue', filters.maxDiscountValue);
+        params.append('maxDiscountValue', filters.maxDiscountValue)
 
       if (filters.startDateFrom)
-        params.append('startDateFrom', filters.startDateFrom);
+        params.append('startDateFrom', filters.startDateFrom)
       if (filters.startDateTo)
-        params.append('startDateTo', filters.startDateTo);
+        params.append('startDateTo', filters.startDateTo)
 
       // Khoảng thời gian kết thúc
       if (filters.endDateFrom)
-        params.append('endDateFrom', filters.endDateFrom);
+        params.append('endDateFrom', filters.endDateFrom)
       if (filters.endDateTo)
-        params.append('endDateTo', filters.endDateTo);
+        params.append('endDateTo', filters.endDateTo)
 
-      const res = await apiAdmin.get(`/vouchers?${params.toString()}`);
-      setPromotionsData(res.data.data || []);
-      setTotal(res.data.total || 0);
+      const res = await apiAdmin.get(`/vouchers?${params.toString()}`)
+      setPromotionsData(res.data.data || [])
+      setTotal(res.data.total || 0)
     } catch (error) {
-      console.error('Error fetching promotions:', error);
-      toast.error('Không thể tải danh sách khuyến mãi!');
+      console.error('Error fetching promotions:', error)
+      toast.error('Không thể tải danh sách khuyến mãi!')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
 
   useEffect(() => {
     const handler = setTimeout(() => {
-      setPage(1);
-      fetVoucher(filters);
-    }, 500);
-    return () => clearTimeout(handler);
-  }, [filters, page, limit]);
+      fetVoucher(filters)
+    }, 500)
+    return () => clearTimeout(handler)
+  }, [filters, page, limit])
 
 
 
@@ -252,7 +251,7 @@ const PromotionManagementPage = () => {
   }
 
   return (
-    <div style={{ backgroundColor: "var(--bg-color)", color: "var(--text-color)" }} className="min-h-screen  p-8 font-sans text-gray-800">
+    <div style={{ backgroundColor: "var(--bg-color)", color: "var(--text-color)" }} className="min-h-screen   p-5 font-sans text-gray-800">
       <header className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold ">Quản lý khuyến mại</h1>
         <div className="flex space-x-2">
@@ -278,19 +277,19 @@ const PromotionManagementPage = () => {
               onChange={(e) => setFilters({ ...filters, searchTerm: e.target.value })}
             />
           </div>
-          
+
           <div className="flex space-x-3 items-center">
             {/* Nút Bộ lọc */}
-            <button 
+            <button
               onClick={toggleFilterPanel}
-              className={`flex items-center space-x-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors border ${isFilterPanelOpen ? 'bg-pink-100 text-[#ff69b4] border-pink-300 hover:bg-pink-200' : 'bg-gray-50 text-gray-700 border-gray-300 hover:bg-gray-100'}`}
+              className={`px-4 py-2 rounded-xl flex items-center space-x-1 font-medium transition-all ${isFilterPanelOpen ? 'bg-pink-600 text-white hover:bg-pink-700' : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100'}`}
             >
               <FunnelIcon className="w-5 h-5" />
-              <span>{isFilterPanelOpen ? 'Ẩn Bộ lọc' : 'Bộ lọc'}</span>
+              <span>{isFilterPanelOpen ? ' Bộ lọc' : 'Bộ lọc'}</span>
             </button>
 
             {/* Nút Xuất báo cáo */}
-            <button 
+            <button
               // Thêm logic export tại đây nếu cần
               className="px-4 py-2 text-sm font-medium rounded-lg transition-colors bg-pink-100 hover:bg-pink-200 text-[#ff69b4] flex items-center space-x-2 border border-pink-300"
             >
@@ -299,101 +298,184 @@ const PromotionManagementPage = () => {
             </button>
           </div>
         </div>
-           <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isFilterPanelOpen ? 'max-h-96 opacity-100 mb-6' : 'max-h-0 opacity-0 mb-0'}`}>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            
+        <div
+          className={`transition-all duration-300 ease-in-out overflow-hidden ${isFilterPanelOpen
+            ? 'max-h-96 opacity-100 mb-6'
+            : 'max-h-0 opacity-0 mb-0'
+            }`}
+        >
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+
             {/* Bộ lọc Loại */}
-            <select
-              className="px-3 py-2 border rounded-lg text-black bg-white focus:ring-2 focus:ring-pink-300"
-              value={filters.type}
-              onChange={(e) => setFilters({ ...filters, type: e.target.value, status: 'Tất cả' })}
-            >
-              <option value="">Tất cả loại</option>
-              <option value="percent">Giảm theo %</option>
-              <option value="amount">Giảm theo số tiền</option>
-              <option value="free_shipping">Miễn phí vận chuyển</option>
-            </select>
+            <div className="flex flex-col">
+              <label className="text-sm font-medium mb-1 ">Loại khuyến mãi</label>
+              <select
+                className="px-3 py-2 border rounded-lg text-black bg-white focus:ring-2 focus:ring-pink-300"
+                value={filters.type}
+                onChange={(e) => setFilters({ ...filters, type: e.target.value, status: 'Tất cả' })}
+              >
+                <option value="">Tất cả loại</option>
+                <option value="percent">Giảm theo %</option>
+                <option value="amount">Giảm theo số tiền</option>
+                <option value="free_shipping">Miễn phí vận chuyển</option>
+              </select>
+            </div>
 
             {/* Bộ lọc Trạng thái */}
-            <select
-              className="px-3 py-2 border rounded-lg text-black bg-white focus:ring-2 focus:ring-pink-300"
-              value={filters.status}
-              onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-            >
-              <option value="Tất cả">Tất cả trạng thái</option>
-              <option value="Đang hoạt động">Đang hoạt động</option>
-              <option value="Bị tạm dừng">Bị tạm dừng</option>
-              <option value="Hết hạn">Hết hạn</option>
-            </select>
+            <div className="flex flex-col">
+              <label className="text-sm font-medium mb-1 ">Trạng thái</label>
+              <select
+                className="px-3 py-2 border rounded-lg text-black bg-white focus:ring-2 focus:ring-pink-300"
+                value={filters.status}
+                onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+              >
+                <option value="Tất cả">Tất cả trạng thái</option>
+                <option value="Đang hoạt động">Đang hoạt động</option>
+                <option value="Bị tạm dừng">Bị tạm dừng</option>
+                <option value="Hết hạn">Hết hạn</option>
+              </select>
+            </div>
 
             {/* Bộ lọc Điều kiện */}
-            <select
-              className="px-3 py-2 border rounded-lg text-black bg-white focus:ring-2 focus:ring-pink-300"
-              value={filters.autoCondition}
-              onChange={(e) => setFilters({ ...filters, autoCondition: e.target.value })}
-            >
-              <option value="">Tất cả điều kiện</option>
-              <option value="new_user">Người dùng mới</option>
-              <option value="vip_user">Khách VIP</option>
-              <option value="birthday">Sinh nhật</option>
-              <option value="manual">Tạo thủ công</option>
-            </select>
-            
-            {/* Bộ lọc Giá trị giảm Min */}
-            <input
-              type="number"
-              placeholder="Giá trị giảm tối thiểu"
-              className="px-3 py-2 border rounded-lg text-black focus:ring-2 focus:ring-pink-300"
-              value={filters.minDiscountValue}
-              onChange={(e) => setFilters({ ...filters, minDiscountValue: e.target.value })}
-            />
-            {/* Bộ lọc Giá trị giảm Max */}
-            <input
-              type="number"
-              placeholder="Giá trị giảm tối đa"
-              className="px-3 py-2 border rounded-lg text-black focus:ring-2 focus:ring-pink-300"
-              value={filters.maxDiscountValue}
-              onChange={(e) => setFilters({ ...filters, maxDiscountValue: e.target.value })}
-            />
+            <div className="flex flex-col">
+              <label className="text-sm font-medium mb-1 ">Điều kiện tự động</label>
+              <select
+                className="px-3 py-2 border rounded-lg text-black bg-white focus:ring-2 focus:ring-pink-300"
+                value={filters.autoCondition}
+                onChange={(e) => setFilters({ ...filters, autoCondition: e.target.value })}
+              >
+                <option value="">Tất cả điều kiện</option>
+                <option value="new_user">Người dùng mới</option>
+                <option value="vip_user">Khách VIP</option>
+                <option value="birthday">Sinh nhật</option>
+                <option value="manual">Tạo thủ công</option>
+              </select>
+            </div>
 
-            {/* Khoảng thời gian BẮT ĐẦU */}
-            <input
-              type="date"
-              title="Ngày bắt đầu từ"
-              className="px-3 py-2 border rounded-lg text-black focus:ring-2 focus:ring-pink-300"
-              value={filters.startDateFrom}
-              onChange={(e) => setFilters({ ...filters, startDateFrom: e.target.value })}
-            />
-            <input
-              type="date"
-              title="Ngày bắt đầu đến"
-              className="px-3 py-2 border rounded-lg text-black focus:ring-2 focus:ring-pink-300"
-              value={filters.startDateTo}
-              onChange={(e) => setFilters({ ...filters, startDateTo: e.target.value })}
-            />
+            {/* Giá trị giảm tối thiểu */}
+            <div className="flex flex-col">
+              <label className="text-sm font-medium mb-1 ">Giá trị giảm tối thiểu</label>
+              <input
+                type="text"
+                inputMode="numeric"
+                placeholder="VD: 50.000 ₫"
+                className="px-3 py-2 border rounded-lg text-black focus:ring-2 focus:ring-pink-300"
+                value={
+                  filters.minDiscountValue
+                    ? new Intl.NumberFormat('vi-VN').format(filters.minDiscountValue)
+                    : ''
+                }
+                onChange={(e) => {
+                  const raw = e.target.value.replace(/[^\d]/g, '')
+                  setFilters({ ...filters, minDiscountValue: raw ? Number(raw) : '' })
+                }}
+              />
 
-            {/* Khoảng thời gian KẾT THÚC */}
-            <input
-              type="date"
-              title="Ngày kết thúc từ"
-              className="px-3 py-2 border rounded-lg text-black focus:ring-2 focus:ring-pink-300"
-              value={filters.endDateFrom}
-              onChange={(e) => setFilters({ ...filters, endDateFrom: e.target.value })}
-            />
-            <input
-              type="date"
-              title="Ngày kết thúc đến"
-              className="px-3 py-2 border rounded-lg text-black focus:ring-2 focus:ring-pink-300"
-              value={filters.endDateTo}
-              onChange={(e) => setFilters({ ...filters, endDateTo: e.target.value })}
-            />
+            </div>
+
+            {/* Giá trị giảm tối đa */}
+            <div className="flex flex-col">
+              <label className="text-sm font-medium mb-1 ">Giá trị giảm tối đa</label>
+              <input
+                type="text"
+                inputMode="numeric"
+                placeholder="VD: 100.000 ₫"
+                className="px-3 py-2 border rounded-lg text-black focus:ring-2 focus:ring-pink-300"
+                value={
+                  filters.maxDiscountValue
+                    ? new Intl.NumberFormat('vi-VN').format(filters.maxDiscountValue)
+                    : ''
+                }
+                onChange={(e) => {
+                  const raw = e.target.value.replace(/[^\d]/g, '')
+                  setFilters({ ...filters, maxDiscountValue: raw ? Number(raw) : '' })
+                }}
+              />
+            </div>
+
+            {/* Khoảng thời gian bắt đầu */}
+            <div className="flex flex-col">
+              <label className="text-sm font-medium mb-1 ">Bắt đầu từ</label>
+              <input
+                type="date"
+                className="px-3 py-2 border rounded-lg text-black focus:ring-2 focus:ring-pink-300"
+                value={filters.startDateFrom}
+                onChange={(e) => setFilters({ ...filters, startDateFrom: e.target.value })}
+              />
+            </div>
+            <div className="flex flex-col">
+              <label className="text-sm font-medium mb-1 ">Bắt đầu đến</label>
+              <input
+                type="date"
+                className="px-3 py-2 border rounded-lg text-black focus:ring-2 focus:ring-pink-300"
+                value={filters.startDateTo}
+                onChange={(e) => setFilters({ ...filters, startDateTo: e.target.value })}
+              />
+            </div>
+
+            {/* Khoảng thời gian kết thúc */}
+            <div className="flex flex-col">
+              <label className="text-sm font-medium mb-1 ">Kết thúc từ</label>
+              <input
+                type="date"
+                className="px-3 py-2 border rounded-lg text-black focus:ring-2 focus:ring-pink-300"
+                value={filters.endDateFrom}
+                onChange={(e) => setFilters({ ...filters, endDateFrom: e.target.value })}
+              />
+            </div>
+            <div className="flex flex-col">
+              <label className="text-sm font-medium  ">Kết thúc đến</label>
+              <input
+                type="date"
+                className="px-3 py-2 border rounded-lg text-black focus:ring-2 focus:ring-pink-300"
+                value={filters.endDateTo}
+                onChange={(e) => setFilters({ ...filters, endDateTo: e.target.value })}
+              />
+            </div>
+
           </div>
-        </div>
+          <div className="flex justify-end col-span-full">
+            <button
+              onClick={() => {
+                setFilters({
+                  searchTerm: '',
+                  status: 'Tất cả',
+                  type: '',
+                  autoCondition: '',
+                  minDiscountValue: '',
+                  maxDiscountValue: '',
+                  startDateFrom: '',
+                  startDateTo: '',
+                  endDateFrom: '',
+                  endDateTo: '',
+                })
+                setPage(1)
+                fetVoucher({
+                  searchTerm: '',
+                  status: 'Tất cả',
+                  type: '',
+                  autoCondition: '',
+                  minDiscountValue: '',
+                  maxDiscountValue: '',
+                  startDateFrom: '',
+                  startDateTo: '',
+                  endDateFrom: '',
+                  endDateTo: '',
+                })
+              }}
+              className="px-4 bg-pink-500 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium border border-gray-300 transition-colors"
+            >
+              Đặt lại bộ lọc
+            </button>
+          </div>
+          {/* Nút Reset Bộ lọc */}
 
+
+        </div>
 
         <div className="space-y-4">
           {promotionsData?.map((promo) => (
-            <div key={promo.id} className="relative  rounded-xl p-6 flex flex-col md:flex-row justify-between items-center md:items-start hover:bg-pink-50 hover:text-black transition-colors">
+            <div key={promo.id} className="relative border border-gray-100  rounded-xl p-6 flex flex-col md:flex-row justify-between items-center md:items-start hover:bg-pink-50 hover:text-black transition-colors">
               <div className="flex-grow">
                 <div className="flex items-center space-x-2 mb-1">
                   <span className="font-semibold ">{promo.name}</span>
@@ -412,10 +494,17 @@ const PromotionManagementPage = () => {
                   {promo?.type === "free_shipping" ? (
                     <p><span className="font-medium">Giá trị giảm:</span> Miễn phí vận chuyển</p>
                   ) : (
-                    <p><span className="font-medium">Giá trị giảm:</span> {promo.discountValue}{promo.type === 'percent' ? '%' : 'đ'}</p>
+                    <p>
+                      <span className="font-medium">Giá trị giảm:</span>{' '}
+                      {promo.type === 'percent'
+                        ? `${promo.discountValue}%`
+                        : new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(promo.discountValue)}
+                    </p>
                   )}
                   <p>
-                    <span className="font-medium">Đơn hàng tối thiểu:</span> {promo.minOrderValue}
+                    <span className="font-medium">Đơn hàng tối thiểu:</span>
+                    {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(promo?.minOrderValue)}
+
                   </p>
                 </div>
               </div>

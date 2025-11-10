@@ -5,7 +5,9 @@ import { Switch } from '@headlessui/react'
 import { LazyLoadImage } from 'react-lazy-load-image-component'
 import 'react-lazy-load-image-component/src/effects/blur.css'
 import apiAdmin from '@/service/apiAdmin'
-
+import {
+  FunnelIcon
+} from '@heroicons/react/24/outline'
 const ProductCollections = () => {
     const [collections, setCollections] = useState([])
     const [isFormOpen, setIsFormOpen] = useState(false)
@@ -232,10 +234,10 @@ const ProductCollections = () => {
 
     return (
         <div style={{ backgroundColor: "var(--bg-color)", color: "var(--text-color)" }} className="min-h-screen  font-sans antialiased">
-            <div className="space-y-6 p-6">
+            <div className="space-y-6  p-5">
                 <div className="flex justify-between items-center mb-6">
                     <div className="flex items-center space-x-4">
-                        <h2 className="text-2xl font-bold ">Bộ sưu tập sản phẩm</h2>
+                         <h1 className="text-3xl font-bold">Danh sách bộ sưu tập</h1>
                         {/* Nút Bộ lọc */}
                         <button
                             onClick={toggleFilterDropdown}
@@ -243,9 +245,7 @@ const ProductCollections = () => {
                                 ? 'bg-pink-600 text-white hover:bg-pink-700'
                                 : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100'}`}
                         >
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
-                                <path fillRule="evenodd" d="M2.5 3A1.5 1.5 0 001 4.5v1.5a1 1 0 002 0v-1.5a.5.5 0 01.5-.5h15a.5.5 0 01.5.5v1.5a1 1 0 002 0v-1.5A1.5 1.5 0 0017.5 3h-15zM4 9a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zm3 5a1 1 0 011-1h4a1 1 0 110 2H8a1 1 0 01-1-1z" clipRule="evenodd" />
-                            </svg>
+                           <FunnelIcon className="w-5 h-5" />
                             <span>Bộ lọc</span>
                         </button>
                     </div>

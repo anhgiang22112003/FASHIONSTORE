@@ -127,21 +127,21 @@ const AddFlashSalePage = ({ setActiveTab, editData }) => {
 
 
     return (
-        <div className="max-w-full mx-auto bg-pink-50 shadow-2xl p-8 rounded-2xl border border-rose-200">
+        <div style={{ backgroundColor: "var(--bg-color)", color: "var(--text-color)" }}  className="max-w-full mt-5 mx-auto shadow-2xl p-5 rounded-2xl border border-rose-200">
             {/* Tiêu đề Form */}
-            <h2 className="text-3xl font-bold mb-6 text-rose-700 border-b pb-3 border-rose-200">
+            <h2 className="text-3xl font-bold mb-6 text-[#ff69b4] border-b pb-3 border-rose-200">
                 {editData?._id ? "Chỉnh sửa sự kiện  Flash Sale" : "Thêm sự kiện Flash Sale"}
             </h2>
 
             <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Trường Tên Flash Sale */}
                 <div>
-                    <label className="block text-sm font-semibold mb-1 text-gray-700">Tên Flash Sale</label>
+                    <label className="block text-sm font-semibold mb-1 ">Tên Flash Sale</label>
                     <input
                         type="text"
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
-                        className="w-full border border-rose-300 rounded-xl p-3 focus:ring-rose-500 focus:border-rose-500 transition-shadow shadow-sm"
+                        className="w-full border text-black border-rose-300 rounded-xl p-3 focus:ring-rose-500 focus:border-rose-500 transition-shadow shadow-sm"
                         placeholder="Ví dụ: Sale Noel Giảm Sốc 50%"
                     />
                 </div>
@@ -149,21 +149,21 @@ const AddFlashSalePage = ({ setActiveTab, editData }) => {
                 {/* Thời gian Bắt đầu / Kết thúc */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label className="block text-sm font-semibold mb-1 text-gray-700">Thời gian bắt đầu</label>
+                        <label className="block text-sm font-semibold mb-1 ">Thời gian bắt đầu</label>
                         <input
                             type="datetime-local"
                             value={startTime}
                             onChange={(e) => setStartTime(e.target.value)}
-                            className="w-full border border-rose-300 rounded-xl p-3 focus:ring-rose-500 focus:border-rose-500 transition-shadow shadow-sm"
+                            className="w-full text-black border border-rose-300 rounded-xl p-3 focus:ring-rose-500 focus:border-rose-500 transition-shadow shadow-sm"
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-semibold mb-1 text-gray-700">Thời gian kết thúc</label>
+                        <label className="block text-sm font-semibold mb-1 ">Thời gian kết thúc</label>
                         <input
                             type="datetime-local"
                             value={endTime}
                             onChange={(e) => setEndTime(e.target.value)}
-                            className="w-full border border-rose-300 rounded-xl p-3 focus:ring-rose-500 focus:border-rose-500 transition-shadow shadow-sm"
+                            className="w-full text-black border border-rose-300 rounded-xl p-3 focus:ring-rose-500 focus:border-rose-500 transition-shadow shadow-sm"
                         />
                     </div>
                 </div>
@@ -171,17 +171,17 @@ const AddFlashSalePage = ({ setActiveTab, editData }) => {
                 <hr className="my-4 border-rose-300" />
 
                 {/* Khu vực Chọn sản phẩm */}
-                <h3 className="text-xl font-bold text-gray-800"> Chọn sản phẩm Flash Sale</h3>
+                <h3 className="text-xl font-bold "> Chọn sản phẩm Flash Sale</h3>
 
                 {/* Ô tìm kiếm sản phẩm */}
                 <div className="mb-4">
-                    <label className="block text-sm font-semibold mb-1 text-gray-700"> Tìm sản phẩm</label>
+                    <label className="block text-sm font-semibold mb-1 "> Tìm sản phẩm</label>
                     <input
                         type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder="Nhập tên sản phẩm..."
-                        className="w-full border border-rose-300 rounded-xl p-3 focus:ring-rose-500 focus:border-rose-500 transition-shadow shadow-sm"
+                        className="w-full text-black border border-rose-300 rounded-xl p-3 focus:ring-rose-500 focus:border-rose-500 transition-shadow shadow-sm"
                     />
                 </div>
 
@@ -224,7 +224,7 @@ const AddFlashSalePage = ({ setActiveTab, editData }) => {
                                                     prev.map((i) => (i.productId === item.productId ? { ...i, salePrice: e.target.value } : i))
                                                 )
                                             }
-                                            className="w-24 border border-rose-300 rounded-lg p-2 text-sm focus:ring-rose-500"
+                                            className="w-24 border text-black border-rose-300 rounded-lg p-2 text-sm focus:ring-rose-500"
                                             placeholder="Giá sale"
                                         />
                                         {/* Input Số lượng */}
@@ -236,7 +236,7 @@ const AddFlashSalePage = ({ setActiveTab, editData }) => {
                                                     prev.map((i) => (i.productId === item.productId ? { ...i, quantity: e.target.value } : i))
                                                 )
                                             }
-                                            className="w-20 border border-rose-300 rounded-lg p-2 text-sm focus:ring-rose-500"
+                                            className="w-20 border text-black border-rose-300 rounded-lg p-2 text-sm focus:ring-rose-500"
                                             placeholder="SL"
                                         />
                                         {/* Nút Xóa */}
@@ -257,7 +257,7 @@ const AddFlashSalePage = ({ setActiveTab, editData }) => {
                 {/* Nút Submit */}
                 <button
                     type="submit"
-                    className="w-full bg-rose-600 text-white px-6 py-3 rounded-xl font-bold text-lg hover:bg-rose-700 transition-all shadow-lg mt-6 transform hover:scale-[1.01]"
+                    className="w-full bg-[#ff69b4] text-white px-6 py-3 rounded-xl font-bold text-lg hover:bg-[#ff69b4] transition-all shadow-lg mt-6 transform hover:scale-[1.01]"
                 >
                     {editData?._id ? "Cập nhật Flash Sale" : "Tạo Flash Sale"}
                 </button>

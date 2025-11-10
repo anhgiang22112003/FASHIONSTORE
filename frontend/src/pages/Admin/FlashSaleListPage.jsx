@@ -34,7 +34,7 @@ const FlashSaleListPage = ({ setActiveTab, setEditData }) => {
     }
 
     return (
-        <div className="max-w-full mx-auto bg-pink-50 shadow-2xl p-6 rounded-2xl border border-pink-200">
+        <div style={{ backgroundColor: "var(--bg-color)", color: "var(--text-color)" }} className="min-h-screen  p-5 font-sans ">
             {/* Tiêu đề */}
             <div className="flex items-center justify-between mb-6">
                 <h2 className="flex text-3xl font-bold">

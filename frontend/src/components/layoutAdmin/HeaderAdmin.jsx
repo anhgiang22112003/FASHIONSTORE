@@ -97,7 +97,7 @@ const Header = ({ toggleSidebar, setActiveTab, setEditingProductId, setEditingOr
         </button>
 
         {/* Tiêu đề */}
-        <h1 className="text-3xl font-bold text-var(--text-color) hidden lg:block ml-4">Quản trị</h1>
+        <h1 className="text-3xl font-bold text-var(--text-color) hidden lg:block ml-5">Quản trị</h1>
 
         <div className="flex items-center justify-end p-4">
           <SwitchAdminHeader />
