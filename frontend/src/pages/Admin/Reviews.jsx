@@ -63,18 +63,18 @@ const ReplyModal = ({ isOpen, onClose, onSendReply, review }) => {
 
   return (
     <CommonModal title="Phản hồi đánh giá" isOpen={isOpen} onClose={onClose}>
-      <div className="mt-4 p-4 border rounded-xl bg-gray-50">
-        <h4 className="font-semibold text-lg">
+      <div className="mt-4 p-4 border rounded-xl ">
+        <h4 className="font-semibold text-black text-lg">
           {review?.user?.name || "Người dùng"} {getStarRating(review?.rating)}
         </h4>
-        <p className="text-sm text-gray-600 italic">"{review?.content}"</p>
+        <p className="text-sm text-black italic">"{review?.content}"</p>
       </div>
       <div className="mt-4">
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="block text-sm font-medium  mb-1">
           Nội dung phản hồi
         </label>
         <textarea
-          className="w-full h-32 px-4 py-2 border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-[#ff69b4]"
+          className="w-full text-black h-32 px-4 py-2 border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-[#ff69b4]"
           placeholder="Nhập phản hồi của bạn..."
           value={replyContent}
           onChange={(e) => setReplyContent(e.target.value)}
@@ -283,9 +283,9 @@ const ReviewManagementPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8 font-sans text-gray-800">
+    <div style={{ backgroundColor: "var(--bg-color)", color: "var(--text-color)" }} className="min-h-screen  p-5 font-sans ">
       <header className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Quản lý đánh giá</h1>
+        <h1 className="text-3xl font-bold ">Quản lý đánh giá</h1>
         <button className="flex items-center space-x-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors bg-pink-100 hover:bg-pink-200 text-[#ff69b4]">
           <ArrowDownTrayIcon className="w-5 h-5" />
           <span>Xuất báo cáo</span>
@@ -293,13 +293,13 @@ const ReviewManagementPage = () => {
       </header>
 
       {/* Bộ lọc */}
-      <div className="bg-white rounded-xl shadow-md p-6">
+      <div className=" rounded-xl shadow-md p-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 space-y-4 md:space-y-0 md:space-x-4">
           <div className="relative w-full md:w-1/2">
             <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
               type="text"
-              className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-300"
+              className="w-full pl-10 text-black pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-300"
               placeholder="Tìm kiếm theo nội dung, sản phẩm, user..."
               value={searchTerm}
               onChange={handleSearch}
@@ -312,6 +312,7 @@ const ReviewManagementPage = () => {
             loadOptions={loadOptions}
             value={selectedProduct}
             onChange={handleChange}
+            className="text-black"
             isClearable
             placeholder="Chọn sản phẩm..."
             styles={{
@@ -320,7 +321,7 @@ const ReviewManagementPage = () => {
           />
           <div className="flex space-x-2 items-center">
             <select
-              className="px-4 py-2 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-pink-300"
+              className="px-4 py-2 text-black border rounded-lg bg-gray-50 focus:ring-2 focus:ring-pink-300"
               value={starFilter}
               onChange={(e) => setStarFilter(e.target.value)}
             >
@@ -330,7 +331,7 @@ const ReviewManagementPage = () => {
               ))}
             </select>
             <select
-              className="px-4 py-2 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-pink-300"
+              className="px-4 py-2 border text-black rounded-lg bg-gray-50 focus:ring-2 focus:ring-pink-300"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
             >
@@ -353,7 +354,7 @@ const ReviewManagementPage = () => {
               <div
                 key={review._id}
                 // Card nền trắng, bo góc lớn hơn, bóng đổ nhẹ tạo cảm giác sang trọng
-                className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100"
+                className="rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100"
               >
                 <div className="flex justify-between items-start">
 
@@ -370,7 +371,7 @@ const ReviewManagementPage = () => {
                     <div className="flex-grow min-w-0">
                       {/* Hàng 1: Tên, Sao, Trạng thái */}
                       <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-3 mb-2">
-                        <span className="text-lg font-extrabold text-gray-900 truncate">
+                        <span className="text-lg font-extrabold  truncate">
                           {review?.user?.name || "Người dùng"}
                         </span>
                         <div className="flex items-center space-x-2 mt-1 sm:mt-0">
@@ -384,27 +385,27 @@ const ReviewManagementPage = () => {
                       </div>
 
                       {/* Hàng 2: Sản phẩm được đánh giá */}
-                      <div className="flex items-center space-x-2 text-gray-700 mb-3">
+                      <div className="flex items-center space-x-2  mb-3">
                         <span className="text-sm font-medium">cho:</span>
                         <img src={review?.product?.mainImage} alt={review?.product?.name} className="w-8 h-8 rounded-lg object-cover shadow-sm" />
-                        <span className="text-sm text-gray-800 font-semibold truncate">
+                        <span className="text-sm  font-semibold truncate">
                           {review?.product?.name}
                         </span>
                       </div>
 
                       {/* Nội dung đánh giá */}
                       {/* Sử dụng font chữ dễ đọc hơn cho nội dung */}
-                      <p className="text-base text-gray-800 mt-2 leading-relaxed">
+                      <p className="text-base  mt-2 leading-relaxed">
                         {review.content}
                       </p>
 
                       {/* Thông tin phụ: Thời gian và Hữu ích */}
-                      <div className="flex items-center space-x-4 mt-3 pt-3 border-t border-gray-100 text-sm text-gray-500">
+                      <div className="flex items-center space-x-4 mt-3 pt-3 border-t border-gray-100 text-sm ">
                         <span className="text-xs">
                           {new Date(review.createdAt).toLocaleString()}
                         </span>
                         <div className="flex items-center space-x-1">
-                          <span className="font-semibold text-gray-700">{review.helpfulCount}</span>
+                          <span className="font-semibold ">{review.helpfulCount}</span>
                           <span>người thấy hữu ích</span>
                         </div>
                       </div>
@@ -483,7 +484,7 @@ const ReviewManagementPage = () => {
             <button
               onClick={() => setPage((p) => Math.max(p - 1, 1))}
               disabled={page === 1}
-              className="px-3 py-1 border rounded-lg bg-gray-100 hover:bg-gray-200 disabled:opacity-50"
+              className="px-3 py-1 border rounded-lg  hover:bg-gray-200 disabled:opacity-50"
             >
               ← Trước
             </button>
@@ -492,8 +493,8 @@ const ReviewManagementPage = () => {
                 key={i}
                 onClick={() => setPage(i + 1)}
                 className={`px-3 py-1 border rounded-lg font-semibold ${page === i + 1
-                  ? "bg-pink-600 text-white"
-                  : "bg-white hover:bg-gray-100"
+                  ? "bg-pink-600 text-black"
+                  : " hover:bg-pink-600"
                   }`}
               >
                 {i + 1}
@@ -502,7 +503,7 @@ const ReviewManagementPage = () => {
             <button
               onClick={() => setPage((p) => p + 1)}
               disabled={page >= Math.ceil(total / limit)}
-              className="px-3 py-1 border rounded-lg bg-gray-100 hover:bg-gray-200 disabled:opacity-50"
+              className="px-3 py-1 border rounded-lg  hover:bg-gray-200 disabled:opacity-50"
             >
               Sau →
             </button>

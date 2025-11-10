@@ -9,6 +9,7 @@ import {
   PlayIcon,
   CheckCircleIcon,
   XMarkIcon,
+  FunnelIcon
 } from '@heroicons/react/24/outline'
 import {
   ExclamationCircleIcon,
@@ -83,6 +84,26 @@ const PromotionManagementPage = () => {
   const [isLoading, setLoading] = useState(false)
   const [promotionsData, setPromotionsData] = useState([])
   const [isResumeModalOpen, setIsResumeModalOpen] = useState(false)
+  const [page, setPage] = useState(1)
+  const [limit, setLimit] = useState(5)
+  const [total, setTotal] = useState(0)
+  const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false) // State mới cho panel bộ lọc
+
+  const [filters, setFilters] = useState({
+    searchTerm: '',
+    status: 'Tất cả',
+    type: '',
+    autoCondition: '',
+    minDiscountValue: '',
+    maxDiscountValue: '',
+    startDateFrom: '',
+    startDateTo: '',
+    endDateFrom: '',
+    endDateTo: '',
+  });
+  const toggleFilterPanel = () => {
+    setIsFilterPanelOpen(prev => !prev);
+  }
   const handleResumeClick = (promotion) => {
     setSelectedPromotion(promotion)
     setIsResumeModalOpen(true)
@@ -153,29 +174,65 @@ const PromotionManagementPage = () => {
     return isExpired || isMaxUsage
   }
 
-  const fetVoucher = async () => {
-    setLoading(true)
+  const fetVoucher = async (filters = {}) => {
+    setLoading(true);
     try {
-      const response = await apiAdmin.get('/vouchers')
+      const params = new URLSearchParams();
 
-      setPromotionsData(response.data.data || [])
+      params.append('page', page);
+      params.append('limit', limit);
+
+      if (filters.searchTerm) {
+        params.append('name', filters.searchTerm);
+        params.append('code', filters.searchTerm);
+      }
+      if (filters.type) params.append('type', filters.type);
+
+      if (filters.status && filters.status !== 'Tất cả') {
+        if (filters.status === 'Đang hoạt động') params.append('status', 'active');
+        else if (filters.status === 'Bị tạm dừng') params.append('status', 'paused');
+        else if (filters.status === 'Hết hạn') params.append('status', 'expired');
+      }
+      if (filters.autoCondition) params.append('autoCondition', filters.autoCondition);
+
+      if (filters.minDiscountValue)
+        params.append('minDiscountValue', filters.minDiscountValue);
+      if (filters.maxDiscountValue)
+        params.append('maxDiscountValue', filters.maxDiscountValue);
+
+      if (filters.startDateFrom)
+        params.append('startDateFrom', filters.startDateFrom);
+      if (filters.startDateTo)
+        params.append('startDateTo', filters.startDateTo);
+
+      // Khoảng thời gian kết thúc
+      if (filters.endDateFrom)
+        params.append('endDateFrom', filters.endDateFrom);
+      if (filters.endDateTo)
+        params.append('endDateTo', filters.endDateTo);
+
+      const res = await apiAdmin.get(`/vouchers?${params.toString()}`);
+      setPromotionsData(res.data.data || []);
+      setTotal(res.data.total || 0);
     } catch (error) {
-      console.error('Error fetching promotions:', error)
+      console.error('Error fetching promotions:', error);
+      toast.error('Không thể tải danh sách khuyến mãi!');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
+
+
   useEffect(() => {
+    const handler = setTimeout(() => {
+      setPage(1);
+      fetVoucher(filters);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [filters, page, limit]);
 
-    fetVoucher()
-  }, [])
 
-  const filteredPromotions = promotionsData?.filter(promo => {
-    const matchesSearch = promo.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      promo.code.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesStatus = statusFilter === 'Tất cả' || promo.status === statusFilter
-    return matchesSearch && matchesStatus
-  })
+
 
   const getStatusClasses = (status) => {
     switch (status) {
@@ -195,9 +252,9 @@ const PromotionManagementPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8 font-sans text-gray-800">
+    <div style={{ backgroundColor: "var(--bg-color)", color: "var(--text-color)" }} className="min-h-screen  p-8 font-sans text-gray-800">
       <header className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Quản lý khuyến mại</h1>
+        <h1 className="text-3xl font-bold ">Quản lý khuyến mại</h1>
         <div className="flex space-x-2">
           <button
             onClick={handleAddClick}
@@ -209,47 +266,143 @@ const PromotionManagementPage = () => {
         </div>
       </header>
 
-      <div className="bg-white rounded-xl shadow-md p-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 space-y-4 md:space-y-0 md:space-x-4">
+      <div className=" rounded-xl shadow-md p-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-4 space-y-4 md:space-y-0 md:space-x-4">
           <div className="relative w-full md:w-1/2">
             <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
               type="text"
-              className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-300"
+              className="w-full pl-10 text-black pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-300"
               placeholder="Tìm kiếm theo tên hoặc mã khuyến mại..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              value={filters.searchTerm}
+              onChange={(e) => setFilters({ ...filters, searchTerm: e.target.value })}
             />
           </div>
-          <div className="flex space-x-2 items-center">
-            <select
-              className="px-4 py-2 border rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-pink-300"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
+          
+          <div className="flex space-x-3 items-center">
+            {/* Nút Bộ lọc */}
+            <button 
+              onClick={toggleFilterPanel}
+              className={`flex items-center space-x-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors border ${isFilterPanelOpen ? 'bg-pink-100 text-[#ff69b4] border-pink-300 hover:bg-pink-200' : 'bg-gray-50 text-gray-700 border-gray-300 hover:bg-gray-100'}`}
             >
-              <option>Tất cả</option>
-              <option>Đang hoạt động</option>
-              <option>Bị tạm dừng</option>
-            </select>
-            <button className="px-4 py-2 text-sm font-medium rounded-lg transition-colors bg-pink-100 hover:bg-pink-200 text-[#ff69b4] flex items-center space-x-2">
+              <FunnelIcon className="w-5 h-5" />
+              <span>{isFilterPanelOpen ? 'Ẩn Bộ lọc' : 'Bộ lọc'}</span>
+            </button>
+
+            {/* Nút Xuất báo cáo */}
+            <button 
+              // Thêm logic export tại đây nếu cần
+              className="px-4 py-2 text-sm font-medium rounded-lg transition-colors bg-pink-100 hover:bg-pink-200 text-[#ff69b4] flex items-center space-x-2 border border-pink-300"
+            >
               <ArrowDownTrayIcon className="w-5 h-5" />
               <span>Xuất báo cáo</span>
             </button>
           </div>
         </div>
+           <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isFilterPanelOpen ? 'max-h-96 opacity-100 mb-6' : 'max-h-0 opacity-0 mb-0'}`}>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            
+            {/* Bộ lọc Loại */}
+            <select
+              className="px-3 py-2 border rounded-lg text-black bg-white focus:ring-2 focus:ring-pink-300"
+              value={filters.type}
+              onChange={(e) => setFilters({ ...filters, type: e.target.value, status: 'Tất cả' })}
+            >
+              <option value="">Tất cả loại</option>
+              <option value="percent">Giảm theo %</option>
+              <option value="amount">Giảm theo số tiền</option>
+              <option value="free_shipping">Miễn phí vận chuyển</option>
+            </select>
+
+            {/* Bộ lọc Trạng thái */}
+            <select
+              className="px-3 py-2 border rounded-lg text-black bg-white focus:ring-2 focus:ring-pink-300"
+              value={filters.status}
+              onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+            >
+              <option value="Tất cả">Tất cả trạng thái</option>
+              <option value="Đang hoạt động">Đang hoạt động</option>
+              <option value="Bị tạm dừng">Bị tạm dừng</option>
+              <option value="Hết hạn">Hết hạn</option>
+            </select>
+
+            {/* Bộ lọc Điều kiện */}
+            <select
+              className="px-3 py-2 border rounded-lg text-black bg-white focus:ring-2 focus:ring-pink-300"
+              value={filters.autoCondition}
+              onChange={(e) => setFilters({ ...filters, autoCondition: e.target.value })}
+            >
+              <option value="">Tất cả điều kiện</option>
+              <option value="new_user">Người dùng mới</option>
+              <option value="vip_user">Khách VIP</option>
+              <option value="birthday">Sinh nhật</option>
+              <option value="manual">Tạo thủ công</option>
+            </select>
+            
+            {/* Bộ lọc Giá trị giảm Min */}
+            <input
+              type="number"
+              placeholder="Giá trị giảm tối thiểu"
+              className="px-3 py-2 border rounded-lg text-black focus:ring-2 focus:ring-pink-300"
+              value={filters.minDiscountValue}
+              onChange={(e) => setFilters({ ...filters, minDiscountValue: e.target.value })}
+            />
+            {/* Bộ lọc Giá trị giảm Max */}
+            <input
+              type="number"
+              placeholder="Giá trị giảm tối đa"
+              className="px-3 py-2 border rounded-lg text-black focus:ring-2 focus:ring-pink-300"
+              value={filters.maxDiscountValue}
+              onChange={(e) => setFilters({ ...filters, maxDiscountValue: e.target.value })}
+            />
+
+            {/* Khoảng thời gian BẮT ĐẦU */}
+            <input
+              type="date"
+              title="Ngày bắt đầu từ"
+              className="px-3 py-2 border rounded-lg text-black focus:ring-2 focus:ring-pink-300"
+              value={filters.startDateFrom}
+              onChange={(e) => setFilters({ ...filters, startDateFrom: e.target.value })}
+            />
+            <input
+              type="date"
+              title="Ngày bắt đầu đến"
+              className="px-3 py-2 border rounded-lg text-black focus:ring-2 focus:ring-pink-300"
+              value={filters.startDateTo}
+              onChange={(e) => setFilters({ ...filters, startDateTo: e.target.value })}
+            />
+
+            {/* Khoảng thời gian KẾT THÚC */}
+            <input
+              type="date"
+              title="Ngày kết thúc từ"
+              className="px-3 py-2 border rounded-lg text-black focus:ring-2 focus:ring-pink-300"
+              value={filters.endDateFrom}
+              onChange={(e) => setFilters({ ...filters, endDateFrom: e.target.value })}
+            />
+            <input
+              type="date"
+              title="Ngày kết thúc đến"
+              className="px-3 py-2 border rounded-lg text-black focus:ring-2 focus:ring-pink-300"
+              value={filters.endDateTo}
+              onChange={(e) => setFilters({ ...filters, endDateTo: e.target.value })}
+            />
+          </div>
+        </div>
+
 
         <div className="space-y-4">
-          {filteredPromotions.map((promo) => (
-            <div key={promo.id} className="relative bg-gray-50 rounded-xl p-6 flex flex-col md:flex-row justify-between items-center md:items-start hover:bg-pink-50 transition-colors">
+          {promotionsData?.map((promo) => (
+            <div key={promo.id} className="relative  rounded-xl p-6 flex flex-col md:flex-row justify-between items-center md:items-start hover:bg-pink-50 hover:text-black transition-colors">
               <div className="flex-grow">
                 <div className="flex items-center space-x-2 mb-1">
-                  <span className="font-semibold text-gray-900">{promo.name}</span>
+                  <span className="font-semibold ">{promo.name}</span>
                   <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusClasses(promo.status)}`}>
                     {promo?.status}
                   </span>
                   <span className="px-2 py-1 text-xs font-medium rounded-full bg-pink-200 text-pink-700">{promo.code}</span>
                 </div>
-                <p className="text-sm text-gray-600 mt-2">{promo.description}</p>
+                <p className="text-sm  mt-2">{promo.description}</p>
                 {checkVoucherExpirationOrUsage(promo) && (
                   <span className="text-red-600 text-sm font-semibold">
                     Hết hạn hoặc hết lượt sử dụng
@@ -267,14 +420,14 @@ const PromotionManagementPage = () => {
                 </div>
               </div>
               <div className="flex-shrink-0 text-right md:w-1/3 mt-4 md:mt-0">
-                <p className="text-sm text-gray-500">
-                  <span className="font-medium text-gray-700">Thời gian</span>
+                <p className="text-sm ">
+                  <span className="font-medium ">Thời gian</span>
                   <br />
                   {formatDateTime(promo.startDate)} - {formatDateTime(promo.endDate)}
                 </p>
                 <div className="mt-4">
-                  <p className="text-sm font-medium text-gray-700">Sử dụng</p>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm font-medium ">Sử dụng</p>
+                  <p className="text-sm ">
                     {promo.usedCount}/{promo.usageLimit} ({getUsagePercentage(promo.usedCount, promo.usageLimit).toFixed(0)}%)
                   </p>
                   <div className="w-full bg-gray-200 rounded-full h-2.5 mt-1">
@@ -309,6 +462,36 @@ const PromotionManagementPage = () => {
             </div>
           ))}
         </div>
+        {total > limit && (
+          <div className="flex justify-center items-center mt-6 space-x-2">
+            <button
+              onClick={() => setPage((p) => Math.max(p - 1, 1))}
+              disabled={page === 1}
+              className="px-3 py-1 border rounded-lg  hover:bg-gray-200 disabled:opacity-50"
+            >
+              ← Trước
+            </button>
+            {Array.from({ length: Math.ceil(total / limit) }, (_, i) => (
+              <button
+                key={i}
+                onClick={() => setPage(i + 1)}
+                className={`px-3 py-1 border rounded-lg font-semibold ${page === i + 1
+                  ? "bg-pink-600 text-black"
+                  : " hover:bg-pink-600"
+                  }`}
+              >
+                {i + 1}
+              </button>
+            ))}
+            <button
+              onClick={() => setPage((p) => p + 1)}
+              disabled={page >= Math.ceil(total / limit)}
+              className="px-3 py-1 border rounded-lg  hover:bg-gray-200 disabled:opacity-50"
+            >
+              Sau →
+            </button>
+          </div>
+        )}
       </div>
 
       {isAddModalOpen && (

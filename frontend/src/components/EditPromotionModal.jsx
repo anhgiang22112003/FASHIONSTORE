@@ -159,7 +159,7 @@ const EditPromotionModal = ({ title, isOpen, onClose, onSave, promotion = null }
               name="name"
               value={formData.name}
               onChange={handleInputChange}
-              className="mt-1 block w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff69b4]"
+              className="mt-1 text-black block w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff69b4]"
               placeholder="Nhập tên khuyến mại"
             />
           </div>
@@ -170,7 +170,7 @@ const EditPromotionModal = ({ title, isOpen, onClose, onSave, promotion = null }
               name="description"
               value={formData.description}
               onChange={handleInputChange}
-              className="mt-1 block w-full h-24 px-4 py-2 border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-[#ff69b4]"
+              className="mt-1 block text-black w-full h-24 px-4 py-2 border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-[#ff69b4]"
               placeholder="Mô tả chi tiết về khuyến mại"
             ></textarea>
           </div>
@@ -185,7 +185,7 @@ const EditPromotionModal = ({ title, isOpen, onClose, onSave, promotion = null }
                   value="percent"
                   checked={formData.type === 'percent'}
                   onChange={handleInputChange}
-                  className="form-radio text-[#ff69b4] focus:ring-[#ff69b4]"
+                  className="form-radio text-black text-[#ff69b4] focus:ring-[#ff69b4]"
                 />
                 <span className="text-gray-700 text-sm">Giảm theo %</span>
               </label>
@@ -196,7 +196,7 @@ const EditPromotionModal = ({ title, isOpen, onClose, onSave, promotion = null }
                   value="amount"
                   checked={formData.type === 'amount'}
                   onChange={handleInputChange}
-                  className="form-radio text-[#ff69b4] focus:ring-[#ff69b4]"
+                  className="form-radio text-black text-[#ff69b4] focus:ring-[#ff69b4]"
                 />
                 <span className="text-gray-700 text-sm">Giảm theo số tiền</span>
               </label>
@@ -207,7 +207,7 @@ const EditPromotionModal = ({ title, isOpen, onClose, onSave, promotion = null }
                   value="free_shipping"
                   checked={formData.type === 'free_shipping'}
                   onChange={handleInputChange}
-                  className="form-radio text-[#ff69b4] focus:ring-[#ff69b4]"
+                  className="form-radio text-black text-[#ff69b4] focus:ring-[#ff69b4]"
                 />
                 <span className="text-gray-700 text-sm">Miễn phí vận chuyển</span>
               </label>
@@ -222,7 +222,7 @@ const EditPromotionModal = ({ title, isOpen, onClose, onSave, promotion = null }
                 name="discountValue"
                 value={formData.discountValue}
                 onChange={handleInputChange}
-                className="mt-1 block w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff69b4]"
+                className="mt-1 block w-full text-black px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff69b4]"
                 placeholder="VD: 20"
               />
             </div>
@@ -235,7 +235,7 @@ const EditPromotionModal = ({ title, isOpen, onClose, onSave, promotion = null }
                 name="discountValue"
                 value={formData.discountValue}
                 onChange={handleInputChange}
-                className="mt-1 block w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff69b4]"
+                className="mt-1 block w-full text-black px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff69b4]"
                 placeholder="VD: 50.000"
               />
             </div>
@@ -249,19 +249,19 @@ const EditPromotionModal = ({ title, isOpen, onClose, onSave, promotion = null }
                 name="minOrderValue"
                 value={formData.minOrderValue}
                 onChange={handleInputChange}
-                className="mt-1 block w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff69b4]"
+                className="mt-1 block w-full text-black px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff69b4]"
                 placeholder="VD: 200.000"
               />
             </div>
             {formData.type === 'percent' && (
               <div className="w-1/2">
-                <label className="block text-sm font-medium text-gray-700">Giảm tối đa</label>
+                <label className="block text-sm  font-medium text-gray-700">Giảm tối đa</label>
                 <input
                   type="text"
                   name="maxDiscount"
                   value={formData.maxDiscount}
                   onChange={handleInputChange}
-                  className="mt-1 block w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff69b4]"
+                  className="mt-1 block w-full text-black px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff69b4]"
                   placeholder="VD: 100.000"
                 />
               </div>
@@ -280,7 +280,7 @@ const EditPromotionModal = ({ title, isOpen, onClose, onSave, promotion = null }
                 name="code"
                 value={formData.code}
                 onChange={handleInputChange}
-                className="block w-full px-4 py-2 border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-[#ff69b4]"
+                className="block w-full px-4 py-2 text-black border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-[#ff69b4]"
                 placeholder="VD: SALE20"
               />
               <button
@@ -294,13 +294,13 @@ const EditPromotionModal = ({ title, isOpen, onClose, onSave, promotion = null }
           {/* Ngày bắt đầu - kết thúc */}
           <div className="flex space-x-4">
             <div className="w-1/2">
-              <label className="block text-sm font-medium text-gray-700">Ngày bắt đầu</label>
+              <label className="block text-sm  font-medium text-gray-700">Ngày bắt đầu</label>
               <input
                 type="datetime-local"
                 name="startDate"
                 value={formData.startDate}
                 onChange={handleInputChange}
-                className="mt-1 block w-full px-4 py-2 border rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#ff69b4]"
+                className="mt-1 block w-full text-black px-4 py-2 border rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#ff69b4]"
               />
             </div>
             <div className="w-1/2">
@@ -310,7 +310,7 @@ const EditPromotionModal = ({ title, isOpen, onClose, onSave, promotion = null }
                 name="endDate"
                 value={formData.endDate}
                 onChange={handleInputChange}
-                className="mt-1 block w-full px-4 py-2 border rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#ff69b4]"
+                className="mt-1 block w-full text-black px-4 py-2 border rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#ff69b4]"
               />
             </div>
           </div>
@@ -322,7 +322,7 @@ const EditPromotionModal = ({ title, isOpen, onClose, onSave, promotion = null }
               name="usageLimit"
               value={formData.usageLimit}
               onChange={handleInputChange}
-              className="mt-1 block w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff69b4]"
+              className="mt-1 block w-full text-black px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff69b4]"
               placeholder="VD: 100"
             />
           </div>
@@ -332,7 +332,7 @@ const EditPromotionModal = ({ title, isOpen, onClose, onSave, promotion = null }
               name="autoCondition"
               value={formData.autoCondition}
               onChange={handleInputChange}
-              className="mt-1 block w-full px-4 py-2 border rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#ff69b4]"
+              className="mt-1 block w-full text-black px-4 py-2 border rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#ff69b4]"
             >
               <option value="">Tất cả người dùng</option>
               <option value="new_user">Chỉ người dùng mới</option>
@@ -362,7 +362,7 @@ const EditPromotionModal = ({ title, isOpen, onClose, onSave, promotion = null }
                 name="applicableCategories"
                 value={formData.applicableCategories}
                 onChange={handleInputChange}
-                className="mt-1 block w-full px-4 py-2 border rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#ff69b4]"
+                className="mt-1 block w-full text-black px-4 py-2 border rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#ff69b4]"
               >
                 <option value="Tất cả danh mục">Tất cả danh mục</option>
                 {categories.map((cat) => (
