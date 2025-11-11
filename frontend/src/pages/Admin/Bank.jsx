@@ -142,14 +142,14 @@ const Bank = () => {
 
                 {/* FORM */}
                 {isFormOpen && (
-                    <div className="bg-white p-8 rounded-2xl shadow-xl mb-6">
-                        <h3 className="text-xl font-bold text-gray-800 mb-4">
+                    <div className=" p-8 rounded-2xl shadow-xl mb-6">
+                        <h3 className="text-xl font-bold  mb-4">
                             {editBank ? 'Chỉnh sửa ngân hàng' : 'Thêm ngân hàng mới'}
                         </h3>
                         <form onSubmit={handleSubmit} className="space-y-4">
                             {/* inputs ... */}
                             <label className="block">
-                                <span className="text-gray-600">Tên ngân hàng</span>
+                                <span className="">Tên ngân hàng</span>
                                 <input
                                     type="text"
                                     name="name"
@@ -160,7 +160,7 @@ const Bank = () => {
                                 />
                             </label>
                             <label className="block">
-                                <span className="text-gray-600">Mô tả</span>
+                                <span className="">Mô tả</span>
                                 <textarea
                                     name="description"
                                     onChange={(e) => setdec(e.target.value)}
@@ -171,7 +171,7 @@ const Bank = () => {
                             </label>
 
                             <label className="block">
-                                <span className="text-gray-600">App</span>
+                                <span className="">App</span>
                                 <textarea
                                     name="app"
                                     onChange={(e) => setApp(e.target.value)}
@@ -181,7 +181,7 @@ const Bank = () => {
                                 ></textarea>
                             </label>
                             <label className="block">
-                                <span className="text-gray-600">SMS</span>
+                                <span className="">SMS</span>
                                 <textarea
                                     name="sms"
                                     onChange={(e) => setSms(e.target.value)}
@@ -190,8 +190,8 @@ const Bank = () => {
                                     className="w-full text-black px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200 resize-none"
                                 ></textarea>
                             </label>
-                            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                                <span className="text-gray-700 font-medium">Trạng thái: {isNewBank ? 'Đang hoạt động' : 'Ngừng hoạt động'}</span>
+                            <div className="flex items-center justify-between p-4 rounded-lg">
+                                <span className=" font-medium">Trạng thái: {isNewBank ? 'Đang hoạt động' : 'Ngừng hoạt động'}</span>
                                 <Switch
                                     checked={isNewBank}
                                     onChange={setIsNewBank} // 👈 Cập nhật state khi click
@@ -231,7 +231,7 @@ const Bank = () => {
                 )}
 
                 {/* TABLE */}
-                <div className="bg-white p-6 rounded-2xl shadow-xl overflow-x-auto">
+                <div className=" p-6 rounded-2xl shadow-xl overflow-x-auto">
                     {isLoading ? (
                         <div className="text-center py-6 text-gray-500">Đang tải dữ liệu...</div>
                     ) : (
@@ -246,19 +246,19 @@ const Bank = () => {
                                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Hành động</th>
                                 </tr>
                             </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
+                            <tbody className=" divide-y divide-gray-200">
                                 {bank.map(bank => (
-                                    <tr key={bank._id}>
+                                    <tr className='hover:bg-pink-50 hover:text-black' key={bank._id}>
                                         {/* Trong bảng */}
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{bank?._id}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium ">{bank?._id}</td>
 
                                         </td>
 
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{bank?.name}</td>
-                                        <td className="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">{bank?.app}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{bank?.description}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{bank?.status ? "Hoạt động" : "Không hoạt động"}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium ">{bank?.name}</td>
+                                        <td className="px-6 py-4 text-sm  max-w-xs truncate">{bank?.app}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm ">{bank?.description}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm ">{bank?.status ? "Hoạt động" : "Không hoạt động"}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
                                             <button
                                                 onClick={() => handleOpenForm(bank)}
