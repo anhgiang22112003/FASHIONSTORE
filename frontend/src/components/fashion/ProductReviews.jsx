@@ -14,6 +14,7 @@ const ProductReviews = ({ productId }) => {
   const [ratingFilter, setRatingFilter] = useState('')
   const [replyInputs, setReplyInputs] = useState({})
   const [expandedReplies, setExpandedReplies] = useState({})
+  const [showReplyForm, setShowReplyForm] = useState({})
 
   const { user } = useContext(AuthContext)
   const isAdmin = user?.role === 'admin'
@@ -72,6 +73,7 @@ const ProductReviews = ({ productId }) => {
       toast.error(error.response?.data?.message || 'Gửi phản hồi thất bại.')
     }
   }
+  
   const handleAdminReply = async (reviewId) => {
     const message = replyInputs[reviewId]?.trim()
     if (!message) return toast.warning('Vui lòng nhập nội dung phản hồi!')
@@ -88,10 +90,9 @@ const ProductReviews = ({ productId }) => {
     }
   }
 
-
   // === Render sao
   const renderStars = (rating) => (
-    <div className="flex items-center">
+    <div className="flex items-center gap-1">
       {[...Array(5)].map((_, i) => (
         <Star
           key={i}
@@ -104,198 +105,299 @@ const ProductReviews = ({ productId }) => {
   // === Render review list
   const renderReviews = () => (
     <div className="space-y-6">
-      <h3 className="text-xl font-semibold">Đánh giá sản phẩm ({reviews.length})</h3>
-      {reviews.map((review, index) => (
-        <div key={index} className="border-b pb-4 last:border-b-0">
-          {/* Người viết review */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <User className="w-5 h-5 text-gray-500" />
-              <span className="font-semibold">{review.user?.name || 'Ẩn danh'}</span>
+      <div className="flex items-center justify-between mb-6">
+        <h3 className="text-xl font-semibold text-pink-500 text-foreground">
+          Đánh giá sản phẩm ({reviews.length})
+        </h3>
+        <div className="flex items-center gap-2">
+          <label className="text-sm text-muted-foreground">Lọc theo:</label>
+          <select
+            value={ratingFilter}
+            onChange={(e) => setRatingFilter(e.target.value)}
+            className="border border-border rounded-lg px-3 py-1.5 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary"
+          >
+            <option value="">Tất cả</option>
+            {[5, 4, 3, 2, 1].map((star) => (
+              <option key={star} value={star}>{star} sao</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {reviews.length === 0 ? (
+        <div className="text-center py-12 text-muted-foreground">
+          Chưa có đánh giá nào cho sản phẩm này
+        </div>
+      ) : (
+        reviews.map((review) => (
+          <div key={review._id} className="border-b border-border pb-6 last:border-b-0">
+            {/* Header: User info + Rating */}
+            <div className="flex items-start justify-between mb-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                  <User className="w-5 h-5 text-muted-foreground" />
+                </div>
+                <div>
+                  <p className="font-semibold text-pink-500 text-foreground">
+                    {review.user?.name || 'Ẩn danh'}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {new Date(review.createdAt).toLocaleDateString('vi-VN', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric',
+                    })}
+                  </p>
+                </div>
+              </div>
+              {renderStars(review.rating)}
             </div>
-            {renderStars(review.rating)}
-          </div>
 
-          <p className="text-sm text-gray-500 mt-1 mb-2">
-            {new Date(review.createdAt).toLocaleDateString('vi-VN')}
-          </p>
+            {/* Review content */}
+            <p className="text-sm text-foreground leading-relaxed mb-3">{review.content}</p>
 
-          <p className="text-gray-700">{review.content}</p>
+            {/* === Danh sách phản hồi của admin và user === */}
+            {review.replies?.length > 0 && (
+              <div className="ml-12 space-y-2 mb-3">
+                <div
+                  className={`space-y-2 overflow-y-auto ${
+                    expandedReplies[review._id] ? '' : 'max-h-48'
+                  }`}
+                >
+                  {[...review.replies]
+                    .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+                    .map((reply, i) => {
+                      const isAdminReply = reply.senderType === 'admin'
+                      const sender = review.replyUsers?.find((u) => u._id === reply.senderId)
 
-          {/* === Danh sách phản hồi của admin và user === */}
-          {review.replies?.length > 0 && (
-            <div
-              className={`space-y-2 mt-2 ml-4 overflow-y-auto ${expandedReplies[review._id] ? '' : 'max-h-48'}`}
-            >
-              {[...review.replies]
-                .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
-                .map((reply, i) => {
-                  const isAdmin = reply.senderType === 'admin'
-                  const sender = review.replyUsers?.find(u => u._id === reply.senderId)
+                      return (
+                        <div
+                          key={i}
+                          className={`p-3 rounded-lg text-sm ${
+                            isAdminReply
+                              ? 'bg-pink-50 border border-pink-200'
+                              : 'bg-muted border border-border'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between mb-1">
+                            <span
+                              className={`font-semibold text-xs ${
+                                isAdminReply ? 'text-pink-600' : 'text-foreground'
+                              }`}
+                            >
+                              {sender?.name || (isAdminReply ? '👑 Quản trị viên' : 'Ẩn danh')}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              {new Date(reply.createdAt).toLocaleString('vi-VN', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              })}
+                            </span>
+                          </div>
+                          <p className="text-foreground">{reply.message}</p>
+                        </div>
+                      )
+                    })}
+                </div>
+                {review.replies?.length > 3 && (
+                  <button
+                    onClick={() =>
+                      setExpandedReplies({
+                        ...expandedReplies,
+                        [review._id]: !expandedReplies[review._id],
+                      })
+                    }
+                    className="text-xs text-primary hover:underline"
+                  >
+                    {expandedReplies[review._id] ? '← Thu gọn' : `Xem thêm ${review.replies.length - 3} phản hồi →`}
+                  </button>
+                )}
+              </div>
+            )}
 
-                  return (
-                    <div
-                      key={i}
-                      className={`p-2 rounded-lg ${isAdmin ? 'bg-pink-50 border border-pink-200' : 'bg-gray-50 border border-gray-200'}`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className={`font-semibold ${isAdmin ? 'text-pink-600' : 'text-gray-700'}`}>
-                          {sender?.name || (isAdmin ? 'Admin' : 'Ẩn danh')}
-                        </span>
-                        <span className="text-xs text-gray-400">
-                          {new Date(reply.createdAt).toLocaleString()}
-                        </span>
-                      </div>
-                      <p className="text-sm mt-1">{reply.message}</p>
+            {/* === Action buttons: Helpful + Reply === */}
+            <div className="flex items-center gap-4 ml-12">
+              <button
+                onClick={() => handleMarkHelpful(review._id)}
+                className="flex items-center gap-1.5 text-muted-foreground hover:text-primary transition-colors text-sm"
+              >
+                <ThumbsUp className="w-4 h-4" />
+                <span>Hữu ích ({review.helpfulCount || 0})</span>
+              </button>
+              <button
+                onClick={() =>
+                  setShowReplyForm({ ...showReplyForm, [review._id]: !showReplyForm[review._id] })
+                }
+                className="text-sm text-muted-foreground hover:text-primary transition-colors"
+              >
+                Trả lời
+              </button>
+            </div>
+
+            {/* === Form reply (chỉ hiện khi bấm "Trả lời") === */}
+            {showReplyForm[review._id] && (
+              <div className="mt-4 ml-12 bg-muted/50 p-4 rounded-lg border border-border">
+                {isAdmin ? (
+                  <>
+                    <textarea
+                      placeholder="Phản hồi với tư cách Quản trị viên..."
+                      value={replyInputs[review._id] || ''}
+                      onChange={(e) =>
+                        setReplyInputs({ ...replyInputs, [review._id]: e.target.value })
+                      }
+                      className="w-full border border-border rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary bg-background resize-none"
+                      rows={3}
+                    />
+                    <div className="flex gap-2 mt-3">
+                      <Button
+                        onClick={() => {
+                          handleAdminReply(review._id)
+                          setShowReplyForm({ ...showReplyForm, [review._id]: false })
+                        }}
+                        className="bg-primary text-primary-foreground hover:bg-primary/90"
+                        size="sm"
+                      >
+                        Gửi phản hồi
+                      </Button>
+                      <Button
+                        onClick={() => setShowReplyForm({ ...showReplyForm, [review._id]: false })}
+                        variant="outline"
+                        size="sm"
+                      >
+                        Hủy
+                      </Button>
                     </div>
-                  )
-                })}
-            </div>
-          )}
-          {review.replies?.length > 5 && (
-            <button
-              onClick={() =>
-                setExpandedReplies({
-                  ...expandedReplies,
-                  [review._id]: !expandedReplies[review._id],
-                })
-              }
-              className="text-sm text-pink-500 hover:underline mt-1"
-            >
-              {expandedReplies[review._id] ? 'Thu gọn' : 'Xem thêm'}
-            </button>
-          )}
-
-
-          {/* === Nút like === */}
-          <div className="flex items-center gap-2 mt-2">
-            <button
-              onClick={() => handleMarkHelpful(review._id)}
-              className="flex items-center gap-1 text-gray-600 hover:text-pink-500"
-            >
-              <ThumbsUp className="w-4 h-4" />
-              <span className="text-sm">{review.helpfulCount || 0} lượt thích</span>
-            </button>
-          </div>
-
-          {/* === Cho user reply lại === */}
-          <div className="mt-3 ml-8 space-y-2">
-            {isAdmin ? (
-              <>
-                <textarea
-                  placeholder="Phản hồi với tư cách Quản trị viên..."
-                  value={replyInputs[review._id] || ''}
-                  onChange={(e) =>
-                    setReplyInputs({ ...replyInputs, [review._id]: e.target.value })
-                  }
-                  className="w-full border border-pink-400 rounded-lg p-2 text-sm"
-                  rows={2}
-                />
-                <button
-                  onClick={() => handleAdminReply(review._id)}
-                  className="mt-1 px-3 py-1 text-sm bg-pink-600 text-white rounded hover:bg-pink-700"
-                >
-                  Gửi phản hồi (Admin)
-                </button>
-              </>
-            ) : (
-              <>
-                <textarea
-                  placeholder="Phản hồi lại admin..."
-                  value={replyInputs[review._id] || ''}
-                  onChange={(e) =>
-                    setReplyInputs({ ...replyInputs, [review._id]: e.target.value })
-                  }
-                  className="w-full border border-gray-300 rounded-lg p-2 text-sm"
-                  rows={2}
-                />
-                <button
-                  onClick={() => handleUserReply(review._id)}
-                  className="mt-1 px-3 py-1 text-sm bg-pink-500 text-white rounded hover:bg-pink-600"
-                >
-                  Gửi phản hồi
-                </button>
-              </>
+                  </>
+                ) : (
+                  <>
+                    <textarea
+                      placeholder="Nhập phản hồi của bạn..."
+                      value={replyInputs[review._id] || ''}
+                      onChange={(e) =>
+                        setReplyInputs({ ...replyInputs, [review._id]: e.target.value })
+                      }
+                      className="w-full border border-border rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary bg-background resize-none"
+                      rows={3}
+                    />
+                    <div className="flex gap-2 mt-3">
+                      <Button
+                        onClick={() => {
+                          handleUserReply(review._id)
+                          setShowReplyForm({ ...showReplyForm, [review._id]: false })
+                        }}
+                        className="bg-primary text-primary-foreground hover:bg-primary/90"
+                        size="sm"
+                      >
+                        Gửi
+                      </Button>
+                      <Button
+                        onClick={() => setShowReplyForm({ ...showReplyForm, [review._id]: false })}
+                        variant="outline"
+                        size="sm"
+                      >
+                        Hủy
+                      </Button>
+                    </div>
+                  </>
+                )}
+              </div>
             )}
           </div>
+        ))
+      )}
+
+      {reviews.length > 0 && (
+        <div className="text-center pt-4">
+          <Button variant="outline" className="border-primary text-primary hover:bg-primary/10">
+            Xem tất cả đánh giá
+          </Button>
         </div>
-      ))}
-      <Button variant="outline" className="mt-4">Xem tất cả đánh giá</Button>
+      )}
     </div>
   )
 
   // === Render tab sản phẩm yêu thích
   const renderLovedProducts = () => (
     <div className="space-y-4">
-      <h3 className="text-xl font-semibold">Sản phẩm được yêu thích khác</h3>
-      {lovedProducts.map((p) => (
-        <div
-          key={p._id}
-          className="flex items-center gap-4 p-3 border rounded-lg hover:shadow-sm cursor-pointer"
-        >
-          <div className="w-16 h-16 flex-shrink-0">
-            <img src={p.mainImage} alt={p.name} className="w-full h-full object-cover rounded" />
-          </div>
-          <div className="flex-1">
-            <p className="font-medium hover:text-pink-500 line-clamp-2">{p.name}</p>
-            <p className="text-sm font-bold text-pink-500">
-              {p.sellingPrice.toLocaleString('vi-VN')}đ
-            </p>
-          </div>
-          <Heart className="w-5 h-5 text-pink-500 fill-pink-500/10 flex-shrink-0" />
+      <h3 className="text-xl font-semibold text-foreground mb-6">
+        Sản phẩm được yêu thích khác
+      </h3>
+      {lovedProducts.length === 0 ? (
+        <div className="text-center py-12 text-muted-foreground">
+          Chưa có sản phẩm yêu thích nào
         </div>
-      ))}
+      ) : (
+        lovedProducts.map((p) => (
+          <div
+            key={p._id}
+            className="flex items-center gap-4 p-4 border border-border rounded-lg hover:shadow-md hover:border-primary transition-all cursor-pointer group"
+          >
+            <div className="w-16 h-16 flex-shrink-0 overflow-hidden rounded-lg">
+              <img
+                src={p.mainImage}
+                alt={p.name}
+                className="w-full h-full object-cover group-hover:scale-110 transition-transform"
+              />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-medium text-foreground group-hover:text-primary transition-colors line-clamp-2">
+                {p.name}
+              </p>
+              <p className="text-sm font-bold text-primary mt-1">
+                {p.sellingPrice.toLocaleString('vi-VN')}đ
+              </p>
+            </div>
+            <Heart className="w-5 h-5 text-pink-500 fill-pink-500/20 flex-shrink-0" />
+          </div>
+        ))
+      )}
     </div>
   )
 
   return (
-    <section className="mt-12">
+    <section className="mt-12 bg-background rounded-lg border border-border p-6">
       {/* === Tabs === */}
-      <div className="flex border-b mb-6">
+      <div className="flex border-b border-border mb-6">
         <button
           onClick={() => setActiveTab('reviews')}
-          className={`px-6 py-3 font-semibold transition-colors ${activeTab === 'reviews'
-            ? 'border-b-2 border-pink-500 text-pink-500'
-            : 'text-gray-600 hover:text-gray-800'
-            }`}
+          className={`px-6 py-3 font-semibold transition-all relative ${
+            activeTab === 'reviews'
+              ? 'text-primary'
+              : 'text-muted-foreground hover:text-foreground'
+          }`}
         >
           Đánh giá sản phẩm
+          {activeTab === 'reviews' && (
+            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+          )}
         </button>
         <button
           onClick={() => setActiveTab('loved')}
-          className={`px-6 py-3 font-semibold transition-colors ${activeTab === 'loved'
-            ? 'border-b-2 border-pink-500 text-pink-500'
-            : 'text-gray-600 hover:text-gray-800'
-            }`}
+          className={`px-6 py-3 font-semibold transition-all relative ${
+            activeTab === 'loved'
+              ? 'text-primary'
+              : 'text-muted-foreground hover:text-foreground'
+          }`}
         >
           Sản phẩm được yêu thích khác
+          {activeTab === 'loved' && (
+            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+          )}
         </button>
       </div>
 
       {/* === Nội dung === */}
       <div className="py-4">
         {loading ? (
-          <div className="text-center text-gray-500">Đang tải đánh giá...</div>
+          <div className="text-center py-12">
+            <div className="inline-block w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+            <p className="text-muted-foreground mt-3">Đang tải...</p>
+          </div>
         ) : (
           <>
-            {activeTab === 'reviews' && (
-              <div>
-                <div className="mb-4">
-                  <label className="mr-3">Lọc theo số sao: </label>
-                  <select
-                    value={ratingFilter}
-                    onChange={(e) => setRatingFilter(e.target.value)}
-                    className="border px-2 py-1 rounded"
-                  >
-                    <option value="">Tất cả</option>
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <option key={star} value={star}>{`${star} sao`}</option>
-                    ))}
-                  </select>
-                </div>
-                {renderReviews()}
-              </div>
-            )}
+            {activeTab === 'reviews' && renderReviews()}
             {activeTab === 'loved' && renderLovedProducts()}
           </>
         )}

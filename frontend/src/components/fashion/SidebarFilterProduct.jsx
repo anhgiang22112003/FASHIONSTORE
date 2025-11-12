@@ -1,125 +1,161 @@
-import { Filter } from 'lucide-react'
+import { Filter, X } from 'lucide-react'
+import { useState } from 'react'
 
-const Sidebar = ({ setSelectedSubcategory, setPriceRange, categories, collections, setCategory, setCollection, setSortBy }) => {
-  return (
-    <div className="w-64 flex-shrink-0">
-      <div className="bg-white rounded-lg shadow-sm border p-6 sticky top-4">
-        <div className="flex items-center gap-2 mb-6">
-          <Filter className="w-5 h-5" />
-          <h3 className="font-semibold">Bộ lọc</h3>
+const Sidebar = ({ setSelectedSubcategory, setPriceRange,collection, categories, collections, setCategory, setCollection, setSortBy }) => {
+  const [isMobileOpen, setIsMobileOpen] = useState(false)
+
+  const priceRanges = [
+    { value: 'all', label: 'Tất cả' },
+    { value: 'under-100k', label: 'Dưới 100,000đ' },
+    { value: '100k-300k', label: '100,000đ - 300,000đ' },
+    { value: '300k-500k', label: '300,000đ - 500,000đ' },
+    { value: 'over-500k', label: 'Trên 500,000đ' },
+  ]
+
+  const sortOptions = [
+    { value: 'newest', label: 'Mới nhất' },
+    { value: 'oldest', label: 'Cũ nhất' },
+    { value: 'priceAsc', label: 'Giá thấp đến cao' },
+    { value: 'priceDesc', label: 'Giá cao đến thấp' },
+    { value: 'stockAsc', label: 'Tồn kho tăng dần' },
+    { value: 'stockDesc', label: 'Tồn kho giảm dần' },
+  ]
+
+  const SidebarContent = () => (
+    <>
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6 pb-4 border-b-2 border-pink-100">
+        <div className="flex items-center gap-2">
+          <Filter className="w-5 h-5 text-pink-500" />
+          <h3 className="font-black text-xl text-gray-900">Bộ lọc</h3>
         </div>
+        {isMobileOpen && (
+          <button
+            onClick={() => setIsMobileOpen(false)}
+            className="lg:hidden text-gray-600 hover:text-gray-900"
+          >
+            <X className="w-6 h-6" />
+          </button>
+        )}
+      </div>
 
-        {/* Category Filter */}
-        <div className="mb-6">
-          <h4 className="font-medium mb-3">Danh mục</h4>
-          <select onChange={(e) => setCategory(e.target.value)} className="w-full border p-2 rounded">
-            <option value="">Tất cả</option>
-            {categories?.map((category) => (
-              <option key={category._id} value={category._id}>{category.name}</option>
-            ))}
-          </select>
-        </div>
+      {/* Category Filter */}
+      {/* <div className="mb-6">
+        <h4 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide">Danh mục</h4>
+        <select 
+          onChange={(e) => setCategory(e.target.value)} 
+          className="w-full border-2 border-pink-200 p-3 rounded-xl focus:outline-none focus:border-pink-500 transition-colors bg-white text-gray-900 font-medium hover:border-pink-300"
+        >
+          <option value="all">Tất cả danh mục</option>
+          {categories?.map((category) => (
+            <option key={category._id} value={category._id}>{category.name}</option>
+          ))}
+        </select>
+      </div> */}
 
-        {/* Collection Filter */}
-        <div className="mb-6">
-          <h4 className="font-medium mb-3">Bộ sưu tập</h4>
-          <select onChange={(e) => setCollection(e.target.value)} className="w-full border p-2 rounded">
-            <option value="">Tất cả</option>
-            {collections?.map((collection) => (
-              <option key={collection._id} value={collection._id}>{collection.name}</option>
-            ))}
-          </select>
-        </div>
+      {/* Collection Filter */}
+      <div className="mb-6">
+        <h4 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide">Bộ sưu tập</h4>
+        <select
+          value={collection}
+          onChange={(e) => setCollection(e.target.value)}
+          className="w-full border-2 border-pink-200 p-3 rounded-xl focus:outline-none focus:border-pink-500 transition-colors bg-white text-gray-900 font-medium hover:border-pink-300"
+        >
+          <option value="all">Tất cả bộ sưu tập</option>
+          {collections?.map((col) => (
+            <option key={col._id} value={col._id}>
+              {col.name}
+            </option>
+          ))}
+        </select>
+      </div>
 
-        {/* Subcategory Filter */}
-        <div className="mb-6">
-          <h4 className="font-medium mb-3">Danh mục con</h4>
-          <div className="space-y-2">
-            <label className="flex items-center">
-              <input
-                type="radio"
-                name="subcategory"
-                value="all"
-                onChange={(e) => setSelectedSubcategory(e.target.value)}
-                className="mr-2"
-              />
-              Tất cả
-            </label>
-            {/* Map other subcategories */}
-            <label className="flex items-center">
-              <input
-                type="radio"
-                name="subcategory"
-                value="subcategory-1"
-                onChange={(e) => setSelectedSubcategory(e.target.value)}
-                className="mr-2"
-              />
-              Subcategory 1
-            </label>
-          </div>
-        </div>
-
-        {/* Price Filter */}
-        <div className="mb-6">
-          <h4 className="font-medium mb-3">Khoảng giá</h4>
-          <div className="space-y-2">
-            <label className="flex items-center">
+      {/* Price Filter */}
+      <div className="mb-6">
+        <h4 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide">Khoảng giá</h4>
+        <div className="space-y-2">
+          {priceRanges.map((range) => (
+            <label
+              key={range.value}
+              className="flex items-center p-3 rounded-xl hover:bg-pink-50 cursor-pointer transition-colors group"
+            >
               <input
                 type="radio"
                 name="price"
-                value="all"
+                value={range.value}
+                defaultChecked={range.value === 'all'}
                 onChange={(e) => setPriceRange(e.target.value)}
-                className="mr-2"
+                className="w-5 h-5 text-pink-500 border-2 border-pink-300 focus:ring-pink-500 focus:ring-2 cursor-pointer"
               />
-              Tất cả
+              <span className="ml-3 text-gray-700 font-medium group-hover:text-pink-500 transition-colors">
+                {range.label}
+              </span>
             </label>
-            <label className="flex items-center">
-              <input
-                type="radio"
-                name="price"
-                value="under-100k"
-                onChange={(e) => setPriceRange(e.target.value)}
-                className="mr-2"
-              />
-              Dưới 100,000đ
-            </label>
-            <label className="flex items-center">
-              <input
-                type="radio"
-                name="price"
-                value="100k-300k"
-                onChange={(e) => setPriceRange(e.target.value)}
-                className="mr-2"
-              />
-              100,000đ - 300,000đ
-            </label>
-            <label className="flex items-center">
-              <input
-                type="radio"
-                name="price"
-                value="over-300k"
-                onChange={(e) => setPriceRange(e.target.value)}
-                className="mr-2"
-              />
-              Trên 300,000đ
-            </label>
-          </div>
-        </div>
-
-        {/* Sort Filter */}
-        <div className="mb-6">
-          <h4 className="font-medium mb-3">Sắp xếp theo</h4>
-          <select onChange={(e) => setSortBy(e.target.value)} className="w-full border p-2 rounded">
-            <option value="newest">Mới nhất</option>
-            <option value="oldest">Cũ nhất</option>
-            <option value="priceAsc">Giá thấp đến cao</option>
-            <option value="priceDesc">Giá cao đến thấp</option>
-            <option value="stockAsc">Tồn kho tăng dần</option>
-            <option value="stockDesc">Tồn kho giảm dần</option>
-          </select>
+          ))}
         </div>
       </div>
-    </div>
+
+      {/* Sort Filter */}
+      <div className="mb-6">
+        <h4 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide">Sắp xếp theo</h4>
+        <select
+          onChange={(e) => setSortBy(e.target.value)}
+          defaultValue="newest"
+          className="w-full border-2 border-pink-200 p-3 rounded-xl focus:outline-none focus:border-pink-500 transition-colors bg-white text-gray-900 font-medium hover:border-pink-300"
+        >
+          {sortOptions.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Decorative Element */}
+      <div className="mt-8 p-6 bg-pink-500 rounded-2xl text-white">
+        <h4 className="font-black text-lg mb-2">💝 Ưu đãi đặc biệt</h4>
+        <p className="text-pink-100 text-sm">
+          Miễn phí vận chuyển cho đơn hàng trên 500,000đ
+        </p>
+      </div>
+    </>
+  )
+
+  return (
+    <>
+      {/* Mobile Filter Button */}
+      <button
+        onClick={() => setIsMobileOpen(true)}
+        className="lg:hidden fixed bottom-6 right-6 z-40 bg-pink-500 text-white p-4 rounded-full shadow-2xl hover:bg-pink-600 transition-colors"
+      >
+        <Filter className="w-6 h-6" />
+      </button>
+
+      {/* Mobile Overlay */}
+      {isMobileOpen && (
+        <div
+          className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
+          onClick={() => setIsMobileOpen(false)}
+        />
+      )}
+
+      {/* Desktop Sidebar */}
+      <div className="hidden lg:block w-full">
+        <div className="bg-white rounded-2xl shadow-lg border-2 border-pink-100 p-6 sticky top-4">
+          <SidebarContent />
+        </div>
+      </div>
+
+      {/* Mobile Sidebar */}
+      <div
+        className={`lg:hidden fixed top-0 right-0 h-full w-80 bg-white z-50 shadow-2xl transform transition-transform duration-300 overflow-y-auto ${isMobileOpen ? 'translate-x-0' : 'translate-x-full'
+          }`}
+      >
+        <div className="p-6">
+          <SidebarContent />
+        </div>
+      </div>
+    </>
   )
 }
 

@@ -16,6 +16,7 @@ import { WishlistProvider } from "./context/WishlistContext"
 import ChatBot from "./pages/ChatBot"
 import OrderReturn from "./pages/OrderReturn"
 
+const Products = lazy(() => import("./pages/Products"))
 const AdminLoginForm = lazy(() => import("./pages/Admin/LoginAdmin"))
 const HomePage = lazy(() => import("./pages/HomePage"))
 const ProductPage = lazy(() => import("./pages/ProductPage"))
@@ -220,6 +221,7 @@ function App() {
                         <Route path="/product/:id" element={<ProductPage setIsCartDrawerOpen={setIsCartDrawerOpen} />} />
                         <Route path="/category/:category" element={<CategoryPage />} />
                         <Route path="/cart" element={<CartPage />} />
+                        <Route path="/products" element={<Products />} />
                         <Route path="/about" element={<AboutPage />} />
                         <Route path="/contact" element={<ContactPage />} />
                         <Route path="/checkout" element={<Checkout />} />

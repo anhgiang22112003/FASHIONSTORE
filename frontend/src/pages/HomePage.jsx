@@ -7,7 +7,6 @@ import AboutSection from '../components/fashion/AboutSection';
 import Testimonials from '../components/fashion/Testimonials';
 import Newsletter from '../components/fashion/Newsletter';
 import FlashSaleBanner from '@/components/fashion/FlashSaleBanner';
-import Card from './Card'
 
 const HomePage = () => {
   return (
@@ -15,7 +14,6 @@ const HomePage = () => {
       <HeroSection />
       <FlashSaleBanner/>
       <FeaturedCollections />
-      <Card/>
       <ProductCategories />
       <BestSellers />
       <AboutSection />
