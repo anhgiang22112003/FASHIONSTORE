@@ -18,7 +18,6 @@ import apiUser from '@/service/api'
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const navigate = useNavigate()
-  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
   const { wishlist } = useContext(WishlistContext)
   const { user, logout } = useContext(AuthContext)
@@ -27,7 +26,6 @@ const Header = () => {
   const [showDropdown, setShowDropdown] = useState(false)
   const totalItems = cart?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0
   const wishlistCount = wishlist?.length
-  console.log(showDropdown);
   
   useEffect(() => {
     const fetchUnreadCount = async () => {

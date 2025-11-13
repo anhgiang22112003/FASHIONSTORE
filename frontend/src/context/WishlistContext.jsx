@@ -7,22 +7,20 @@ export const WishlistContext = createContext()
 export const WishlistProvider = ({ children }) => {
   const [wishlist, setWishlist] = useState([])
 
-  // ✅ Lấy danh sách sản phẩm yêu thích khi load trang
-     const fetchWishlist = async () => {
-      try {
-        const res = await api.get('/users/favorites')
-        setWishlist(res.data || [])
-      } catch (error) {
-        console.error('Lỗi khi tải danh sách yêu thích:', error)
-      }
+  const fetchWishlist = async () => {
+    try {
+      const res = await api.get('/users/favorites')
+      setWishlist(res.data || [])
+    } catch (error) {
+      console.error('Lỗi khi tải danh sách yêu thích:', error)
     }
+  }
   useEffect(() => {
- 
+
     const token = localStorage.getItem('accessToken')
     if (token) fetchWishlist()
   }, [])
 
-  // ✅ Hàm thêm/xóa yêu thích
   const toggleWishlist = async (productId) => {
     try {
       const res = await api.post(`/users/toggle-favorite/${productId}`)
@@ -33,7 +31,7 @@ export const WishlistProvider = ({ children }) => {
   }
 
   return (
-    <WishlistContext.Provider value={{ wishlist, setWishlist, toggleWishlist ,fetchWishlist}}>
+    <WishlistContext.Provider value={{ wishlist, setWishlist, toggleWishlist, fetchWishlist }}>
       {children}
     </WishlistContext.Provider>
   )

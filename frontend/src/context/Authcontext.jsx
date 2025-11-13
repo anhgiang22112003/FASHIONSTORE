@@ -1,10 +1,12 @@
 import React, { createContext, useState, useEffect, useContext } from "react"
 import { CartContext } from "./CartContext"
+import { WishlistContext } from "./WishlistContext"
 
 export const AuthContext = createContext()
 
 export const AuthProvider = ({ children }) => {
-const { fetchCart } = useContext(CartContext) || {};
+  const { fetchCart } = useContext(CartContext) || {}
+  const { fetchWishlist } = useContext(WishlistContext) || {}
   const [user, setUser] = useState(() => {
     const savedUser = localStorage.getItem("user")
     return savedUser ? JSON.parse(savedUser) : null
@@ -20,10 +22,16 @@ const { fetchCart } = useContext(CartContext) || {};
     }
   }, [user])
 
-  const login = (userData) => setUser(userData)
+  const login = (userData) => {
+    setUser(userData)
+    fetchCart()
+    fetchWishlist()
+
+  }
   const logout = () => {
     setUser(null)
     fetchCart()
+    fetchWishlist()
   }
 
   return (

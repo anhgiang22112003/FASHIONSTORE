@@ -25,6 +25,7 @@ const CartPage = lazy(() => import("./pages/CartPage"))
 const AboutPage = lazy(() => import("./pages/AboutPage"))
 const ContactPage = lazy(() => import("./pages/ContactPage"))
 const BlogPage = lazy(() => import("./pages/BlogPage"))
+const BlogArticlePage = lazy(() => import("./pages/BlogArticlePage"))
 const Checkout = lazy(() => import("./pages/Checkout"))
 const Wishlist = lazy(() => import("./pages/Wishlist"))
 const AuthPage = lazy(() => import("./pages/AuthPage"))
@@ -50,25 +51,7 @@ const reviewStatusText = {
   rejected: "Bị từ chối",
 }
 
-const BlogArticlePage = () => {
-  return (
-    <div className="container mx-auto px-4 py-16">
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Bài viết blog sẽ được hiển thị ở đây
-          </h1>
-          <p className="text-gray-600">
-            Nội dung chi tiết của bài viết sẽ được load từ database
-          </p>
-        </div>
-        <div className="bg-gray-100 rounded-lg p-8 text-center">
-          <p className="text-gray-500">Content placeholder</p>
-        </div>
-      </div>
-    </div>
-  )
-}
+
 
 const FrontendLayout = ({ children, isCartDrawerOpen, setIsCartDrawerOpen, currentUser }) => {
   const { cart } = React.useContext(CartContext)
@@ -175,9 +158,10 @@ function App() {
 
   return (
     <Router>
-      <CartProvider>
-        <AuthProvider>
-          <WishlistProvider>
+      <WishlistProvider>
+        <CartProvider>
+          <AuthProvider>
+
             <Suspense fallback={<div className="p-8 text-center">Đang tải...</div>}>
               <ToastContainer
                 position="top-center" // hoặc bottom-center
@@ -245,9 +229,10 @@ function App() {
                 <Route path="/login/admin" element={<AdminLoginForm />} />
               </Routes>
             </Suspense>
-          </WishlistProvider>
-        </AuthProvider>
-      </CartProvider>
+
+          </AuthProvider>
+        </CartProvider>
+      </WishlistProvider>
     </Router>
   )
 }
