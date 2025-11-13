@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import api from '@/service/api'
 import Sidebar from '@/components/fashion/SidebarFilterProduct'
@@ -7,25 +7,18 @@ import ProductCard from '@/components/fashion/ProductCard'
 import { Loader2 } from 'lucide-react'
 
 const CategoryPage = () => {
-  const { categoryId } = useParams()
+  const { state } = useLocation()  
   const navigate = useNavigate()
-
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(false)
-  const [selectedSubcategory, setSelectedSubcategory] = useState('all')
   const [priceRange, setPriceRange] = useState('all')
-  const [category, setCategory] = useState(categoryId || '')
   const [collection, setCollection] = useState('all')
   const [sortBy, setSortBy] = useState('newest')
-
-  const [categories, setCategories] = useState([])
   const [collections, setCollections] = useState([])
 
   useEffect(() => {
     const fetchCategoriesAndCollections = async () => {
       try {
-        const categoriesRes = await api.get('/categories')
-        setCategories(categoriesRes?.data?.data || [])
         
         const collectionsRes = await api.get('/collection')
         setCollections(collectionsRes?.data?.data || [])
@@ -35,16 +28,14 @@ const CategoryPage = () => {
     }
     
     fetchCategoriesAndCollections()
-  }, [])
+  }, [state?.id])
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         setLoading(true)
-        const response = await api.get(`/products`, {
+        const response = await api.get(`/categories/${state?.id}/products`, {
           params: {
-            category,
-            subcategory: selectedSubcategory === 'all' ? undefined : selectedSubcategory,
             collection,
             priceRange,
             sortBy,
@@ -59,7 +50,7 @@ const CategoryPage = () => {
     }
 
     fetchProducts()
-  }, [category, selectedSubcategory, priceRange, collection, sortBy])
+  }, [ priceRange, collection, sortBy,state?.id])
 
   const handleProductClick = (productId) => {
     navigate(`/product/${productId}`)
@@ -72,14 +63,12 @@ const CategoryPage = () => {
           {/* Sidebar */}
           <div className="lg:w-80 flex-shrink-0">
             <Sidebar
-              setSelectedSubcategory={setSelectedSubcategory}
               setPriceRange={setPriceRange}
-              categories={categories}
               collections={collections}
               collection={collection}
-              setCategory={setCategory}
               setCollection={setCollection}
               setSortBy={setSortBy}
+              sortBy={sortBy}
             />
           </div>
 

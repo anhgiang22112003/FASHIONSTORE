@@ -1,7 +1,7 @@
 import { Filter, X } from 'lucide-react'
 import { useState } from 'react'
 
-const Sidebar = ({ setSelectedSubcategory, setPriceRange,collection, categories, collections, setCategory, setCollection, setSortBy }) => {
+const Sidebar = ({ sortBy, setPriceRange,collection, collections, setCollection, setSortBy }) => {
   const [isMobileOpen, setIsMobileOpen] = useState(false)
 
   const priceRanges = [
@@ -39,19 +39,6 @@ const Sidebar = ({ setSelectedSubcategory, setPriceRange,collection, categories,
         )}
       </div>
 
-      {/* Category Filter */}
-      {/* <div className="mb-6">
-        <h4 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide">Danh mục</h4>
-        <select 
-          onChange={(e) => setCategory(e.target.value)} 
-          className="w-full border-2 border-pink-200 p-3 rounded-xl focus:outline-none focus:border-pink-500 transition-colors bg-white text-gray-900 font-medium hover:border-pink-300"
-        >
-          <option value="all">Tất cả danh mục</option>
-          {categories?.map((category) => (
-            <option key={category._id} value={category._id}>{category.name}</option>
-          ))}
-        </select>
-      </div> */}
 
       {/* Collection Filter */}
       <div className="mb-6">
@@ -100,6 +87,7 @@ const Sidebar = ({ setSelectedSubcategory, setPriceRange,collection, categories,
         <h4 className="font-bold text-gray-900 mb-3 text-sm uppercase tracking-wide">Sắp xếp theo</h4>
         <select
           onChange={(e) => setSortBy(e.target.value)}
+          value={sortBy}
           defaultValue="newest"
           className="w-full border-2 border-pink-200 p-3 rounded-xl focus:outline-none focus:border-pink-500 transition-colors bg-white text-gray-900 font-medium hover:border-pink-300"
         >

@@ -22,7 +22,7 @@ const Newsletter = () => {
       </div>
 
       <div className="container mx-auto px-4 relative z-10">
-        <div className="max-w-4xl mx-auto text-center">
+        <div className="max-w-[1550px] mx-auto text-center">
           <div className="mb-10 animate-slide-up">
             <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-2xl hover:scale-110 transition-transform animate-bounce-in">
               <Mail className="w-10 h-10 text-white" />

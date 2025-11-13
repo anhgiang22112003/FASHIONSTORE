@@ -203,7 +203,7 @@ function App() {
                       <Routes>
                         <Route path="/" element={<HomePage />} />
                         <Route path="/product/:id" element={<ProductPage setIsCartDrawerOpen={setIsCartDrawerOpen} />} />
-                        <Route path="/category/:category" element={<CategoryPage />} />
+                        <Route path="/category/:id" element={<CategoryPage />} />
                         <Route path="/cart" element={<CartPage />} />
                         <Route path="/products" element={<Products />} />
                         <Route path="/about" element={<AboutPage />} />
