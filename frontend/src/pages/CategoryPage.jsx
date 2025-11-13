@@ -41,6 +41,9 @@ const CategoryPage = () => {
             sortBy,
           },
         })
+        console.log(response);
+        
+
         setProducts(response.data.products)
       } catch (error) {
         toast.error('Đã xảy ra lỗi khi tải sản phẩm.')
@@ -51,7 +54,7 @@ const CategoryPage = () => {
 
     fetchProducts()
   }, [ priceRange, collection, sortBy,state?.id])
-
+ 
   const handleProductClick = (productId) => {
     navigate(`/product/${productId}`)
   }
@@ -77,7 +80,7 @@ const CategoryPage = () => {
             <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <h2 className="text-3xl font-black text-gray-900">
-                  Sản phẩm
+                  Sản phẩm theo danh mục
                   {products.length > 0 && (
                     <span className="ml-3 text-lg font-normal text-pink-500">
                       ({products.length} sản phẩm)
