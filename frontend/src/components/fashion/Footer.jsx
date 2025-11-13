@@ -1,6 +1,189 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Facebook, Instagram, Twitter, Youtube, Phone, Mail, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
+
+const footerStyles = {
+  footer: {
+    background: 'linear-gradient(180deg, #1a1a1a 0%, #0d0d0d 100%)',
+    color: '#a3a3a3',
+    position: 'relative',
+    overflow: 'hidden'
+  },
+  decorativeTop: {
+    position: 'absolute' ,
+    top: 0,
+    left: 0,
+    right: 0,
+    height: '2px',
+    background: 'linear-gradient(90deg, #ffc0cb 0%, #ff69b4 50%, #ffc0cb 100%)',
+    opacity: 0.6
+  },
+  brandText: {
+    background: 'linear-gradient(135deg, #ffc0cb 0%, #ff69b4 100%)',
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
+    backgroundClip: 'text'
+  },
+  contactIcon: {
+    width: '32px',
+    height: '32px',
+    borderRadius: '50%',
+    background: '#1f1f1f',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    transition: 'all 0.3s ease'
+  },
+  contactIconHover: {
+    background: 'linear-gradient(135deg, #ffc0cb 0%, #ff69b4 100%)',
+    boxShadow: '0 0 20px rgba(255, 192, 203, 0.4)'
+  },
+  socialLink: {
+    width: '40px',
+    height: '40px',
+    borderRadius: '50%',
+    background: '#1f1f1f',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    transition: 'all 0.3s ease',
+    cursor: 'pointer'
+  },
+  socialLinkHover: {
+    background: 'linear-gradient(135deg, #ffc0cb 0%, #ff69b4 100%)',
+    boxShadow: '0 0 25px rgba(255, 192, 203, 0.5)',
+    transform: 'scale(1.1)'
+  },
+  sectionTitle: {
+    color: '#fff',
+    fontSize: '18px',
+    fontWeight: 600,
+    marginBottom: '24px',
+    position: 'relative' ,
+    display: 'inline-block'
+  },
+  underline: {
+    position: 'absolute' ,
+    bottom: '-8px',
+    left: 0,
+    width: '48px',
+    height: '2px',
+    background: 'linear-gradient(90deg, #ffc0cb 0%, #ff69b4 100%)',
+    borderRadius: '2px'
+  },
+  workingHoursCard: {
+    background: 'rgba(31, 31, 31, 0.5)',
+    borderRadius: '8px',
+    padding: '16px',
+    border: '1px solid #2a2a2a'
+  },
+  paymentBadge: {
+    background: '#1f1f1f',
+    border: '1px solid #2a2a2a',
+    borderRadius: '4px',
+    padding: '6px 8px',
+    fontSize: '11px',
+    textAlign: 'center' ,
+    transition: 'border-color 0.3s ease'
+  },
+  decorativeBottom: {
+    position: 'absolute' ,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: '3px',
+    background: 'linear-gradient(90deg, #ffc0cb 0%, #ff69b4 50%, #ffc0cb 100%)',
+    opacity: 0.4
+  }
+};
+
+const SocialLink = memo(({ 
+  icon: Icon, 
+  href, 
+  label 
+}) => {
+  const [isHovered, setIsHovered] = React.useState(false);
+  
+  return (
+    <a
+      href={href}
+      style={{
+        ...footerStyles.socialLink,
+        ...(isHovered ? footerStyles.socialLinkHover : {})
+      }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      aria-label={label}
+    >
+      <Icon style={{ width: '20px', height: '20px', transition: 'transform 0.3s ease', transform: isHovered ? 'scale(1.1)' : 'scale(1)' }} />
+    </a>
+  );
+});
+
+SocialLink.displayName = 'SocialLink';
+
+const FooterLink = memo(({ 
+  to, 
+  children 
+}) => {
+  const [isHovered, setIsHovered] = React.useState(false);
+  
+  return (
+    <li>
+      <Link
+        to={to}
+        style={{
+          color: isHovered ? '#ff69b4' : '#a3a3a3',
+          transition: 'all 0.3s ease',
+          display: 'inline-block',
+          transform: isHovered ? 'translateX(4px)' : 'translateX(0)'
+        }}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        {children}
+      </Link>
+    </li>
+  );
+});
+
+FooterLink.displayName = 'FooterLink';
+
+const ContactItem = memo(({ 
+  icon: Icon, 
+  children 
+}) => {
+  const [isHovered, setIsHovered] = React.useState(false);
+  
+  return (
+    <div 
+      style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'default' }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <div style={{
+        ...footerStyles.contactIcon,
+        ...(isHovered ? footerStyles.contactIconHover : {})
+      }}>
+        <Icon style={{ 
+          width: '16px', 
+          height: '16px', 
+          color: isHovered ? '#fff' : '#ff69b4',
+          transition: 'color 0.3s ease'
+        }} />
+      </div>
+      <span style={{ 
+        fontSize: '14px',
+        color: isHovered ? '#fff' : '#a3a3a3',
+        transition: 'color 0.3s ease'
+      }}>
+        {children}
+      </span>
+    </div>
+  );
+});
+
+ContactItem.displayName = 'ContactItem';
 
 const Footer = () => {
   const socialLinks = [
@@ -33,107 +216,132 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="bg-gray-900 text-gray-300">
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid lg:grid-cols-4 md:grid-cols-2 gap-8">
+    <footer style={footerStyles.footer}>
+      <div style={footerStyles.decorativeTop} />
+      
+      <div style={{ maxWidth: '1550px', margin: '0 auto', padding: '48px 16px', position: 'relative' }}>
+        <div style={{ 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+          gap: '32px'
+        }}>
           {/* Company Info */}
-          <div className="space-y-6">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <div>
-              <h3 className="text-2xl font-bold text-white mb-4">
-                FASHION<span className="text-pink-500">STORE</span>
+              <h3 style={{ 
+                fontSize: '24px', 
+                fontWeight: 700, 
+                marginBottom: '16px',
+                ...footerStyles.brandText
+              }}>
+                FASHIONSTORE
               </h3>
-              <p className="text-gray-400 leading-relaxed">
+              <p style={{ 
+                fontSize: '14px', 
+                lineHeight: '1.6',
+                color: '#a3a3a3'
+              }}>
                 Thương hiệu thời trang hàng đầu Việt Nam, mang đến những sản phẩm 
                 chất lượng cao với thiết kế hiện đại và phong cách.
               </p>
             </div>
 
-            {/* Contact Info */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <Phone className="w-4 h-4 text-pink-500" />
-                <span>Hotline: 1900 1234</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <Mail className="w-4 h-4 text-pink-500" />
-                <span>Email: contact@fashionstore.vn</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <MapPin className="w-4 h-4 text-pink-500" />
-                <span>123 Nguyễn Huệ, Q1, TP.HCM</span>
-              </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <ContactItem icon={Phone}>Hotline: 1900 1234</ContactItem>
+              <ContactItem icon={Mail}>contact@fashionstore.vn</ContactItem>
+              <ContactItem icon={MapPin}>123 Nguyễn Huệ, Q1, TP.HCM</ContactItem>
             </div>
 
-            {/* Social Links */}
-            <div className="flex gap-4">
+            <div style={{ display: 'flex', gap: '12px' }}>
               {socialLinks.map((social) => (
-                <a
+                <SocialLink
                   key={social.label}
+                  icon={social.icon}
                   href={social.href}
-                  className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-pink-500 transition-colors"
-                  aria-label={social.label}
-                >
-                  <social.icon className="w-5 h-5" />
-                </a>
+                  label={social.label}
+                />
               ))}
             </div>
           </div>
 
           {/* Quick Links */}
           <div>
-            <h4 className="text-lg font-semibold text-white mb-6">Liên kết nhanh</h4>
-            <ul className="space-y-3">
+            <h4 style={footerStyles.sectionTitle}>
+              Liên kết nhanh
+              <span style={footerStyles.underline} />
+            </h4>
+            <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '14px' }}>
               {quickLinks.map((link) => (
-                <li key={link.name}>
-                  <Link
-                    to={link.href}
-                    className="hover:text-pink-500 transition-colors"
-                  >
-                    {link.name}
-                  </Link>
-                </li>
+                <FooterLink key={link.name} to={link.href}>
+                  {link.name}
+                </FooterLink>
               ))}
             </ul>
           </div>
 
           {/* Categories */}
           <div>
-            <h4 className="text-lg font-semibold text-white mb-6">Danh mục</h4>
-            <ul className="space-y-3">
-              {categories.map((category) => (
-                <li key={category}>
-                  <a
-                    href="#"
-                    className="hover:text-pink-500 transition-colors"
-                  >
-                    {category}
-                  </a>
-                </li>
-              ))}
+            <h4 style={footerStyles.sectionTitle}>
+              Danh mục
+              <span style={footerStyles.underline} />
+            </h4>
+            <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '14px' }}>
+              {categories.map((category) => {
+                const [isHovered, setIsHovered] = React.useState(false);
+                return (
+                  <li key={category}>
+                    <a
+                      href="#"
+                      style={{
+                        color: isHovered ? '#ff69b4' : '#a3a3a3',
+                        transition: 'all 0.3s ease',
+                        display: 'inline-block',
+                        transform: isHovered ? 'translateX(4px)' : 'translateX(0)',
+                        textDecoration: 'none'
+                      }}
+                      onMouseEnter={() => setIsHovered(true)}
+                      onMouseLeave={() => setIsHovered(false)}
+                    >
+                      {category}
+                    </a>
+                  </li>
+                );
+              })}
             </ul>
           </div>
 
           {/* Customer Service */}
           <div>
-            <h4 className="text-lg font-semibold text-white mb-6">Hỗ trợ khách hàng</h4>
-            <div className="space-y-4">
-              <div>
-                <p className="text-sm mb-2">Giờ làm việc:</p>
-                <p className="text-white">T2 - T6: 8:00 - 22:00</p>
-                <p className="text-white">T7 - CN: 9:00 - 21:00</p>
+            <h4 style={footerStyles.sectionTitle}>
+              Hỗ trợ khách hàng
+              <span style={footerStyles.underline} />
+            </h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={footerStyles.workingHoursCard}>
+                <p style={{ fontSize: '12px', color: '#a3a3a3', marginBottom: '8px' }}>Giờ làm việc:</p>
+                <p style={{ fontSize: '14px', color: '#fff', fontWeight: 500 }}>T2 - T6: 8:00 - 22:00</p>
+                <p style={{ fontSize: '14px', color: '#fff', fontWeight: 500 }}>T7 - CN: 9:00 - 21:00</p>
               </div>
               
               <div>
-                <p className="text-sm mb-3">Phương thức thanh toán:</p>
-                <div className="grid grid-cols-3 gap-2">
-                  {paymentMethods.map((method) => (
-                    <div
-                      key={method}
-                      className="bg-gray-800 rounded px-2 py-1 text-xs text-center"
-                    >
-                      {method}
-                    </div>
-                  ))}
+                <p style={{ fontSize: '12px', color: '#a3a3a3', marginBottom: '12px' }}>Phương thức thanh toán:</p>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
+                  {paymentMethods.map((method) => {
+                    const [isHovered, setIsHovered] = React.useState(false);
+                    return (
+                      <div
+                        key={method}
+                        style={{
+                          ...footerStyles.paymentBadge,
+                          borderColor: isHovered ? '#ff69b4' : '#2a2a2a'
+                        }}
+                        onMouseEnter={() => setIsHovered(true)}
+                        onMouseLeave={() => setIsHovered(false)}
+                      >
+                        {method}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -141,28 +349,47 @@ const Footer = () => {
         </div>
 
         {/* Bottom Bar */}
-        <div className="border-t border-gray-800 mt-12 pt-8">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-sm text-gray-500">
-              © 2025 FashionStore. All rights reserved.
-            </p>
-            
-            <div className="flex items-center gap-6 text-sm">
-              <a href="#" className="hover:text-pink-500 transition-colors">
-                Chính sách bảo mật
-              </a>
-              <a href="#" className="hover:text-pink-500 transition-colors">
-                Điều khoản
-              </a>
-              <a href="#" className="hover:text-pink-500 transition-colors">
-                Sitemap
-              </a>
-            </div>
-          </div>
+        <div style={{ 
+          borderTop: '1px solid rgba(42, 42, 42, 0.5)', 
+          marginTop: '48px', 
+          paddingTop: '32px',
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: '16px',
+          flexWrap: 'wrap'
+        }}>
+          <p style={{ fontSize: '12px', color: '#a3a3a3' }}>
+            © 2025 FashionStore. All rights reserved.
+          </p>
+          
+          <nav style={{ display: 'flex', alignItems: 'center', gap: '24px', fontSize: '12px' }}>
+            {['Chính sách bảo mật', 'Điều khoản', 'Sitemap'].map((text) => {
+              const [isHovered, setIsHovered] = React.useState(false);
+              return (
+                <a
+                  key={text}
+                  href="#"
+                  style={{
+                    color: isHovered ? '#ff69b4' : '#a3a3a3',
+                    transition: 'color 0.3s ease',
+                    textDecoration: 'none'
+                  }}
+                  onMouseEnter={() => setIsHovered(true)}
+                  onMouseLeave={() => setIsHovered(false)}
+                >
+                  {text}
+                </a>
+              );
+            })}
+          </nav>
         </div>
       </div>
+      
+      <div style={footerStyles.decorativeBottom} />
     </footer>
   );
 };
 
-export default Footer;
+export default memo(Footer);

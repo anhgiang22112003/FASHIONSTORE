@@ -27,6 +27,8 @@ const Header = () => {
   const [showDropdown, setShowDropdown] = useState(false)
   const totalItems = cart?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0
   const wishlistCount = wishlist?.length
+  console.log(showDropdown);
+  
   useEffect(() => {
     const fetchUnreadCount = async () => {
       try {
