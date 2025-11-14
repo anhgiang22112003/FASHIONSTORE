@@ -251,14 +251,18 @@ const Bank = () => {
                                     <tr className='hover:bg-pink-50 hover:text-black' key={bank._id}>
                                         {/* Trong bảng */}
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium ">{bank?._id}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium ">{bank?._id}</td>
 
                                         </td>
 
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium ">{bank?.name}</td>
                                         <td className="px-6 py-4 text-sm  max-w-xs truncate">{bank?.app}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm ">{bank?.description}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm ">{bank?.status ? "Hoạt động" : "Không hoạt động"}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm ">
+                                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${bank?.status ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                                                {bank?.status ? "Hoạt động" : "Ngừng hoạt động"}
+                                            </span>
+                                        </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
                                             <button
                                                 onClick={() => handleOpenForm(bank)}

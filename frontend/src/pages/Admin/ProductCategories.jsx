@@ -121,8 +121,8 @@ const ProductCategories = () => {
         setIsLoading(true) // bật loading khi submit
 
         let categorydata = {
-            name: name,
-            description: dec,
+            name: name || editCategory?.name,
+            description: dec || editCategory?.description,
             image: imagePreview,
             isActive: isNewCategoryActive
         }
@@ -491,7 +491,11 @@ const ProductCategories = () => {
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium ">{category?.name}</td>
                                         <td className="px-6 py-4 text-sm  max-w-xs truncate">{category?.description}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm ">{category?.productCount}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm ">{category?.isActive ? "Hoạt động" : "Không hoạt động"}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm ">
+                                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${category?.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                                                {category?.isActive ? "Hoạt động" : "Ngừng hoạt động"}
+                                            </span>
+                                        </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
                                             <button
                                                 onClick={() => handleOpenForm(category)}

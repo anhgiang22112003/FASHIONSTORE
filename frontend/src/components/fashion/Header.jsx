@@ -97,7 +97,7 @@ const Header = () => {
 
   return (
     <>
-      <header className="sticky top-0 border-b border-border backdrop-blur-lg bg-white/95" style={{ zIndex: 1000 }}>
+      <header className="sticky top-0 border-b border-border backdrop-blur-lg bg-white/95" style={{ zIndex: 50 }}>
         {/* Top banner with gradient */}
         <div className="gradient-primary bg-pink-500 text-primary-foreground text-center py-2.5 text-sm font-medium relative overflow-hidden">
           <div
@@ -469,9 +469,13 @@ const Header = () => {
                   {categories.map((category, index) => (
                     <Link
                       key={category._id}
-                      to={`/category/${category.slug || category._id}`}
                       className="block py-2.5 px-4 text-gray-700 hover:bg-pink-50 hover:text-pink-600 rounded-lg transition-all text-sm font-medium relative group"
-                      onClick={() => setIsMenuOpen(false)}
+                      onClick={() => {
+                        navigate(`/category/${category.slug || category.name.replace(/\s+/g, '-').toLowerCase()}`, {
+                          state: { id: category._id },
+                        })
+                        setIsMenuOpen(false)
+                      }}
                       style={{
                         animation: isCategoryMenuOpen ? `slideIn 0.3s ease ${index * 0.05}s both` : 'none'
                       }}

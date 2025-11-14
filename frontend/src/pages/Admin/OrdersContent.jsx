@@ -345,8 +345,8 @@ const OrdersContent = ({ data, onEditOrder }) => {
   }
 
   return (
-    <div style={{ backgroundColor: "var(--bg-color)", color: "var(--text-color)" }} className="flex  min-h-screen  font-sans antialiased">
-      <main className="flex-1  p-5">
+    <div style={{ backgroundColor: "var(--bg-color)", color: "var(--text-color)" }} className="w-full min-h-screen font-sans antialiased">
+      <main className="w-full p-3 sm:p-5">
 
         {/* TIÊU ĐỀ & NÚT HÀNH ĐỘNG */}
         <div className="mb-6">
@@ -590,9 +590,9 @@ const OrdersContent = ({ data, onEditOrder }) => {
         )}
 
         {/* TABLE WITH HORIZONTAL SCROLL & STICKY HEADER */}
-        <div className=" rounded-xl shadow-lg">
-          <div className="overflow-x-auto">
-            <div className="max-h-[calc(100vh-160px)] overflow-y-auto">
+        <div className="rounded-xl shadow-lg">
+          <div className="overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
+            <div className="max-h-[calc(100vh-200px)] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-pink-50 sticky top-0 z-10">
                   <tr>
