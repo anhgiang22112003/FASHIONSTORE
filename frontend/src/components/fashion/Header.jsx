@@ -311,10 +311,14 @@ const Header = () => {
                   <div className="relative hidden sm:block" ref={profileRef}>
                     <button
                       onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-                      className="p-1 rounded-full hover:bg-accent transition-all group"
+                      className="flex items-center gap-2 p-1 rounded-full hover:bg-accent transition-all group"
                     >
                       <UserCircleIcon className="w-7 h-7 sm:w-8 sm:h-8 text-foreground transition-colors" />
+                      <span className="font-semibold text-foreground text-sm sm:text-base">
+                        {user.name}
+                      </span>
                     </button>
+
                     {isProfileMenuOpen && (
                       <div
                         className="absolute right-0 mt-3 w-72 bg-card rounded-2xl shadow-xl border border-border overflow-hidden z-50 animate-slideDownFade"

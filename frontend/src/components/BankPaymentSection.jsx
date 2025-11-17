@@ -48,7 +48,6 @@ const BankPaymentModal = ({ order, onClose, selectedBank, setSelectedBank }) => 
     name: "Nguyễn Hồng Giang",
     number: "0343887327",
   }
-  const data = <img src='https://img.vietqr.io/image/vietinbank-113366668888-compact.jpg' />
   const info = `don+hang+${order._id}`
   const qrData = `https://img.vietqr.io/image/mbbank-1880115012003-compact2.jpg?addInfo=${info}&amount=${order.total}`
   console.log(qrData)
