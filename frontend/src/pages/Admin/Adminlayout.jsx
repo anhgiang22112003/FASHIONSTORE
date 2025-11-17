@@ -8,6 +8,7 @@ import { io } from 'socket.io-client'
 import { socket } from "@/service/socket"
 import { ThemeProvider } from "@/context/ThemeContext"
 import Bank from "./Bank"
+import { PosPage } from "./PosPage"
 
 // ✅ Lazy load các tab lớn (chỉ load khi cần)
 const Dashboard = React.lazy(() => import("./AdminDasbroad"))
@@ -188,6 +189,15 @@ const AdminLayout = () => {
 
               {activeTab === "orders" && (
                 <Orders
+                  setActiveTab={setActiveTab}
+                  data={tabData.orders}
+                  onEditOrder={handleEditOrder}
+                  setData={(data) => setTabData((prev) => ({ ...prev, orders: data }))}
+                  fetchOrders={fetchOrders}
+                />
+              )}
+                {activeTab === "orders-pos" && (
+                <PosPage 
                   setActiveTab={setActiveTab}
                   data={tabData.orders}
                   onEditOrder={handleEditOrder}
