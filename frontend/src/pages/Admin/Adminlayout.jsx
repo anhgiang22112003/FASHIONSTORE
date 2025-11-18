@@ -7,10 +7,10 @@ import apiAdmin from "@/service/apiAdmin"
 import { io } from 'socket.io-client'
 import { socket } from "@/service/socket"
 import { ThemeProvider } from "@/context/ThemeContext"
-import Bank from "./Bank"
-import { PosPage } from "./PosPage"
 
-// ✅ Lazy load các tab lớn (chỉ load khi cần)
+const StaffPage = React.lazy(() => import("./StaffPage"))
+const Bank = React.lazy(() => import("./Bank"))
+const PosPage = React.lazy(() => import("./PosPage"))
 const Dashboard = React.lazy(() => import("./AdminDasbroad"))
 const Orders = React.lazy(() => import("./OrdersContent"))
 const Products = React.lazy(() => import("./ProductsContent"))
@@ -95,8 +95,8 @@ const AdminLayout = () => {
       console.error("Lỗi khi fetch orders:", err)
     }
   }
-   
-    useEffect(() => {
+
+  useEffect(() => {
     socket.on("admin_payment_success", (newOrder) => {
       toast.info(`🆕 đơn hàng mới  ${newOrder.user?.name || "khách hàng"} thanh toán thành công`)
       fetchOrders()
@@ -196,8 +196,8 @@ const AdminLayout = () => {
                   fetchOrders={fetchOrders}
                 />
               )}
-                {activeTab === "orders-pos" && (
-                <PosPage 
+              {activeTab === "orders-pos" && (
+                <PosPage
                   setActiveTab={setActiveTab}
                   data={tabData.orders}
                   onEditOrder={handleEditOrder}
@@ -251,6 +251,16 @@ const AdminLayout = () => {
                 <AddCustomerPage
                   refreshCustomers={fetchCustomers}
                   onBack={() => setActiveTab("customers")}
+                />
+              )}
+
+              {activeTab === "staff" && (
+                <StaffPage
+                  setEditingCustomer={setEditingCustomer}
+                  setActivePage={setActiveTab}
+                  data={tabData.customers}
+                  setData={(data) => setTabData((prev) => ({ ...prev, customers: data }))}
+                  refreshCustomers={fetchCustomers}
                 />
               )}
 

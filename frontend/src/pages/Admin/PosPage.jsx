@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react"
 import apiAdmin from "@/service/apiAdmin"
-import { 
-  PlusIcon, 
-  MinusIcon, 
-  TrashIcon, 
+import {
+  PlusIcon,
+  MinusIcon,
+  TrashIcon,
   ShoppingCartIcon,
   CreditCardIcon,
   MagnifyingGlassIcon,
@@ -11,22 +11,163 @@ import {
   PhotoIcon,
   UserIcon,
   FunnelIcon,
-  XMarkIcon
+  XMarkIcon,
+  BanknotesIcon
 } from "@heroicons/react/24/outline"
 import { toast } from "react-toastify"
+import { QRCodeCanvas } from "qrcode.react"
+import { socket } from "@/service/socket"
 
-export const PosPage = () => {
+const BankPaymentModal = ({ order, onClose, onSuccess }) => {
+  const [banks, setBanks] = useState([])
+  const [selectedBank, setSelectedBank] = useState(null)
+  const [isPaid, setIsPaid] = useState(false)
+
+  useEffect(() => {
+    const fetchBanks = async () => {
+      try {
+        const response = await apiAdmin.get("/bank")
+        const activeBanks = response.data.filter(b => b.status === true)
+        setBanks(activeBanks)
+      } catch (err) {
+        toast.error("Không tải được danh sách ngân hàng")
+      }
+    }
+    fetchBanks()
+  }, [])
+
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user"))
+    if (!user?.id) return
+
+    socket.emit("join_user", user.id)
+
+    socket.on("user_payment_success", (data) => {
+      console.log("Received payment success:", data)
+
+      if (data.order._id === order._id) {
+        setIsPaid(true)
+        toast.success("Thanh toán thành công qua ngân hàng!")
+        setTimeout(() => {
+          onSuccess()
+          onClose()
+        }, 1500)
+      }
+    })
+
+    return () => {
+      socket.off("user_payment_success")
+    }
+  }, [order._id, onSuccess, onClose])
+
+  const defaultAccount = {
+    name: "Nguyễn Hồng Giang",
+    number: "0343887327",
+  }
+
+  const info = `don+hang+${order._id}`
+  const qrData = `https://img.vietqr.io/image/mbbank-1880115012003-compact2.jpg?addInfo=${info}&amount=${order.total}`
+
+  return (
+    <div className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md relative">
+        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+              <BanknotesIcon className="w-6 h-6 text-blue-600" />
+            </div>
+            <h2 className="text-xl font-bold text-gray-800">Thanh toán chuyển khoản</h2>
+          </div>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            <XMarkIcon className="w-6 h-6" />
+          </button>
+        </div>
+
+        <div className="p-6">
+          {/* Danh sách ngân hàng */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-3">Chọn ngân hàng</label>
+            <div className="space-y-2 max-h-[200px] overflow-y-auto">
+              {banks.map(bank => (
+                <div
+                  key={bank._id}
+                  onClick={() => setSelectedBank(bank)}
+                  className={`p-3 border rounded-lg cursor-pointer transition-all duration-200 ${
+                    selectedBank?._id === bank._id 
+                      ? "border-pink-500 bg-pink-50 shadow-md" 
+                      : "border-gray-200 hover:bg-gray-50 hover:border-gray-300"
+                  }`}
+                >
+                  <div className="font-semibold text-gray-800">{bank.name}</div>
+                  <div className="text-sm text-gray-600">{bank.description}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* QR Code và thông tin */}
+          {selectedBank && (
+            <div className="flex flex-col items-center bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-6">
+              <div className="bg-white p-4 rounded-xl shadow-lg mb-4">
+                <img src={qrData} alt="QR Code" className="w-64 h-64 object-contain" />
+              </div>
+              
+              <div className="w-full bg-white rounded-lg p-4 shadow-sm space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Chủ tài khoản:</span>
+                  <span className="font-semibold text-gray-800">{defaultAccount.name}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Số tài khoản:</span>
+                  <span className="font-semibold text-gray-800">{defaultAccount.number}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Số tiền:</span>
+                  <span className="font-semibold text-pink-600">{order.total?.toLocaleString()} ₫</span>
+                </div>
+                <div className="flex justify-between items-start">
+                  <span className="text-gray-600">Nội dung:</span>
+                  <span className="font-semibold text-gray-800 text-right">don hang {order._id}</span>
+                </div>
+              </div>
+
+              {!isPaid ? (
+                <div className="mt-6 flex items-center space-x-3 text-gray-700">
+                  <div className="w-5 h-5 border-2 border-pink-500 border-t-transparent rounded-full animate-spin"></div>
+                  <span className="font-medium">Đang chờ thanh toán...</span>
+                </div>
+              ) : (
+                <div className="mt-6 flex items-center space-x-2 text-green-600">
+                  <CheckIcon className="w-6 h-6" />
+                  <span className="font-semibold text-lg">Thanh toán thành công!</span>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+const PosPage = () => {
   const [products, setProducts] = useState([])
   const [cartItems, setCartItems] = useState([])
   const [searchTerm, setSearchTerm] = useState("")
   const [isProcessing, setIsProcessing] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
   const [selectedVariations, setSelectedVariations] = useState({})
-  
+  const [paymentMethod, setPaymentMethod] = useState("CASH")
+  const [showBankPayment, setShowBankPayment] = useState(false)
+  const [currentOrder, setCurrentOrder] = useState(null)
+
   // Staff management
   const [staffList, setStaffList] = useState([])
   const [selectedStaff, setSelectedStaff] = useState("")
-  
+
   // Product filters
   const [filters, setFilters] = useState({
     category: "",
@@ -37,7 +178,7 @@ export const PosPage = () => {
     sortBy: ""
   })
   const [showFilters, setShowFilters] = useState(false)
-  
+
   // Customer management
   const [customers, setCustomers] = useState([])
   const [selectedCustomer, setSelectedCustomer] = useState(null)
@@ -59,7 +200,7 @@ export const PosPage = () => {
         const res = await apiAdmin.get("/users/staff", {
           params: { page: 1, limit: 100 }
         })
-        setStaffList(res.data.users || [])
+        setStaffList(res.data.data || [])
       } catch (err) {
         console.error("Error fetching staff:", err)
       }
@@ -67,20 +208,21 @@ export const PosPage = () => {
     fetchStaff()
   }, [])
 
+  const fetchProducts = async () => {
+    try {
+      const params = {
+        q: searchTerm,
+        ...filters
+      }
+      const res = await apiAdmin.get("/products", { params })
+      setProducts(res.data.products || [])
+    } catch (err) {
+      console.error("Error fetching products:", err)
+    }
+  }
+
   // Load danh sách sản phẩm với filters
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const params = {
-          q: searchTerm,
-          ...filters
-        }
-        const res = await apiAdmin.get("/products", { params })
-        setProducts(res.data.products || [])
-      } catch (err) {
-        console.error("Error fetching products:", err)
-      }
-    }
     fetchProducts()
   }, [searchTerm, filters])
 
@@ -91,8 +233,6 @@ export const PosPage = () => {
         const res = await apiAdmin.get("/users", {
           params: { role: "customer", page: 1, limit: 100 }
         })
-        console.log(res);
-        
         setCustomers(res.data.data || [])
       } catch (err) {
         console.error("Error fetching customers:", err)
@@ -116,8 +256,8 @@ export const PosPage = () => {
     if (!selected?.color || !selected?.size || !product.variations) {
       return product.stock || 0
     }
-    
-    const variation = product.variations.find(v => 
+
+    const variation = product.variations.find(v =>
       v.color === selected.color && v.size === selected.size
     )
     return variation ? variation.stock : 0
@@ -130,14 +270,14 @@ export const PosPage = () => {
     }
 
     const selected = selectedVariations[product._id]
-    
+
     // Kiểm tra nếu sản phẩm có variations nhưng chưa chọn đủ
     if (product.variations && product.variations.length > 0) {
       if (!selected?.color || !selected?.size) {
         toast.info("Vui lòng chọn màu sắc và kích thước!")
         return
       }
-      
+
       const availableStock = getAvailableStock(product)
       if (availableStock <= 0) {
         toast.info("Biến thể này đã hết hàng!")
@@ -145,12 +285,12 @@ export const PosPage = () => {
       }
     }
 
-    const cartKey = product.variations && product.variations.length > 0 
+    const cartKey = product.variations && product.variations.length > 0
       ? `${product._id}-${selected.color}-${selected.size}`
       : product._id
 
     const existing = cartItems.find((i) => i.cartKey === cartKey)
-    
+
     if (existing) {
       existing.quantity += 1
       setCartItems([...cartItems])
@@ -163,14 +303,14 @@ export const PosPage = () => {
         quantity: 1,
         mainImage: product.mainImage,
       }
-      
+
       // Thêm thông tin variation nếu có
       if (product.variations && product.variations.length > 0) {
         newItem.color = selected.color
         newItem.size = selected.size
         newItem.productName = `${product.name} (${selected.color}, ${selected.size})`
       }
-      
+
       setCartItems([...cartItems, newItem])
     }
   }
@@ -224,29 +364,47 @@ export const PosPage = () => {
         staffId: selectedStaff,
         customerId: selectedCustomer?._id
       }
-      
+
       // Lưu cart POS
       const cart = await apiAdmin.post("/pos/cart", orderData)
+      
       // Checkout POS
       const order = await apiAdmin.post("/pos/checkout", {
         cartId: cart.data._id,
         staffId: selectedStaff,
-        paymentMethod: "CASH",
+        paymentMethod: paymentMethod,
       })
-      
-      setShowSuccess(true)
-      setCartItems([])
-      setSelectedVariations({})
-      
-      setTimeout(() => {
-        setShowSuccess(false)
-      }, 3000)
-      
+
+      // Nếu chọn chuyển khoản, hiển thị modal thanh toán
+      if (paymentMethod === "BANK") {
+        setCurrentOrder(order.data)
+        setShowBankPayment(true)
+      } else {
+        // Thanh toán tiền mặt thành công ngay
+        setShowSuccess(true)
+        setCartItems([])
+        setSelectedVariations({})
+        fetchProducts()
+        setTimeout(() => {
+          setShowSuccess(false)
+        }, 3000)
+      }
+
     } catch (err) {
       toast.error(err.response?.data?.message || err.message)
     } finally {
       setIsProcessing(false)
     }
+  }
+
+  const handlePaymentSuccess = () => {
+    setShowSuccess(true)
+    setCartItems([])
+    setSelectedVariations({})
+    fetchProducts()
+    setTimeout(() => {
+      setShowSuccess(false)
+    }, 3000)
   }
 
   const filteredProducts = products.filter(product =>
@@ -264,18 +422,18 @@ export const PosPage = () => {
 
   const getAvailableSizes = (variations, selectedColor) => {
     if (!variations || variations.length === 0) return []
-    const filteredVariations = selectedColor 
+    const filteredVariations = selectedColor
       ? variations.filter(v => v.color === selectedColor && v.stock > 0)
       : variations.filter(v => v.stock > 0)
     return [...new Set(filteredVariations.map(v => v.size))]
   }
 
   return (
-    <div style={{ backgroundColor: "var(--bg-color)", color: "var(--text-color)" }} className="min-h-screen from-pink-50  to-purple-50 p-4">
+    <div style={{ backgroundColor: "var(--bg-color)", color: "var(--text-color)" }} className="min-h-screen from-pink-50 to-purple-50 p-4">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold  mb-2">
+          <h1 className="text-3xl font-bold mb-2">
             Bán hàng tại chỗ (POS)
           </h1>
           <p className="">Quản lý bán hàng trực tiếp tại cửa hàng</p>
@@ -340,7 +498,7 @@ export const PosPage = () => {
             <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
               <div className="p-6 border-b border-gray-100 bg-gradient-to-r from-pink-500 to-purple-600">
                 <h2 className="text-xl font-semibold text-white mb-4">Danh sách sản phẩm</h2>
-                
+
                 {/* Search & Filter Bar */}
                 <div className="flex gap-3">
                   <div className="relative flex-1">
@@ -368,14 +526,14 @@ export const PosPage = () => {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                       <select
                         value={filters.category}
-                        onChange={(e) => setFilters({...filters, category: e.target.value})}
+                        onChange={(e) => setFilters({ ...filters, category: e.target.value })}
                         className="px-3 py-2 text-black rounded-lg border border-gray-200 focus:ring-2 focus:ring-pink-500 focus:border-transparent bg-white/90"
                       >
                         <option value="">Tất cả danh mục</option>
                       </select>
                       <select
                         value={filters.status}
-                        onChange={(e) => setFilters({...filters, status: e.target.value})}
+                        onChange={(e) => setFilters({ ...filters, status: e.target.value })}
                         className="px-3 py-2 text-black rounded-lg border border-gray-200 focus:ring-2 focus:ring-pink-500 focus:border-transparent bg-white/90"
                       >
                         <option value="">Tất cả trạng thái</option>
@@ -384,7 +542,7 @@ export const PosPage = () => {
                       </select>
                       <select
                         value={filters.sortBy}
-                        onChange={(e) => setFilters({...filters, sortBy: e.target.value})}
+                        onChange={(e) => setFilters({ ...filters, sortBy: e.target.value })}
                         className="px-3 py-2 text-black rounded-lg border border-gray-200 focus:ring-2 focus:ring-pink-500 focus:border-transparent bg-white/90"
                       >
                         <option value="">Sắp xếp</option>
@@ -418,7 +576,7 @@ export const PosPage = () => {
                         const availableColors = getAvailableColors(product.variations)
                         const availableSizes = getAvailableSizes(product.variations, selected.color)
                         const availableStock = getAvailableStock(product)
-                        
+
                         return (
                           <tr key={product._id} className="hover:bg-gray-50 transition-colors duration-200">
                             {/* Product Info */}
@@ -475,11 +633,10 @@ export const PosPage = () => {
                                     <button
                                       key={color}
                                       onClick={() => handleVariationChange(product._id, 'color', color)}
-                                      className={`px-2 py-1 text-xs rounded-lg border transition-all duration-200 ${
-                                        selected.color === color
+                                      className={`px-2 py-1 text-xs rounded-lg border transition-all duration-200 ${selected.color === color
                                           ? 'bg-pink-500 text-white border-pink-500'
                                           : 'bg-white text-gray-700 border-gray-300 hover:border-pink-300'
-                                      }`}
+                                        }`}
                                     >
                                       {color}
                                     </button>
@@ -498,11 +655,10 @@ export const PosPage = () => {
                                     <button
                                       key={size}
                                       onClick={() => handleVariationChange(product._id, 'size', size)}
-                                      className={`px-2 py-1 text-xs rounded-lg border transition-all duration-200 ${
-                                        selected.size === size
+                                      className={`px-2 py-1 text-xs rounded-lg border transition-all duration-200 ${selected.size === size
                                           ? 'bg-pink-500 text-white border-pink-500'
                                           : 'bg-white text-gray-700 border-gray-300 hover:border-pink-300'
-                                      }`}
+                                        }`}
                                     >
                                       {size}
                                     </button>
@@ -515,11 +671,10 @@ export const PosPage = () => {
 
                             {/* Stock */}
                             <td className="px-4 py-4">
-                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                (hasVariations ? availableStock : product.stock) > 0 
-                                  ? 'bg-green-100 text-green-800' 
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${(hasVariations ? availableStock : product.stock) > 0
+                                  ? 'bg-green-100 text-green-800'
                                   : 'bg-red-100 text-red-800'
-                              }`}>
+                                }`}>
                                 {hasVariations ? availableStock : product.stock}
                               </span>
                             </td>
@@ -528,7 +683,7 @@ export const PosPage = () => {
                             <td className="px-4 py-4">
                               <button
                                 onClick={() => handleAddProduct(product)}
-                                disabled={(!hasVariations && product.stock <= 0) || (hasVariations && availableStock <= 0) }
+                                disabled={(!hasVariations && product.stock <= 0) || (hasVariations && availableStock <= 0)}
                                 className="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:from-pink-600 hover:to-purple-700 transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center gap-1"
                               >
                                 <PlusIcon className="w-4 h-4" />
@@ -540,7 +695,7 @@ export const PosPage = () => {
                       })}
                     </tbody>
                   </table>
-                  
+
                   {filteredProducts.length === 0 && (
                     <div className="text-center py-12">
                       <div className="text-gray-400 text-lg mb-2">Không tìm thấy sản phẩm</div>
@@ -605,7 +760,7 @@ export const PosPage = () => {
                                 </div>
                               )}
                             </div>
-                            
+
                             <div className="flex-1 min-w-0">
                               <h4 className="font-medium text-gray-800 text-sm truncate">
                                 {item.productName}
@@ -614,7 +769,7 @@ export const PosPage = () => {
                                 {item.price?.toLocaleString()} ₫
                               </div>
                             </div>
-                            
+
                             <button
                               onClick={() => handleRemove(idx)}
                               className="text-red-500 hover:text-red-700 hover:bg-red-50 p-1 rounded-lg transition-all duration-200 flex-shrink-0"
@@ -622,7 +777,7 @@ export const PosPage = () => {
                               <TrashIcon className="w-4 h-4" />
                             </button>
                           </div>
-                          
+
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
                               <button
@@ -631,15 +786,15 @@ export const PosPage = () => {
                               >
                                 <MinusIcon className="w-4 h-4" />
                               </button>
-                              
+
                               <input
                                 type="number"
                                 value={item.quantity}
                                 min={1}
                                 onChange={(e) => handleChangeQuantity(idx, Number(e.target.value))}
-                                className="w-16 text-center py-1 px-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                                className="w-16 text-black text-center py-1 px-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
                               />
-                              
+
                               <button
                                 onClick={() => handleChangeQuantity(idx, item.quantity + 1)}
                                 className="w-8 h-8 rounded-lg bg-gray-100 hover:bg-pink-100 text-gray-600 hover:text-pink-600 flex items-center justify-center transition-all duration-200"
@@ -647,7 +802,7 @@ export const PosPage = () => {
                                 <PlusIcon className="w-4 h-4" />
                               </button>
                             </div>
-                            
+
                             <div className="text-right">
                               <div className="font-semibold text-pink-600">
                                 {(item.price * item.quantity)?.toLocaleString()} ₫
@@ -659,12 +814,43 @@ export const PosPage = () => {
                     </div>
 
                     {/* Tổng tiền */}
-                    <div className="border-t border-gray-200 pt-4 mb-6">
+                    <div className="border-t border-gray-200 pt-4 mb-4">
                       <div className="flex justify-between items-center mb-2">
                         <span className="text-gray-600">Tổng cộng:</span>
                         <span className="text-2xl font-bold text-pink-600">
                           {total?.toLocaleString()} ₫
                         </span>
+                      </div>
+                    </div>
+
+                    {/* Chọn phương thức thanh toán */}
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Phương thức thanh toán
+                      </label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <button
+                          onClick={() => setPaymentMethod("CASH")}
+                          className={`px-4 py-3 text-black rounded-lg border-2 transition-all duration-200 flex items-center justify-center gap-2 ${
+                            paymentMethod === "CASH"
+                              ? "border-green-500 bg-green-50 text-green-700"
+                              : "border-gray-200 hover:border-gray-300"
+                          }`}
+                        >
+                          <CreditCardIcon className="w-5 h-5" />
+                          <span className="font-medium">Tiền mặt</span>
+                        </button>
+                        <button
+                          onClick={() => setPaymentMethod("BANK")}
+                          className={`px-4 py-3 text-black rounded-lg border-2 transition-all duration-200 flex items-center justify-center gap-2 ${
+                            paymentMethod === "BANK"
+                              ? "border-blue-500 bg-blue-50 text-blue-700"
+                              : "border-gray-200 hover:border-gray-300"
+                          }`}
+                        >
+                          <BanknotesIcon className="w-5 h-5" />
+                          <span className="font-medium">Chuyển khoản</span>
+                        </button>
                       </div>
                     </div>
 
@@ -681,8 +867,17 @@ export const PosPage = () => {
                         </>
                       ) : (
                         <>
-                          <CreditCardIcon className="w-5 h-5" />
-                          Thanh toán tiền mặt
+                          {paymentMethod === "CASH" ? (
+                            <>
+                              <CreditCardIcon className="w-5 h-5" />
+                              Thanh toán tiền mặt
+                            </>
+                          ) : (
+                            <>
+                              <BanknotesIcon className="w-5 h-5" />
+                              Thanh toán chuyển khoản
+                            </>
+                          )}
                         </>
                       )}
                     </button>
@@ -706,7 +901,7 @@ export const PosPage = () => {
                   <XMarkIcon className="w-6 h-6" />
                 </button>
               </div>
-              
+
               <form onSubmit={handleCustomerSubmit} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Họ tên *</label>
@@ -714,63 +909,31 @@ export const PosPage = () => {
                     type="text"
                     required
                     value={customerForm.name}
-                    onChange={(e) => setCustomerForm({...customerForm, name: e.target.value})}
+                    onChange={(e) => setCustomerForm({ ...customerForm, name: e.target.value })}
                     className="w-full px-3 py-2 text-black border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
                   <input
                     type="email"
                     value={customerForm.email}
-                    onChange={(e) => setCustomerForm({...customerForm, email: e.target.value})}
+                    onChange={(e) => setCustomerForm({ ...customerForm, email: e.target.value })}
                     className="w-full px-3 py-2 text-black border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Số điện thoại</label>
                   <input
                     type="tel"
                     value={customerForm.phone}
-                    onChange={(e) => setCustomerForm({...customerForm, phone: e.target.value})}
+                    onChange={(e) => setCustomerForm({ ...customerForm, phone: e.target.value })}
                     className="w-full px-3 py-2 text-black border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
                   />
                 </div>
-                
-              
-                
-                {/* <div className="grid grid-cols-3 gap-3">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Phường/Xã</label>
-                    <input
-                      type="text"
-                      value={customerForm.ward}
-                      onChange={(e) => setCustomerForm({...customerForm, ward: e.target.value})}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Quận/Huyện</label>
-                    <input
-                      type="text"
-                      value={customerForm.district}
-                      onChange={(e) => setCustomerForm({...customerForm, district: e.target.value})}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Tỉnh/TP</label>
-                    <input
-                      type="text"
-                      value={customerForm.province}
-                      onChange={(e) => setCustomerForm({...customerForm, province: e.target.value})}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-                    />
-                  </div>
-                </div> */}
-                
+
                 <div className="flex gap-3 pt-4">
                   <button
                     type="button"
@@ -789,6 +952,15 @@ export const PosPage = () => {
               </form>
             </div>
           </div>
+        )}
+
+        {/* Bank Payment Modal */}
+        {showBankPayment && currentOrder && (
+          <BankPaymentModal
+            order={currentOrder}
+            onClose={() => setShowBankPayment(false)}
+            onSuccess={handlePaymentSuccess}
+          />
         )}
 
         {/* Success Modal */}
@@ -860,3 +1032,4 @@ export const PosPage = () => {
     </div>
   )
 }
+export default PosPage

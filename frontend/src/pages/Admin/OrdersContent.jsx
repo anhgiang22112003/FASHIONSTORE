@@ -34,6 +34,7 @@ const paymentMethodOptions = {
   MOMO: "Ví MoMo",
   ZALOPAY: "ZaloPay",
   VNPAY: "VNPay",
+  CASH: "Thanh toán tại cửa hàng",
 }
 
 
@@ -625,7 +626,7 @@ const OrdersContent = ({ data, onEditOrder }) => {
                         <td className="px-6 py-4 font-bold  text-sm whitespace-nowrap">#{order._id.slice(-6).toUpperCase()}</td>
 
                         <td className="px-6 py-4 whitespace-nowrap ">
-                          <p className="font-semibold ">{order.user?.name || order.shippingInfo?.name || 'Khách vãng lai'}</p>
+                          <p className="font-semibold ">{order.user?.name || order.shippingInfo?.name || 'Khách mua tại cửa hàng'}</p>
                           <p className=" text-xs">{order.user?.email || order.shippingInfo?.phone || ''}</p>
                         </td>
 
@@ -636,7 +637,7 @@ const OrdersContent = ({ data, onEditOrder }) => {
 
                         <td className="px-6 py-4 text-sm  max-w-xs ">
                           <p className="line-clamp-2" title={order.address}>
-                            {order.address || order.shippingInfo?.address || 'Chưa có địa chỉ'}
+                            {order.orderType =="POS" ?"Khách mua tại cửa hàng ": order.address || order.shippingInfo?.address || 'Chưa có địa chỉ'}
                           </p>
                         </td>
 

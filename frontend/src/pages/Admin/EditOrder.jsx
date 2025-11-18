@@ -68,10 +68,10 @@ const OrderEditPage = ({ orderId }) => {
                 status: order.status,
                 paymentStatus: order.paymentStatus,
                 customerInfo: {
-                    name: order.shippingInfo.name,
-                    phone: order.shippingInfo.phone,
-                    email: order.user?.email || "",
-                    address: order.shippingInfo.address,
+                    name: order?.shippingInfo?.name,
+                    phone: order?.shippingInfo?.phone,
+                    email: order?.user?.email || "",
+                    address: order?.shippingInfo?.address,
                 },
                 shippingInfo: {
                     type: order.shippingMethod === "HOA_TOC" ? "Giao hàng hỏa tốc" : "Giao hàng tiêu chuẩn",

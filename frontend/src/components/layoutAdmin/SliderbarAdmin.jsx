@@ -10,6 +10,8 @@ import {
 
 const Sidebar = ({ activeTab, setActiveTab, isOpen, toggleSidebar }) => {
     const [openSubmenu, setOpenSubmenu] = useState(null)
+    const [hoverSubmenu, setHoverSubmenu] = useState(null)
+
 
     const navItems = [
         {
@@ -55,10 +57,17 @@ const Sidebar = ({ activeTab, setActiveTab, isOpen, toggleSidebar }) => {
             )
         },
         {
-            id: 'customers', name: 'Khách hàng', icon: (
+            id: 'users',
+            name: 'Người dùng',
+            icon: (
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.5.87 2.62 1.94 3.29 2.95V19h4v-2.5c0-2.33-4.67-3.5-7-3.5z"></path></svg>
-            )
+            ),
+            submenu: [
+                { id: 'customers', name: 'Khách hàng' },
+                { id: 'staff', name: 'Nhân viên' }
+            ]
         },
+
         {
             id: 'chat', name: 'Chat với khách', icon: (
                 <svg
@@ -86,8 +95,8 @@ const Sidebar = ({ activeTab, setActiveTab, isOpen, toggleSidebar }) => {
             )
         },
     ]
-       const handleNavClick = (item) => {
-        if(item.submenu){
+    const handleNavClick = (item) => {
+        if (item.submenu) {
             setOpenSubmenu(openSubmenu === item.id ? null : item.id)
         } else {
             setActiveTab(item.id)
@@ -95,7 +104,7 @@ const Sidebar = ({ activeTab, setActiveTab, isOpen, toggleSidebar }) => {
         }
     }
 
-     return (
+    return (
         <div className={`
             fixed lg:relative
             h-screen lg:h-auto
@@ -119,14 +128,14 @@ const Sidebar = ({ activeTab, setActiveTab, isOpen, toggleSidebar }) => {
                         </h2>
                     </div>
                 )}
-                <button 
-                    onClick={toggleSidebar} 
+                <button
+                    onClick={toggleSidebar}
                     className="p-2 rounded-xl bg-white/80 backdrop-blur-sm text-gray-600 hover:bg-gradient-to-r hover:from-pink-500 hover:to-purple-600 hover:text-white transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
                 >
-                    <svg 
-                        className={`w-5 h-5 transform transition-transform duration-300 ${isOpen ? 'rotate-180' : 'rotate-0'}`} 
-                        fill="none" 
-                        stroke="currentColor" 
+                    <svg
+                        className={`w-5 h-5 transform transition-transform duration-300 ${isOpen ? 'rotate-180' : 'rotate-0'}`}
+                        fill="none"
+                        stroke="currentColor"
                         viewBox="0 0 24 24"
                     >
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7"></path>
@@ -146,8 +155,8 @@ const Sidebar = ({ activeTab, setActiveTab, isOpen, toggleSidebar }) => {
                             }}
                             className={`
                                 flex items-center space-x-3 p-3 rounded-xl transition-all duration-300
-                                ${activeTab === item.id 
-                                    ? 'bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-lg transform scale-105' 
+                               ${activeTab === item.id || item.submenu?.some(sub => sub.id === activeTab)
+                                    ? 'bg-gradient-to-r from-pink-500 to-purple-600  shadow-lg transform scale-105'
                                     : ' hover:bg-white/70 hover:text-pink-600 hover:shadow-md hover:transform hover:scale-102'
                                 }
                                 ${!isOpen ? 'justify-center' : ''}
@@ -157,7 +166,7 @@ const Sidebar = ({ activeTab, setActiveTab, isOpen, toggleSidebar }) => {
                             <div className={`flex-shrink-0 ${activeTab === item.id ? 'text-white' : ''}`}>
                                 {item.icon}
                             </div>
-                            
+
                             {isOpen && (
                                 <>
                                     <span className="font-medium text-sm flex-1 truncate">
@@ -166,7 +175,7 @@ const Sidebar = ({ activeTab, setActiveTab, isOpen, toggleSidebar }) => {
                                     {item.submenu && (
                                         <div className={`transform transition-transform duration-200 ${openSubmenu === item.id ? 'rotate-180' : 'rotate-0'}`}>
                                             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                                <path d="M7 10l5 5 5-5z"/>
+                                                <path d="M7 10l5 5 5-5z" />
                                             </svg>
                                         </div>
                                     )}
@@ -187,9 +196,9 @@ const Sidebar = ({ activeTab, setActiveTab, isOpen, toggleSidebar }) => {
                                         }}
                                         className={`
                                             block p-2 pl-4 rounded-lg text-sm transition-all duration-200
-                                            ${activeTab === sub.id 
-                                                ? 'bg-gradient-to-r from-pink-100 to-purple-100 text-pink-700 font-semibold border-l-3 border-pink-500' 
-                                                : 'text-gray-600 hover:bg-white/50 hover:text-pink-600 hover:pl-5'
+                                            ${activeTab === sub.id
+                                                ? 'bg-gradient-to-r from-pink-100 to-purple-100 text-pink-700 font-semibold border-l-3 border-pink-500'
+                                                : ' hover:bg-white/50 hover:text-pink-600 hover:pl-5'
                                             }
                                         `}
                                     >
@@ -203,7 +212,7 @@ const Sidebar = ({ activeTab, setActiveTab, isOpen, toggleSidebar }) => {
             </nav>
 
             {/* Footer */}
-          
+
 
             <style jsx>{`
                 .scrollbar-thin {

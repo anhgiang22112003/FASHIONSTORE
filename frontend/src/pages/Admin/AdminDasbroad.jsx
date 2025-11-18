@@ -172,10 +172,10 @@ const AdminDashboard = () => {
                   <span className="text-xl">🛒</span>
                   <div>
                     <p className="font-semibold text-black">
-                      {order.user.name || "Khách hàng"}
+                      {order?.user?.name || "Khách hàng"}
                     </p>
                     <p className="text-sm text-gray-500">
-                      {order.items?.length || 0} sản phẩm
+                      {order?.items?.length || 0} sản phẩm
                     </p>
                   </div>
                 </div>
