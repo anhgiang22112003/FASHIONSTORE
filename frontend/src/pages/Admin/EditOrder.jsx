@@ -56,7 +56,7 @@ const OrderEditPage = ({ orderId }) => {
     const [isLoading, setIsLoading] = useState(true)
     const canEditFull = editedOrder.status === 'PENDING' || editedOrder.status === 'PROCESSING'
     const canEditProductList = editedOrder.status !== 'COMPLETED' && editedOrder.status !== 'CANCELLED'
-    
+
     const fetchOrder = async () => {
         setIsLoading(true)
         try {
@@ -74,7 +74,13 @@ const OrderEditPage = ({ orderId }) => {
                     address: order?.shippingInfo?.address,
                 },
                 shippingInfo: {
-                    type: order.shippingMethod === "HOA_TOC" ? "Giao hàng hỏa tốc" : "Giao hàng tiêu chuẩn",
+                    type:
+                        order.shippingMethod === "HOA_TOC"
+                            ? "Giao hàng hỏa tốc"
+                            : order.shippingMethod === "NHANH"
+                                ? "Giao hàng tiêu chuẩn"
+                                : "Mua tại cửa hàng",
+
                     note: order.note || "",
                 },
                 paymentInfo: {
@@ -124,11 +130,11 @@ const OrderEditPage = ({ orderId }) => {
 
     useEffect(() => {
         // Giữ nguyên logic tính lại phí vận chuyển
-        const newShippingFee = editedOrder.shippingInfo.type === "Giao hàng hỏa tốc" ? 50000 : 30000;
+        const newShippingFee = editedOrder.shippingInfo.type === "Giao hàng hỏa tốc" ? 50000 : 30000
         setEditedOrder((prev) => ({
             ...prev,
             totals: { ...prev.totals, shippingFee: newShippingFee },
-        }));
+        }))
     }, [editedOrder.shippingInfo.type])
 
 
@@ -141,7 +147,7 @@ const OrderEditPage = ({ orderId }) => {
         try {
             const updateData = {
                 status: editedOrder.status,
-                voucherCode: canEditFull ? editedOrder.paymentInfo.voucher : originalOrder.paymentInfo.voucher, 
+                voucherCode: canEditFull ? editedOrder.paymentInfo.voucher : originalOrder.paymentInfo.voucher,
                 note: editedOrder.shippingInfo.note,
                 shippingMethod: editedOrder.shippingInfo.type.includes("hỏa tốc") ? "HOA_TOC" : "NHANH",
                 paymentMethod: editedOrder.paymentInfo.method.includes("COD") ? "COD" : editedOrder.paymentInfo.method,
@@ -199,37 +205,43 @@ const OrderEditPage = ({ orderId }) => {
     const currentStatusLabel = statusObj ? statusObj.label : String(editedOrder.status || "")
 
     // --- RENDERING SUB-COMPONENTS (Giữ nguyên renderEditableField và renderHeaderButtons) ---
-    const renderEditableField = (label, name, value, inputType = "text", options = [], disabled = false) => (
+   const renderEditableField = (label, name, value, inputType = "text", options = {}, disabled = false) => {
+    const hasOptions = options && typeof options === "object" && Object.keys(options).length > 0
+
+    return (
         <div className="flex-1 space-y-1">
-            <label htmlFor={name} className="block text-sm font-medium text-gray-500">{label}</label>
+            <label className="block text-sm font-medium text-gray-500">{label}</label>
+
             {isEditMode && !disabled ? (
-                options.length > 0 ? (
+                hasOptions ? (
                     <select
-                        id={name}
                         name={name}
-                        value={value}
+                        value={value ?? ""}
                         onChange={handleChange}
-                        className="w-full px-4 py-2 text-black rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all"
+                        className="w-full px-4 py-2 text-black rounded-xl border border-gray-300"
                     >
-                        {options.map(option => (
-                            <option key={option} value={option}>{option}</option>
+                        {Object.keys(options).map(key => (
+                            <option key={key} value={key}>{options[key]}</option>
                         ))}
                     </select>
                 ) : (
                     <input
                         type={inputType}
-                        id={name}
                         name={name}
-                        value={value}
+                        value={value ?? ""}
                         onChange={handleChange}
-                        className="w-full px-4 py-2 text-black rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-500 transition-all"
+                        className="w-full px-4 py-2 text-black rounded-xl border border-gray-300"
                     />
                 )
             ) : (
-                <p className="font-semibold text-gray-800 break-words">{value || 'N/A'}</p>
+                <p className="font-semibold text-gray-800">
+                    {options[value] || value || 'N/A'}
+                </p>
             )}
         </div>
     )
+}
+
 
     const renderHeaderButtons = () => {
         if (isEditMode) {

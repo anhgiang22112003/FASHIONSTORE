@@ -58,6 +58,8 @@ const OrdersContent = ({ data, onEditOrder }) => {
 
   const [filters, setFilters] = useState({
     userId: "",
+    staffId: "",      // thêm staffId
+    orderType: "",    // thêm orderType
     status: "",
     minDate: "",
     maxDate: "",
@@ -67,6 +69,7 @@ const OrdersContent = ({ data, onEditOrder }) => {
     district: "",
     ward: "",
   })
+
 
   const [customers, setCustomers] = useState([])
   const [customerPage, setCustomerPage] = useState(1)
@@ -78,6 +81,7 @@ const OrdersContent = ({ data, onEditOrder }) => {
   const [showImportModal, setShowImportModal] = useState(false)
   const [page, setPage] = useState(1)
   const [total, setTotal] = useState(0)
+  const [staffs, setStaffs] = useState([])
   const limit = 20
   const debouncedMinTotal = useDebounce(filters.minTotal, 500)
   const debouncedMaxTotal = useDebounce(filters.maxTotal, 500)
@@ -94,7 +98,19 @@ const OrdersContent = ({ data, onEditOrder }) => {
 
 
 
-
+ useEffect(() => {
+    const fetchStaff = async () => {
+      try {
+        const res = await apiAdmin.get("/users/staff", {
+          params: { page: 1, limit: 100 }
+        })
+        setStaffs(res.data.data || [])
+      } catch (err) {
+        console.error("Error fetching staff:", err)
+      }
+    }
+    fetchStaff()
+  }, [])
   const handleExportExcel = async () => {
     try {
       setLoading(true)
@@ -169,7 +185,7 @@ const OrdersContent = ({ data, onEditOrder }) => {
       setPage(res.data.page || 1)
     } catch (err) {
       console.error(err)
-      toast.error("Không thể tải danh sách đơn hàng")
+      toast.error(err?.response?.data?.message || "Không thể tải danh sách đơn hàng")
     } finally {
       setLoading(false)
     }
@@ -263,6 +279,8 @@ const OrdersContent = ({ data, onEditOrder }) => {
   const clearFilters = () => {
     const emptyFilters = {
       userId: "",
+      staffId: "",      // thêm staffId
+      orderType: "",    // thêm orderType
       status: "",
       minDate: "",
       maxDate: "",
@@ -303,7 +321,6 @@ const OrdersContent = ({ data, onEditOrder }) => {
     try {
       setLoading(true)
 
-      // Giả định apiAdmin.patch trả về data có cấu trúc { message: "...", summary: [...] }
       const response = await apiAdmin.patch("/orders/bulk-status", {
         orderIds: selectedOrders,
         status: bulkStatus
@@ -332,13 +349,11 @@ const OrdersContent = ({ data, onEditOrder }) => {
         })
       }
 
-      // 4. Reset và làm mới dữ liệu
       setSelectedOrders([])
       setBulkStatus("")
       fetchOrders()
 
     } catch (err) {
-      // Xử lý các lỗi HTTP chung (ví dụ: mất kết nối, lỗi 500 trước khi xử lý logic)
       toast.error(err?.response?.data?.message || "Lỗi hệ thống khi cập nhật hàng loạt ❌")
     } finally {
       setLoading(false)
@@ -489,6 +504,22 @@ const OrdersContent = ({ data, onEditOrder }) => {
                   ))}
                 </select>
               </div>
+              <div className="lg:col-span-2">
+                <label className="block text-sm font-medium mb-1">Nhân viên</label>
+                <select
+                  name="staffId"
+                  value={filters.staffId}
+                  onChange={handleFilterChange}
+                  className="w-full px-3 py-2 border text-black border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500"
+                >
+                  <option value="">-- Tất cả nhân viên --</option>
+                  {staffs.map(staff => (
+                    <option key={staff._id} value={staff._id}>
+                      {staff.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
               <div className="lg:col-span-1">
                 <label className="block text-sm font-medium mb-1">Trạng thái</label>
@@ -582,6 +613,19 @@ const OrdersContent = ({ data, onEditOrder }) => {
                   ))}
                 </select>
               </div>
+                 <div className="lg:col-span-1">
+                <label className="block text-sm font-medium mb-1">Loại đơn</label>
+                <select
+                  name="orderType"
+                  value={filters.orderType}
+                  onChange={handleFilterChange}
+                  className="w-full px-3 py-2 border text-black border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500"
+                >
+                  <option value="">-- Tất cả --</option>
+                  <option value="ONLINE">ONLINE</option>
+                  <option value="POS">POS</option>
+                </select>
+              </div>
             </div>
 
             <div className="flex justify-end space-x-3 pt-6 border-t mt-4">
@@ -637,7 +681,7 @@ const OrdersContent = ({ data, onEditOrder }) => {
 
                         <td className="px-6 py-4 text-sm  max-w-xs ">
                           <p className="line-clamp-2" title={order.address}>
-                            {order.orderType =="POS" ?"Khách mua tại cửa hàng ": order.address || order.shippingInfo?.address || 'Chưa có địa chỉ'}
+                            {order.orderType == "POS" ? "Khách mua tại cửa hàng " : order.address || order.shippingInfo?.address || 'Chưa có địa chỉ'}
                           </p>
                         </td>
 
