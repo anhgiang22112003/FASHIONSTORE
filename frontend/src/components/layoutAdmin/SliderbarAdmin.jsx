@@ -64,7 +64,8 @@ const Sidebar = ({ activeTab, setActiveTab, isOpen, toggleSidebar }) => {
             ),
             submenu: [
                 { id: 'customers', name: 'Khách hàng' },
-                { id: 'staff', name: 'Nhân viên' }
+                { id: 'staff', name: 'Nhân viên' },
+                { id: 'supplier', name: 'Nhà cung cấp' }
             ]
         },
 

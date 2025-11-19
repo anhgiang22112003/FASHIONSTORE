@@ -8,6 +8,7 @@ import { io } from 'socket.io-client'
 import { socket } from "@/service/socket"
 import { ThemeProvider } from "@/context/ThemeContext"
 
+const Suppliers = React.lazy(() => import("./Suppliers"))
 const StaffPage = React.lazy(() => import("./StaffPage"))
 const Bank = React.lazy(() => import("./Bank"))
 const PosPage = React.lazy(() => import("./PosPage"))
@@ -256,11 +257,13 @@ const AdminLayout = () => {
 
               {activeTab === "staff" && (
                 <StaffPage
-                  setEditingCustomer={setEditingCustomer}
                   setActivePage={setActiveTab}
-                  data={tabData.customers}
-                  setData={(data) => setTabData((prev) => ({ ...prev, customers: data }))}
-                  refreshCustomers={fetchCustomers}
+
+                />
+              )}
+              {activeTab === "supplier" && (
+                <Suppliers
+                 setActivePage={setActiveTab}
                 />
               )}
 
