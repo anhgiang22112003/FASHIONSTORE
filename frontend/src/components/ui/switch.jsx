@@ -2,19 +2,21 @@ import React from 'react';
 import styled from 'styled-components';
 
 const Switch = ({ checked, onChange }) => {
- return (
+  const handleChange = (e) => {
+    onChange(e.target.checked);
+  };
+
+  return (
     <StyledWrapper>
       <label className="switch">
-        {/* Truyền checked và onChange vào input */}
         <input 
           id="input" 
           type="checkbox" 
           checked={checked} 
-          onChange={onChange} 
+          onChange={handleChange} 
         />
         <div className="slider round">
           <div className="sun-moon">
-            {/* ...Các SVG (giữ nguyên) ... */}
             <svg id="moon-dot-1" className="moon-dot" viewBox="0 0 100 100">
               <circle cx={50} cy={50} r={50} />
             </svg>
@@ -53,7 +55,6 @@ const Switch = ({ checked, onChange }) => {
             </svg>
           </div>
           <div className="stars">
-            {/* ...Các SVG (giữ nguyên) ... */}
             <svg id="star-1" className="star" viewBox="0 0 20 20">
               <path d="M 0 10 C 10 10,10 10 ,0 10 C 10 10 , 10 10 , 10 20 C 10 10 , 10 10 , 20 10 C 10 10 , 10 10 , 10 0 C 10 10,10 10 ,0 10 Z" />
             </svg>
@@ -71,7 +72,7 @@ const Switch = ({ checked, onChange }) => {
       </label>
     </StyledWrapper>
   );
-}
+};
 
 const StyledWrapper = styled.div`
   .switch {
@@ -345,6 +346,16 @@ const StyledWrapper = styled.div`
     100% {
       transform: scale(1);
     }
-  }`;
+  }
 
-export default Switch;
+  @keyframes rotate-center {
+    0% {
+      transform: translateX(26px) rotate(0);
+    }
+    100% {
+      transform: translateX(26px) rotate(360deg);
+    }
+  }
+`;
+
+export default Switch ;

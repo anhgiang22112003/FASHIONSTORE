@@ -54,20 +54,38 @@ const Suppliers = () => {
 
   // Update districts when province changes
   useEffect(() => {
-    if (selectedProvince) {
+    if (selectedProvince && provinces.length > 0) {
       const province = provinces.find((p) => p.name === selectedProvince);
-      setDistricts(province?.districts || []);
+      if (province && province.districts) {
+        setDistricts(province.districts);
+        // Giữ district và ward nếu đang edit và có dữ liệu
+        if (!editSupplier) {
+          setSelectedDistrict('');
+          setSelectedWard('');
+          setWards([]);
+        }
+      }
+    } else if (!selectedProvince) {
+      setDistricts([]);
       setSelectedDistrict('');
-      setSelectedWard('');
       setWards([]);
+      setSelectedWard('');
     }
   }, [selectedProvince, provinces]);
 
   // Update wards when district changes
   useEffect(() => {
-    if (selectedDistrict) {
+    if (selectedDistrict && districts.length > 0) {
       const district = districts.find((d) => d.name === selectedDistrict);
-      setWards(district?.wards || []);
+      if (district && district.wards) {
+        setWards(district.wards);
+        // Giữ ward nếu đang edit và có dữ liệu
+        if (!editSupplier) {
+          setSelectedWard('');
+        }
+      }
+    } else if (!selectedDistrict) {
+      setWards([]);
       setSelectedWard('');
     }
   }, [selectedDistrict, districts]);
@@ -218,10 +236,28 @@ const Suppliers = () => {
       setPhone(supplier.phone || '');
       setEmail(supplier.email || '');
       setAddress(supplier.address || '');
-      setSelectedProvince(supplier.province || '');
-      setSelectedDistrict(supplier.district || '');
-      setSelectedWard(supplier.ward || '');
       setIsNewSupplierActive(supplier.isActive);
+      
+      // Load province first
+      setSelectedProvince(supplier.province || '');
+      
+      // Load districts and district selection
+      if (supplier.province && provinces.length > 0) {
+        const province = provinces.find((p) => p.name === supplier.province);
+        if (province) {
+          setDistricts(province.districts || []);
+          setSelectedDistrict(supplier.district || '');
+          
+          // Load wards and ward selection
+          if (supplier.district) {
+            const district = province.districts?.find((d) => d.name === supplier.district);
+            if (district) {
+              setWards(district.wards || []);
+              setSelectedWard(supplier.ward || '');
+            }
+          }
+        }
+      }
     }
   };
 
@@ -240,28 +276,28 @@ const Suppliers = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div style={{ backgroundColor: "var(--bg-color)", color: "var(--text-color)" }} className="min-h-screen  from-gray-50 to-blue-50 p-6">
+      <div className="max-w-full mx-auto space-y-6">
         <div className="flex justify-between items-center">
           <div className="flex items-center space-x-4">
-            <h1 className="text-3xl font-bold text-gray-900">Quản lý nhà cung cấp</h1>
+            <h1 className="text-3xl font-bold ">Quản lý nhà cung cấp</h1>
             <Button
               onClick={toggleFilterDropdown}
               variant={isFilterVisible ? 'default' : 'outline'}
-              className={isFilterVisible ? 'bg-blue-600 hover:bg-blue-700' : ''}
+              className={isFilterVisible ? 'bg-pink-600 hover:bg-pink-700' : ''}
             >
               <Filter className="w-4 h-4 mr-2" />
               Bộ lọc
             </Button>
           </div>
 
-          <Button onClick={() => handleOpenForm()} className="bg-blue-600 hover:bg-blue-700">
+          <Button onClick={() => handleOpenForm()} className="bg-pink-600 hover:bg-pink-700">
             <Plus className="w-4 h-4 mr-2" />
             Thêm nhà cung cấp mới
           </Button>
         </div>
 
-        {/* FORM */}
+        {/* FORM */}  
         {isFormOpen && (
           <div className="bg-white p-8 rounded-2xl shadow-xl">
             <h3 className="text-xl font-bold text-gray-800 mb-6">
@@ -269,8 +305,8 @@ const Suppliers = () => {
             </h3>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="name">
+                <div className="space-y-2 text-black">
+                  <Label  htmlFor="name">
                     Tên nhà cung cấp <span className="text-red-500">*</span>
                   </Label>
                   <Input
@@ -279,11 +315,11 @@ const Suppliers = () => {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Nhập tên nhà cung cấp"
-                    required
+                    className="text-black"
                   />
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-2 text-black">
                   <Label htmlFor="contactName">Tên người liên hệ</Label>
                   <Input
                     id="contactName"
@@ -291,10 +327,11 @@ const Suppliers = () => {
                     value={contactName}
                     onChange={(e) => setContactName(e.target.value)}
                     placeholder="Nhập tên người liên hệ"
+                    className="text-black"
                   />
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-2 text-black">
                   <Label htmlFor="phone">Số điện thoại</Label>
                   <Input
                     id="phone"
@@ -305,7 +342,7 @@ const Suppliers = () => {
                   />
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-2 text-black">
                   <Label htmlFor="email">Email</Label>
                   <Input
                     id="email"
@@ -316,7 +353,7 @@ const Suppliers = () => {
                   />
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-2 text-black">
                   <Label htmlFor="province">Tỉnh/Thành phố</Label>
                   <Select value={selectedProvince} onValueChange={setSelectedProvince}>
                     <SelectTrigger>
@@ -332,7 +369,7 @@ const Suppliers = () => {
                   </Select>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-2 text-black">
                   <Label htmlFor="district">Quận/Huyện</Label>
                   <Select
                     value={selectedDistrict}
@@ -352,7 +389,7 @@ const Suppliers = () => {
                   </Select>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-2 text-black">
                   <Label htmlFor="ward">Phường/Xã</Label>
                   <Select
                     value={selectedWard}
@@ -372,8 +409,8 @@ const Suppliers = () => {
                   </Select>
                 </div>
 
-                <div className="space-y-2 md:col-span-2">
-                  <Label htmlFor="address">Địa chỉ chi tiết</Label>
+                <div className="space-y-2 md:col-span-2 text-black  ">
+                  <Label htmlFor="address ">Địa chỉ chi tiết</Label>
                   <Textarea
                     id="address"
                     value={address}
@@ -388,10 +425,10 @@ const Suppliers = () => {
                 <span className="font-medium text-gray-700">
                   Trạng thái: {isNewSupplierActive ? 'Đang hoạt động' : 'Ngừng hoạt động'}
                 </span>
-                <Switch checked={isNewSupplierActive} onCheckedChange={setIsNewSupplierActive} />
+                <Switch checked={isNewSupplierActive} onChange={setIsNewSupplierActive} />
               </div>
 
-              <div className="flex justify-end space-x-4">
+              <div className="flex text-black justify-end space-x-4">
                 <Button type="button" onClick={handleCloseForm} variant="outline">
                   Hủy
                 </Button>
@@ -405,11 +442,11 @@ const Suppliers = () => {
 
         {/* FILTER */}
         {isFilterVisible && (
-          <div className="bg-white p-6 rounded-2xl shadow-lg">
-            <h4 className="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">
+          <div className=" p-6 rounded-2xl shadow-lg">
+            <h4 className="text-lg font-semibold  mb-4 border-b pb-2">
               Bộ lọc nhà cung cấp
             </h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1  md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="filterName">Tên nhà cung cấp</Label>
                 <Input
@@ -467,7 +504,7 @@ const Suppliers = () => {
         )}
 
         {/* TABLE */}
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+        <div className=" rounded-2xl shadow-xl overflow-hidden">
           {isLoading ? (
             <div className="text-center py-12 text-gray-500">Đang tải dữ liệu...</div>
           ) : (
@@ -498,10 +535,10 @@ const Suppliers = () => {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="divide-y divide-gray-200">
                   {suppliers.map((supplier) => (
                     <tr key={supplier._id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-medium ">
                         {supplier.name}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
