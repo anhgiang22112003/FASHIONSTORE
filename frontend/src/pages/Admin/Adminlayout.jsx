@@ -8,6 +8,7 @@ import { io } from 'socket.io-client'
 import { socket } from "@/service/socket"
 import { ThemeProvider } from "@/context/ThemeContext"
 
+const StockManagement = React.lazy(() => import("./StockManagement"))
 const Suppliers = React.lazy(() => import("./Suppliers"))
 const StaffPage = React.lazy(() => import("./StaffPage"))
 const Bank = React.lazy(() => import("./Bank"))
@@ -263,7 +264,7 @@ const AdminLayout = () => {
               )}
               {activeTab === "supplier" && (
                 <Suppliers
-                 setActivePage={setActiveTab}
+                  setActivePage={setActiveTab}
                 />
               )}
 
@@ -290,6 +291,8 @@ const AdminLayout = () => {
                 />
               )}
 
+
+              {activeTab === "importExport" && <StockManagement />}
               {activeTab === "settings" && <Settings />}
               {activeTab === "bank" && <Bank />}
               {activeTab === "admin-setting" && <AdminSettingsPage />}

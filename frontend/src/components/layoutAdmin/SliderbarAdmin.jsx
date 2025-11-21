@@ -25,6 +25,11 @@ const Sidebar = ({ activeTab, setActiveTab, isOpen, toggleSidebar }) => {
             )
         },
         {
+            id: 'importExport', name: 'Nhập/xuất sản phẩm', icon: (
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M11 20H4a2 2 0 01-2-2V8a2 2 0 012-2h16a2 2 0 012 2v2M8 12h4m-4 4h4m-4-8h8m-4 12v-2h-4v2h4zm0-6v-2h-4v2h4z"></path></svg>
+            )
+        },
+        {
             id: 'orders', name: 'Đơn hàng', icon: <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 18a8 8 0 110-16 8 8 0 010 16zm-1-10v4h-2v-4h2zm2 0h2v4h-2v-4z"></path></svg>,
             submenu: [
                 { id: 'orders', name: 'Đơn hàng online' },
