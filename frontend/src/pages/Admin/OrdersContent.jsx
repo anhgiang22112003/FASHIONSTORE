@@ -645,6 +645,7 @@ const OrdersContent = ({ data, onEditOrder }) => {
                       <input type="checkbox" checked={isAllSelected} onChange={handleSelectAll} />
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider whitespace-nowrap bg-pink-50">Mã đơn</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider whitespace-nowrap bg-pink-50">Mã code</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider whitespace-nowrap bg-pink-50">Khách hàng</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider whitespace-nowrap bg-pink-50">Ngày đặt</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider whitespace-nowrap bg-pink-50">Địa chỉ giao hàng</th>
@@ -668,6 +669,7 @@ const OrdersContent = ({ data, onEditOrder }) => {
                         </td>
 
                         <td className="px-6 py-4 font-bold  text-sm whitespace-nowrap">#{order._id.slice(-6).toUpperCase()}</td>
+                        <td className="px-6 py-4 font-bold   whitespace-nowrap">{order.code}</td>
 
                         <td className="px-6 py-4 whitespace-nowrap ">
                           <p className="font-semibold ">{order.user?.name || order.shippingInfo?.name || 'Khách mua tại cửa hàng'}</p>

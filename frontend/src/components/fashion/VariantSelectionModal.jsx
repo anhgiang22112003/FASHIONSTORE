@@ -1,51 +1,51 @@
-import React, { useState, useMemo, useCallback, useEffect, useContext } from 'react';
-import { ShoppingBag, Minus, Plus, Package, Sparkles } from 'lucide-react';
-import { Button } from '../ui/button';
-import { toast } from 'react-toastify';
-import { CartContext } from '@/context/CartContext';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
+import React, { useState, useMemo, useCallback, useEffect, useContext } from 'react'
+import { ShoppingBag, Minus, Plus, Package, Sparkles } from 'lucide-react'
+import { Button } from '../ui/button'
+import { toast } from 'react-toastify'
+import { CartContext } from '@/context/CartContext'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog'
 
 const VariantSelectionModal = ({ product, isOpen, onClose, onSuccessAndOpenCart }) => {
-  const [selectedColor, setSelectedColor] = useState('');
-  const [selectedSize, setSelectedSize] = useState('');
-  const [quantity, setQuantity] = useState(1);
-  const { addToCart } = useContext(CartContext);
+  const [selectedColor, setSelectedColor] = useState('')
+  const [selectedSize, setSelectedSize] = useState('')
+  const [quantity, setQuantity] = useState(1)
+  const { addToCart } = useContext(CartContext)
 
   // 1. Lấy danh sách Màu và Size duy nhất
   const availableColors = useMemo(() => {
-    const colors = new Set(product?.variations?.map(v => v.color));
-    return Array.from(colors);
-  }, [product]);
+    const colors = new Set(product?.variations?.map(v => v.color))
+    return Array.from(colors)
+  }, [product])
 
   const availableSizes = useMemo(() => {
-    const filteredVariations = product?.variations?.filter(v => v.color === selectedColor);
-    const sizes = new Set(filteredVariations?.map(v => v.size));
-    return Array.from(sizes);
-  }, [product, selectedColor]);
+    const filteredVariations = product?.variations?.filter(v => v.color === selectedColor)
+    const sizes = new Set(filteredVariations?.map(v => v.size))
+    return Array.from(sizes)
+  }, [product, selectedColor])
 
   // 2. Tìm tồn kho hiện tại và Biến thể đã chọn
   const currentVariant = useMemo(() => {
-    return product?.variations?.find(v => v.color === selectedColor && v.size === selectedSize);
-  }, [product, selectedColor, selectedSize]);
+    return product?.variations?.find(v => v.color === selectedColor && v.size === selectedSize)
+  }, [product, selectedColor, selectedSize])
 
-  const currentStock = currentVariant?.stock || 0;
-  const isOutOfStock = currentStock <= 0;
+  const currentStock = currentVariant?.stock || 0
+  const isOutOfStock = currentStock <= 0
 
   // 3. Hàm xử lý thêm vào giỏ hàng
   const handleAddToCart = useCallback(async () => {
     if (!selectedColor || !selectedSize) {
-      toast.warning('Vui lòng chọn Màu và Kích thước');
-      return;
+      toast.warning('Vui lòng chọn Màu và Kích thước')
+      return
     }
 
     if (quantity > currentStock) {
-      toast.warning(`Không đủ hàng, chỉ còn ${currentStock} sản phẩm.`);
-      return;
+      toast.warning(`Không đủ hàng, chỉ còn ${currentStock} sản phẩm.`)
+      return
     }
 
     if (!product?._id) {
-      toast.error('Không tìm thấy sản phẩm');
-      return;
+      toast.error('Không tìm thấy sản phẩm')
+      return
     }
 
     try {
@@ -54,21 +54,21 @@ const VariantSelectionModal = ({ product, isOpen, onClose, onSuccessAndOpenCart 
         quantity,
         color: selectedColor,
         size: selectedSize,
-      };
-      await addToCart(body);
-      onSuccessAndOpenCart();
-      onClose();
+      }
+      await addToCart(body)
+      onSuccessAndOpenCart()
+      onClose()
     } catch (error) {
-      console.error(error);
-      toast.error(error?.response?.data?.message || 'Thêm vào giỏ hàng thất bại');
+      console.error(error)
+      toast.error(error?.response?.data?.message || 'Thêm vào giỏ hàng thất bại')
     }
-  }, [product, quantity, selectedColor, selectedSize, currentStock, addToCart, onClose, onSuccessAndOpenCart]);
+  }, [product, quantity, selectedColor, selectedSize, currentStock, addToCart, onClose, onSuccessAndOpenCart])
 
   useEffect(() => {
     if (selectedColor && !availableSizes.includes(selectedSize)) {
-      setSelectedSize('');
+      setSelectedSize('')
     }
-  }, [selectedColor, availableSizes, selectedSize]);
+  }, [selectedColor, availableSizes, selectedSize])
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -121,8 +121,8 @@ const VariantSelectionModal = ({ product, isOpen, onClose, onSuccessAndOpenCart 
                 <button
                   key={color}
                   onClick={() => {
-                    setSelectedColor(color);
-                    setQuantity(1);
+                    setSelectedColor(color)
+                    setQuantity(1)
                   }}
                   className={`px-5 py-2.5 text-sm font-bold rounded-full border-2 transition-all duration-300 transform hover:scale-105
                     ${selectedColor === color
@@ -152,17 +152,17 @@ const VariantSelectionModal = ({ product, isOpen, onClose, onSuccessAndOpenCart 
               </div>
               <div className="flex flex-wrap gap-2">
                 {availableSizes.map(size => {
-                  const variant = product?.variations?.find(v => v.color === selectedColor && v.size === size);
-                  const stock = variant?.stock || 0;
-                  const isDisabled = stock <= 0;
+                  const variant = product?.variations?.find(v => v.color === selectedColor && v.size === size)
+                  const stock = variant?.stock || 0
+                  const isDisabled = stock <= 0
 
                   return (
                     <button
                       key={size}
                       onClick={() => {
                         if (!isDisabled) {
-                          setSelectedSize(size);
-                          setQuantity(1);
+                          setSelectedSize(size)
+                          setQuantity(1)
                         }
                       }}
                       disabled={isDisabled}
@@ -182,7 +182,7 @@ const VariantSelectionModal = ({ product, isOpen, onClose, onSuccessAndOpenCart 
                       )}
                       <span className={isDisabled ? 'line-through' : ''}>{size}</span>
                     </button>
-                  );
+                  )
                 })}
               </div>
             </div>
@@ -197,13 +197,12 @@ const VariantSelectionModal = ({ product, isOpen, onClose, onSuccessAndOpenCart 
                   <Package className={`w-5 h-5 ${isOutOfStock ? 'text-red-500' : 'text-green-500'}`} />
                   <span className="text-sm font-medium text-gray-600">Tồn kho:</span>
                 </div>
-                <span className={`font-bold text-sm px-3 py-1 rounded-full ${
-                  isOutOfStock 
-                    ? 'bg-red-100 text-red-600' 
-                    : currentStock < 10 
+                <span className={`font-bold text-sm px-3 py-1 rounded-full ${isOutOfStock
+                    ? 'bg-red-100 text-red-600'
+                    : currentStock < 10
                       ? 'bg-yellow-100 text-yellow-600'
                       : 'bg-green-100 text-green-600'
-                }`}>
+                  }`}>
                   {isOutOfStock ? 'Hết hàng' : `${currentStock} sản phẩm`}
                 </span>
               </div>
@@ -222,11 +221,32 @@ const VariantSelectionModal = ({ product, isOpen, onClose, onSuccessAndOpenCart 
                     >
                       <Minus className="w-4 h-4 text-pink-600" />
                     </Button>
-                    
+
                     <div className="w-16 h-10 flex items-center justify-center bg-gradient-to-r from-pink-100 to-rose-100 rounded-full">
-                      <span className="text-lg font-black text-pink-600">{quantity}</span>
+                      <input
+                        type="number"
+                        value={quantity}
+                        onChange={(e) => {
+                          const value = Number(e.target.value)
+
+                          // Không cho nhập số âm hoặc 0
+                          if (value < 1) {
+                            setQuantity(1)
+                            return
+                          }
+
+                          // Không vượt quá tồn kho
+                          if (value > currentStock) {
+                            setQuantity(currentStock)
+                            return
+                          }
+
+                          setQuantity(value)
+                        }}
+                        className="w-20 h-10 text-center text-lg font-black text-pink-600 bg-white border-2 border-pink-200 rounded-full focus:ring-2 focus:ring-pink-400 focus:outline-none"
+                      />
                     </div>
-                    
+
                     <Button
                       variant="outline"
                       size="icon"
@@ -256,7 +276,7 @@ const VariantSelectionModal = ({ product, isOpen, onClose, onSuccessAndOpenCart 
         </div>
       </DialogContent>
     </Dialog>
-  );
-};
+  )
+}
 
-export default VariantSelectionModal;
+export default VariantSelectionModal

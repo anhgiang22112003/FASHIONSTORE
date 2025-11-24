@@ -8,6 +8,7 @@ import { io } from 'socket.io-client'
 import { socket } from "@/service/socket"
 import { ThemeProvider } from "@/context/ThemeContext"
 
+const ComplaintList = React.lazy(() => import("./ComplaintList"))
 const StockManagement = React.lazy(() => import("./StockManagement"))
 const Suppliers = React.lazy(() => import("./Suppliers"))
 const StaffPage = React.lazy(() => import("./StaffPage"))
@@ -291,7 +292,7 @@ const AdminLayout = () => {
                 />
               )}
 
-
+              {activeTab === "compalint" && <ComplaintList />}
               {activeTab === "importExport" && <StockManagement />}
               {activeTab === "settings" && <Settings />}
               {activeTab === "bank" && <Bank />}

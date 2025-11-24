@@ -32,8 +32,9 @@ const Sidebar = ({ activeTab, setActiveTab, isOpen, toggleSidebar }) => {
         {
             id: 'orders', name: 'Đơn hàng', icon: <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 18a8 8 0 110-16 8 8 0 010 16zm-1-10v4h-2v-4h2zm2 0h2v4h-2v-4z"></path></svg>,
             submenu: [
-                { id: 'orders', name: 'Đơn hàng online' },
-                { id: 'orders-pos', name: 'Mua tại chỗ (POS)' }
+                { id: 'orders', name: 'Đơn hàng' },
+                { id: 'orders-pos', name: 'Mua tại chỗ (POS)' },
+                { id: 'compalint', name: 'Chiết khấu khiếu nại' }
             ]
         },
         {
