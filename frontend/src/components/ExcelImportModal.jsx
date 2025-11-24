@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react'
 import { X, Upload, FileSpreadsheet, Download, AlertCircle, CheckCircle } from 'lucide-react'
 import apiAdmin from '@/service/apiAdmin'
+import { toast } from 'react-toastify'
 
 export default function ExcelImportModal({ isOpen, onClose, onSuccess }) {
     const [file, setFile] = useState(null)
@@ -54,49 +55,48 @@ export default function ExcelImportModal({ isOpen, onClose, onSuccess }) {
         }
     }
 
-    const handleUpload = async () => {
-        if (!file) {
-            setError('Vui lòng chọn file để tải lên')
-            return
-        }
 
-        setUploading(true)
-        setError(null)
-        setSuccess(false)
-
-        try {
-            const formData = new FormData()
-            formData.append('file', file)
-
-            const response = await apiAdmin.post('/importExport/transactions/import-excel', { body: formData, })
-
-            if (!response.ok) {
-                const errorData = await response.json()
-                throw new Error(errorData.message || 'Upload failed')
-            }
-
-            const result = await response.json()
-            setSuccess(true)
-            setFile(null)
-
-            // Close modal after 2 seconds
-            setTimeout(() => {
-                onSuccess()
-            }, 2000)
-        } catch (err) {
-            setError(err.message || 'Có lỗi xảy ra khi tải file lên')
-        } finally {
-            setUploading(false)
-        }
+const handleUpload = async () => {
+    if (!file) {
+        setError('Vui lòng chọn file để tải lên')
+        return
     }
+
+    setUploading(true)
+    setError(null)
+    setSuccess(false)
+
+    try {
+        const formData = new FormData()
+        formData.append('file', file)
+
+        const response = await apiAdmin.post(
+            '/importExport/transactions/import-excel',
+            formData,
+            {
+                headers: {
+                    "Content-Type": "multipart/form-data"   // QUAN TRỌNG
+                }
+            }
+        )
+
+        setSuccess(true)
+        setFile(null)
+        
+        toast.success("Upload file thành công")
+        setTimeout(() => onSuccess(), 2000)
+    } catch (err) {
+        setError(err.response?.data?.message || 'Có lỗi xảy ra khi tải file lên')
+    } finally {
+        setUploading(false)
+    }
+}
 
     const handleDownloadTemplate = async () => {
         try {
             const response = await apiAdmin.get('/importExport/transactions/template', {
                 responseType: 'arraybuffer', // important!
             })
-            console.log(response)
-
             const blob = new Blob([response.data], {
                 type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             })

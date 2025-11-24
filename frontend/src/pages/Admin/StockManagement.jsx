@@ -36,12 +36,12 @@ export default function StockManagement() {
 
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6">
+        <div  style={{ backgroundColor: "var(--bg-color)", color: "var(--text-color)" }} className="min-h-screen  from-slate-50 to-slate-100 p-6">
             <div className="max-w-full mx-auto">
                 {/* Header */}
                 <div className="mb-8 flex justify-between items-center">
                     <div>
-                        <h1 className="text-3xl font-bold text-slate-800 mb-2">Quản lý Kho hàng</h1>
+                        <h1 className="text-3xl font-bold  mb-2">Quản lý Kho hàng</h1>
                         <p className="text-slate-600">Nhập xuất và theo dõi lịch sử kho hàng</p>
                     </div>
 

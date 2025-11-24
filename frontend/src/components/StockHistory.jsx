@@ -107,10 +107,10 @@ export default function StockHistory() {
     const hasActiveFilters = Object.values(filters).some(v => v !== '')
 
     return (
-        <div className="bg-white rounded-xl shadow-lg p-6">
+        <div className=" rounded-xl shadow-lg p-6">
             {/* Header with Filters */}
             <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
-                <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                <h3 className="text-xl font-bold  flex items-center gap-2">
                     <Package className="w-6 h-6 text-blue-500" />
                     Lịch sử nhập xuất kho
                 </h3>
@@ -139,14 +139,14 @@ export default function StockHistory() {
 
             {/* Filters Panel */}
             {showFilters && (
-                <div className="mb-6 p-4 bg-slate-50 rounded-lg border-2 border-slate-200">
+                <div className="mb-6 p-4  rounded-lg border-2 border-slate-200">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">Loại giao dịch</label>
+                            <label className="block text-sm font-medium  mb-2">Loại giao dịch</label>
                             <select
                                 value={filters.type}
                                 onChange={e => setFilters({ ...filters, type: e.target.value })}
-                                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
+                                className="w-full px-3 text-black py-2 border border-slate-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
                             >
                                 <option value="">Tất cả</option>
                                 <option value="IMPORT">Nhập kho</option>
@@ -158,11 +158,11 @@ export default function StockHistory() {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">Nhà cung cấp</label>
+                            <label className="block text-sm font-medium  mb-2">Nhà cung cấp</label>
                             <select
                                 value={filters.supplierId}
                                 onChange={e => setFilters({ ...filters, supplierId: e.target.value })}
-                                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
+                                className="w-full text-black px-3 py-2 border border-slate-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
                             >
                                 <option value="">Tất cả</option>
                                 {suppliers.map(s => (
@@ -172,22 +172,22 @@ export default function StockHistory() {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">Từ ngày</label>
+                            <label className="block text-sm font-medium  mb-2">Từ ngày</label>
                             <input
                                 type="date"
                                 value={filters.dateFrom}
                                 onChange={e => setFilters({ ...filters, dateFrom: e.target.value })}
-                                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
+                                className="w-full text-black px-3 py-2 border border-slate-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">Đến ngày</label>
+                            <label className="block text-sm font-medium  mb-2">Đến ngày</label>
                             <input
                                 type="date"
                                 value={filters.dateTo}
                                 onChange={e => setFilters({ ...filters, dateTo: e.target.value })}
-                                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
+                                className="w-full text-black px-3 py-2 border border-slate-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
                             />
                         </div>
 
@@ -219,7 +219,7 @@ export default function StockHistory() {
                     <div className="overflow-x-auto">
                         <table className="w-full">
                             <thead>
-                                <tr className="border-b-2 border-slate-200">
+                                <tr className="border-b-2 bg-white border-slate-200">
                                     <th className="text-left p-4 text-sm font-semibold text-slate-700">Thời gian</th>
                                     <th className="text-left p-4 text-sm font-semibold text-slate-700">Sản phẩm</th>
                                     <th className="text-left p-4 text-sm font-semibold text-slate-700">Biến thể</th>
@@ -232,11 +232,11 @@ export default function StockHistory() {
                             </thead>
                             <tbody>
                                 {history.map((h) => (
-                                    <tr key={h._id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                                    <tr key={h._id} className="border-b border-slate-100 hover:bg-slate-50 hover:text-black transition-colors">
                                         <td className="p-4 text-sm text-slate-600">
                                             {new Date(h.createdAt).toLocaleString('vi-VN')}
                                         </td>
-                                        <td className="p-4 text-sm font-medium text-slate-800">
+                                        <td className="p-4 text-sm font-medium ">
                                             {h.productName || h.product?.name || h.product}
                                         </td>
                                         <td className="p-4 text-sm text-slate-600">
@@ -245,7 +245,7 @@ export default function StockHistory() {
                                             </span>
                                         </td>
                                         <td className="p-4 text-center">
-                                            <span className="font-semibold text-slate-800">{h.quantity}</span>
+                                            <span className="font-semibold ">{h.quantity}</span>
                                         </td>
                                         <td className="p-4 text-center">
                                             <span
