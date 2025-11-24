@@ -10,6 +10,12 @@ const VariantSelectionModal = ({ product, isOpen, onClose, onSuccessAndOpenCart 
   const [selectedSize, setSelectedSize] = useState('')
   const [quantity, setQuantity] = useState(1)
   const { addToCart } = useContext(CartContext)
+  const [inputValue, setInputValue] = useState("1");
+
+  useEffect(() => {
+    setInputValue(String(quantity))
+  }, [quantity])
+
 
   // 1. Lấy danh sách Màu và Size duy nhất
   const availableColors = useMemo(() => {
@@ -198,10 +204,10 @@ const VariantSelectionModal = ({ product, isOpen, onClose, onSuccessAndOpenCart 
                   <span className="text-sm font-medium text-gray-600">Tồn kho:</span>
                 </div>
                 <span className={`font-bold text-sm px-3 py-1 rounded-full ${isOutOfStock
-                    ? 'bg-red-100 text-red-600'
-                    : currentStock < 10
-                      ? 'bg-yellow-100 text-yellow-600'
-                      : 'bg-green-100 text-green-600'
+                  ? 'bg-red-100 text-red-600'
+                  : currentStock < 10
+                    ? 'bg-yellow-100 text-yellow-600'
+                    : 'bg-green-100 text-green-600'
                   }`}>
                   {isOutOfStock ? 'Hết hàng' : `${currentStock} sản phẩm`}
                 </span>
@@ -224,27 +230,28 @@ const VariantSelectionModal = ({ product, isOpen, onClose, onSuccessAndOpenCart 
 
                     <div className="w-16 h-10 flex items-center justify-center bg-gradient-to-r from-pink-100 to-rose-100 rounded-full">
                       <input
-                        type="number"
-                        value={quantity}
+                        type="text"
+                        value={inputValue}
                         onChange={(e) => {
-                          const value = Number(e.target.value)
+                          const val = e.target.value;
 
-                          // Không cho nhập số âm hoặc 0
-                          if (value < 1) {
-                            setQuantity(1)
-                            return
+                          // Chỉ cho phép số, hoặc chuỗi rỗng để user xoá
+                          if (/^\d*$/.test(val)) {
+                            setInputValue(val);
                           }
+                        }}
+                        onBlur={() => {
+                          let num = parseInt(inputValue);
 
-                          // Không vượt quá tồn kho
-                          if (value > currentStock) {
-                            setQuantity(currentStock)
-                            return
-                          }
+                          if (isNaN(num) || num < 1) num = 1;
+                          if (num > currentStock) num = currentStock;
 
-                          setQuantity(value)
+                          setQuantity(num);
+                          setInputValue(String(num));
                         }}
                         className="w-20 h-10 text-center text-lg font-black text-pink-600 bg-white border-2 border-pink-200 rounded-full focus:ring-2 focus:ring-pink-400 focus:outline-none"
                       />
+
                     </div>
 
                     <Button

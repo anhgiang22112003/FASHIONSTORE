@@ -6,13 +6,13 @@ import { CartContext } from "@/context/CartContext"
 import AddproductSearch from "@/components/fashion/AddProductSearch"
 import BankPaymentModal from "@/components/BankPaymentSection"
 import VoucherSection from "@/components/VoucherSection"
-import { 
-  ShoppingBag, 
-  MapPin, 
-  CreditCard, 
-  Truck, 
-  Plus, 
-  Minus, 
+import {
+  ShoppingBag,
+  MapPin,
+  CreditCard,
+  Truck,
+  Plus,
+  Minus,
   Shield,
   ArrowRight,
   CheckCircle,
@@ -45,6 +45,7 @@ const Checkout = () => {
   const [buyNowDiscountAmount, setBuyNowDiscountAmount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
   const [shippingMethod, setShippingMethod] = useState("standard")
+  const [qtyInput, setQtyInput] = useState({});
   const [form, setForm] = useState({
     name: cart?.user?.name || "",
     phone: cart?.user?.phone || "",
@@ -58,19 +59,19 @@ const Checkout = () => {
   })
 
   const shippingOptions = useMemo(() => [
-    { 
-      id: "standard", 
-      name: "Giao hàng tiêu chuẩn", 
-      price: 30000, 
+    {
+      id: "standard",
+      name: "Giao hàng tiêu chuẩn",
+      price: 30000,
       backendValue: ShippingMethodEnum.STANDARD,
       icon: <Truck className="w-4 h-4 sm:w-5 sm:h-5" />,
       time: "3-5 ngày",
       description: "Giao hàng trong giờ hành chính"
     },
-    { 
-      id: "express", 
-      name: "Giao hàng hỏa tốc", 
-      price: 50000, 
+    {
+      id: "express",
+      name: "Giao hàng hỏa tốc",
+      price: 50000,
       backendValue: ShippingMethodEnum.EXPRESS,
       icon: <Zap className="w-4 h-4 sm:w-5 sm:h-5" />,
       time: "1-2 ngày",
@@ -138,23 +139,23 @@ const Checkout = () => {
 
   const isBuyNow = useMemo(() => buyNowData?.mode === "buyNow", [buyNowData])
 
-  const buyNowSubtotal = useMemo(() => 
+  const buyNowSubtotal = useMemo(() =>
     isBuyNow
       ? (buyNowData.product?.sellingPrice || 0) * (buyNowData.quantity || 1)
       : cart?.subtotal || 0
-  , [isBuyNow, buyNowData, cart?.subtotal])
+    , [isBuyNow, buyNowData, cart?.subtotal])
 
-  const shippingFee = useMemo(() => 
+  const shippingFee = useMemo(() =>
     shippingMethod === "express" ? 50000 : 30000
-  , [shippingMethod])
+    , [shippingMethod])
 
-  const buyNowTotal = useMemo(() => 
+  const buyNowTotal = useMemo(() =>
     buyNowSubtotal - (buyNowData ? buyNowDiscountAmount : cart?.discount || 0) + shippingFee
-  , [buyNowSubtotal, buyNowData, buyNowDiscountAmount, cart?.discount, shippingFee])
+    , [buyNowSubtotal, buyNowData, buyNowDiscountAmount, cart?.discount, shippingFee])
 
-  const displayShippingFee = useMemo(() => 
+  const displayShippingFee = useMemo(() =>
     cart?.shipping ?? shippingFee
-  , [cart?.shipping, shippingFee])
+    , [cart?.shipping, shippingFee])
 
   useEffect(() => {
     const newShippingFee = shippingMethod === "express" ? 50000 : 30000
@@ -184,17 +185,42 @@ const Checkout = () => {
   }, [fetchCart])
 
   const updateQuantity = useCallback(async (itemId, newQuantity) => {
-    if (newQuantity <= 0) {
+    // Lấy item hiện tại từ cart
+    const item = cart?.items.find(i => i._id === itemId)
+    if (!item) return
+
+    // Lấy stock thực tế từ biến thể
+    const currentVariant = item.product.variations.find(
+      v => v.color === item.color && v.size === item.size
+    )
+    const maxStock = currentVariant ? currentVariant.stock : 0
+
+    // Giới hạn quantity trong khoảng 1..maxStock
+    if (newQuantity < 1) newQuantity = 1
+    if (newQuantity > maxStock) {
+      newQuantity = maxStock
+      toast.warning(`Chỉ còn ${maxStock} sản phẩm, đã điều chỉnh số lượng`)
+    }
+
+    // Cập nhật local input để thay đổi hiển thị tức thì
+    setQtyInput(prev => ({ ...prev, [itemId]: String(newQuantity) }))
+
+    // Nếu số lượng <= 0 thì xóa sản phẩm
+    if (newQuantity === 0) {
       removeItem(itemId)
       return
     }
+
     try {
+      // Gọi API cập nhật backend
       await api.patch(`/cart/update/${itemId}`, { quantity: newQuantity })
+      // Đồng bộ lại cart
       fetchCart()
     } catch (err) {
       toast.error(err?.response?.data?.message || 'Cập nhật thất bại')
     }
-  }, [removeItem, fetchCart])
+  }, [cart, fetchCart, removeItem])
+
 
   const handleProvinceChange = useCallback((e) => {
     const provinceCode = e.target.value
@@ -441,13 +467,13 @@ const Checkout = () => {
                       <User className="w-3 h-3 sm:w-4 sm:h-4 text-gray-500" />
                       Họ và tên *
                     </label>
-                    <input 
-                      name="name" 
-                      value={form.name} 
-                      onChange={handleChange} 
-                      type="text" 
-                      placeholder="Nhập họ và tên" 
-                      className="w-full p-2.5 sm:p-3.5 text-sm sm:text-base border-2 border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:border-pink-400 focus:ring-4 focus:ring-pink-100 transition-all bg-white shadow-sm" 
+                    <input
+                      name="name"
+                      value={form.name}
+                      onChange={handleChange}
+                      type="text"
+                      placeholder="Nhập họ và tên"
+                      className="w-full p-2.5 sm:p-3.5 text-sm sm:text-base border-2 border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:border-pink-400 focus:ring-4 focus:ring-pink-100 transition-all bg-white shadow-sm"
                     />
                   </div>
                   <div className="group">
@@ -455,13 +481,13 @@ const Checkout = () => {
                       <Phone className="w-3 h-3 sm:w-4 sm:h-4 text-gray-500" />
                       Số điện thoại *
                     </label>
-                    <input 
-                      name="phone" 
-                      value={form.phone} 
-                      onChange={handleChange} 
-                      type="tel" 
-                      placeholder="Nhập số điện thoại" 
-                      className="w-full p-2.5 sm:p-3.5 text-sm sm:text-base border-2 border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:border-pink-400 focus:ring-4 focus:ring-pink-100 transition-all bg-white shadow-sm" 
+                    <input
+                      name="phone"
+                      value={form.phone}
+                      onChange={handleChange}
+                      type="tel"
+                      placeholder="Nhập số điện thoại"
+                      className="w-full p-2.5 sm:p-3.5 text-sm sm:text-base border-2 border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:border-pink-400 focus:ring-4 focus:ring-pink-100 transition-all bg-white shadow-sm"
                     />
                   </div>
                 </div>
@@ -471,13 +497,13 @@ const Checkout = () => {
                     <Mail className="w-3 h-3 sm:w-4 sm:h-4 text-gray-500" />
                     Email
                   </label>
-                  <input 
-                    name="email" 
-                    type="email" 
-                    value={form.email} 
-                    onChange={handleChange} 
-                    placeholder="Nhập email" 
-                    className="w-full p-2.5 sm:p-3.5 text-sm sm:text-base border-2 border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:border-pink-400 focus:ring-4 focus:ring-pink-100 transition-all bg-white shadow-sm" 
+                  <input
+                    name="email"
+                    type="email"
+                    value={form.email}
+                    onChange={handleChange}
+                    placeholder="Nhập email"
+                    className="w-full p-2.5 sm:p-3.5 text-sm sm:text-base border-2 border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:border-pink-400 focus:ring-4 focus:ring-pink-100 transition-all bg-white shadow-sm"
                   />
                 </div>
 
@@ -487,9 +513,9 @@ const Checkout = () => {
                       <MapPinned className="w-3 h-3 sm:w-4 sm:h-4 text-gray-500" />
                       Tỉnh/Thành phố *
                     </label>
-                    <select 
-                      onChange={handleProvinceChange} 
-                      value={form.provinceCode} 
+                    <select
+                      onChange={handleProvinceChange}
+                      value={form.provinceCode}
                       className="w-full p-2.5 sm:p-3.5 text-sm sm:text-base border-2 border-gray-200 rounded-lg sm:rounded-xl bg-white focus:outline-none focus:border-pink-400 focus:ring-4 focus:ring-pink-100 transition-all shadow-sm"
                     >
                       <option value="">Chọn tỉnh/thành</option>
@@ -498,10 +524,10 @@ const Checkout = () => {
                   </div>
                   <div>
                     <label className="text-xs sm:text-sm font-semibold text-gray-700 mb-2 block">Quận/Huyện *</label>
-                    <select 
-                      onChange={handleDistrictChange} 
-                      value={form.districtCode} 
-                      className="w-full p-2.5 sm:p-3.5 text-sm sm:text-base border-2 border-gray-200 rounded-lg sm:rounded-xl bg-white focus:outline-none focus:border-pink-400 focus:ring-4 focus:ring-pink-100 transition-all shadow-sm disabled:bg-gray-100 disabled:cursor-not-allowed" 
+                    <select
+                      onChange={handleDistrictChange}
+                      value={form.districtCode}
+                      className="w-full p-2.5 sm:p-3.5 text-sm sm:text-base border-2 border-gray-200 rounded-lg sm:rounded-xl bg-white focus:outline-none focus:border-pink-400 focus:ring-4 focus:ring-pink-100 transition-all shadow-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
                       disabled={districts.length === 0}
                     >
                       <option value="">Chọn quận/huyện</option>
@@ -510,10 +536,10 @@ const Checkout = () => {
                   </div>
                   <div>
                     <label className="text-xs sm:text-sm font-semibold text-gray-700 mb-2 block">Phường/Xã *</label>
-                    <select 
-                      onChange={handleWardChange} 
-                      value={form.wardCode} 
-                      className="w-full p-2.5 sm:p-3.5 text-sm sm:text-base border-2 border-gray-200 rounded-lg sm:rounded-xl bg-white focus:outline-none focus:border-pink-400 focus:ring-4 focus:ring-pink-100 transition-all shadow-sm disabled:bg-gray-100 disabled:cursor-not-allowed" 
+                    <select
+                      onChange={handleWardChange}
+                      value={form.wardCode}
+                      className="w-full p-2.5 sm:p-3.5 text-sm sm:text-base border-2 border-gray-200 rounded-lg sm:rounded-xl bg-white focus:outline-none focus:border-pink-400 focus:ring-4 focus:ring-pink-100 transition-all shadow-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
                       disabled={wards.length === 0}
                     >
                       <option value="">Chọn phường/xã</option>
@@ -524,13 +550,13 @@ const Checkout = () => {
 
                 <div>
                   <label className="text-xs sm:text-sm font-semibold text-gray-700 mb-2 block">Số nhà, tên đường *</label>
-                  <input 
-                    name="address" 
-                    type="text" 
-                    value={form.address} 
-                    onChange={handleChange} 
-                    placeholder="Số nhà, tên đường, thôn xóm..." 
-                    className="w-full p-2.5 sm:p-3.5 text-sm sm:text-base border-2 border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:border-pink-400 focus:ring-4 focus:ring-pink-100 transition-all bg-white shadow-sm" 
+                  <input
+                    name="address"
+                    type="text"
+                    value={form.address}
+                    onChange={handleChange}
+                    placeholder="Số nhà, tên đường, thôn xóm..."
+                    className="w-full p-2.5 sm:p-3.5 text-sm sm:text-base border-2 border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:border-pink-400 focus:ring-4 focus:ring-pink-100 transition-all bg-white shadow-sm"
                   />
                 </div>
 
@@ -559,13 +585,12 @@ const Checkout = () => {
 
               <div className="space-y-2 sm:space-y-3">
                 {shippingOptions.map((option) => (
-                  <label 
-                    key={option.id} 
-                    className={`flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-5 border-2 rounded-xl sm:rounded-2xl cursor-pointer transition-all duration-300 ${
-                      shippingMethod === option.id 
-                        ? "border-pink-400 bg-gradient-to-r from-pink-50 via-purple-50 to-indigo-50 shadow-lg scale-[1.02]" 
-                        : "border-gray-200 hover:border-pink-300 hover:bg-gray-50 hover:shadow-md"
-                    }`}
+                  <label
+                    key={option.id}
+                    className={`flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-5 border-2 rounded-xl sm:rounded-2xl cursor-pointer transition-all duration-300 ${shippingMethod === option.id
+                      ? "border-pink-400 bg-gradient-to-r from-pink-50 via-purple-50 to-indigo-50 shadow-lg scale-[1.02]"
+                      : "border-gray-200 hover:border-pink-300 hover:bg-gray-50 hover:shadow-md"
+                      }`}
                   >
                     <div className="flex items-center gap-3 sm:gap-4 flex-1 mb-2 sm:mb-0">
                       <input
@@ -613,11 +638,10 @@ const Checkout = () => {
                   <div
                     key={method.id}
                     onClick={() => handlePaymentChange(method.id)}
-                    className={`flex items-center p-3 sm:p-5 border-2 rounded-xl sm:rounded-2xl cursor-pointer transition-all duration-300 ${
-                      form.paymentMethod === method.id 
-                        ? "border-pink-400 bg-gradient-to-r from-pink-50 via-purple-50 to-indigo-50 shadow-lg scale-[1.02]" 
-                        : "border-gray-200 hover:border-pink-300 hover:bg-gray-50 hover:shadow-md"
-                    }`}
+                    className={`flex items-center p-3 sm:p-5 border-2 rounded-xl sm:rounded-2xl cursor-pointer transition-all duration-300 ${form.paymentMethod === method.id
+                      ? "border-pink-400 bg-gradient-to-r from-pink-50 via-purple-50 to-indigo-50 shadow-lg scale-[1.02]"
+                      : "border-gray-200 hover:border-pink-300 hover:bg-gray-50 hover:shadow-md"
+                      }`}
                   >
                     <input
                       type="radio"
@@ -637,11 +661,10 @@ const Checkout = () => {
                             {method.name}
                           </label>
                           {method.badge && (
-                            <span className={`text-xs px-1.5 sm:px-2 py-0.5 rounded-full font-bold ${
-                              method.badge === "Phổ biến" 
-                                ? "bg-blue-100 text-blue-700" 
-                                : "bg-green-100 text-green-700"
-                            }`}>
+                            <span className={`text-xs px-1.5 sm:px-2 py-0.5 rounded-full font-bold ${method.badge === "Phổ biến"
+                              ? "bg-blue-100 text-blue-700"
+                              : "bg-green-100 text-green-700"
+                              }`}>
                               {method.badge}
                             </span>
                           )}
@@ -706,21 +729,69 @@ const Checkout = () => {
                           {item?.product?.sellingPrice?.toLocaleString("vi-VN")}₫
                         </p>
                       </div>
-                      <div className="flex items-center gap-1 sm:gap-2">
+                      <div className="flex items-center gap-1 sm:gap-2 bg-white rounded-full border-2 border-gray-200 p-1 sm:p-2 shadow-sm">
+                        {/* Giảm */}
                         <button
-                          onClick={() => updateQuantity(item?._id, item?.quantity - 1)}
-                          className="p-1.5 sm:p-2 bg-white border-2 border-pink-300 rounded-full w-7 h-7 sm:w-9 sm:h-9 flex items-center justify-center text-pink-600 hover:bg-pink-50 hover:border-pink-400 transition-all active:scale-90 shadow-sm"
+                          onClick={() => {
+                            if (item.quantity > 1) updateQuantity(item._id, item.quantity - 1)
+                          }}
+                          className="flex items-center justify-center w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-white border-2 border-pink-300 text-pink-600 hover:bg-pink-50 hover:border-pink-400 transition-all active:scale-90 shadow-sm"
                         >
                           <Minus className="w-3 h-3 sm:w-4 sm:h-4" />
                         </button>
-                        <span className="min-w-[25px] sm:min-w-[35px] text-center font-black text-base sm:text-lg">{item.quantity}</span>
+
+                        {/* Input số lượng */}
+                        <input
+                          type="text"
+                          value={qtyInput[item._id] ?? String(item.quantity)}
+                          onChange={(e) => {
+                            const val = e.target.value
+                            // Chỉ cho nhập số hoặc để trống
+                            if (/^\d*$/.test(val)) {
+                              setQtyInput(prev => ({ ...prev, [item._id]: val }))
+                            }
+                          }}
+                          onBlur={async () => {
+                            let num = parseInt(qtyInput[item._id])
+
+                            // Lấy stock thực tế từ biến thể
+                            const currentVariant = item.product.variations.find(
+                              v => v.color === item.color && v.size === item.size
+                            )
+                            const maxStock = currentVariant ? currentVariant.stock : 0
+
+                            // Nếu nhập < 1 thì set về 1
+                            if (isNaN(num) || num < 1) num = 1
+
+                            // Nếu nhập quá stock thì set về max stock và thông báo
+                            if (num > maxStock) {
+                              num = maxStock
+                              toast.warning(`Chỉ còn ${maxStock} sản phẩm, đã điều chỉnh số lượng`)
+                            }
+
+                            // Gọi API cập nhật quantity
+                            try {
+                              await api.patch(`/cart/update/${item._id}`, { quantity: num })
+                              // Đồng bộ lại cart
+                              fetchCart()
+                              setQtyInput(prev => ({ ...prev, [item._id]: String(num) }))
+                            } catch (err) {
+                              toast.error(err?.response?.data?.message || 'Cập nhật thất bại')
+                            }
+                          }}
+                          className="w-12 sm:w-16 text-center font-black text-base sm:text-lg border-none focus:outline-none bg-transparent"
+                        />
+
+
+                        {/* Tăng */}
                         <button
-                          onClick={() => updateQuantity(item?._id, item?.quantity + 1)}
-                          className="p-1.5 sm:p-2 bg-white border-2 border-pink-300 rounded-full w-7 h-7 sm:w-9 sm:h-9 flex items-center justify-center text-pink-600 hover:bg-pink-50 hover:border-pink-400 transition-all active:scale-90 shadow-sm"
+                          onClick={() => updateQuantity(item._id, item.quantity + 1)}
+                          className="flex items-center justify-center w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-white border-2 border-pink-300 text-pink-600 hover:bg-pink-50 hover:border-pink-400 transition-all active:scale-90 shadow-sm"
                         >
                           <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
                         </button>
                       </div>
+
                     </div>
                   ))
                 )}

@@ -25,6 +25,11 @@ const ProductPage = () => {
   const { fetchWishlist } = useContext(WishlistContext)
   const [favorites, setFavorites] = React.useState([])
   const { user } = useContext(AuthContext)
+  const [inputValue, setInputValue] = useState("1");
+
+  useEffect(() => {
+    setInputValue(String(quantity));
+  }, [quantity]);
 
   const getProductsDetails = async () => {
     try {
@@ -256,7 +261,7 @@ const ProductPage = () => {
                     <Star
                       key={i}
                       className={`w-5 h-5 ${i < Math.floor(product?.ratingAverage || 0)
-                          ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
+                        ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
                         }`}
                     />
                   ))}
@@ -363,9 +368,28 @@ const ProductPage = () => {
                   >
                     <Minus className="w-5 h-5" />
                   </button>
-                  <span className="px-8 py-3 font-semibold text-lg min-w-[80px] text-center">
-                    {quantity}
-                  </span>
+                  <input
+                    type="text"
+                    value={inputValue}
+                    onChange={(e) => {
+                      // Cho phép xoá hết để nhập lại (e.g "1" -> "" -> "6")
+                      const val = e.target.value;
+
+                      if (/^\d*$/.test(val)) {
+                        setInputValue(val);
+                      }
+                    }}
+                    onBlur={() => {
+                      let num = parseInt(inputValue);
+
+                      if (isNaN(num) || num < 1) num = 1;
+                      if (num > currentStock) num = currentStock;
+
+                      setQuantity(num);
+                      setInputValue(String(num));
+                    }}
+                    className="px-6 py-3 font-semibold text-lg w-20 text-center outline-none"
+                  />
                   <button
                     onClick={() => setQuantity(Math.min(currentStock, quantity + 1))}
                     className="p-3 hover:bg-pink-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"

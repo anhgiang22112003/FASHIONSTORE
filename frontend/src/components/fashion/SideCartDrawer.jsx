@@ -13,6 +13,7 @@ const SideCartDrawer = ({ isOpen, onClose }) => {
     const { cart, fetchCart } = useContext(CartContext)
     const navigate = useNavigate()
     const [loadedImages, setLoadedImages] = useState({})
+    const [qtyInput, setQtyInput] = useState({});
 
     const cartItems = cart?.items || []
     const totalPrice = cart?.total || 0
@@ -32,18 +33,29 @@ const SideCartDrawer = ({ isOpen, onClose }) => {
         }
     }
 
-    const handleUpdateQuantity = async (itemId, newQuantity) => {
-        if (newQuantity <= 0) {
-            handleRemoveItem(itemId)
-            return
+    const handleUpdateQuantity = async (itemId, newQuantity, maxStock) => {
+
+        // Giới hạn
+        if (newQuantity < 1) newQuantity = 1;
+        if (newQuantity > maxStock) {
+            newQuantity = maxStock;
+            toast.warning(`Chỉ còn ${maxStock} sản phẩm, đã điều chỉnh số lượng`);
         }
+
+        // Cập nhật UI NGAY
+        setQtyInput(prev => ({
+            ...prev,
+            [itemId]: String(newQuantity)
+        }));
+
         try {
-            await api.patch(`/cart/update/${itemId}`, { quantity: newQuantity })
-            fetchCart()
+            await api.patch(`/cart/update/${itemId}`, { quantity: newQuantity });
+            fetchCart(); // cập nhật server
         } catch (err) {
-            toast.error(err?.response?.data?.message || 'Cập nhật thất bại')
+            toast.error(err?.response?.data?.message || 'Cập nhật thất bại');
         }
-    }
+    };
+
 
     return (
         <Sheet open={isOpen} onOpenChange={onClose}>
@@ -79,8 +91,8 @@ const SideCartDrawer = ({ isOpen, onClose }) => {
                                     className="group relative flex gap-3 p-3 rounded-lg border border-border bg-card hover:shadow-md transition-all duration-300"
                                 >
                                     {/* IMAGE with Loading State */}
-                                    <Link 
-                                        to={`/product/${item.product?._id}`} 
+                                    <Link
+                                        to={`/product/${item.product?._id}`}
                                         onClick={onClose}
                                         className="relative flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border border-border bg-muted"
                                     >
@@ -90,17 +102,16 @@ const SideCartDrawer = ({ isOpen, onClose }) => {
                                         <img
                                             src={item.product?.mainImage || '/placeholder.svg'}
                                             alt={item.product?.productName}
-                                            className={`w-full h-full object-cover transition-all duration-300 ${
-                                                loadedImages[item._id] ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
-                                            }`}
+                                            className={`w-full h-full object-cover transition-all duration-300 ${loadedImages[item._id] ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+                                                }`}
                                             onLoad={() => handleImageLoad(item._id)}
                                         />
                                     </Link>
 
                                     <div className="flex-grow min-w-0 flex flex-col justify-between">
                                         <div>
-                                            <Link 
-                                                to={`/product/${item.product?._id}`} 
+                                            <Link
+                                                to={`/product/${item.product?._id}`}
                                                 onClick={onClose}
                                                 className="block"
                                             >
@@ -129,22 +140,65 @@ const SideCartDrawer = ({ isOpen, onClose }) => {
                                                     variant="ghost"
                                                     size="icon"
                                                     className="w-7 h-7 rounded-full hover:bg-pink-100 hover:text-pink-600 transition-colors"
-                                                    onClick={() => handleUpdateQuantity(item._id, item.quantity - 1)}
+                                                    onClick={() => {
+                                                        const variant = item.product.variations.find(
+                                                            v => v.color === item.color && v.size === item.size
+                                                        );
+                                                        const maxStock = variant ? variant.stock : 1;
+
+                                                        handleUpdateQuantity(item._id, item.quantity - 1, maxStock);
+                                                    }}
                                                     disabled={item.quantity <= 1}
                                                 >
                                                     <Minus className="w-3.5 h-3.5" />
                                                 </Button>
-                                                <span className="text-sm font-semibold min-w-[24px] text-center">
-                                                    {item.quantity}
-                                                </span>
+
+                                                <input
+                                                    type="text"
+                                                    value={qtyInput[item._id] ?? String(item.quantity)}
+                                                    onChange={(e) => {
+                                                        const val = e.target.value;
+                                                        if (/^\d*$/.test(val)) {
+                                                            setQtyInput(prev => ({
+                                                                ...prev,
+                                                                [item._id]: val
+                                                            }));
+                                                        }
+                                                    }}
+                                                    onBlur={() => {
+                                                        const variant = item.product.variations.find(
+                                                            v => v.color === item.color && v.size === item.size
+                                                        );
+                                                        const maxStock = variant ? variant.stock : 1;
+
+                                                        let num = parseInt(qtyInput[item._id]);
+                                                        if (isNaN(num) || num < 1) num = 1;
+                                                        if (num > maxStock) {
+                                                            num = maxStock;
+                                                            toast.warning(`Chỉ còn ${maxStock} sản phẩm, đã điều chỉnh số lượng`);
+                                                        }
+
+                                                        handleUpdateQuantity(item._id, num, maxStock);
+                                                    }}
+                                                    className="w-10 h-7 text-center text-sm font-semibold bg-white border border-border rounded-full focus:ring-2 focus:ring-pink-400 focus:outline-none"
+                                                />
+
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
                                                     className="w-7 h-7 rounded-full hover:bg-pink-100 hover:text-pink-600 transition-colors"
-                                                    onClick={() => handleUpdateQuantity(item._id, item.quantity + 1)}
+                                                    onClick={() => {
+                                                        const variant = item.product.variations.find(
+                                                            v => v.color === item.color && v.size === item.size
+                                                        );
+                                                        const maxStock = variant ? variant.stock : 1;
+
+                                                        handleUpdateQuantity(item._id, item.quantity + 1, maxStock);
+                                                    }}
                                                 >
                                                     <Plus className="w-3.5 h-3.5" />
                                                 </Button>
+
                                             </div>
                                         </div>
                                     </div>

@@ -11,6 +11,7 @@ const CartPage = () => {
   const [cart, setCarts] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const { fetchCart, setCart } = useContext(CartContext)
+  const [qtyInput, setQtyInput] = useState({});
 
   const fetchCarts = useCallback(async () => {
     setIsLoading(true)
@@ -40,29 +41,58 @@ const CartPage = () => {
     }
   }, [fetchCarts])
 
-const updateQuantity = useCallback(async (itemId, newQuantity) => {
-  if (newQuantity <= 0) {
-    removeItem(itemId)
-    return
-  }
-  try {
-    const res = await api.patch(`/cart/update/${itemId}`, { quantity: newQuantity })
-    setCarts(prev => ({
-      ...prev,
-      items: prev.items.map(item =>
-        item._id === itemId ? { ...item, quantity: newQuantity } : item
-      ),
-      subtotal: prev.items.reduce((sum, item) =>
-        item._id === itemId ? sum + item.product.sellingPrice * newQuantity : sum + item.product.sellingPrice * item.quantity
-      , 0),
-      total: prev.total // update total nếu cần
-    }))
-    setCart(res.data)
+  const updateQuantity = useCallback(async (itemId, newQuantity) => {
+    if (newQuantity <= 0) {
+      removeItem(itemId)
+      return
+    }
 
-  } catch (err) {
-    toast.error(err?.response?.data?.message || 'Cập nhật thất bại')
-  }
-}, [removeItem])
+    // Lấy item hiện tại
+    const currentItem = cart.items.find(i => i._id === itemId)
+    if (!currentItem) return
+
+    // Lấy stock thực tế từ biến thể
+    const currentVariant = currentItem.product.variations.find(
+      v => v.color === currentItem.color && v.size === currentItem.size
+    )
+    const maxStock = currentVariant ? currentVariant.stock : 0
+
+    // Nếu nhập vượt stock, ép về maxStock và thông báo
+    if (newQuantity > maxStock) {
+      newQuantity = maxStock
+      toast.warning(`Chỉ còn ${maxStock} sản phẩm, đã điều chỉnh số lượng`)
+    }
+
+    try {
+      const res = await api.patch(`/cart/update/${itemId}`, { quantity: newQuantity })
+
+      // Cập nhật cart state
+      setCarts(prev => {
+        const updatedItems = prev.items.map(item =>
+          item._id === itemId ? { ...item, quantity: newQuantity } : item
+        )
+        const updatedSubtotal = updatedItems.reduce(
+          (sum, item) => sum + item.product.sellingPrice * item.quantity,
+          0
+        )
+        return {
+          ...prev,
+          items: updatedItems,
+          subtotal: updatedSubtotal,
+          total: updatedSubtotal + (prev.shipping || 0)
+        }
+      })
+
+      // Đồng bộ CartContext
+      setCart(res.data)
+
+      // **Cập nhật luôn qtyInput để input hiển thị đúng**
+      setQtyInput(prev => ({ ...prev, [itemId]: String(newQuantity) }))
+    } catch (err) {
+      toast.error(err?.response?.data?.message || 'Cập nhật thất bại')
+    }
+  }, [cart, removeItem, setCart])
+
 
 
   const cartItems = useMemo(() => cart?.items || [], [cart?.items])
@@ -124,8 +154,8 @@ const updateQuantity = useCallback(async (itemId, newQuantity) => {
             <p className="text-gray-600 text-lg mb-8">
               Hãy khám phá và thêm những sản phẩm yêu thích vào giỏ hàng của bạn!
             </p>
-            <Button 
-              onClick={() => navigate('/')} 
+            <Button
+              onClick={() => navigate('/')}
               className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white px-8 py-4 rounded-full font-bold shadow-lg hover:shadow-xl transition-all duration-300 active:scale-95"
             >
               <ShoppingBag className="w-5 h-5 mr-2" />
@@ -142,8 +172,8 @@ const updateQuantity = useCallback(async (itemId, newQuantity) => {
       <div className="container mx-auto px-4 py-8 max-w-[1550px]">
         {/* Breadcrumb */}
         <nav className="flex items-center text-sm text-gray-600 mb-8 bg-white/70 backdrop-blur-md rounded-full px-6 py-3 shadow-sm border border-white/20 w-fit animate-slideDown">
-          <span 
-            className="cursor-pointer hover:text-pink-500 transition-colors font-semibold" 
+          <span
+            className="cursor-pointer hover:text-pink-500 transition-colors font-semibold"
             onClick={() => navigate('/')}
           >
             Trang chủ
@@ -173,8 +203,8 @@ const updateQuantity = useCallback(async (itemId, newQuantity) => {
           {/* Cart Items */}
           <div className="lg:col-span-2 space-y-4">
             {cartItems?.map((item, index) => (
-              <div 
-                key={item._id} 
+              <div
+                key={item._id}
                 className="group bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-white/20 p-6 hover:shadow-2xl hover:border-pink-200 transition-all duration-300 animate-slideUp"
                 style={{ animationDelay: `${index * 50}ms` }}
               >
@@ -196,7 +226,7 @@ const updateQuantity = useCallback(async (itemId, newQuantity) => {
                         <h3 className="font-bold text-gray-900 mb-3 text-lg group-hover:text-pink-600 transition-colors line-clamp-2">
                           {item.productName}
                         </h3>
-                        
+
                         <div className="flex flex-wrap gap-2 mb-4">
                           <div className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-pink-100 to-purple-100 rounded-full">
                             <span className="text-xs font-semibold text-gray-700">Size:</span>
@@ -233,9 +263,61 @@ const updateQuantity = useCallback(async (itemId, newQuantity) => {
                           >
                             <Minus className="w-4 h-4" />
                           </Button>
-                          <span className="px-4 py-2 min-w-[60px] text-center font-black text-lg">
-                            {item.quantity}
-                          </span>
+                          <input
+                            type="text"
+                            value={qtyInput[item._id] ?? String(item.quantity)}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              if (/^\d*$/.test(val)) {
+                                setQtyInput(prev => ({ ...prev, [item._id]: val }));
+                              }
+                            }}
+                            onBlur={async () => {
+                              let num = parseInt(qtyInput[item._id]);
+                              if (isNaN(num) || num < 1) num = 1;
+
+                              // Lấy stock thực tế từ biến thể
+                              const currentVariant = item.product.variations.find(
+                                v => v.color === item.color && v.size === item.size
+                              );
+                              const maxStock = currentVariant ? currentVariant.stock : 0;
+
+                              if (num > maxStock) {
+                                num = maxStock;
+                                toast.warning(`Chỉ còn ${maxStock} sản phẩm, đã điều chỉnh số lượng`);
+                              }
+
+                              // Cập nhật quantity lên server
+                              try {
+                                const res = await api.patch(`/cart/update/${item._id}`, { quantity: num });
+
+                                // Đồng bộ state local với server và input
+                                setCarts(prev => {
+                                  const updatedItems = prev.items.map(i =>
+                                    i._id === item._id ? { ...i, quantity: num } : i
+                                  );
+                                  const updatedSubtotal = updatedItems.reduce(
+                                    (sum, i) => sum + i.product.sellingPrice * i.quantity,
+                                    0
+                                  );
+                                  return {
+                                    ...prev,
+                                    items: updatedItems,
+                                    subtotal: updatedSubtotal,
+                                    total: updatedSubtotal + (prev.shipping || 0)
+                                  };
+                                });
+
+                                setQtyInput(prev => ({ ...prev, [item._id]: String(num) }));
+                                setCart(res.data); // nếu bạn muốn đồng bộ CartContext
+                              } catch (err) {
+                                toast.error(err?.response?.data?.message || 'Cập nhật thất bại');
+                              }
+                            }}
+                            className="px-0 py-2 w-[60px] text-center font-black text-lg bg-transparent outline-none border-none"
+                          />
+
+
                           <Button
                             variant="ghost"
                             size="sm"
@@ -287,7 +369,7 @@ const updateQuantity = useCallback(async (itemId, newQuantity) => {
                       Mua thêm <span className="font-black">{(500000 - subtotal).toLocaleString('vi-VN')}₫</span> để được miễn phí vận chuyển
                     </p>
                     <div className="w-full bg-blue-200 rounded-full h-2.5">
-                      <div 
+                      <div
                         className="bg-gradient-to-r from-blue-500 to-indigo-600 h-2.5 rounded-full transition-all duration-500"
                         style={{ width: `${Math.min((subtotal / 500000) * 100, 100)}%` }}
                       ></div>
