@@ -1,6 +1,6 @@
 import api from '@/service/api'
 import React, { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Pagination, Navigation, Autoplay } from 'swiper/modules'
 import { Sparkles, ArrowRight } from 'lucide-react'
@@ -10,7 +10,7 @@ import 'swiper/css/navigation'
 
 const ProductCategories = () => {
     const [category, setCategory] = useState([])
-
+    const navigate = useNavigate()
     const Category = async () => {
         try {
             const response = await api.get('/categories')
@@ -30,7 +30,7 @@ const ProductCategories = () => {
             {/* Decorative elements */}
             <div className="absolute top-20 left-10 w-72 h-72 bg-pink-200/40 rounded-full blur-3xl animate-float"></div>
             <div className="absolute bottom-20 right-10 w-96 h-96 bg-pink-200/40 rounded-full blur-3xl animate-float" style={{ animationDelay: '1.5s' }}></div>
-            
+
             <div className="container mx-auto px-4 relative z-10">
                 <div className="text-center mb-16 animate-slide-up">
                     <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/90 backdrop-blur-sm rounded-full border border-pink-300 mb-4 shadow-lg">
@@ -54,9 +54,9 @@ const ProductCategories = () => {
                             pauseOnMouseEnter: true,
                         }}
                         navigation={true}
-                        pagination={{ 
+                        pagination={{
                             clickable: true,
-                            dynamicBullets: true 
+                            dynamicBullets: true
                         }}
                         slidesPerView={2}
                         spaceBetween={24}
@@ -68,7 +68,13 @@ const ProductCategories = () => {
                     >
                         {category?.map((category, index) => (
                             <SwiperSlide key={category?.id}>
-                                <Link to={`/category/${category?.slug || 'category'}`}>
+                                <div
+                                    onClick={() => {
+                                        navigate(`/category/${category.slug || category.name.replace(/\s+/g, '-').toLowerCase()}`, {
+                                            state: { id: category._id },
+                                        })
+                                    }}
+                                >
                                     <div className="group relative overflow-hidden rounded-3xl bg-white shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 cursor-pointer">
                                         <div className="aspect-[4/3] overflow-hidden relative">
                                             <img
@@ -76,14 +82,14 @@ const ProductCategories = () => {
                                                 alt={category?.name}
                                                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                             />
-                                            
+
                                             {/* Gradient overlay */}
                                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent group-hover:from-pink-600/80 group-hover:via-pink-500/30 transition-all duration-500"></div>
-                                            
+
                                             {/* Shine effect */}
                                             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
                                         </div>
-                                        
+
                                         <div className="absolute bottom-0 left-0 right-0 p-6 text-white transform transition-all duration-300">
                                             <h3 className="text-2xl font-black mb-2 truncate drop-shadow-lg">
                                                 {category?.name}
@@ -101,7 +107,7 @@ const ProductCategories = () => {
                                         {/* Corner decoration */}
                                         <div className="absolute top-0 left-0 w-20 h-20 bg-pink-400/20 rounded-br-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                                     </div>
-                                </Link>
+                                </div>
                             </SwiperSlide>
                         ))}
                     </Swiper>

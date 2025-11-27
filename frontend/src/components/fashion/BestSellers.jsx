@@ -11,7 +11,7 @@ import { AuthContext } from '@/context/Authcontext'
 const VariantSelectionModal = React.lazy(() => import('./VariantSelectionModal'))
 
 const BestSellers = () => {
-  const [products, setProducts] = React.useState()
+  const [products, setProducts] = React.useState([])
   const [selectedProduct, setSelectedProduct] = React.useState(null)
   const [isVariantModalOpen, setIsVariantModalOpen] = React.useState(false)
   const [isCartDrawerOpen, setIsCartDrawerOpen] = React.useState(false)
@@ -78,9 +78,9 @@ const BestSellers = () => {
 
   return (
     <section className="py-20 bg-[#FFF5F7] relative overflow-hidden">
-      {/* Decorative background */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-pink-200/30 rounded-full blur-3xl"></div>
-      <div className="absolute bottom-0 left-0 w-96 h-96 bg-pink-200/30 rounded-full blur-3xl"></div>
+      {/* Decorative background - đã tối ưu */}
+      <div className="absolute top-0 right-0 w-96 h-96 bg-pink-200/30 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="absolute bottom-0 left-0 w-96 h-96 bg-pink-200/30 rounded-full blur-3xl pointer-events-none"></div>
 
       <div className="container mx-auto px-4 relative z-10">
         <div className="text-center mb-16 animate-slide-up">
@@ -100,7 +100,7 @@ const BestSellers = () => {
           {products?.map((product, index) => (
             <div
               key={product?.id}
-              className="group relative bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden hover:-translate-y-2"
+              className="group relative bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden hover-lift"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
               {/* Product Image */}
@@ -109,6 +109,7 @@ const BestSellers = () => {
                   src={product?.mainImage}
                   alt={product?.name}
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  loading="lazy"
                 />
 
                 {/* Gradient overlay */}
@@ -217,7 +218,6 @@ const BestSellers = () => {
           <Link to={"/products"}> 
           <Button 
             variant="outline" 
-
             size="lg" 
             className="border-2 border-pink-500 text-pink-500 hover:bg-pink-50 rounded-full px-8 py-6 text-lg font-bold group shadow-lg hover:shadow-pink-500/30"
           >

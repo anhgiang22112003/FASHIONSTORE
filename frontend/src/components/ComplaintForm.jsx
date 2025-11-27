@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Plus, Edit } from 'lucide-react';
@@ -33,7 +33,6 @@ const ComplaintForm = ({
   const [isDialogOpen, setIsDialogOpen] = useState(isOpen || false);
 
   const isEditing = !!complaint;
-
   // ... (useEffect, resetForm, handleOrderSelect, validateForm, handleSubmit giữ nguyên)
   useEffect(() => {
     if (complaint) {
@@ -102,37 +101,44 @@ const ComplaintForm = ({
     return true;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  
+  if (!validateForm()) return;
+
+  setLoading(true);
+  setError('');
+
+  try {
+    const submitData = {
+      ...formData,
+      complaintAmount: Number(formData.complaintAmount)
+    };
+
+    const id = complaint?._id; 
+    let successMessage = '';
     
-    if (!validateForm()) return;
-
-    setLoading(true);
-    setError('');
-
-    try {
-      const submitData = {
-        ...formData,
-        complaintAmount: Number(formData.complaintAmount)
-      };
-
-      // Đảm bảo id được truyền vào đúng cách khi chỉnh sửa
-      const id = complaint?._id; 
-      
-      if (isEditing && id) {
-        await apiAdmin.put(`/complaints/${id}`, submitData);
-      } else {
-        await apiAdmin.post('/complaints',submitData);
-      }
-
-      onSuccess?.();
-      handleClose();
-    } catch (err) {
-      toast.error(err.response.data.error|| "Lỗi khi thêm hoặc sửa");
-    } finally {
-      setLoading(false);
+    if (isEditing && id) {
+      await apiAdmin.put(`/complaints/${id}`, submitData);
+      successMessage = 'Cập nhật khiếu nại thành công!';
+    } else {
+      await apiAdmin.post('/complaints', submitData);
+      successMessage = 'Tạo khiếu nại mới thành công!';
     }
-  };
+    
+    // ⭐️ THÊM THÔNG BÁO THÀNH CÔNG ⭐️
+    toast.success(successMessage);
+
+    onSuccess?.();
+    handleClose();
+  } catch (err) {
+    // Sử dụng optional chaining để truy cập data.error an toàn hơn
+    toast.error(err.response?.data?.error || "Lỗi khi thêm hoặc sửa khiếu nại.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleClose = () => {
     setIsDialogOpen(false);
@@ -165,6 +171,8 @@ const ComplaintForm = ({
           />
         </div>
       )}
+     
+      
 
       {/* Show selected order info for editing */}
       {isEditing && selectedOrder && (

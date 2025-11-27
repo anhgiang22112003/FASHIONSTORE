@@ -1,17 +1,17 @@
-import React, { useEffect, useState } from 'react'
-import { ArrowRight, Sparkles } from 'lucide-react'
-import { Button } from '../ui/button'
-import { Link } from 'react-router-dom'
-import api from '@/service/api'
-import { Swiper, SwiperSlide } from 'swiper/react'
-import { Pagination, Navigation, Autoplay, EffectCards } from 'swiper/modules'
-import 'swiper/css'
-import 'swiper/css/pagination'
-import 'swiper/css/navigation'
-import 'swiper/css/effect-cards'
+import React, { useEffect, useState } from 'react';
+import { ArrowRight, Sparkles } from 'lucide-react';
+import { Button } from '../ui/button';
+import { Link } from 'react-router-dom';
+import api from '@/service/api';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Pagination, Navigation, Autoplay, EffectCards } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/pagination';
+import 'swiper/css/navigation';
+import 'swiper/css/effect-cards';
 
 const FeaturedCollections = () => {
-  const [collection, setCollection] = useState([])
+  const [collection, setCollection] = useState([]);
   
   const featuredCollections = async () => {
     try {
@@ -21,15 +21,15 @@ const FeaturedCollections = () => {
     } catch (error) {
       console.log('Error fetching featured collections:', error);
     }
-  }
+  };
 
   useEffect(() => {
     featuredCollections();
-  }, [])
+  }, []);
 
   return (
     <section className="py-20 bg-gradient-to-br from-pink-50 via-white to-pink-100 relative overflow-hidden">
-      {/* Background decoration */}
+      {/* Background decoration - Giảm số lượng */}
       <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-pink-300 via-pink-400 to-pink-500"></div>
       
       <div className="container mx-auto px-4">
@@ -51,9 +51,9 @@ const FeaturedCollections = () => {
             <Swiper
               modules={[Pagination, Navigation, Autoplay]}
               autoplay={{
-                delay: 4000,
+                delay: 5000,  // Tăng delay để mượt hơn
                 disableOnInteraction: false,
-                pauseOnMouseEnter: true,
+                pauseOnMouseEnter: false,  // Tắt để tránh lag
               }}
               navigation={true}
               pagination={{ 
@@ -66,16 +66,19 @@ const FeaturedCollections = () => {
                 768: { slidesPerView: 2 },
                 1024: { slidesPerView: 3 },
               }}
+              grabCursor={true}  // Thêm để mượt hơn
               className="pb-16"
             >
               {collection.map((item, index) => (
                 <SwiperSlide key={item?.id}>
-                  <div className="group relative overflow-hidden rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2">
+                  <div className="group relative overflow-hidden rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 hover-scale">
                     <div className="aspect-[4/5] overflow-hidden relative">
                       <img
                         src={item?.image}
                         alt={item?.name}
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        loading="lazy"  // Lazy load
+                        style={{ willChange: 'transform' }}
                       />
                       
                       {/* Gradient overlays */}
@@ -135,7 +138,7 @@ const FeaturedCollections = () => {
         </div>
       </div>
     </section>
-  )
-}
+  );
+};
 
-export default FeaturedCollections
+export default FeaturedCollections;

@@ -68,6 +68,7 @@ const AboutSection = () => {
               src="/image/anhabout.avif"
               alt="Fashion Store"
               className="w-full h-[500px] object-cover rounded-2xl shadow-2xl"
+              loading="lazy"
             />
             <div className="absolute -bottom-6 -left-6 w-24 h-24 bg-pink-500 rounded-full opacity-20 blur-2xl"></div>
             <div className="absolute -top-6 -right-6 w-32 h-32 bg-purple-500 rounded-full opacity-20 blur-3xl"></div>
@@ -98,4 +99,4 @@ const AboutSection = () => {
   );
 };
 
-export default AboutSection;
+export default React.memo(AboutSection);
