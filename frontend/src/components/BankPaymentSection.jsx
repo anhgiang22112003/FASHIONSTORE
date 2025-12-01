@@ -2,11 +2,10 @@ import React, { useEffect, useState } from "react"
 import { toast } from "react-toastify"
 import apiAdmin from "@/service/apiAdmin"
 import { QRCodeCanvas } from "qrcode.react"
-import io from "socket.io-client"
 import { socket } from "@/service/socket"
 
 
-const BankPaymentModal = ({ order, onClose, selectedBank, setSelectedBank }) => {
+const BankPaymentModal = ({ order, onClose, selectedBank ,setSelectedBank}) => {
   const [banks, setBanks] = useState([])
   const [loading, setLoading] = useState(false)
   const [isPaid, setIsPaid] = useState(false)

@@ -16,6 +16,7 @@ import { WishlistProvider } from "./context/WishlistContext"
 import ChatBot from "./pages/ChatBot"
 import OrderReturn from "./pages/OrderReturn"
 
+const CustomerDisplayScreen = lazy(() => import("./components/CustomerDisplayScreen"))
 const Products = lazy(() => import("./pages/Products"))
 const AdminLoginForm = lazy(() => import("./pages/Admin/LoginAdmin"))
 const HomePage = lazy(() => import("./pages/HomePage"))
@@ -227,6 +228,7 @@ function App() {
                 />
                 <Route path="/admin/*" element={<AdminRoute><AdminLayout /></AdminRoute>} />
                 <Route path="/login/admin" element={<AdminLoginForm />} />
+                <Route path="/customer-display" element={<CustomerDisplayScreen />} />
               </Routes>
             </Suspense>
 

@@ -14,6 +14,7 @@ import { socket } from "@/service/socket"
 import CartSidebar from "@/components/CartSidebar"
 import VoucherModal from "@/components/VoucherModal"
 import BankPaymentModal from "@/components/BankPaymentSection"
+import BankPaymentPos from "@/components/BankPaymentPos"
 
 const PosPage = () => {
   const [products, setProducts] = useState([])
@@ -24,6 +25,7 @@ const PosPage = () => {
   const [selectedVariations, setSelectedVariations] = useState({})
   const [paymentMethod, setPaymentMethod] = useState("CASH")
   const [showBankPayment, setShowBankPayment] = useState(false)
+  const [selectedBank, setSelectedBank] = useState(null)
   const [currentOrder, setCurrentOrder] = useState(null)
 
   // Staff management
@@ -165,34 +167,64 @@ const PosPage = () => {
 
   // Tính toán discount value dựa trên type
   useEffect(() => {
-    const subtotal = cartItems.reduce((sum, i) => sum + i.price * i.quantity, 0)
+    const updateDiscount = async () => {
+      if (cartItems.length === 0) return
 
-    switch (discountType) {
-      case "PERCENT":
-        setDiscountValue(Math.round(subtotal * discountPercent / 100))
-        break
-      case "AMOUNT":
-        setDiscountValue(Math.min(discountAmount, subtotal))
-        break
-      case "VOUCHER":
-        if (selectedVoucher) {
-          if (selectedVoucher.discountType === "percentage") {
-            const voucherDiscount = Math.round(subtotal * selectedVoucher.discountValue / 100)
-            setDiscountValue(selectedVoucher.maxDiscount ? Math.min(voucherDiscount, selectedVoucher.maxDiscount) : voucherDiscount)
-          } else {
-            setDiscountValue(selectedVoucher.discountValue)
+      const subtotal = cartItems.reduce((sum, i) => sum + i.price * i.quantity, 0)
+      let newDiscountValue = 0
+
+      switch (discountType) {
+        case "PERCENT":
+          newDiscountValue = Math.round(subtotal * discountPercent / 100)
+          break
+        case "AMOUNT":
+          newDiscountValue = Math.min(discountAmount, subtotal)
+          break
+        case "VOUCHER":
+          if (selectedVoucher) {
+            if (selectedVoucher.type === "percent") {
+              const voucherDiscount = Math.round(subtotal * selectedVoucher.discountValue / 100)
+              newDiscountValue = selectedVoucher.maxDiscount
+                ? Math.min(voucherDiscount, selectedVoucher.maxDiscount)
+                : voucherDiscount
+            } else {
+              newDiscountValue = selectedVoucher.discountValue
+            }
           }
-        } else {
-          setDiscountValue(0)
-        }
-        break
-      case "NONE":
-      default:
-        setDiscountValue(0)
-        break
-    }
-  }, [discountType, discountPercent, discountAmount, selectedVoucher, cartItems])
+          break
+        default:
+          newDiscountValue = 0
+      }
 
+      setDiscountValue(newDiscountValue)
+
+      // ✅ Gọi API để cập nhật discount
+      if (discountType === "VOUCHER" && selectedVoucher) {
+        try {
+          await apiAdmin.post("/pos/cart/apply-voucher", {
+            code: selectedVoucher.code,
+            staffId: selectedStaff
+          })
+        } catch (err) {
+          console.error("Error applying voucher:", err)
+        }
+      } else if (discountType === "PERCENT" || discountType === "AMOUNT") {
+        try {
+          await apiAdmin.post("/pos/cart/manual-discount", {
+            manualDiscount: newDiscountValue,
+            staffId: selectedStaff
+          })
+        } catch (err) {
+          console.error("Error applying discount:", err)
+        }
+      } else {
+        // Reset discount nếu NONE
+        await updateCartAPI(cartItems)
+      }
+    }
+
+    updateDiscount()
+  }, [discountType, discountPercent, discountAmount, selectedVoucher, cartItems])
   const handleVariationChange = (productId, type, value) => {
     setSelectedVariations(prev => ({
       ...prev,
@@ -215,7 +247,7 @@ const PosPage = () => {
     return variation ? variation.stock : 0
   }
 
-  const handleAddProduct = (product) => {
+  const handleAddProduct = async (product) => {
     if (!selectedStaff) {
       toast.info("Vui lòng chọn nhân viên!")
       return
@@ -242,9 +274,10 @@ const PosPage = () => {
 
     const existing = cartItems.find((i) => i.cartKey === cartKey)
 
+    let updatedItems
     if (existing) {
       existing.quantity += 1
-      setCartItems([...cartItems])
+      updatedItems = [...cartItems]
     } else {
       const newItem = {
         cartKey,
@@ -254,26 +287,50 @@ const PosPage = () => {
         quantity: 1,
         mainImage: product.mainImage,
       }
-
       if (product.variations && product.variations.length > 0) {
         newItem.color = selected.color
         newItem.size = selected.size
         newItem.productName = `${product.name} (${selected.color}, ${selected.size})`
       }
 
-      setCartItems([...cartItems, newItem])
+      updatedItems = [...cartItems, newItem]
     }
+    setCartItems(updatedItems)
+    await updateCartAPI(updatedItems)
   }
 
-  const handleChangeQuantity = (index, qty) => {
+  const handleChangeQuantity = async (index, qty) => {
     if (qty <= 0) return
-    cartItems[index].quantity = qty
-    setCartItems([...cartItems])
+
+    const updatedItems = [...cartItems]
+    updatedItems[index].quantity = qty
+    setCartItems(updatedItems)
+
+    // ✅ Gọi API để cập nhật cart
+    await updateCartAPI(updatedItems)
   }
 
-  const handleRemove = (index) => {
-    cartItems.splice(index, 1)
-    setCartItems([...cartItems])
+  const handleRemove = async (index) => {
+    const updatedItems = [...cartItems]
+    updatedItems.splice(index, 1)
+    setCartItems(updatedItems)
+
+    // ✅ Gọi API để cập nhật cart
+    await updateCartAPI(updatedItems)
+  }
+  const updateCartAPI = async (items) => {
+    try {
+      await apiAdmin.post("/pos/cart", {
+        items,
+        staffId: selectedStaff,
+        customerId: selectedCustomer?._id,
+        discount: discountValue,
+      })
+      // Socket event sẽ được emit từ backend tự động
+    } catch (err) {
+      console.error("Error updating cart:", err)
+      toast.error("Lỗi khi cập nhật giỏ hàng")
+    }
   }
 
   const handleCustomerSubmit = async (e) => {
@@ -306,12 +363,24 @@ const PosPage = () => {
     setDiscountType("VOUCHER")
   }
 
-  const handleRemoveDiscount = () => {
+  const handleRemoveDiscount = async () => {
     setDiscountType("NONE")
     setDiscountValue(0)
     setDiscountPercent(0)
     setDiscountAmount(0)
     setSelectedVoucher(null)
+
+    // ✅ Gọi API để reset discount
+    if (cartItems.length > 0) {
+      try {
+        await apiAdmin.post("/pos/cart/manual-discount", {
+          manualDiscount: 0,
+          staffId: selectedStaff
+        })
+      } catch (err) {
+        console.error("Error removing discount:", err)
+      }
+    }
   }
 
   const handleCheckout = async () => {
@@ -322,16 +391,20 @@ const PosPage = () => {
 
     setIsProcessing(true)
     try {
-      const orderData = {
+      // Đảm bảo cart đã được update lần cuối
+      const cart = await apiAdmin.post("/pos/cart", {
         items: cartItems,
         staffId: selectedStaff,
         customerId: selectedCustomer?._id,
         discount: discountValue,
-        voucherId: selectedVoucher?._id
+      })
+
+      if (paymentMethod === "CASH") {
+        socket.emit('customer_checkout', {
+          paymentMethod: paymentMethod,
+          total: total
+        })
       }
-
-      const cart = await apiAdmin.post("/pos/cart", orderData)
-
       const order = await apiAdmin.post("/pos/checkout", {
         cartId: cart.data._id,
         staffId: selectedStaff,
@@ -342,11 +415,15 @@ const PosPage = () => {
         setCurrentOrder(order.data)
         setShowBankPayment(true)
       } else {
+        // ✅ Emit null để xóa màn hình khách hàng
+        socket.emit('customer_cart_update', null)
+
         setShowSuccess(true)
         setCartItems([])
         setSelectedVariations({})
         handleRemoveDiscount()
         fetchProducts()
+
         setTimeout(() => {
           setShowSuccess(false)
         }, 3000)
@@ -360,11 +437,16 @@ const PosPage = () => {
   }
 
   const handlePaymentSuccess = () => {
+    // ✅ Emit null để xóa màn hình khách hàng
+    socket.emit('customer_cart_update', null)
+
+    setShowBankPayment(false)
     setShowSuccess(true)
     setCartItems([])
     setSelectedVariations({})
     handleRemoveDiscount()
     fetchProducts()
+
     setTimeout(() => {
       setShowSuccess(false)
     }, 3000)
@@ -788,8 +870,10 @@ const PosPage = () => {
 
         {/* Bank Payment Modal */}
         {showBankPayment && currentOrder && (
-          <BankPaymentModal
+          <BankPaymentPos
             order={currentOrder}
+            selectedBank={selectedBank}
+            setSelectedBank={setSelectedBank}
             onClose={() => setShowBankPayment(false)}
             onSuccess={handlePaymentSuccess}
           />
