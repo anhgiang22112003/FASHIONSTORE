@@ -1,22 +1,22 @@
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/badge';
-import { 
-  FileText, 
-  Clock, 
-  CheckCircle, 
-  XCircle, 
+import React from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import {
+  FileText,
+  Clock,
+  CheckCircle,
+  XCircle,
   DollarSign,
-  TrendingUp 
-} from 'lucide-react';
+  TrendingUp
+} from 'lucide-react'
 
 const ComplaintStats = ({ stats, loading = false }) => {
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
       currency: 'VND'
-    }).format(amount);
-  };
+    }).format(amount)
+  }
 
   const statCards = [
     {
@@ -47,7 +47,7 @@ const ComplaintStats = ({ stats, loading = false }) => {
       color: 'bg-red-500',
       textColor: 'text-red-600'
     }
-  ];
+  ]
 
   if (loading) {
     return (
@@ -65,7 +65,7 @@ const ComplaintStats = ({ stats, loading = false }) => {
           </Card>
         ))}
       </div>
-    );
+    )
   }
 
   return (
@@ -73,7 +73,7 @@ const ComplaintStats = ({ stats, loading = false }) => {
       {/* Main Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {statCards.map((stat, index) => {
-          const Icon = stat.icon;
+          const Icon = stat.icon
           return (
             <Card key={index}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -100,7 +100,7 @@ const ComplaintStats = ({ stats, loading = false }) => {
                 </p>
               </CardContent>
             </Card>
-          );
+          )
         })}
       </div>
 
@@ -142,14 +142,14 @@ const ComplaintStats = ({ stats, loading = false }) => {
                   <span className="text-sm font-medium">{type.count}</span>
                 </div>
               )) || (
-                <p className="text-xs text-gray-500">Chưa có dữ liệu</p>
-              )}
+                  <p className="text-xs text-gray-500">Chưa có dữ liệu</p>
+                )}
             </div>
           </CardContent>
         </Card>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default ComplaintStats;
+export default ComplaintStats
