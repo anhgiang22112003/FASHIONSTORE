@@ -43,9 +43,6 @@ const OrderSearch = ({ onOrderSelect, selectedOrder }) => {
             }
            const queryString = new URLSearchParams(params).toString()
             const response = await apiAdmin.get(`/orders/all?${queryString}`)
-            console.log(response);
-            
-
             setOrders(response.data.data || [])
         } catch (err) {
             setError('Lỗi khi tìm kiếm đơn hàng')

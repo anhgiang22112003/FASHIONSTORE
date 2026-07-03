@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react"
+import React, { useEffect, useMemo, useRef, useState } from "react"
 import { PencilIcon, TrashIcon, FunnelIcon, ArrowDownTrayIcon, ArrowUpTrayIcon, EyeIcon } from "@heroicons/react/24/outline"
 import DeleteProductModal from "../../components/DeleteProductPopup"
 import { toast } from "react-toastify"
@@ -9,6 +9,7 @@ import debounce from "lodash.debounce"
 import ConfirmBulkDeleteModal from "@/components/ConfirmBulkDeleteModal"
 import apiAdmin from "@/service/apiAdmin"
 import Switch from "@/components/ui/switch"
+import AdminSpinner from "@/components/AdminSpinner"
 
 const statusColors = {
     "Còn hàng": "bg-green-100 text-green-600",
@@ -47,6 +48,9 @@ const ProductsContent = ({ setActiveTab, onEditProduct, onViewProductDetail, dat
         maxPrice: "",
         sortBy: "newest",
     })
+
+    // Tránh gọi API 2 lần khi mount: useEffect([page]) sẽ bỏ qua lần chạy đầu tiên
+    const isFirstPageRender = useRef(true)
 
     // ✅ Xử lý chọn checkbox
     const handleSelectAll = () => {
@@ -185,11 +189,13 @@ const ProductsContent = ({ setActiveTab, onEditProduct, onViewProductDetail, dat
         return () => debouncedFetch.cancel()
     }, [filters, searchTerm])
 
-    // Gọi API khi page thay đổi
     useEffect(() => {
-        if (page) {
-            fetchProducts(page, filters, searchTerm)
+        // Bỏ qua lần đầu tiên mount (useEffect[filters,searchTerm] đã gọi rồi)
+        if (isFirstPageRender.current) {
+            isFirstPageRender.current = false
+            return
         }
+        fetchProducts(page, filters, searchTerm)
     }, [page])
 
     const handlePriceChange = (e) => {
@@ -282,7 +288,7 @@ const ProductsContent = ({ setActiveTab, onEditProduct, onViewProductDetail, dat
         setIsModalOpen(false)
     }
 
-    console.log(product)
+
 
     const handleCloseModal = () => {
         setIsModalOpen(false)
@@ -484,7 +490,10 @@ const ProductsContent = ({ setActiveTab, onEditProduct, onViewProductDetail, dat
                 </div>
             )}
 
-            <div className="overflow-x-auto   shadow">
+            {loading ? (
+                <AdminSpinner message="Đang tải danh sách sản phẩm..." />
+            ) : (
+                <div className="overflow-x-auto   shadow">
                 <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-pink-50">
                         <tr>
@@ -601,6 +610,7 @@ const ProductsContent = ({ setActiveTab, onEditProduct, onViewProductDetail, dat
                     </div>
                 )}
             </div>
+            )}
             {productToDelete && (
                 <DeleteProductModal
                     isOpen={isModalOpen}

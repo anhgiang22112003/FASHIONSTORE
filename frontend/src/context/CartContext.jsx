@@ -31,11 +31,13 @@ export const CartProvider = ({ children }) => {
         return
       }
 
-      const res = await api.post('/cart/add', body)
+      await api.post('/cart/add', body)
       toast.success('Đã thêm vào giỏ hàng')
-      setCart(res.data)
+      // Fetch lại để có dữ liệu product đã populate đầy đủ
+      await fetchCart()
     } catch (error) {
       toast.error(error.response?.data?.message || 'Lỗi thêm vào giỏ hàng')
+      throw error // re-throw để VariantModal catch được và không gọi onSuccessAndOpenCart
     }
   }
 

@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { toast } from 'react-toastify';
 
 const BlogPage = () => {
   const navigate = useNavigate();
@@ -56,7 +57,7 @@ const BlogPage = () => {
   const handleSubscribe = (e) => {
     e.preventDefault();
     if (email) {
-      console.log('Subscribed:', email);
+      toast.success('Đăng ký thành công! Chúng tôi sẽ gửi bài viết mới đến ' + email + ' 💌');
       setEmail('');
     }
   };

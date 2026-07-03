@@ -3,7 +3,8 @@ import apiAdmin from "@/service/apiAdmin"
 import OrderStatusChart from "@/components/OrderStatusChart"
 import DatePicker from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css"
-import { TagIcon } from '@heroicons/react/24/solid'
+import { ArrowTrendingUpIcon, ShoppingCartIcon, UserIcon, TagIcon, UserGroupIcon, CalendarDaysIcon, ArchiveBoxIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline'
+import AdminSpinner from "@/components/AdminSpinner"
 
 const AdminDashboard = () => {
   const [data, setData] = useState(null)
@@ -59,7 +60,7 @@ const AdminDashboard = () => {
     PROCESSING: "bg-blue-100 text-blue-600",
   }
 
-  if (loading) return <div className="p-8 text-center">Đang tải dữ liệu...</div>
+  if (loading) return <AdminSpinner message="Đang tải dữ liệu..." />
 
   if (!data)
     return (
@@ -121,7 +122,7 @@ const AdminDashboard = () => {
               {new Date(summary.to).toLocaleDateString()}
             </p>
           </div>
-          <div className="text-3xl">📈</div>
+          <ArrowTrendingUpIcon className="w-8 h-8 text-pink-500" />
         </div>
 
         <div className=" p-6 rounded-xl shadow flex justify-between items-center">
@@ -131,7 +132,7 @@ const AdminDashboard = () => {
               {summary.orders}
             </p>
           </div>
-          <div className="text-3xl">🛒</div>
+          <ShoppingCartIcon className="w-8 h-8 text-pink-500" />
         </div>
 
         <div className=" p-6 rounded-xl shadow flex justify-between items-center">
@@ -141,7 +142,7 @@ const AdminDashboard = () => {
               {summary.customers}
             </p>
           </div>
-          <div className="text-3xl">👤</div>
+          <UserIcon className="w-8 h-8 text-pink-500" />
         </div>
 
         <div className="p-6 rounded-xl shadow flex justify-between items-center">
@@ -151,7 +152,7 @@ const AdminDashboard = () => {
               {summary.products}
             </p>
           </div>
-          <div className="text-3xl">🏷️</div>
+          <TagIcon className="w-8 h-8 text-pink-500" />
         </div>
       </div>
       <OrderStatusChart statusSummary={data.summary.statusSummary} />
@@ -169,7 +170,7 @@ const AdminDashboard = () => {
                 className="flex justify-between items-center p-4 bg-pink-50 rounded-lg"
               >
                 <div className="flex items-center space-x-2">
-                  <span className="text-xl">🛒</span>
+                  <ShoppingCartIcon className="w-5 h-5 text-pink-500" />
                   <div>
                     <p className="font-semibold text-black">
                       {order?.user?.name || "Khách hàng"}
@@ -216,7 +217,7 @@ const AdminDashboard = () => {
                 className="flex justify-between items-center p-4 bg-pink-50 rounded-lg"
               >
                 <div className="flex items-center space-x-2">
-                  <span className="text-xl">🏷️</span>
+                  <TagIcon className="w-5 h-5 text-pink-500" />
                   <div>
                     <p className="font-semibold text-black">{product.name}</p>
                     <p className="text-sm text-gray-500">
@@ -235,16 +236,7 @@ const AdminDashboard = () => {
         <div className="p-6 rounded-2xl shadow-xl   transition-all hover:shadow-2xl">
           {/* Header */}
           <h2 className="text-xl font-extrabold mb-5 text-red-700 flex items-center gap-3">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6 text-red-500 animate-pulse"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.398 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
+            <ExclamationTriangleIcon className="h-6 w-6 text-red-500 animate-pulse" />
             Sản phẩm sắp hết hàng
           </h2>
 
@@ -305,9 +297,7 @@ const AdminDashboard = () => {
         {/* Khách hàng hoạt động gần đây */}
         <div className="p-6 rounded-2xl shadow-xl  transition-all hover:shadow-2xl">
           <h2 className="text-xl font-extrabold mb-5 flex items-center gap-3">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-pink-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M5 10v2a4 4 0 004 4h6a4 4 0 004-4v-2" />
-            </svg>
+            <UserGroupIcon className="h-6 w-6 text-pink-500" />
             Khách hàng hoạt động gần đây
           </h2>
           <ul className="space-y-3">
@@ -336,9 +326,7 @@ const AdminDashboard = () => {
         {/* Lịch sự kiện / Chiến dịch marketing */}
         <div className="p-6 rounded-2xl shadow-xl  transition-all hover:shadow-2xl">
           <h2 className="text-xl font-extrabold mb-5  flex items-center gap-3">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
+            <CalendarDaysIcon className="h-6 w-6 text-blue-500" />
             Lịch sự kiện / Chiến dịch marketing
           </h2>
           <ul className="space-y-3">
@@ -369,9 +357,7 @@ const AdminDashboard = () => {
         {/* Sản phẩm tồn kho nhiều nhất */}
         <div className="p-6 rounded-2xl shadow-xl  transition-all hover:shadow-2xl">
           <h2 className="text-xl font-extrabold mb-5  flex items-center gap-3">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 " fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M5 8h14M5 12h14M5 16h14M4 6h16a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V7a1 1 0 011-1z" />
-            </svg>
+            <ArchiveBoxIcon className="h-6 w-6 text-blue-500" />
             Sản phẩm tồn kho nhiều nhất
           </h2>
           <ul className="space-y-3">

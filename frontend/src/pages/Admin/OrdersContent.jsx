@@ -4,6 +4,7 @@ import { toast } from "react-toastify"
 import { socket } from "@/service/socket"
 import apiAdmin from "@/service/apiAdmin"
 import { useDebounce } from "@/hooks/useDebounce"
+import AdminSpinner from "@/components/AdminSpinner"
 
 
 const statusOptions = [
@@ -635,7 +636,10 @@ const OrdersContent = ({ data, onEditOrder }) => {
         )}
 
         {/* TABLE WITH HORIZONTAL SCROLL & STICKY HEADER */}
-        <div className="rounded-xl shadow-lg">
+        {loading ? (
+          <AdminSpinner message="Đang tải danh sách đơn hàng..." />
+        ) : (
+          <div className="rounded-xl shadow-lg">
           <div className="overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
             <div className="max-h-[calc(100vh-200px)] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
               <table className="min-w-full divide-y divide-gray-200">
@@ -765,8 +769,9 @@ const OrdersContent = ({ data, onEditOrder }) => {
             </div>
           </div>
         </div>
+        )}
 
-        {/* PHÂN TRANG */}
+        {/* PHẦN TRANG */}
         {total > limit && (
           <div className="flex justify-center items-center mt-6 space-x-2">
             <button

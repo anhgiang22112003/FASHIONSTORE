@@ -193,7 +193,7 @@ const Checkout = () => {
     const currentVariant = item.product.variations.find(
       v => v.color === item.color && v.size === item.size
     )
-    const maxStock = currentVariant ? currentVariant.stock : 0
+    const maxStock = currentVariant ? (currentVariant.stock - (currentVariant.lockedStock || 0)) : 0
 
     // Giới hạn quantity trong khoảng 1..maxStock
     if (newQuantity < 1) newQuantity = 1
@@ -758,7 +758,7 @@ const Checkout = () => {
                             const currentVariant = item.product.variations.find(
                               v => v.color === item.color && v.size === item.size
                             )
-                            const maxStock = currentVariant ? currentVariant.stock : 0
+                            const maxStock = currentVariant ? (currentVariant.stock - (currentVariant.lockedStock || 0)) : 0
 
                             // Nếu nhập < 1 thì set về 1
                             if (isNaN(num) || num < 1) num = 1

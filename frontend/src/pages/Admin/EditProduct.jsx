@@ -238,7 +238,7 @@ const EditProduct = ({ productId, onBack, fetchProducts }) => {
 
 
     return (
-        <div className="flex flex-col lg:flex-row lg:space-x-8 h-full">
+        <div className="flex flex-col lg:flex-row lg:space-x-8 h-full p-6 lg:p-8">
             {/* Main content - Left side with scroll on desktop, full on mobile */}
             <div className="flex-1 lg:overflow-y-auto lg:pr-4 space-y-8 pb-8 scrollbar-hidden">
                 <div className="bg-white p-8 rounded-2xl shadow-xl space-y-6">
@@ -498,7 +498,7 @@ const EditProduct = ({ productId, onBack, fetchProducts }) => {
                         )}
                     </div>
                     <div className="space-y-1">
-                        <p className="font-semibold text-gray-800">{name}</p>
+                        <p className="font-semibold text-gray-800">{productName}</p>
                         <p className="text-sm text-gray-500">{shortDesc}</p>
                     </div>
                   <div className="flex items-center space-x-2">

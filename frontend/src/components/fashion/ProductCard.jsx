@@ -195,6 +195,11 @@ const ProductCard = ({ product, viewMode, onClick }) => {
       </div>
 
       <div className="p-4">
+        {/* Brand & Material */}
+        <div className="text-[10px] uppercase font-black tracking-wider text-pink-500 mb-1">
+          {product?.brand || 'FashionStore'} • {product?.material || 'Chất lượng cao'}
+        </div>
+
         <h3 className="font-bold text-gray-900 mb-2 cursor-pointer hover:text-pink-500 transition-colors line-clamp-2 text-base" onClick={onClick}>
           {product?.name}
         </h3>
@@ -211,6 +216,54 @@ const ProductCard = ({ product, viewMode, onClick }) => {
           ))}
           <span className="text-xs text-gray-600 ml-1 font-medium">({reviews})</span>
         </div>
+
+        {/* Colors & Sizes Swatches */}
+        {(() => {
+          const colors = Array.from(new Set((product?.variations || []).map(v => v.color).filter(Boolean)));
+          const sizes = Array.from(new Set((product?.variations || []).map(v => v.size).filter(Boolean)));
+          const colorMap = {
+            'Đen': '#000000', 'Den': '#000000',
+            'Trắng': '#FFFFFF', 'Trang': '#FFFFFF',
+            'Đỏ': '#EF4444', 'Do': '#EF4444',
+            'Xanh': '#3B82F6',
+            'Xanh lá': '#10B981', 'Xanh la': '#10B981',
+            'Vàng': '#F59E0B', 'Vang': '#F59E0B',
+            'Hồng': '#EC4899', 'Hong': '#EC4899',
+            'Xám': '#6B7280', 'Xam': '#6B7280',
+            'Cam': '#F97316',
+            'Tím': '#8B5CF6', 'Tim': '#8B5CF6',
+            'Nâu': '#78350F', 'Nau': '#78350F',
+          };
+          if (colors.length === 0 && sizes.length === 0) return null;
+          return (
+            <div className="flex items-center justify-between gap-2 border-t border-gray-50 pt-2.5 mb-3">
+              {colors.length > 0 ? (
+                <div className="flex items-center gap-1">
+                  {colors.slice(0, 4).map((c, idx) => {
+                    const bgCol = colorMap[c] || '#CBD5E1';
+                    return (
+                      <span
+                        key={idx}
+                        className="w-3 h-3 rounded-full border border-gray-200 inline-block shadow-sm"
+                        style={{ backgroundColor: bgCol }}
+                        title={c}
+                      />
+                    );
+                  })}
+                  {colors.length > 4 && (
+                    <span className="text-[9px] text-gray-400 font-bold">+{colors.length - 4}</span>
+                  )}
+                </div>
+              ) : <div />}
+
+              {sizes.length > 0 && (
+                <div className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">
+                  Sizes: {sizes.slice(0, 3).join(', ')}{sizes.length > 3 && '...'}
+                </div>
+              )}
+            </div>
+          );
+        })()}
 
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-xl font-black text-pink-500">

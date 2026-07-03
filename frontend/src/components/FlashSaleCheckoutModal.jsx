@@ -99,7 +99,7 @@ const FlashSaleCheckoutModal = ({ item, onClose, onSuccess }) => {
       const res = await apiUser.get(`/users/${user.id}`)
       setUsers(res.data)
     } catch (error) {
-      console.log("Lỗi lấy thông tin user:", error)
+      // console.log("Lỗi lấy thông tin user:", error)
     }
   }
 
@@ -149,7 +149,7 @@ const FlashSaleCheckoutModal = ({ item, onClose, onSuccess }) => {
           }
         }
       } catch (err) {
-        console.log("Lỗi auto điền địa chỉ:", err)
+        // console.log("Lỗi auto điền địa chỉ:", err)
       }
     }
 
@@ -271,7 +271,7 @@ const FlashSaleCheckoutModal = ({ item, onClose, onSuccess }) => {
     try {
       setLoading(true)
       const res = await apiUser.post("/flash-sales/purchase", payload)
-      console.log(res)
+      
       
       const invoiceNumber = res.data._id
       const total = res.data.total

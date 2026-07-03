@@ -33,9 +33,10 @@ const Header = () => {
   const wishlistCount = wishlist?.length
 
   useEffect(() => {
+    if (!user?.id) return   // ← Bảo vệ: không gọi khi user chưa sẵn sàng
     const fetchUnreadCount = async () => {
       try {
-        const res = await apiUser.get(`/notifications/user/${user?.id}`)
+        const res = await apiUser.get(`/notifications/user/${user.id}`)
         const notificationData = res.data || []
         const unreadCount = notificationData.filter(n => !n.isRead).length
         setUnreadCount(unreadCount)

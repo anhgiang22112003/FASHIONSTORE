@@ -78,7 +78,9 @@ code {
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-    width: 12px;
+    width: 0px;
+    height: 0px;
+    background: transparent;
 }
 
 ::-webkit-scrollbar-track {
@@ -86,12 +88,16 @@ code {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #535353;
-    border-radius: 6px;
+    background: transparent;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: #727272;
+    background: transparent;
+}
+
+* {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
 }
 
 /* Spotify-like hover effects */
@@ -310,4 +316,15 @@ Toast Container Styling
   body {
     @apply bg-background text-foreground;
     }
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none !important;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.scrollbar-hidden {
+  -ms-overflow-style: none !important;  /* IE and Edge */
+  scrollbar-width: none !important;  /* Firefox */
 }

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { UserCircleIcon, CheckCircleIcon, XMarkIcon } from '@heroicons/react/24/solid'
+import { UserCircleIcon, CheckCircleIcon, XMarkIcon, ArrowLeftIcon } from '@heroicons/react/24/solid'
 import { toast } from 'react-toastify'
 import apiAdmin from '@/service/apiAdmin'
 
@@ -101,19 +101,30 @@ const AddCustomerPage = ({ onBack, refreshCustomers }) => {
 
   return (
     <div style={{ backgroundColor: "var(--bg-color)", color: "var(--text-color)" }} className="min-h-screen rounded-2xl shadow-xl mb-8 space-y-8 p-8 font-sans text-gray-800">
-      <header className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold ">Thêm khách hàng mới</h1>
+      <header className="flex justify-between items-center mb-6 border-b border-gray-100 pb-4">
+        <div className="flex items-center space-x-3">
+          <button
+            onClick={onBack}
+            className="p-2 bg-white border border-gray-200 text-gray-600 rounded-xl hover:bg-gray-50 hover:text-gray-900 transition-all shadow-sm"
+            title="Quay lại"
+          >
+            <ArrowLeftIcon className="w-5 h-5" />
+          </button>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-800">Thêm khách hàng mới</h1>
+            <p className="text-xs text-gray-500 mt-0.5">Nhập các thông tin chi tiết để tạo hồ sơ khách hàng mới</p>
+          </div>
+        </div>
         <div className="flex space-x-2">
           <button
             onClick={handleSave}
             disabled={!isFormValid()}
-            className={`flex items-center space-x-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors ${isFormValid() ? 'bg-[#ff69b4] hover:bg-[#ff4f9f] text-white' : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+            className={`flex items-center space-x-2 px-5 py-2.5 text-sm font-semibold rounded-xl transition-all shadow-md ${isFormValid() ? 'bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white shadow-pink-200' : 'bg-gray-100 text-gray-400 cursor-not-allowed shadow-none'
               }`}
           >
-            <CheckCircleIcon className="w-5 h-5" />
+            <CheckCircleIcon className="w-4 h-4" />
             <span>Lưu khách hàng</span>
           </button>
-       
         </div>
       </header>
 
@@ -126,27 +137,27 @@ const AddCustomerPage = ({ onBack, refreshCustomers }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Họ</label>
-                <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} className="w-full text-black px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff69b4]" placeholder="Nhập họ" />
+                <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} className="w-full text-black px-3 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-400 transition-all" placeholder="Nhập họ" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Tên</label>
-                <input type="text" name="firstName" value={formData.firstName} onChange={handleChange} className="w-full text-black px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff69b4]" placeholder="Nhập tên" />
+                <input type="text" name="firstName" value={formData.firstName} onChange={handleChange} className="w-full text-black px-3 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-400 transition-all" placeholder="Nhập tên" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                <input type="email" name="email" value={formData.email} onChange={handleChange} className="w-full px-3 text-black py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff69b4]" placeholder="vd: example@mail.com" />
+                <input type="email" name="email" value={formData.email} onChange={handleChange} className="w-full px-3 text-black py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-400 transition-all" placeholder="vd: example@mail.com" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Số điện thoại</label>
-                <input type="tel" name="phone" value={formData.phone} onChange={handleChange} className="w-full px-3 text-black py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff69b4]" placeholder="Nhập số điện thoại" />
+                <input type="tel" name="phone" value={formData.phone} onChange={handleChange} className="w-full px-3 text-black py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-400 transition-all" placeholder="Nhập số điện thoại" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Ngày sinh</label>
-                <input type="date" name="birthDate" value={formData.birthDate} onChange={handleChange} className="w-full text-black  px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff69b4]" />
+                <input type="date" name="birthDate" value={formData.birthDate} onChange={handleChange} className="w-full text-black px-3 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-400 transition-all" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Giới tính</label>
-                <select name="gender" value={formData.gender} onChange={handleChange} className="w-full px-3 py-2 border text-black border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff69b4]">
+                <select name="gender" value={formData.gender} onChange={handleChange} className="w-full px-3 py-2.5 border text-black border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-400 bg-white transition-all">
                   <option value="N/A">Chọn giới tính</option>
                   <option value="male">Nam</option>
                   <option value="female">Nữ</option>
@@ -162,7 +173,7 @@ const AddCustomerPage = ({ onBack, refreshCustomers }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="col-span-1 md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Địa chỉ</label>
-                <input type="text" name="address" value={formData.address} onChange={handleChange} className="w-full text-black px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff69b4]" placeholder="vd: 123 Lê Duẩn" />
+                <input type="text" name="address" value={formData.address} onChange={handleChange} className="w-full text-black px-3 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-400 transition-all" placeholder="vd: 123 Lê Duẩn" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Tỉnh/Thành phố</label>
@@ -177,7 +188,7 @@ const AddCustomerPage = ({ onBack, refreshCustomers }) => {
                       ward: '',
                     })
                   }}
-                  className="w-full text-black px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ff69b4]"
+                  className="w-full text-black px-3 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-pink-300 focus:border-pink-400 bg-white transition-all"
                 >
                   <option value="">-- Chọn tỉnh/thành phố --</option>
                   {provinces.map((p) => (
@@ -202,7 +213,7 @@ const AddCustomerPage = ({ onBack, refreshCustomers }) => {
                     })
                   }}
                   disabled={!formData.province}
-                  className="w-full px-3 text-black py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ff69b4]"
+                  className="w-full px-3 text-black py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-pink-300 focus:border-pink-400 bg-white transition-all disabled:bg-gray-50"
                 >
                   <option value="">-- Chọn quận/huyện --</option>
                   {districts.map((d) => (
@@ -221,7 +232,7 @@ const AddCustomerPage = ({ onBack, refreshCustomers }) => {
                   value={formData.ward}
                   onChange={handleChange}
                   disabled={!formData.district}
-                  className="w-full px-3 text-black py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ff69b4]"
+                  className="w-full px-3 text-black py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-pink-300 focus:border-pink-400 bg-white transition-all disabled:bg-gray-50"
                 >
                   <option value="">-- Chọn phường/xã --</option>
                   {wards.map((w) => (
@@ -233,7 +244,7 @@ const AddCustomerPage = ({ onBack, refreshCustomers }) => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Quốc gia</label>
-                <input type="text" name="country" value={formData.country} onChange={handleChange} className="w-full text-black px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff69b4]" placeholder="Quốc gia" />
+                <input type="text" name="country" value={formData.country} onChange={handleChange} className="w-full text-black px-3 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-400 transition-all" placeholder="Quốc gia" />
               </div>
             </div>
           </div>
@@ -248,7 +259,7 @@ const AddCustomerPage = ({ onBack, refreshCustomers }) => {
                   key={tag}
                   type="button"
                   onClick={() => handleTagClick(tag)}
-                  className={`px-3 py-1 text-sm rounded-full transition-colors ${formData.tags.includes(tag) ? 'bg-pink-100 text-[#ff69b4] border border-[#ff69b4]' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  className={`px-3 py-1 text-sm rounded-full transition-colors ${formData.tags.includes(tag) ? 'bg-pink-100 text-pink-600 border border-pink-200' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                     }`}
                 >
                   {tag}
@@ -260,14 +271,14 @@ const AddCustomerPage = ({ onBack, refreshCustomers }) => {
                 <span className="text-sm font-medium text-gray-700">Đăng ký nhận Newsletter</span>
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input type="checkbox" name="newsletter" checked={formData.newsletter} onChange={handleChange} className="sr-only peer" />
-                  <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-2 peer-focus:ring-pink-300 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-[#ff69b4]"></div>
+                  <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-2 peer-focus:ring-pink-300 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-pink-600"></div>
                 </label>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm font-medium text-gray-700">Marketing qua SMS</span>
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input type="checkbox" name="smsMarketing" checked={formData.smsMarketing} onChange={handleChange} className="sr-only peer" />
-                  <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-2 peer-focus:ring-pink-300 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-[#ff69b4]"></div>
+                  <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-2 peer-focus:ring-pink-300 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-pink-600"></div>
                 </label>
               </div>
             </div>
@@ -279,7 +290,7 @@ const AddCustomerPage = ({ onBack, refreshCustomers }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Nhóm khách hàng</label>
-                <select name="customerGroup" value={formData.customerGroup} onChange={handleChange} className="w-full px-3 text-black py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff69b4]">
+                <select name="customerGroup" value={formData.customerGroup} onChange={handleChange} className="w-full px-3 text-black py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-400 bg-white transition-all">
                   <option value="">Chọn nhóm</option>
                   <option value="Nhóm VIP">Nhóm VIP</option>
                   <option value="Khách hàng thường">Khách hàng thường</option>
@@ -287,14 +298,14 @@ const AddCustomerPage = ({ onBack, refreshCustomers }) => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Trạng thái</label>
-                <select name="status" value={formData.status} onChange={handleChange} className="w-full px-3 py-2 border text-black border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff69b4]">
+                <select name="status" value={formData.status} onChange={handleChange} className="w-full px-3 py-2.5 border text-black border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-400 bg-white transition-all">
                   <option value="Hoạt động">Hoạt động</option>
                   <option value="Không hoạt động">Không hoạt động</option>
                 </select>
               </div>
               <div className="col-span-1 md:col-span-2">
                 <label className="block text-sm  font-medium text-gray-700 mb-1">Ghi chú phụ về khách hàng</label>
-                <textarea name="notes" value={formData.notes} onChange={handleChange} className="w-full px-3 py-2 text-black border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff69b4] resize-none h-24" placeholder="Nhập ghi chú..."></textarea>
+                <textarea name="notes" value={formData.notes} onChange={handleChange} className="w-full px-3 py-2.5 text-black border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-400 transition-all resize-none h-24" placeholder="Nhập ghi chú..."></textarea>
               </div>
             </div>
           </div>
@@ -306,7 +317,7 @@ const AddCustomerPage = ({ onBack, refreshCustomers }) => {
             <h2 className="text-xl text-black font-semibold mb-4 border-b border-gray-200 pb-2">Xem trước thông tin</h2>
             <div className="flex flex-col items-center text-center">
               <div className="relative w-20 h-20 rounded-full bg-pink-100 flex items-center justify-center mb-2">
-                <UserCircleIcon className="w-12 h-12 text-[#ff69b4]" />
+                <UserCircleIcon className="w-12 h-12 text-pink-500" />
               </div>
               <h3 className="text-lg font-semibold text-gray-900">{formData.lastName} {formData.firstName}</h3>
               <p className="text-gray-600 text-sm">{formData.email}</p>
@@ -339,23 +350,23 @@ const AddCustomerPage = ({ onBack, refreshCustomers }) => {
             <h2 className="text-xl text-black  font-semibold mb-4 border-b border-gray-200 pb-2">Hướng dẫn</h2>
             <ul className="space-y-3 text-sm">
               <li className="flex items-start text-gray-700">
-                <span className="w-6 h-6 rounded-full flex items-center justify-center bg-pink-100 text-[#ff69b4] font-bold text-xs mr-2 flex-shrink-0">1</span>
+                <span className="w-6 h-6 rounded-full flex items-center justify-center bg-pink-100 text-pink-600 font-bold text-xs mr-2 flex-shrink-0">1</span>
                 <span>Điền đầy đủ thông tin cá nhân và địa chỉ</span>
               </li>
               <li className="flex items-start text-gray-700">
-                <span className="w-6 h-6 rounded-full flex items-center justify-center bg-pink-100 text-[#ff69b4] font-bold text-xs mr-2 flex-shrink-0">2</span>
+                <span className="w-6 h-6 rounded-full flex items-center justify-center bg-pink-100 text-pink-600 font-bold text-xs mr-2 flex-shrink-0">2</span>
                 <span>Chọn các thẻ phù hợp cho khách hàng</span>
               </li>
               <li className="flex items-start text-gray-700">
-                <span className="w-6 h-6 rounded-full flex items-center justify-center bg-pink-100 text-[#ff69b4] font-bold text-xs mr-2 flex-shrink-0">3</span>
+                <span className="w-6 h-6 rounded-full flex items-center justify-center bg-pink-100 text-pink-600 font-bold text-xs mr-2 flex-shrink-0">3</span>
                 <span>Cập nhật trạng thái và nhóm khách hàng</span>
               </li>
               <li className="flex items-start text-gray-700">
-                <span className="w-6 h-6 rounded-full flex items-center justify-center bg-pink-100 text-[#ff69b4] font-bold text-xs mr-2 flex-shrink-0">4</span>
+                <span className="w-6 h-6 rounded-full flex items-center justify-center bg-pink-100 text-pink-600 font-bold text-xs mr-2 flex-shrink-0">4</span>
                 <span>Thêm ghi chú nếu cần thiết</span>
               </li>
               <li className="flex items-start text-gray-700">
-                <span className="w-6 h-6 rounded-full flex items-center justify-center bg-pink-100 text-[#ff69b4] font-bold text-xs mr-2 flex-shrink-0">5</span>
+                <span className="w-6 h-6 rounded-full flex items-center justify-center bg-pink-100 text-pink-600 font-bold text-xs mr-2 flex-shrink-0">5</span>
                 <span>Kiểm tra lại thông tin trước khi lưu</span>
               </li>
             </ul>

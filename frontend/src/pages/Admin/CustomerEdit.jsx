@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react'
 import { toast } from 'react-toastify' // Dùng toast để hiển thị thông báo
 import apiAdmin from '@/service/apiAdmin'
 import CustomerOrderHistory from '@/components/CustomerOrderHistory'
+import { ArrowLeftIcon, UserIcon, EnvelopeIcon, CalendarIcon, UsersIcon, PhoneIcon, TagIcon, MapPinIcon, PencilIcon, LockClosedIcon, GiftIcon, InboxIcon, XMarkIcon, CheckIcon } from '@heroicons/react/24/outline'
 
 // Component Input Tags đơn giản
 const TagInput = ({ tags, onAddTag, onRemoveTag }) => {
@@ -16,16 +17,15 @@ const TagInput = ({ tags, onAddTag, onRemoveTag }) => {
     }
   }
 
-
   return (
-    <div className="border border-pink-300 rounded-lg p-2 flex flex-wrap items-center focus-within:ring-2 focus:ring-pink-200">
+    <div className="border border-gray-200 rounded-xl p-2 flex flex-wrap items-center focus-within:ring-2 focus-within:ring-pink-300 focus-within:border-pink-400 transition-all">
       {tags.map((tag, index) => (
-        <span key={index} className="flex items-center bg-pink-100 text-pink-700 text-sm px-3 py-1 rounded-full mr-2 mb-2">
+        <span key={index} className="flex items-center bg-pink-50 text-pink-600 text-xs font-semibold px-3 py-1 rounded-xl mr-2 mb-1.5 border border-pink-100">
           {tag}
           <button
             type="button"
             onClick={() => onRemoveTag(tag)}
-            className="ml-2 text-pink-500 hover:text-pink-800"
+            className="ml-2 text-pink-500 hover:text-pink-800 transition-colors font-bold text-sm"
           >
             &times;
           </button>
@@ -37,7 +37,7 @@ const TagInput = ({ tags, onAddTag, onRemoveTag }) => {
         onChange={(e) => setInputValue(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder="Thêm tag (VD: VIP, Mua nhiều)"
-        className="flex-grow bg-transparent outline-none border-none p-2 mb-2"
+        className="flex-grow bg-transparent outline-none border-none p-1 mb-1 text-sm text-black"
       />
     </div>
   )
@@ -255,54 +255,60 @@ const CustomerEdit = ({ customer: initialCustomerData, onBack, refreshCustomers 
 
 
   return (
-    <div style={{ backgroundColor: "var(--bg-color)", color: "var(--text-color)" }} className=" rounded-2xl shadow-xl p-8 mb-8 space-y-8">
+    <div style={{ backgroundColor: "var(--bg-color)", color: "var(--text-color)" }} className="rounded-2xl shadow-xl p-8 mb-8 space-y-8 font-sans text-gray-800">
       {/* Header */}
-      <div className="flex items-center space-x-4">
-        <div className="w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center text-pink-600">
-          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"></path></svg>
+      <header className="flex justify-between items-center mb-6 border-b border-gray-100 pb-4">
+        <div className="flex items-center space-x-3">
+          <button
+            onClick={onBack}
+            className="p-2 bg-white border border-gray-200 text-gray-600 rounded-xl hover:bg-gray-55 hover:text-gray-900 transition-all shadow-sm"
+            title="Quay lại"
+          >
+            <ArrowLeftIcon className="w-5 h-5" />
+          </button>
+          <div>
+            <h2 className="text-xl font-bold text-gray-800">Chỉnh sửa thông tin khách hàng</h2>
+            <p className="text-xs text-gray-500 mt-0.5">Cập nhật thông tin chi tiết của khách hàng ID: {initialCustomerData?._id}</p>
+          </div>
         </div>
-        <div>
-          <h2 className="text-xl font-bold ">Chỉnh sửa thông tin khách hàng</h2>
-          <p className="text-sm ">Cập nhật thông tin chi tiết của khách hàng ID: {initialCustomerData?._id}</p>
-        </div>
-      </div>
+      </header>
 
       {/* Customer Info Form */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
         <div className="space-y-6">
           {/* Họ */}
-          <label className="block space-y-2">
-            <div className="flex items-center space-x-2 ">
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path></svg>
-              <span className="font-semibold">Họ</span>
+          <label className="block space-y-1.5">
+            <div className="flex items-center space-x-2 text-gray-700">
+              <UserIcon className="w-4 h-4 text-pink-500" />
+              <span className="font-semibold text-sm">Họ</span>
             </div>
             <input
               type="text"
               name="firstName"
               value={formData.firstName}
               onChange={handleChange}
-              className="w-full px-4 py-3 border text-black  border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
+              className="w-full px-4 py-2.5 border text-black border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-400 transition-all"
             />
           </label>
           {/* Email */}
-          <label className="block space-y-2">
-            <div className="flex items-center space-x-2 ">
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"></path></svg>
-              <span className="font-semibold">Email</span>
+          <label className="block space-y-1.5">
+            <div className="flex items-center space-x-2 text-gray-700">
+              <EnvelopeIcon className="w-4 h-4 text-pink-500" />
+              <span className="font-semibold text-sm">Email</span>
             </div>
             <input
               type="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
-              className="w-full px-4 py-3 text-black  border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
+              className="w-full px-4 py-2.5 text-black border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-400 transition-all"
             />
           </label>
           {/* Ngày sinh */}
-          <label className="block space-y-2">
-            <div className="flex items-center space-x-2 ">
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M20 3h-1V1h-2v2H7V1H5v2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 18H4V8h16v13z"></path></svg>
-              <span className="font-semibold">Ngày sinh</span>
+          <label className="block space-y-1.5">
+            <div className="flex items-center space-x-2 text-gray-700">
+              <CalendarIcon className="w-4 h-4 text-pink-500" />
+              <span className="font-semibold text-sm">Ngày sinh</span>
             </div>
             <div className="relative">
               <input
@@ -310,21 +316,21 @@ const CustomerEdit = ({ customer: initialCustomerData, onBack, refreshCustomers 
                 name="birthDate"
                 value={formData.birthDate}
                 onChange={handleChange}
-                className="w-full px-4 py-3 text-black  border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
+                className="w-full px-4 py-2.5 text-black border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-400 transition-all"
               />
             </div>
           </label>
           {/* Nhóm khách hàng */}
-          <label className="block space-y-2">
-            <div className="flex items-center space-x-2 ">
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM7.5 17.5c-2.33 0-7 1.17-7 3.5V22h14v-1.5c0-2.33-4.67-3.5-7-3.5z"></path></svg>
-              <span className="font-semibold">Nhóm khách hàng</span>
+          <label className="block space-y-1.5">
+            <div className="flex items-center space-x-2 text-gray-700">
+              <UsersIcon className="w-4 h-4 text-pink-500" />
+              <span className="font-semibold text-sm">Nhóm khách hàng</span>
             </div>
             <select
               name="customerGroup"
               value={formData.customerGroup}
               onChange={handleChange}
-              className="w-full px-4 py-3 text-black  border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200 appearance-none"
+              className="w-full px-4 py-2.5 text-black border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-400 bg-white transition-all appearance-none"
             >
               <option value="Thành viên">Thành viên</option>
               <option value="VIP">VIP</option>
@@ -335,69 +341,69 @@ const CustomerEdit = ({ customer: initialCustomerData, onBack, refreshCustomers 
         </div>
         <div className="space-y-6">
           {/* Tên */}
-          <label className="block space-y-2">
-            <div className="flex items-center space-x-2 ">
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path></svg>
-              <span className="font-semibold">Tên</span>
+          <label className="block space-y-1.5">
+            <div className="flex items-center space-x-2 text-gray-700">
+              <UserIcon className="w-4 h-4 text-pink-500" />
+              <span className="font-semibold text-sm">Tên</span>
             </div>
             <input
               type="text"
               name="lastName"
               value={formData.lastName}
               onChange={handleChange}
-              className="w-full px-4 py-3 text-black  border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
+              className="w-full px-4 py-2.5 text-black border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-400 transition-all"
             />
           </label>
           {/* Số điện thoại */}
-          <label className="block space-y-2">
-            <div className="flex items-center space-x-2 ">
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1v3.5c0 .55-.45 1-1 1C10.76 21 2 12.24 2 3c0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.24 1.02l-2.2 2.2z"></path></svg>
-              <span className="font-semibold">Số điện thoại</span>
+          <label className="block space-y-1.5">
+            <div className="flex items-center space-x-2 text-gray-700">
+              <PhoneIcon className="w-4 h-4 text-pink-500" />
+              <span className="font-semibold text-sm">Số điện thoại</span>
             </div>
             <input
               type="tel"
               name="phone"
               value={formData.phone}
               onChange={handleChange}
-              className="w-full px-4 text-black  py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
+              className="w-full px-4 text-black py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-400 transition-all"
             />
           </label>
           {/* Giới tính */}
-          <div className="block space-y-2">
-            <div className="flex items-center space-x-2 ">
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM7.5 17.5c-2.33 0-7 1.17-7 3.5V22h14v-1.5c0-2.33-4.67-3.5-7-3.5z"></path></svg>
-              <span className="font-semibold">Giới tính</span>
+          <div className="block space-y-1.5">
+            <div className="flex items-center space-x-2 text-gray-700">
+              <UserIcon className="w-4 h-4 text-pink-500" />
+              <span className="font-semibold text-sm">Giới tính</span>
             </div>
-            <div className="flex items-center space-x-6 h-12">
-              <label className="flex items-center space-x-2">
+            <div className="flex items-center space-x-6 h-11">
+              <label className="flex items-center space-x-2 cursor-pointer text-sm">
                 <input
                   type="radio"
                   name="gender"
                   value="male"
                   checked={formData.gender === "male"}
                   onChange={handleChange}
-                  className="form-radio text-black  text-pink-600 w-4 h-4"
+                  className="form-radio text-pink-600 focus:ring-pink-300 w-4 h-4"
                 />
                 <span>Nam</span>
               </label>
-              <label className="flex items-center space-x-2 ">
+              <label className="flex items-center space-x-2 cursor-pointer text-sm">
                 <input
                   type="radio"
                   name="gender"
                   value="female"
                   checked={formData.gender === "female"}
                   onChange={handleChange}
-                  className="form-radio text-black  text-pink-600 w-4 h-4"
+                  className="form-radio text-pink-600 focus:ring-pink-300 w-4 h-4"
                 />
                 <span>Nữ</span>
               </label>
             </div>
           </div>
           {/* Tags */}
-          <label className="block space-y-2">
-            <div className="flex items-center space-x-2 ">
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M20 18c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2H0v2h24v-2h-4zM4 6h16v10H4V6z"></path></svg>
-              <span className="font-semibold">Tags</span>
+          <label className="block space-y-1.5">
+            <div className="flex items-center space-x-2 text-gray-700">
+              <TagIcon className="w-4 h-4 text-pink-500" />
+              <span className="font-semibold text-sm">Tags</span>
             </div>
             <TagInput
               tags={formData.tags}
@@ -409,26 +415,28 @@ const CustomerEdit = ({ customer: initialCustomerData, onBack, refreshCustomers 
       </div>
 
       {/* ADDRESS SECTION */}
-      <div className="space-y-6 border-t border-gray-200 pt-6">
-        <h3 className="text-xl font-bold ">Địa chỉ</h3>
-        <label className="block space-y-2">
-          <span className="font-semibold ">Địa chỉ (Số nhà, tên đường)</span>
+      <div className="space-y-6 border-t border-gray-100 pt-6">
+        <h3 className="text-lg font-bold text-gray-800 flex items-center space-x-2">
+          <MapPinIcon className="w-5 h-5 text-pink-500" />
+          <span>Địa chỉ nhận hàng</span>
+        </h3>
+        <label className="block space-y-1.5">
+          <span className="font-semibold text-sm text-gray-700">Địa chỉ (Số nhà, tên đường)</span>
           <input
             type="text"
             name="address"
             value={formData.address}
             onChange={handleChange}
             placeholder="VD: 123 Lê Duẩn"
-            className="w-full text-black  px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
+            className="w-full text-black px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-400 transition-all"
           />
         </label>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium  mb-1">Tỉnh / Thành phố</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Tỉnh / Thành phố</label>
             <select
               name="province"
-              // Giá trị này là TÊN tỉnh: formData.province
               value={formData.province}
               onChange={(e) => {
                 const selectedName = e.target.value
@@ -442,7 +450,7 @@ const CustomerEdit = ({ customer: initialCustomerData, onBack, refreshCustomers 
                 setDistricts(selected?.districts || [])
                 setWards([])
               }}
-              className="w-full text-black  px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff69b4]"
+              className="w-full text-black px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-400 bg-white transition-all"
             >
               <option value="">Chọn tỉnh / thành</option>
               {provinces.map((p) => (
@@ -453,18 +461,17 @@ const CustomerEdit = ({ customer: initialCustomerData, onBack, refreshCustomers 
 
           {/* Quận / Huyện */}
           <div>
-            <label className="block text-sm font-medium mb-1">Quận / Huyện</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Quận / Huyện</label>
             <select
               name="district"
               value={formData.district}
               onChange={(e) => {
-                // Tìm quận/huyện dựa trên **tên** được chọn (e.target.value là tên)
                 const selected = districts.find((d) => d.name === e.target.value)
                 setFormData({ ...formData, district: selected ? selected.name : '', ward: '' })
                 setWards(selected ? selected.wards : [])
               }}
               disabled={!districts.length}
-              className="w-full px-4 py-3 text-black  border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff69b4] disabled:bg-gray-100"
+              className="w-full px-4 py-2.5 text-black border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-400 bg-white disabled:bg-gray-50 transition-all"
             >
               <option value="">Chọn quận / huyện</option>
               {districts.map((d) => (
@@ -474,95 +481,114 @@ const CustomerEdit = ({ customer: initialCustomerData, onBack, refreshCustomers 
           </div>
 
           <div>
-            <label className="block text-sm font-medium  mb-1">Phường / Xã</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Phường / Xã</label>
             <select
               name="ward"
               value={formData.ward}
               onChange={(e) => {
-                // Tìm phường/xã dựa trên **tên** được chọn (e.target.value là tên)
                 const selected = wards.find((w) => w.name === e.target.value)
                 setFormData({ ...formData, ward: selected ? selected.name : '' })
               }}
               disabled={!wards.length}
-              className="w-full px-4 py-3 text-black  border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ff69b4] disabled:bg-gray-100"
+              className="w-full px-4 py-2.5 text-black border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-400 bg-white disabled:bg-gray-50 transition-all"
             >
               <option value="">Chọn phường / xã</option>
               {wards.map((w) => (
-                // Dùng **tên** làm giá trị (value) của option
                 <option key={w.code} value={w.name}>{w.name}</option>
               ))}
             </select>
           </div>
           {/* Quốc gia */}
-          <label className="block ">
-            <span className="font-semibold ">Quốc gia</span>
+          <label className="block">
+            <span className="block text-sm font-medium text-gray-700 mb-1">Quốc gia</span>
             <input
               type="text"
               name="country"
               value={formData.country}
               onChange={handleChange}
               placeholder="Quốc gia"
-              className="w-full px-4 text-black  py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
+              className="w-full px-4 py-2.5 text-black border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-400 transition-all"
             />
           </label>
         </div>
       </div>
 
       {/* Current Info Section */}
-      <div className="bg-pink-50 p-6 rounded-xl space-y-4">
-        <h3 className="text-lg font-bold text-gray-800">Thông tin hiện tại</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm text-gray-600">
-          <p><span className="font-semibold">Khách hàng từ:</span> {new Date(initialCustomerData?.createdAt).toLocaleDateString()}</p>
-          <p><span className="font-semibold">Tổng đơn hàng:</span> {initialCustomerData?.orderCount || 0} đơn</p>
-          <p><span className="font-semibold">Tổng chi tiêu:</span> {initialCustomerData?.totalSpent?.toLocaleString() || 0}₫</p>
-          <p><span className="font-semibold">Trạng thái:</span> <span className={`${initialCustomerData?.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'} px-3 py-1 rounded-full font-medium`}>{initialCustomerData?.status === 'active' ? 'Hoạt động' : 'Bị khóa'}</span></p>
+      <div className="bg-pink-50 border border-pink-100 p-6 rounded-2xl space-y-4">
+        <h3 className="text-base font-bold text-pink-800 flex items-center space-x-2">
+          <SparklesIcon className="w-5 h-5 text-pink-500" />
+          <span>Tóm tắt hoạt động</span>
+        </h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm text-gray-750">
+          <div className="bg-white p-3 rounded-xl shadow-xs border border-pink-100/50">
+            <span className="block text-gray-500 text-xs">Khách hàng từ</span>
+            <span className="font-semibold text-gray-900 mt-0.5 block">{new Date(initialCustomerData?.createdAt).toLocaleDateString()}</span>
+          </div>
+          <div className="bg-white p-3 rounded-xl shadow-xs border border-pink-100/50">
+            <span className="block text-gray-500 text-xs">Tổng đơn hàng</span>
+            <span className="font-semibold text-gray-900 mt-0.5 block">{initialCustomerData?.orderCount || 0} đơn</span>
+          </div>
+          <div className="bg-white p-3 rounded-xl shadow-xs border border-pink-100/50">
+            <span className="block text-gray-500 text-xs">Tổng chi tiêu</span>
+            <span className="font-semibold text-pink-600 mt-0.5 block">{initialCustomerData?.totalSpent?.toLocaleString() || 0}₫</span>
+          </div>
+          <div className="bg-white p-3 rounded-xl shadow-xs border border-pink-100/50">
+            <span className="block text-gray-500 text-xs">Trạng thái</span>
+            <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold mt-1 ${initialCustomerData?.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+              {initialCustomerData?.status === 'active' ? 'Hoạt động' : 'Bị khóa'}
+            </span>
+          </div>
         </div>
       </div>
 
       {/* Action Buttons */}
-      <div className="flex justify-end space-x-4">
-        <button onClick={onBack} className="flex items-center space-x-2 px-6 py-3 bg-white text-gray-600 rounded-xl font-semibold border border-gray-300 hover:bg-gray-100 transition-colors">
-          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM4 12c0-4.41 3.59-8 8-8s8 3.59 8 8-3.59 8-8 8-8-3.59-8-8zm13 1h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"></path></svg>
+      <div className="flex justify-end space-x-3 border-t border-gray-100 pt-6">
+        <button
+          onClick={onBack}
+          className="flex items-center space-x-2 px-5 py-2.5 bg-white text-gray-750 rounded-xl font-semibold border border-gray-200 hover:bg-gray-50 hover:text-gray-900 transition-all shadow-sm"
+        >
+          <XMarkIcon className="w-4 h-4" />
           <span>Hủy bỏ</span>
         </button>
         <button
           onClick={handleSave}
-          className="flex items-center space-x-2 px-6 py-3 bg-pink-600 text-white rounded-xl font-semibold hover:bg-pink-700 transition-colors"
+          className="flex items-center space-x-2 px-5 py-2.5 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white rounded-xl font-semibold shadow-md shadow-pink-200 hover:shadow-pink-300 transition-all"
         >
-          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zM5 19V5h11.17L19 7.83V19H5zm4-8c-.55 0-1 .45-1 1s.45 1 1 1 1-.45 1-1-.45-1-1-1zm0 4c-.55 0-1 .45-1 1s.45 1 1 1 1-.45 1-1-.45-1-1-1z"></path></svg>
+          <CheckIcon className="w-4 h-4" />
           <span>Lưu thay đổi</span>
         </button>
       </div>
 
       {/* Other Actions Section */}
-      <div className="bg-white rounded-2xl p-6 border border-gray-200">
-        <h3 className="text-xl font-bold text-gray-800 mb-4">Thao tác khác</h3>
-        <div className="flex flex-wrap gap-4">
-          <button onClick={handleViewOrders} className="flex items-center space-x-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg font-semibold hover:bg-blue-200 transition-colors">
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.31 2.69-6 6-6s6 2.69 6 6-2.69 6-6 6c-1.01 0-1.97-.25-2.8-.7l-1.46 1.46C10.11 19.4 11.96 20 14 20c4.42 0 8-3.58 8-8s-3.58-8-8-8z"></path></svg>
-            <span>Xem lịch sử đơn hàng</span>
+      <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm space-y-4">
+        <h3 className="text-base font-bold text-gray-800">Thao tác tài khoản</h3>
+        <div className="flex flex-wrap gap-3">
+          <button
+            onClick={handleViewOrders}
+            className="flex items-center space-x-2 px-4 py-2 bg-blue-50 text-blue-600 border border-blue-100 rounded-xl font-semibold hover:bg-blue-100 hover:text-blue-700 transition-all text-sm shadow-xs"
+          >
+            <InboxIcon className="w-4 h-4" />
+            <span>Lịch sử đơn hàng</span>
           </button>
           <button
             onClick={() => setOpenEmailForm(true)}
-            className="flex items-center space-x-2 px-4 py-2 bg-green-100 text-green-700 rounded-lg font-semibold hover:bg-green-200 transition-colors"
+            className="flex items-center space-x-2 px-4 py-2 bg-green-50 text-green-600 border border-green-100 rounded-xl font-semibold hover:bg-green-100 hover:text-green-700 transition-all text-sm shadow-xs"
           >
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"></path>
-            </svg>
+            <EnvelopeIcon className="w-4 h-4" />
             <span>Gửi email</span>
           </button>
-
           <button
             onClick={() => setOpenLockForm(true)}
-            className="flex items-center space-x-2 px-4 py-2 bg-yellow-100 text-yellow-700 rounded-lg font-semibold hover:bg-yellow-200 transition-colors"
+            className="flex items-center space-x-2 px-4 py-2 bg-yellow-50 text-yellow-600 border border-yellow-100 rounded-xl font-semibold hover:bg-yellow-100 hover:text-yellow-750 transition-all text-sm shadow-xs"
           >
-            {initialCustomerData?.status === 'active' ? 'Khóa tài khoản' : 'Mở khóa tài khoản'}
+            <LockClosedIcon className="w-4 h-4" />
+            <span>{initialCustomerData?.status === 'active' ? 'Khóa tài khoản' : 'Mở khóa tài khoản'}</span>
           </button>
-
           <button
             onClick={handleGiveVoucher}
-            className="flex items-center space-x-2 px-4 py-2 bg-purple-100 text-purple-700 rounded-lg font-semibold hover:bg-purple-200 transition-colors"
+            className="flex items-center space-x-2 px-4 py-2 bg-purple-50 text-purple-600 border border-purple-100 rounded-xl font-semibold hover:bg-purple-100 hover:text-purple-700 transition-all text-sm shadow-xs"
           >
+            <GiftIcon className="w-4 h-4" />
             <span>Tặng voucher</span>
           </button>
         </div>
@@ -570,70 +596,87 @@ const CustomerEdit = ({ customer: initialCustomerData, onBack, refreshCustomers 
 
       {/* Modal gửi email */}
       {openEmailForm && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
-          <div className="bg-white rounded-lg shadow-lg w-96 p-6">
-            <h3 className="text-lg text-black font-bold mb-4">Gửi Email cho khách hàng</h3>
-
-            <div className="mb-4">
-              <label className="block text-black text-sm font-medium mb-1">Tiêu đề</label>
-              <input
-                type="text"
-                value={emailSubject}
-                onChange={(e) => setEmailSubject(e.target.value)}
-                className="w-full border text-black rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-green-200"
-                placeholder="Nhập tiêu đề..."
-              />
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-xs z-50 transition-all">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 border border-gray-100 space-y-4 animate-in fade-in zoom-in duration-200">
+            <div className="flex justify-between items-center pb-2 border-b border-gray-100">
+              <h3 className="text-lg font-bold text-gray-800">Gửi Email khách hàng</h3>
+              <button onClick={() => setOpenEmailForm(false)} className="p-1 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600">
+                <XMarkIcon className="w-5 h-5" />
+              </button>
             </div>
 
-            <div className="mb-4">
-              <label className="block text-black text-sm font-medium mb-1">Nội dung</label>
-              <textarea
-                value={emailMessage}
-                onChange={(e) => setEmailMessage(e.target.value)}
-                className="w-full border text-black rounded-md px-3 py-2 h-28 focus:outline-none focus:ring focus:ring-green-200"
-                placeholder="Nhập nội dung email..."
-              />
+            <div className="space-y-3">
+              <div>
+                <label className="block text-gray-700 text-sm font-semibold mb-1">Tiêu đề</label>
+                <input
+                  type="text"
+                  value={emailSubject}
+                  onChange={(e) => setEmailSubject(e.target.value)}
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2 text-black text-sm focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-400 transition-all"
+                  placeholder="Nhập tiêu đề email..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-gray-700 text-sm font-semibold mb-1">Nội dung</label>
+                <textarea
+                  value={emailMessage}
+                  onChange={(e) => setEmailMessage(e.target.value)}
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2 h-28 text-black text-sm focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-400 transition-all resize-none"
+                  placeholder="Nhập nội dung email..."
+                />
+              </div>
             </div>
 
-            <div className="flex justify-end gap-3">
+            <div className="flex justify-end space-x-2 pt-2 border-t border-gray-100">
               <button
                 onClick={() => setOpenEmailForm(false)}
-                className="px-4 py-2 rounded-md bg-gray-200 hover:bg-gray-300"
+                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-sm font-semibold transition-all"
               >
                 Hủy
               </button>
               <button
                 onClick={handleSendEmail}
-                className="px-4 py-2 rounded-md bg-green-500 text-white hover:bg-green-600"
+                className="px-4 py-2 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white rounded-xl text-sm font-semibold shadow-md shadow-pink-100 transition-all"
               >
-                Gửi
+                Gửi email
               </button>
             </div>
           </div>
         </div>
       )}
+
       {openLockForm && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
-          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md space-y-4">
-            <h3 className="text-lg font-bold text-gray-800">{initialCustomerData.status == "inactive" ? "Nhập lý do mở tài khoản" : "Nhập lý do khóa tài khoản"} </h3>
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-xs z-50">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 border border-gray-100 space-y-4 animate-in fade-in zoom-in duration-200">
+            <div className="flex justify-between items-center pb-2 border-b border-gray-100">
+              <h3 className="text-lg font-bold text-gray-800">
+                {initialCustomerData.status === "inactive" ? "Mở khóa tài khoản" : "Khóa tài khoản"}
+              </h3>
+              <button onClick={() => setOpenLockForm(false)} className="p-1 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600">
+                <XMarkIcon className="w-5 h-5" />
+              </button>
+            </div>
+            
             <textarea
               value={lockReason}
               onChange={(e) => setLockReason(e.target.value)}
-              placeholder="Nhập lý do..."
-              className="w-full h-32 text-black border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-pink-300"
+              placeholder="Nhập lý do thực hiện..."
+              className="w-full h-28 text-black text-sm border border-gray-200 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-400 transition-all resize-none"
             />
-            <div className="flex justify-end space-x-3">
+
+            <div className="flex justify-end space-x-2 pt-2 border-t border-gray-100">
               <button
                 onClick={() => setOpenLockForm(false)}
-                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-sm font-semibold transition-all"
               >
                 Hủy
               </button>
               <button
                 onClick={handleConfirmLock}
-                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                className={`px-4 py-2 text-white rounded-xl text-sm font-semibold transition-all shadow-md ${initialCustomerData.status === "inactive" ? 'bg-green-600 hover:bg-green-700 shadow-green-100' : 'bg-red-600 hover:bg-red-700 shadow-red-100'}`}
               >
-                {initialCustomerData.status == "inactive" ? "Xác nhận mở" : "Xác nhận khóa"}
+                {initialCustomerData.status === "inactive" ? "Xác nhận mở" : "Xác nhận khóa"}
               </button>
             </div>
           </div>

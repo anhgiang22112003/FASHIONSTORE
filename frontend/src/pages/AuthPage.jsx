@@ -79,7 +79,6 @@ export default function AuthPage() {
         if (res?.status === 201) {
           localStorage.setItem("accessToken", res?.data?.accessToken)
           localStorage.setItem("user", JSON.stringify(res?.data?.user))
-          console.log(res.data.user);
           
           login(res.data.user) // ✅ Cập nhật context
 

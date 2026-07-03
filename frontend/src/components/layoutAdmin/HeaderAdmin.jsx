@@ -76,7 +76,13 @@ const Header = ({ toggleSidebar, setActiveTab, setEditingProductId, setEditingOr
     setIsProfileMenuOpen(false)
   }
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await apiAdmin.post('/auth/logout-admin')
+    } catch (err) {
+      console.error('Lỗi khi gọi API đăng xuất admin:', err)
+    }
+    sessionStorage.removeItem('accessToken')
     sessionStorage.removeItem('token')
     sessionStorage.removeItem('user')
     window.location.href = '/login/admin'

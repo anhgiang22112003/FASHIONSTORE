@@ -1,6 +1,8 @@
 import React, { createContext, useState, useEffect, useContext } from "react"
 import { CartContext } from "./CartContext"
 import { WishlistContext } from "./WishlistContext"
+import { connectSocket, disconnectSocket } from "@/service/socket"
+import apiUser from "@/service/api"
 
 export const AuthContext = createContext()
 
@@ -11,6 +13,13 @@ export const AuthProvider = ({ children }) => {
     const savedUser = localStorage.getItem("user")
     return savedUser ? JSON.parse(savedUser) : null
   })
+
+  // Kết nối socket khi có user (khởi tạo hoặc reload trang)
+  useEffect(() => {
+    if (user?.id) {
+      connectSocket(user.id)
+    }
+  }, [user?.id])
 
   // Cập nhật localStorage mỗi khi user thay đổi
   useEffect(() => {
@@ -24,14 +33,21 @@ export const AuthProvider = ({ children }) => {
 
   const login = (userData) => {
     setUser(userData)
-    fetchCart()
-    fetchWishlist()
-
+    connectSocket(userData?.id)
+    if (fetchCart) fetchCart()
+    if (fetchWishlist) fetchWishlist()
   }
-  const logout = () => {
+
+  const logout = async () => {
+    try {
+      await apiUser.post("/auth/logout")
+    } catch (err) {
+      console.error("Lỗi khi đăng xuất trên server:", err)
+    }
     setUser(null)
-    fetchCart()
-    fetchWishlist()
+    disconnectSocket()
+    if (fetchCart) fetchCart()
+    if (fetchWishlist) fetchWishlist()
   }
 
   return (

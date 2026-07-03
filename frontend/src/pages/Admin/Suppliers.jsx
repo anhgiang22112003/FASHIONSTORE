@@ -15,6 +15,7 @@ import {
 import { Filter, Plus, Pencil, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 import apiAdmin from '@/service/apiAdmin';
 import Switch from '@/components/ui/switch'
+import AdminSpinner from '@/components/AdminSpinner';
 
 const Suppliers = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -506,7 +507,7 @@ const Suppliers = () => {
         {/* TABLE */}
         <div className=" rounded-2xl shadow-xl overflow-hidden">
           {isLoading ? (
-            <div className="text-center py-12 text-gray-500">Đang tải dữ liệu...</div>
+            <AdminSpinner />
           ) : (
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">

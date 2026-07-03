@@ -89,6 +89,16 @@ const ProductPage = () => {
     }
   }, [product])
 
+  const allImages = React.useMemo(() => {
+    if (!product) return []
+    const list = []
+    if (product.mainImage) list.push(product.mainImage)
+    if (product.subImages && Array.isArray(product.subImages)) {
+      list.push(...product.subImages)
+    }
+    return list
+  }, [product])
+
   const allColors = [...new Set(product?.variations?.map((v) => v.color) || [])]
   const allSizes = [...new Set(product?.variations?.map((v) => v.size) || [])]
 
@@ -109,20 +119,137 @@ const ProductPage = () => {
       const variant = product.variations.find(
         (v) => v.color === selectedColor && v.size === selectedSize
       )
-      setCurrentStock(variant?.stock ?? 0)
+      setCurrentStock((variant?.stock ?? 0) - (variant?.lockedStock ?? 0))
     }
   }, [selectedColor, selectedSize, product])
 
   if (!product) {
     return (
-      <div className="container mx-auto px-4 py-16 text-center">
-        <div className="animate-pulse">
-          <div className="h-8 bg-muted rounded w-64 mx-auto mb-4"></div>
-          <div className="h-4 bg-muted rounded w-48 mx-auto"></div>
+      <div className="min-h-screen bg-gradient-to-b from-pink-50/30 to-white">
+        <div className="container mx-auto px-4 py-8">
+          {/* Breadcrumb skeleton */}
+          <div className="flex items-center gap-2 mb-8">
+            <div className="h-4 w-20 rounded-full bg-gray-200 animate-pulse" />
+            <div className="h-4 w-2 rounded bg-gray-200 animate-pulse" />
+            <div className="h-4 w-24 rounded-full bg-gray-200 animate-pulse" />
+            <div className="h-4 w-2 rounded bg-gray-200 animate-pulse" />
+            <div className="h-4 w-40 rounded-full bg-gray-200 animate-pulse" />
+          </div>
+
+          <div className="grid lg:grid-cols-2 gap-12 mb-20">
+            {/* Left: Image skeleton */}
+            <div className="space-y-4">
+              {/* Main image */}
+              <div className="aspect-square rounded-2xl bg-gray-200 animate-pulse relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full animate-[shimmer_1.5s_infinite]" />
+              </div>
+              {/* Thumbnails */}
+              <div className="grid grid-cols-4 gap-3">
+                {[...Array(4)].map((_, i) => (
+                  <div key={i} className="aspect-square rounded-xl bg-gray-200 animate-pulse" style={{ animationDelay: `${i * 0.1}s` }} />
+                ))}
+              </div>
+            </div>
+
+            {/* Right: Info skeleton */}
+            <div className="space-y-6">
+              {/* Title */}
+              <div className="space-y-3">
+                <div className="h-9 w-4/5 rounded-xl bg-gray-200 animate-pulse" />
+                <div className="h-9 w-3/5 rounded-xl bg-gray-200 animate-pulse" />
+                {/* Stars */}
+                <div className="flex items-center gap-2 pt-1">
+                  {[...Array(5)].map((_, i) => (
+                    <div key={i} className="w-5 h-5 rounded-full bg-gray-200 animate-pulse" />
+                  ))}
+                  <div className="h-4 w-24 rounded-full bg-gray-200 animate-pulse ml-2" />
+                </div>
+              </div>
+
+              {/* Price box */}
+              <div className="bg-gray-100 rounded-2xl p-6 space-y-3 animate-pulse">
+                <div className="h-10 w-48 rounded-xl bg-gray-200" />
+                <div className="flex gap-4">
+                  <div className="h-4 w-32 rounded-full bg-gray-200" />
+                  <div className="h-4 w-24 rounded-full bg-gray-200" />
+                </div>
+              </div>
+
+              {/* Description box */}
+              <div className="bg-gray-50 rounded-xl p-5 space-y-2 animate-pulse">
+                <div className="h-5 w-36 rounded-full bg-gray-200" />
+                <div className="h-4 w-full rounded-full bg-gray-200" />
+                <div className="h-4 w-5/6 rounded-full bg-gray-200" />
+                <div className="h-4 w-4/6 rounded-full bg-gray-200" />
+              </div>
+
+              {/* Color */}
+              <div className="space-y-3">
+                <div className="h-5 w-32 rounded-full bg-gray-200 animate-pulse" />
+                <div className="flex gap-3">
+                  {[...Array(3)].map((_, i) => (
+                    <div key={i} className="h-11 w-20 rounded-xl bg-gray-200 animate-pulse" style={{ animationDelay: `${i * 0.1}s` }} />
+                  ))}
+                </div>
+              </div>
+
+              {/* Size */}
+              <div className="space-y-3">
+                <div className="h-5 w-28 rounded-full bg-gray-200 animate-pulse" />
+                <div className="flex gap-3">
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className="h-11 w-16 rounded-xl bg-gray-200 animate-pulse" style={{ animationDelay: `${i * 0.1}s` }} />
+                  ))}
+                </div>
+              </div>
+
+              {/* Buttons */}
+              <div className="flex gap-4 pt-4">
+                <div className="flex-1 h-14 rounded-xl bg-gray-200 animate-pulse" />
+                <div className="flex-1 h-14 rounded-xl bg-pink-200 animate-pulse" />
+                <div className="w-12 h-12 rounded-full bg-gray-200 animate-pulse" />
+              </div>
+
+              {/* Benefits */}
+              <div className="grid grid-cols-3 gap-4 pt-6 border-t border-gray-100">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="flex flex-col items-center gap-2">
+                    <div className="w-14 h-14 rounded-2xl bg-gray-200 animate-pulse" />
+                    <div className="h-3 w-20 rounded-full bg-gray-200 animate-pulse" />
+                    <div className="h-3 w-14 rounded-full bg-gray-200 animate-pulse" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Related products skeleton */}
+          <div className="space-y-6">
+            <div className="h-7 w-64 rounded-xl bg-gray-200 animate-pulse" />
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="rounded-2xl overflow-hidden border border-gray-100" style={{ animationDelay: `${i * 0.1}s` }}>
+                  <div className="aspect-square bg-gray-200 animate-pulse" />
+                  <div className="p-4 space-y-2">
+                    <div className="h-4 w-full rounded bg-gray-200 animate-pulse" />
+                    <div className="h-4 w-2/3 rounded bg-gray-200 animate-pulse" />
+                    <div className="h-5 w-1/2 rounded bg-pink-100 animate-pulse" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
+
+        <style>{`
+          @keyframes shimmer {
+            100% { transform: translateX(100%); }
+          }
+        `}</style>
       </div>
     )
   }
+
 
   const handleBuyNow = async () => {
     if (!selectedColor || !selectedSize) {
@@ -180,7 +307,7 @@ const ProductPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-pink-50/30 to-white">
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
+      <div className="container mx-auto px-4 py-8">
         {/* Breadcrumb */}
         <nav className="text-sm text-muted-foreground mb-8 flex items-center gap-2">
           <span
@@ -210,7 +337,8 @@ const ProductPage = () => {
                 </div>
               )}
               <img
-                src={product?.mainImage}
+                key={selectedImage}
+                src={allImages[selectedImage] || product?.mainImage}
                 alt={product?.name}
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 onLoad={() => setImageLoading(false)}
@@ -223,14 +351,16 @@ const ProductPage = () => {
             </div>
 
             {/* Thumbnail Images */}
-            {product?.subImages?.length > 0 && (
+            {allImages?.length > 1 && (
               <div className="grid grid-cols-4 gap-3">
-                {product?.subImages?.map((image, index) => (
+                {allImages.map((image, index) => (
                   <button
                     key={index}
                     onClick={() => {
-                      setSelectedImage(index)
-                      setImageLoading(true)
+                      if (selectedImage !== index) {
+                        setSelectedImage(index)
+                        setImageLoading(true)
+                      }
                     }}
                     className={`relative aspect-square rounded-xl overflow-hidden border-2 transition-all duration-300 ${selectedImage === index
                       ? 'border-pink-500 shadow-product scale-95'

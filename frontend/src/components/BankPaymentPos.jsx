@@ -11,7 +11,7 @@ const BankPaymentPos = ({ order, onClose, selectedBank, setSelectedBank }) => {
     const [banks, setBanks] = useState([])
     const [isPaid, setIsPaid] = useState(false)
     const [loading, setLoading] = useState(false) // Thêm state loading cho button
-    console.log(order)
+    // console.log(order)
 
     useEffect(() => {
         const fetchBanks = async () => {
@@ -92,7 +92,7 @@ const BankPaymentPos = ({ order, onClose, selectedBank, setSelectedBank }) => {
         
         // Lắng nghe xác nhận thanh toán từ Webhook/Backend
         socket.on("user_payment_success", (data) => {
-            console.log("Received:", data)
+            // console.log("Received:", data)
             if (data.order._id === order._id) {
                 setIsPaid(true)
                 toast.success("Thanh toán tự động thành công qua ngân hàng!")
@@ -115,7 +115,7 @@ const BankPaymentPos = ({ order, onClose, selectedBank, setSelectedBank }) => {
     const accountNumber = selectedBank?.accountNumber || "1880115012003"
     const info = `don+hang+${order._id}` // Đảm bảo order._id có giá trị
     const qrData = `https://img.vietqr.io/image/${bankCode}-${accountNumber}-compact2.jpg?addInfo=${info}&amount=${order.total}`
-    console.log(qrData)
+    // console.log(qrData)
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">

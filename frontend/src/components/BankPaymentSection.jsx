@@ -5,7 +5,7 @@ import { QRCodeCanvas } from "qrcode.react"
 import { socket } from "@/service/socket"
 
 
-const BankPaymentModal = ({ order, onClose, selectedBank ,setSelectedBank}) => {
+const BankPaymentModal = ({ order, onClose, selectedBank, setSelectedBank }) => {
   const [banks, setBanks] = useState([])
   const [loading, setLoading] = useState(false)
   const [isPaid, setIsPaid] = useState(false)
@@ -22,26 +22,26 @@ const BankPaymentModal = ({ order, onClose, selectedBank ,setSelectedBank}) => {
     fetchBanks()
   }, [])
   useEffect(() => {
-  const user = JSON.parse(localStorage.getItem("user"))
-  if (!user?.id) return
+    const user = JSON.parse(localStorage.getItem("user"))
+    if (!user?.id) return
 
-  // ✅ Gửi userId lên để join room
-  socket.emit("join_user", user.id)
+    // ✅ Gửi userId lên để join room
+    socket.emit("join_user", user.id)
 
-  socket.on("user_payment_success", (data) => {
-    console.log("Received:", data)
+    socket.on("user_payment_success", (data) => {
+      // console.log("Received:", data)
 
-    if (data.order._id === order._id) {
-      setIsPaid(true)
-      toast.success("Thanh toán thành công qua ngân hàng!")
-      setTimeout(() => window.location.href = "/orders", 1000)
+      if (data.order._id === order._id) {
+        setIsPaid(true)
+        toast.success("Thanh toán thành công qua ngân hàng!")
+        setTimeout(() => window.location.href = "/orders", 1000)
+      }
+    })
+
+    return () => {
+      socket.off("user_payment_success")
     }
-  })
-
-  return () => {
-    socket.off("user_payment_success")
-  }
-}, [])
+  }, [])
 
   const defaultAccount = {
     name: "Nguyễn Hồng Giang",
@@ -49,7 +49,7 @@ const BankPaymentModal = ({ order, onClose, selectedBank ,setSelectedBank}) => {
   }
   const info = `don+hang+${order._id}`
   const qrData = `https://img.vietqr.io/image/mbbank-1880115012003-compact2.jpg?addInfo=${info}&amount=${order.total}`
-  console.log(qrData)
+  // console.log(qrData)
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">

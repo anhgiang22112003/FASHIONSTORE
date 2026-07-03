@@ -7,6 +7,7 @@ import apiAdmin from "@/service/apiAdmin"
 import { io } from 'socket.io-client'
 import { socket } from "@/service/socket"
 import { ThemeProvider } from "@/context/ThemeContext"
+import AdminSpinner from "@/components/AdminSpinner"
 
 const ComplaintList = React.lazy(() => import("./ComplaintList"))
 const StockManagement = React.lazy(() => import("./StockManagement"))
@@ -156,7 +157,7 @@ const AdminLayout = () => {
 
           {/* Nội dung chính */}
           <div className="flex-1  overflow-y-auto">
-            <Suspense fallback={<div className="text-center p-10">⏳ Đang tải...</div>}>
+            <Suspense fallback={<AdminSpinner message="Đang tải trang..." />}>
               {activeTab === "dashboard" && <Dashboard />}
               {activeTab === "chat" && <AdminChatDashboard adminId={userId?.id} />}
 

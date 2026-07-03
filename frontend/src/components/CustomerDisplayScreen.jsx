@@ -26,11 +26,11 @@ const CustomerDisplayScreen = () => {
             socketRef.current = newSocket
 
             newSocket.on('connect', () => {
-                console.log('Customer display connected:', newSocket.id)
+                // console.log('Customer display connected:', newSocket.id)
             })
 
             newSocket.on('disconnect', () => {
-                console.log('Customer display disconnected')
+                // console.log('Customer display disconnected')
             })
 
             newSocket.on('connect_error', (error) => {
@@ -39,7 +39,7 @@ const CustomerDisplayScreen = () => {
 
             // Lắng nghe cập nhật giỏ hàng
             newSocket.on('customer_cart_update', (data) => {
-                console.log('Cart updated:', data)
+                // console.log('Cart updated:', data)
                 setCart(data)
 
                 // Nếu cart là null, reset màn hình
@@ -51,7 +51,7 @@ const CustomerDisplayScreen = () => {
 
             // Lắng nghe khi checkout với phương thức thanh toán
             newSocket.on('customer_checkout', (data) => {
-                console.log('Checkout:', data)
+                // console.log('Checkout:', data)
                 setPaymentMethod(data.paymentMethod)
                 setSelectedBankInfo(data.selectedBank)
                 setShowPayment(true)
@@ -59,7 +59,7 @@ const CustomerDisplayScreen = () => {
 
             // Lắng nghe thanh toán thành công
             newSocket.on('user_payment_success', (data) => {
-                console.log('Payment success:', data)
+                // console.log('Payment success:', data)
                 // Hiển thị thông báo thành công
                 setTimeout(() => {
                     setCart(null)
@@ -70,7 +70,7 @@ const CustomerDisplayScreen = () => {
 
             // Lắng nghe admin xác nhận thanh toán
             newSocket.on('admin_payment_success', (data) => {
-                console.log('Admin confirmed payment:', data)
+                // console.log('Admin confirmed payment:', data)
                 setTimeout(() => {
                     setCart(null)
                     setShowPayment(false)
@@ -82,7 +82,7 @@ const CustomerDisplayScreen = () => {
         // Cleanup function - chỉ disconnect khi component unmount hoàn toàn
         return () => {
             if (socketRef.current) {
-                console.log('Cleaning up socket connection')
+                // console.log('Cleaning up socket connection')
                 socketRef.current.off('connect')
                 socketRef.current.off('disconnect')
                 socketRef.current.off('connect_error')

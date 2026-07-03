@@ -2,6 +2,18 @@ import React, { useEffect, useState } from "react"
 import apiAdmin from "@/service/apiAdmin"
 import { toast } from "react-toastify"
 import dayjs from "dayjs"
+import {
+    ArrowLeftIcon,
+    CalendarIcon,
+    TrashIcon,
+    MagnifyingGlassIcon,
+    SparklesIcon,
+    ShoppingBagIcon,
+    PlusIcon,
+    CheckIcon,
+    XMarkIcon,
+    TagIcon
+} from "@heroicons/react/24/outline"
 
 const AddFlashSalePage = ({ setActiveTab, editData }) => {
 
@@ -37,6 +49,7 @@ const AddFlashSalePage = ({ setActiveTab, editData }) => {
 
         return () => clearTimeout(timeout)
     }, [searchQuery])
+
     useEffect(() => {
         if (editData?._id) {
             // Lấy danh sách items của flash sale cũ
@@ -62,7 +75,7 @@ const AddFlashSalePage = ({ setActiveTab, editData }) => {
 
     const handleAddItem = (product) => {
         if (selectedItems.some((i) => i.productId === product._id)) {
-            toast.info(" Sản phẩm này đã được thêm rồi!")
+            toast.info("Sản phẩm này đã được thêm rồi!")
             return
         }
 
@@ -78,7 +91,6 @@ const AddFlashSalePage = ({ setActiveTab, editData }) => {
         ])
     }
 
-
     const handleRemoveItem = (id) => {
         setSelectedItems((prev) => prev.filter((i) => i.productId !== id))
     }
@@ -88,7 +100,6 @@ const AddFlashSalePage = ({ setActiveTab, editData }) => {
         const startMoment = dayjs(startTime)
         const endMoment = dayjs(endTime)
 
-        // 💡 BƯỚC THÊM: Kiểm tra logic thời gian ở Front-end
         if (!startMoment.isValid() || !endMoment.isValid()) {
             toast.error("Vui lòng chọn đầy đủ và hợp lệ Thời gian bắt đầu và kết thúc.")
             return
@@ -111,11 +122,9 @@ const AddFlashSalePage = ({ setActiveTab, editData }) => {
 
         try {
             if (editData?._id) {
-                // 🔹 Cập nhật
                 await apiAdmin.put(`/flash-sales/${editData._id}`, payload)
                 toast.success("Cập nhật Flash Sale thành công!")
             } else {
-                // 🔹 Thêm mới
                 await apiAdmin.post("/flash-sales", payload)
                 toast.success("Thêm Flash Sale thành công!")
             }
@@ -125,145 +134,241 @@ const AddFlashSalePage = ({ setActiveTab, editData }) => {
         }
     }
 
-
     return (
-        <div style={{ backgroundColor: "var(--bg-color)", color: "var(--text-color)" }}  className="max-w-full mt-5 mx-auto shadow-2xl p-5 rounded-2xl border border-rose-200">
-            {/* Tiêu đề Form */}
-            <h2 className="text-3xl font-bold mb-6 text-[#ff69b4] border-b pb-3 border-rose-200">
-                {editData?._id ? "Chỉnh sửa sự kiện  Flash Sale" : "Thêm sự kiện Flash Sale"}
-            </h2>
-
-            <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Trường Tên Flash Sale */}
-                <div>
-                    <label className="block text-sm font-semibold mb-1 ">Tên Flash Sale</label>
-                    <input
-                        type="text"
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                        className="w-full border text-black border-rose-300 rounded-xl p-3 focus:ring-rose-500 focus:border-rose-500 transition-shadow shadow-sm"
-                        placeholder="Ví dụ: Sale Noel Giảm Sốc 50%"
-                    />
-                </div>
-
-                {/* Thời gian Bắt đầu / Kết thúc */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div style={{ backgroundColor: "var(--bg-color)", color: "var(--text-color)" }} className="max-w-full mt-5 mx-auto shadow-xl p-8 rounded-2xl border border-gray-100 font-sans text-gray-800">
+            {/* Header */}
+            <header className="flex justify-between items-center mb-8 border-b border-gray-100 pb-4">
+                <div className="flex items-center space-x-3">
+                    <button
+                        onClick={() => setActiveTab("flash-sale")}
+                        className="p-2 bg-white border border-gray-200 text-gray-600 rounded-xl hover:bg-gray-50 hover:text-gray-900 transition-all shadow-sm"
+                        title="Quay lại"
+                    >
+                        <ArrowLeftIcon className="w-5 h-5" />
+                    </button>
                     <div>
-                        <label className="block text-sm font-semibold mb-1 ">Thời gian bắt đầu</label>
-                        <input
-                            type="datetime-local"
-                            value={startTime}
-                            onChange={(e) => setStartTime(e.target.value)}
-                            className="w-full text-black border border-rose-300 rounded-xl p-3 focus:ring-rose-500 focus:border-rose-500 transition-shadow shadow-sm"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-semibold mb-1 ">Thời gian kết thúc</label>
-                        <input
-                            type="datetime-local"
-                            value={endTime}
-                            onChange={(e) => setEndTime(e.target.value)}
-                            className="w-full text-black border border-rose-300 rounded-xl p-3 focus:ring-rose-500 focus:border-rose-500 transition-shadow shadow-sm"
-                        />
+                        <h2 className="text-xl font-bold text-gray-800">
+                            {editData?._id ? "Chỉnh sửa Flash Sale" : "Thêm sự kiện Flash Sale"}
+                        </h2>
+                        <p className="text-xs text-gray-500 mt-0.5">
+                            {editData?._id ? `Cập nhật thông tin sự kiện ID: ${editData._id}` : "Thiết lập chương trình giảm giá giờ vàng mới"}
+                        </p>
                     </div>
                 </div>
+            </header>
 
-                <hr className="my-4 border-rose-300" />
+            <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                {/* Cột trái: Cấu hình và Tìm kiếm */}
+                <div className="lg:col-span-5 space-y-6">
+                    <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-xs space-y-5">
+                        <h3 className="text-base font-bold text-gray-850 flex items-center space-x-2 pb-2 border-b border-gray-50">
+                            <TagIcon className="w-5 h-5 text-pink-500" />
+                            <span>Thông tin sự kiện</span>
+                        </h3>
 
-                {/* Khu vực Chọn sản phẩm */}
-                <h3 className="text-xl font-bold "> Chọn sản phẩm Flash Sale</h3>
-
-                {/* Ô tìm kiếm sản phẩm */}
-                <div className="mb-4">
-                    <label className="block text-sm font-semibold mb-1 "> Tìm sản phẩm</label>
-                    <input
-                        type="text"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Nhập tên sản phẩm..."
-                        className="w-full text-black border border-rose-300 rounded-xl p-3 focus:ring-rose-500 focus:border-rose-500 transition-shadow shadow-sm"
-                    />
-                </div>
-
-                {/* Kết quả tìm kiếm */}
-                {loadingSearch && <p className="text-sm text-gray-500 italic">Đang tìm kiếm...</p>}
-                <div className="border border-rose-300 rounded-xl max-h-60 overflow-y-auto bg-white shadow-inner">
-                    {searchResults.length === 0 && !loadingSearch && (
-                        <p className="text-gray-500 text-sm p-3 italic">Không có sản phẩm nào</p>
-                    )}
-                    {searchResults.map((p) => (
-                        <div key={p._id} className="flex justify-between items-center p-3 border-b border-rose-100 last:border-b-0 hover:bg-rose-50 transition-colors">
-                            <span className="font-medium text-gray-800 truncate">{p.name}</span>
-                            <button
-                                type="button"
-                                onClick={() => handleAddItem(p)}
-                                className="bg-rose-500 text-white px-4 py-1 rounded-full text-sm font-medium hover:bg-rose-600 transition-colors shadow"
-                            >
-                                + Thêm
-                            </button>
+                        {/* Tên Flash Sale */}
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-1.5">Tên sự kiện Flash Sale</label>
+                            <input
+                                type="text"
+                                value={title}
+                                onChange={(e) => setTitle(e.target.value)}
+                                className="w-full border text-black border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-400 transition-all text-sm"
+                                placeholder="VD: Giờ Vàng Thứ Sáu Giảm 50%"
+                                required
+                            />
                         </div>
-                    ))}
-                </div>
 
+                        {/* Thời gian */}
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-1.5 flex items-center space-x-1.5">
+                                    <CalendarIcon className="w-4 h-4 text-gray-400" />
+                                    <span>Thời gian bắt đầu</span>
+                                </label>
+                                <input
+                                    type="datetime-local"
+                                    value={startTime}
+                                    onChange={(e) => setStartTime(e.target.value)}
+                                    className="w-full text-black border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-400 transition-all text-sm"
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-1.5 flex items-center space-x-1.5">
+                                    <CalendarIcon className="w-4 h-4 text-gray-400" />
+                                    <span>Thời gian kết thúc</span>
+                                </label>
+                                <input
+                                    type="datetime-local"
+                                    value={endTime}
+                                    onChange={(e) => setEndTime(e.target.value)}
+                                    className="w-full text-black border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-400 transition-all text-sm"
+                                    required
+                                />
+                            </div>
+                        </div>
+                    </div>
 
-                {/* Khu vực Sản phẩm đã chọn */}
-                {selectedItems.length > 0 && (
-                    <div className="mt-6 p-4 bg-white rounded-xl shadow-lg border border-rose-300">
-                        <h4 className="font-bold mb-3 text-lg text-rose-600">🛒 Danh sách sản phẩm Flash Sale</h4>
-                        <div className="space-y-3">
-                            {selectedItems.map((item) => (
-                                <div key={item.productId} className="flex justify-between items-center border border-gray-200 p-3 rounded-lg bg-white shadow-sm">
-                                    <span className="font-medium text-gray-800 flex-1 truncate pr-2">{item.name}</span>
-                                    <div className="flex items-center gap-3">
-                                        {/* Input Giá sale */}
-                                        <input
-                                            type="number"
-                                            value={item.salePrice}
-                                            onChange={(e) =>
-                                                setSelectedItems((prev) =>
-                                                    prev.map((i) => (i.productId === item.productId ? { ...i, salePrice: e.target.value } : i))
-                                                )
-                                            }
-                                            className="w-24 border text-black border-rose-300 rounded-lg p-2 text-sm focus:ring-rose-500"
-                                            placeholder="Giá sale"
-                                        />
-                                        {/* Input Số lượng */}
-                                        <input
-                                            type="number"
-                                            value={item.quantity}
-                                            onChange={(e) =>
-                                                setSelectedItems((prev) =>
-                                                    prev.map((i) => (i.productId === item.productId ? { ...i, quantity: e.target.value } : i))
-                                                )
-                                            }
-                                            className="w-20 border text-black border-rose-300 rounded-lg p-2 text-sm focus:ring-rose-500"
-                                            placeholder="SL"
-                                        />
-                                        {/* Nút Xóa */}
+                    <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-xs space-y-4">
+                        <h3 className="text-base font-bold text-gray-850 flex items-center space-x-2 pb-2 border-b border-gray-50">
+                            <MagnifyingGlassIcon className="w-5 h-5 text-pink-500" />
+                            <span>Tìm kiếm sản phẩm</span>
+                        </h3>
+
+                        {/* Tìm kiếm */}
+                        <div className="relative">
+                            <input
+                                type="text"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                placeholder="Nhập tên sản phẩm..."
+                                className="w-full text-black border border-gray-200 rounded-xl pl-10 pr-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-400 transition-all text-sm"
+                            />
+                            <MagnifyingGlassIcon className="w-5 h-5 text-gray-400 absolute left-3 top-3" />
+                        </div>
+
+                        {/* Danh sách kết quả */}
+                        <div>
+                            {loadingSearch && (
+                                <div className="flex items-center space-x-2 py-3 justify-center text-xs text-gray-500">
+                                    <span className="animate-spin inline-block w-4 h-4 border-2 border-pink-500 border-t-transparent rounded-full"></span>
+                                    <span>Đang tìm kiếm...</span>
+                                </div>
+                            )}
+
+                            <div className="border border-gray-100 rounded-xl max-h-56 overflow-y-auto bg-gray-50/50 divide-y divide-gray-100">
+                                {searchResults.length === 0 && !loadingSearch && (
+                                    <p className="text-gray-450 text-xs p-4 text-center italic">Nhập tên sản phẩm để bắt đầu chọn...</p>
+                                )}
+                                {searchResults.map((p) => (
+                                    <div key={p._id} className="flex justify-between items-center p-3 hover:bg-pink-50/20 transition-all">
+                                        <div className="flex-1 min-w-0 pr-3">
+                                            <span className="font-semibold text-xs text-gray-850 block truncate">{p.name}</span>
+                                            <span className="text-[10px] text-gray-400 block mt-0.5">Giá gốc: {p.sellingPrice?.toLocaleString()}₫ | Kho: {p.stock}</span>
+                                        </div>
                                         <button
                                             type="button"
-                                            onClick={() => handleRemoveItem(item.productId)}
-                                            className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-100 transition-colors"
+                                            onClick={() => handleAddItem(p)}
+                                            className="bg-pink-50 hover:bg-pink-100 text-pink-600 px-3 py-1 rounded-xl text-xs font-semibold transition-all flex items-center space-x-1"
                                         >
-                                            <span className="font-bold text-lg">×</span>
+                                            <PlusIcon className="w-3.5 h-3.5" />
+                                            <span>Thêm</span>
                                         </button>
                                     </div>
-                                </div>
-                            ))}
+                                ))}
+                            </div>
                         </div>
                     </div>
-                )}
+                </div>
 
-                {/* Nút Submit */}
-                <button
-                    type="submit"
-                    className="w-full bg-[#ff69b4] text-white px-6 py-3 rounded-xl font-bold text-lg hover:bg-[#ff69b4] transition-all shadow-lg mt-6 transform hover:scale-[1.01]"
-                >
-                    {editData?._id ? "Cập nhật Flash Sale" : "Tạo Flash Sale"}
-                </button>
+                {/* Cột phải: Sản phẩm đã chọn */}
+                <div className="lg:col-span-7 flex flex-col h-full space-y-6">
+                    <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-xs flex-1 flex flex-col min-h-[400px]">
+                        <h3 className="text-base font-bold text-gray-850 flex items-center space-x-2 pb-3 border-b border-gray-100 mb-4">
+                            <ShoppingBagIcon className="w-5 h-5 text-pink-500" />
+                            <span>Sản phẩm trong chương trình ({selectedItems.length})</span>
+                        </h3>
+
+                        {selectedItems.length === 0 ? (
+                            <div className="flex-grow flex flex-col items-center justify-center text-center p-8 space-y-3">
+                                <div className="p-4 bg-pink-50 rounded-full text-pink-500">
+                                    <ShoppingBagIcon className="w-8 h-8" />
+                                </div>
+                                <div>
+                                    <p className="text-sm font-semibold text-gray-700">Chưa có sản phẩm nào</p>
+                                    <p className="text-xs text-gray-400 mt-1">Tìm kiếm và click "Thêm" sản phẩm từ cột trái để thêm vào Flash Sale.</p>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="space-y-3 overflow-y-auto max-h-[480px] pr-1">
+                                {selectedItems.map((item) => (
+                                    <div key={item.productId} className="flex flex-col sm:flex-row sm:items-center justify-between border border-gray-100 p-4 rounded-2xl bg-white hover:border-pink-100 hover:shadow-xs transition-all gap-4">
+                                        <div className="flex-1 min-w-0">
+                                            <span className="font-semibold text-sm text-gray-850 block truncate" title={item.name}>{item.name}</span>
+                                            <span className="text-[11px] text-gray-400 block mt-1">
+                                                Kho hiện tại: <span className="font-medium text-gray-750">{item.stock}</span>
+                                            </span>
+                                        </div>
+
+                                        <div className="flex items-center gap-3 self-end sm:self-auto">
+                                            {/* Giá sale */}
+                                            <div className="w-28">
+                                                <span className="block text-[10px] text-gray-400 mb-1">Giá Flash Sale (₫)</span>
+                                                <input
+                                                    type="number"
+                                                    value={item.salePrice}
+                                                    onChange={(e) =>
+                                                        setSelectedItems((prev) =>
+                                                            prev.map((i) => (i.productId === item.productId ? { ...i, salePrice: parseFloat(e.target.value) || 0 } : i))
+                                                        )
+                                                    }
+                                                    className="w-full border text-black border-gray-200 rounded-xl px-2.5 py-1.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-400"
+                                                    placeholder="Giá sale"
+                                                    min="0"
+                                                    required
+                                                />
+                                            </div>
+
+                                            {/* Số lượng */}
+                                            <div className="w-20">
+                                                <span className="block text-[10px] text-gray-400 mb-1">Số lượng sale</span>
+                                                <input
+                                                    type="number"
+                                                    value={item.quantity}
+                                                    onChange={(e) =>
+                                                        setSelectedItems((prev) =>
+                                                            prev.map((i) => (i.productId === item.productId ? { ...i, quantity: parseInt(e.target.value) || 0 } : i))
+                                                        )
+                                                    }
+                                                    className="w-full border text-black border-gray-200 rounded-xl px-2.5 py-1.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-400"
+                                                    placeholder="SL"
+                                                    min="1"
+                                                    required
+                                                />
+                                            </div>
+
+                                            {/* Xóa */}
+                                            <div className="pt-4">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleRemoveItem(item.productId)}
+                                                    className="text-gray-400 hover:text-red-650 p-2 rounded-xl hover:bg-red-50 transition-colors"
+                                                    title="Xóa khỏi chương trình"
+                                                >
+                                                    <TrashIcon className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Submit Button Section */}
+                        <div className="border-t border-gray-100 pt-6 mt-6 flex flex-col sm:flex-row sm:justify-end gap-3">
+                            <button
+                                type="button"
+                                onClick={() => setActiveTab("flash-sale")}
+                                className="px-5 py-2.5 bg-white text-gray-700 rounded-xl font-semibold border border-gray-200 hover:bg-gray-50 hover:text-gray-900 transition-all text-sm shadow-xs flex items-center justify-center space-x-2"
+                            >
+                                <XMarkIcon className="w-4 h-4" />
+                                <span>Hủy bỏ</span>
+                            </button>
+                            <button
+                                type="submit"
+                                className="px-6 py-2.5 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white rounded-xl font-semibold shadow-md shadow-pink-100 hover:shadow-pink-200 transition-all text-sm flex items-center justify-center space-x-2"
+                            >
+                                <CheckIcon className="w-4 h-4" />
+                                <span>{editData?._id ? "Lưu thay đổi" : "Kích hoạt Flash Sale"}</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </form>
         </div>
     )
 }
 
 export default AddFlashSalePage
+

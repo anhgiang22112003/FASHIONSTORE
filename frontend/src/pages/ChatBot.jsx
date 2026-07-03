@@ -1,6 +1,7 @@
 import { AuthContext } from '@/context/Authcontext'
 import { socket } from '@/service/socket'
 import React, { useState, useEffect, useRef, useContext } from 'react'
+import { Link } from 'react-router-dom'
 
 const ChatBot = ({ userId }) => {
   const [messages, setMessages] = useState([])
@@ -14,19 +15,15 @@ const ChatBot = ({ userId }) => {
     if (!userId) return
 
     const handleConnect = () => {
-      console.log("✅ Connected to chat server")
       setIsConnected(true)
       socket.emit("register", { userId })
     }
 
     const handleDisconnect = () => {
-      console.log("⚠️ Disconnected from chat server")
       setIsConnected(false)
     }
 
     const handleNewMessages = (msgs) => {
-        console.log("🧠 Tin nhắn mới từ server:", msgs)
-
       setMessages(msgs)
       setIsTyping(false)
     }
@@ -122,7 +119,7 @@ const ChatBot = ({ userId }) => {
 
     return (
       <div key={msg._id} className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`}>
-        <div className={`max-w-[70%] rounded-2xl px-4 py-2 ${isUser ? 'bg-blue-500 text-white' : isAdmin ? 'bg-green-100 text-gray-800 border border-green-300' : 'bg-gray-100 text-gray-800'
+        <div className={`${msg.type === "PRODUCT" ? 'max-w-[90%] w-full' : 'max-w-[70%]'} rounded-2xl px-4 py-2 ${isUser ? 'bg-blue-500 text-white' : isAdmin ? 'bg-green-100 text-gray-800 border border-green-300' : 'bg-gray-100 text-gray-800'
           }`}>
           {!isUser && isAdmin && <div className="text-xs font-semibold mb-1 text-green-700">👤 Nhân viên hỗ trợ</div>}
           {!isUser && isBot && <div className="text-xs font-semibold mb-1 text-gray-700">🤖 Bot</div>}
@@ -131,21 +128,90 @@ const ChatBot = ({ userId }) => {
 
           {/* Render sản phẩm nếu có */}
           {msg.type === "PRODUCT" && msg.metadata?.products && (
-            <div className="mt-2 grid grid-cols-1 gap-2">
-              {msg.metadata.products.map((p) => (
-                <div key={p._id} className="border p-2 rounded-lg flex justify-between items-center">
-                  <div>
-                    <div className="font-semibold">{p.name}</div>
-                    <div className="text-sm text-gray-600">{p.sellingPrice.toLocaleString('vi-VN')}đ</div>
+            <div className="mt-2.5 flex flex-col gap-2">
+              {msg.metadata.products.map((p) => {
+                const hasDiscount = p.originalPrice && p.originalPrice > p.sellingPrice;
+                const discountPercent = hasDiscount
+                  ? Math.round(((p.originalPrice - p.sellingPrice) / p.originalPrice) * 100)
+                  : 0;
+
+                return (
+                  <div key={p._id} className="bg-white border border-gray-100 rounded-xl p-2.5 shadow-sm hover:shadow transition-shadow flex gap-3 relative overflow-hidden text-gray-800">
+                    {/* Thumbnail Image */}
+                    <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-gray-50 border border-gray-100">
+                      <img 
+                        src={p.mainImage || 'https://via.placeholder.com/150'} 
+                        alt={p.name} 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+
+                    {/* Product Details */}
+                    <div className="flex-1 flex flex-col justify-between min-w-0">
+                      <div>
+                        {/* Rating */}
+                        {p.ratingAverage > 0 && (
+                          <div className="flex items-center gap-0.5 text-[10px] text-amber-500 font-semibold mb-0.5">
+                            <span>⭐</span>
+                            <span>{p.ratingAverage.toFixed(1)}</span>
+                            <span className="text-gray-400">({p.reviewCount || 0})</span>
+                          </div>
+                        )}
+
+                        {/* Title */}
+                        <Link 
+                          to={`/product/${p._id}`}
+                          className="font-bold text-gray-800 text-xs hover:text-blue-600 transition-colors line-clamp-1 block leading-tight"
+                          onClick={() => setIsChatOpen(false)}
+                        >
+                          {p.name}
+                        </Link>
+
+                        {/* Short Description */}
+                        {p.shortDescription && (
+                          <p className="text-[10px] text-gray-500 line-clamp-1 mt-0.5">
+                            {p.shortDescription}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Pricing & Discount */}
+                      <div className="mt-1 flex items-baseline gap-1 flex-wrap">
+                        <span className="text-xs font-black text-pink-600">
+                          {p.sellingPrice.toLocaleString('vi-VN')}đ
+                        </span>
+                        {discountPercent > 0 && (
+                          <>
+                            <span className="text-[9px] text-gray-400 line-through">
+                              {p.originalPrice.toLocaleString('vi-VN')}đ
+                            </span>
+                            <span className="text-[8px] bg-red-50 text-red-500 px-1 py-0.5 rounded font-bold">
+                              -{discountPercent}%
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Actions Panel */}
+                    <div className="flex flex-col gap-1 justify-center flex-shrink-0">
+                      <Link 
+                        to={`/product/${p._id}`}
+                        className="px-2 py-1 bg-gray-50 hover:bg-gray-100 text-gray-700 text-[10px] font-bold rounded-md border border-gray-200 transition-colors text-center"
+                        onClick={() => setIsChatOpen(false)}
+                      >
+                        Chi tiết
+                      </Link>
+                      <button
+                        className="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-bold rounded-md shadow-sm hover:shadow transition-colors"
+                        onClick={() => sendMessage(`Thêm sản phẩm ${p._id} vào giỏ`)}
+                      >
+                        + Giỏ
+                      </button>
+                    </div>
                   </div>
-                  <button
-                    className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 text-xs"
-                    onClick={() => sendMessage(`Thêm sản phẩm ${p._id} vào giỏ`)}
-                  >
-                    Thêm vào giỏ
-                  </button>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
 
@@ -174,22 +240,22 @@ const ChatBot = ({ userId }) => {
       </button>
 
       {/* Chat Window */}
-      {user ? (
-        <>
-          {isChatOpen && (
-            <div className="fixed bottom-24 right-6 w-96 h-[600px] bg-white rounded-2xl shadow-2xl z-50 flex flex-col overflow-hidden">
-              {/* Header */}
-              <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-4 flex items-center justify-between">
-                <div className="flex items-center">
-                  <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center mr-3">🤖</div>
-                  <div>
-                    <h3 className="font-semibold">Trợ lý AI</h3>
-                    <p className="text-xs opacity-90">{isConnected ? '● Đang hoạt động' : '○ Đang kết nối...'}</p>
-                  </div>
-                </div>
-                <button onClick={() => setIsChatOpen(false)} className="hover:bg-white/20 p-1 rounded-lg transition-colors">✖</button>
+      {isChatOpen && (
+        <div className="fixed bottom-24 right-6 w-96 h-[500px] bg-white rounded-2xl shadow-2xl z-50 flex flex-col overflow-hidden">
+          {/* Header */}
+          <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-4 flex items-center justify-between">
+            <div className="flex items-center">
+              <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center mr-3">🤖</div>
+              <div>
+                <h3 className="font-semibold">Trợ lý AI</h3>
+                <p className="text-xs opacity-90">{user ? (isConnected ? '● Đang hoạt động' : '○ Đang kết nối...') : 'Yêu cầu đăng nhập'}</p>
               </div>
+            </div>
+            <button onClick={() => setIsChatOpen(false)} className="hover:bg-white/20 p-1 rounded-lg transition-colors">✖</button>
+          </div>
 
+          {user ? (
+            <>
               {/* Messages */}
               <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
                 {messages.length === 0 && !isTyping && (
@@ -224,15 +290,17 @@ const ChatBot = ({ userId }) => {
                   <button type="submit" disabled={!isConnected || !inputMessage.trim()} className="bg-blue-500 text-white px-6 py-2 rounded-full hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Gửi</button>
                 </form>
               </div>
+            </>
+          ) : (
+            <div className="flex-1 flex flex-col items-center justify-center p-6 bg-gray-50 text-center">
+              <div className="text-5xl mb-4">🔒</div>
+              <h4 className="font-bold text-gray-800 mb-2">Đăng nhập để trò chuyện</h4>
+              <p className="text-sm text-gray-600 mb-6 font-medium">Bạn cần đăng nhập tài khoản để sử dụng trợ lý mua sắm AI thông minh.</p>
+              <a href="/login" className="px-6 py-2.5 bg-blue-500 text-white rounded-full font-semibold hover:bg-blue-600 transition-colors shadow-md text-sm">Đăng nhập ngay</a>
             </div>
           )}
-        </>
-      ) : (
-        <div>
-        
         </div>
       )}
-
     </>
   )
 }

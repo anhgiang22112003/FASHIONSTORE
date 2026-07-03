@@ -18,6 +18,7 @@ import EditPromotionModal from '@/components/EditPromotionModal'
 import { set } from 'date-fns'
 import { toast } from 'react-toastify'
 import apiAdmin from '@/service/apiAdmin'
+import AdminSpinner from '@/components/AdminSpinner'
 
 
 
@@ -473,7 +474,11 @@ const PromotionManagementPage = () => {
 
         </div>
 
-        <div className="space-y-4">
+        {isLoading ? (
+          <AdminSpinner message="Đang tải danh sách khuyến mãi..." />
+        ) : (
+          <>
+            <div className="space-y-4">
           {promotionsData?.map((promo) => (
             <div key={promo.id} className="relative border border-gray-100  rounded-xl p-6 flex flex-col md:flex-row justify-between items-center md:items-start hover:bg-pink-50 hover:text-black transition-colors">
               <div className="flex-grow">
@@ -580,6 +585,8 @@ const PromotionManagementPage = () => {
               Sau →
             </button>
           </div>
+        )}
+          </>
         )}
       </div>
 

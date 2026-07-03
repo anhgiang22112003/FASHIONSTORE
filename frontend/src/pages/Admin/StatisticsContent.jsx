@@ -12,7 +12,9 @@ import {
   LineChart,
   Line,
 } from "recharts";
-import apiAdmin from "@/service/apiAdmin"; // Giả sử đã có file service này
+import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
+import apiAdmin from "@/service/apiAdmin";
+import AdminSpinner from "@/components/AdminSpinner";
 
 // Custom Component: Toggle Switch (Giữ nguyên)
 const ChartTypeToggle = ({ chartType, setChartType }) => (
@@ -198,7 +200,7 @@ const Statistics = () => {
       {/* Header và Controls (Giữ nguyên) */}
       <div className=" p-6 rounded-2xl shadow-xl mb-8">
         <header className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold ">📊 Thống kê</h1>
+          <h1 className="text-3xl font-bold ">Thống kê</h1>
         </header>
         
         <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
@@ -234,9 +236,7 @@ const Statistics = () => {
             onClick={handleExport}
             className="flex items-center space-x-2 px-6 py-2 bg-pink-600 text-white rounded-lg font-semibold hover:bg-pink-700 transition duration-150 shadow-md"
           >
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"></path>
-            </svg>
+            <ArrowDownTrayIcon className="w-5 h-5" />
             <span>Xuất báo cáo</span>
           </button>
         </div>
@@ -250,7 +250,7 @@ const Statistics = () => {
         <div className="bg-white p-6 rounded-2xl shadow-xl space-y-4 h-96">
           <div className="flex justify-between items-center border-b pb-2">
             <h3 className="text-xl font-bold text-gray-800">
-              📈 Doanh thu theo tháng
+              Doanh thu theo tháng
             </h3>
             <ChartTypeToggle 
                 chartType={revenueChartType} 
@@ -259,7 +259,9 @@ const Statistics = () => {
           </div>
           
           {loading ? (
-            <div className="flex items-center justify-center h-full"><p>Đang tải...</p></div>
+            <div className="flex items-center justify-center h-full">
+              <AdminSpinner message="Đang tải dữ liệu doanh thu..." />
+            </div>
           ) : (
             <ResponsiveContainer width="100%" height="90%">
                 {/* Tăng left margin cho cả 2 loại biểu đồ để khắc phục Trục Y bị cắt */}
@@ -315,10 +317,12 @@ const Statistics = () => {
         {/* Sản phẩm bán chạy (Giữ nguyên Cột nhưng tối ưu YAxis) */}
         <div className="bg-white p-6 rounded-2xl shadow-xl space-y-4 h-96">
           <h3 className="text-xl font-bold text-gray-800 border-b pb-2">
-            🔥 Sản phẩm bán chạy
+            Sản phẩm bán chạy
           </h3>
           {loading ? (
-            <div className="flex items-center justify-center h-full"><p>Đang tải...</p></div>
+            <div className="flex items-center justify-center h-full">
+              <AdminSpinner message="Đang tải sản phẩm bán chạy..." />
+            </div>
           ) : (
             <ResponsiveContainer width="100%" height="90%">
               <BarChart
@@ -343,11 +347,11 @@ const Statistics = () => {
       {/* Báo cáo chi tiết (Giữ nguyên) */}
       <div className=" p-6 rounded-2xl shadow-xl space-y-6">
         <h2 className="text-2xl font-bold  border-b pb-3">
-          📋 Báo cáo chi tiết
+          Báo cáo chi tiết
         </h2>
         
         {!summary ? (
-             <p className="text-center py-4">Đang tải...</p>
+             <AdminSpinner message="Đang tải báo cáo chi tiết..." />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             

@@ -407,8 +407,16 @@ const FlashSaleBanner = () => {
   useEffect(() => {
     socket.on("flash-sale-update", (data) => {
       if (data.type === "status-refresh") {
-        // Tải lại toàn bộ sale data (hoặc chỉ cập nhật nếu data.data là sale object)
-        setSale(data.data[0]) // Dựa trên logic cũ của bạn (res.data[0])
+        if (Array.isArray(data.data) && data.data.length > 0) {
+          const freshSale = data.data[0]
+          setSale(freshSale)
+          updateCountdown(freshSale) // Cập nhật isActive và countdown ngay khi nhận event
+        } else {
+          setSale(null)
+          setIsActive(false)
+          setTimeLeft("00:00:00")
+          if (timerRef.current) clearInterval(timerRef.current)
+        }
       } else {
         // Cập nhật số lượng đã bán của 1 item
         setSale((prev) => {
@@ -419,7 +427,6 @@ const FlashSaleBanner = () => {
 
           if (idx >= 0) {
             const updatedItem = { ...newSale.items[idx], sold: data.sold }
-            // Tối ưu hơn: dùng map thay vì slice + concat
             newSale.items = newSale.items.map((item, index) =>
               index === idx ? updatedItem : item
             )
@@ -452,15 +459,11 @@ const FlashSaleBanner = () => {
     fetchSale()
   }, [fetchSale]);
 
-  const saleStatusText = useMemo(() =>
-    isActive
-      ? "KẾT THÚC SAU"
-      // Kiểm tra sale.startTime (ISO string) > new Date().toISOString() (chuỗi)
-      : sale?.startTime > new Date().toISOString()
-        ? "SẮP BẮT ĐẦU"
-        : "ĐÃ KẾT THÚC",
-    [isActive, sale?.startTime]
-  );
+  const saleStatusText = useMemo(() => {
+    if (isActive) return "KẾT THÚC SAU"
+    if (sale?.startTime && new Date(sale.startTime) > new Date()) return "SẮP BẮT ĐẦU"
+    return "ĐÃ KẾT THÚC"
+  }, [isActive, sale?.startTime]);
 
   if (!sale) return null
 

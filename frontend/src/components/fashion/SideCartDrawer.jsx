@@ -101,10 +101,11 @@ const SideCartDrawer = ({ isOpen, onClose }) => {
                                         )}
                                         <img
                                             src={item.product?.mainImage || '/placeholder.svg'}
-                                            alt={item.product?.productName}
+                                            alt={item.product?.name || item.productName || 'Sản phẩm'}
                                             className={`w-full h-full object-cover transition-all duration-300 ${loadedImages[item._id] ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
                                                 }`}
                                             onLoad={() => handleImageLoad(item._id)}
+                                            onError={(e) => { e.currentTarget.src = '/placeholder.svg'; handleImageLoad(item._id); }}
                                         />
                                     </Link>
 
@@ -116,7 +117,7 @@ const SideCartDrawer = ({ isOpen, onClose }) => {
                                                 className="block"
                                             >
                                                 <p className="font-semibold text-sm text-foreground line-clamp-2 group-hover:text-pink-600 transition-colors">
-                                                    {item.product?.productName}
+                                                    {item.product?.name || item.productName || 'Sản phẩm'}
                                                 </p>
                                             </Link>
                                             <div className="flex items-center gap-2 mt-1">

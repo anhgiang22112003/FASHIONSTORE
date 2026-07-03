@@ -11,6 +11,7 @@ import {
 import { ExclamationCircleIcon } from "@heroicons/react/24/solid"
 import apiAdmin from "@/service/apiAdmin"
 import { toast } from "react-toastify"
+import AdminSpinner from "@/components/AdminSpinner"
 import { socket } from "@/service/socket"
 import AsyncSelect from "react-select/async"
 import debounce from "lodash.debounce"
@@ -345,7 +346,7 @@ const ReviewManagementPage = () => {
 
         {/* Danh sách */}
         {loading ? (
-          <p className="text-center py-8 text-gray-500">Đang tải...</p>
+          <AdminSpinner message="Đang tải danh sách đánh giá..." />
         ) : reviews.length > 0 ? (
           // Đảm bảo bạn có đủ các icon (CheckCircleIcon, XMarkIcon, TrashIcon, PencilIcon)
 

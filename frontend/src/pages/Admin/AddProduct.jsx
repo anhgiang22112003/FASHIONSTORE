@@ -270,7 +270,7 @@ const AddProduct = ({ setActiveTab, fetchProducts }) => {
 
 
     return (
-        <div style={{ backgroundColor: "var(--bg-color)" }} className="flex flex-col lg:flex-row lg:space-x-8 h-full">
+        <div style={{ backgroundColor: "var(--bg-color)" }} className="flex flex-col lg:flex-row lg:space-x-8 h-full p-6 lg:p-8">
             {/* Main content - Left side with scroll on desktop, full on mobile */}
             <div className="flex-1 lg:overflow-y-auto lg:pr-4 space-y-8 pb-8 scrollbar-hidden">
                 {/* Product Info Section */}
@@ -574,13 +574,13 @@ const AddProduct = ({ setActiveTab, fetchProducts }) => {
                             <span className="text-gray-400">Hình ảnh sản phẩm</span>
                         )}
                     </div>
+                    <div className="space-y-1">
+                        <p className="font-semibold text-gray-800">{productName || 'Tên sản phẩm'}</p>
+                        <p className="text-sm text-gray-500">{shortDescription || 'Mô tả ngắn'}</p>
+                    </div>
                     <div className="flex items-center space-x-2">
                         <p className="text-lg font-bold text-pink-600">{sellingPrice ? `${formatCurrency(sellingPrice)}₫` : '0₫'}</p>
                         <p className="text-sm text-gray-400 line-through">{originalPrice ? `${formatCurrency(originalPrice)}₫` : '0₫'}</p>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                        <p className="text-lg font-bold text-pink-600">{sellingPrice ? `${sellingPrice}₫` : '0₫'}</p>
-                        <p className="text-sm text-gray-400 line-through">{originalPrice ? `${originalPrice}₫` : '0₫'}</p>
                     </div>
                     <div className="flex items-center justify-between text-sm text-gray-500">
                         <span>Tồn kho: </span>

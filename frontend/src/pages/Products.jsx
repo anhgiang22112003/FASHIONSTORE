@@ -393,122 +393,181 @@ const Products = () => {
                                     ? 'grid sm:grid-cols-2 lg:grid-cols-3 gap-6'
                                     : 'flex flex-col gap-6'
                                 }>
-                                    {products?.map((product) => (
-                                        <div
-                                            key={product?._id}
-                                            className={`group relative bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden hover:-translate-y-2 ${viewMode === 'list' ? 'flex flex-row' : ''
-                                                }`}
-                                        >
-                                            <div className={`${viewMode === 'list' ? 'w-64' : 'aspect-[4/5]'} overflow-hidden relative`}>
-                                                <img
-                                                    src={product?.mainImage}
-                                                    alt={product?.name}
-                                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                                />
+                                    {products?.map((product) => {
+                                        const colors = Array.from(new Set((product?.variations || []).map(v => v.color).filter(Boolean)));
+                                        const sizes = Array.from(new Set((product?.variations || []).map(v => v.size).filter(Boolean)));
+                                        const colorMap = {
+                                            'Đen': '#000000', 'Den': '#000000',
+                                            'Trắng': '#FFFFFF', 'Trang': '#FFFFFF',
+                                            'Đỏ': '#EF4444', 'Do': '#EF4444',
+                                            'Xanh': '#3B82F6',
+                                            'Xanh lá': '#10B981', 'Xanh la': '#10B981',
+                                            'Vàng': '#F59E0B', 'Vang': '#F59E0B',
+                                            'Hồng': '#EC4899', 'Hong': '#EC4899',
+                                            'Xám': '#6B7280', 'Xam': '#6B7280',
+                                            'Cam': '#F97316',
+                                            'Tím': '#8B5CF6', 'Tim': '#8B5CF6',
+                                            'Nâu': '#78350F', 'Nau': '#78350F',
+                                        };
 
-                                                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                        return (
+                                            <div
+                                                key={product?._id}
+                                                className={`group relative bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden hover:-translate-y-2 ${viewMode === 'list' ? 'flex flex-row' : ''
+                                                    }`}
+                                            >
+                                                <div className={`${viewMode === 'list' ? 'w-64' : 'aspect-[4/5]'} overflow-hidden relative`}>
+                                                    <img
+                                                        src={product?.mainImage}
+                                                        alt={product?.name}
+                                                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                                    />
 
-                                                {product?.originalPrice > product?.sellingPrice && (
-                                                    <div className="absolute top-4 left-4 bg-gradient-to-r from-pink-400 to-pink-600 text-white px-3 py-2 rounded-full text-xs font-black shadow-lg">
-                                                        -{Math.round(((product?.originalPrice - product?.sellingPrice) / product?.originalPrice) * 100)}% OFF
-                                                    </div>
-                                                )}
+                                                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
-                                                <div className="absolute top-4 right-4 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                                                    <Button
-                                                        size="sm"
-                                                        className={`w-10 h-10 p-0 rounded-full shadow-xl ${favorites.includes(product._id)
-                                                            ? 'bg-gradient-to-r from-pink-400 to-pink-600'
-                                                            : 'bg-white hover:bg-gray-50'
-                                                            }`}
-                                                        onClick={(e) => {
-                                                            e.preventDefault()
-                                                            toggleFavorite(product._id)
-                                                        }}
-                                                    >
-                                                        <Heart
-                                                            className={`w-4 h-4 ${favorites.includes(product._id)
-                                                                ? 'fill-white text-white'
-                                                                : 'text-black'
-                                                                }`}
-                                                        />
-                                                    </Button>
-                                                </div>
+                                                    {product?.originalPrice > product?.sellingPrice && (
+                                                        <div className="absolute top-4 left-4 bg-gradient-to-r from-pink-400 to-pink-600 text-white px-3 py-2 rounded-full text-xs font-black shadow-lg">
+                                                            -{Math.round(((product?.originalPrice - product?.sellingPrice) / product?.originalPrice) * 100)}% OFF
+                                                        </div>
+                                                    )}
 
-                                                {viewMode === 'grid' && (
-                                                    <div className="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300">
+                                                    <div className="absolute top-4 right-4 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
                                                         <Button
-                                                            size="lg"
-                                                            className="w-full bg-gradient-to-r from-pink-400 to-pink-600 text-white font-bold rounded-full shadow-xl"
-                                                            onClick={() => {
-                                                                setSelectedProduct(product)
-                                                                setIsVariantModalOpen(true)
+                                                            size="sm"
+                                                            className={`w-10 h-10 p-0 rounded-full shadow-xl ${favorites.includes(product._id)
+                                                                ? 'bg-gradient-to-r from-pink-400 to-pink-600'
+                                                                : 'bg-white hover:bg-gray-50'
+                                                                }`}
+                                                            onClick={(e) => {
+                                                                e.preventDefault()
+                                                                toggleFavorite(product._id)
                                                             }}
                                                         >
-                                                            <ShoppingBag className="w-4 h-4 mr-2" />
-                                                            Thêm vào giỏ
+                                                            <Heart
+                                                                className={`w-4 h-4 ${favorites.includes(product._id)
+                                                                    ? 'fill-white text-white'
+                                                                    : 'text-black'
+                                                                    }`}
+                                                            />
                                                         </Button>
                                                     </div>
-                                                )}
-                                            </div>
 
-                                            <div className={`p-6 bg-white ${viewMode === 'list' ? 'flex-1 flex flex-col justify-between' : ''}`}>
-                                                <div>
-                                                    <Link to={`/product/${product?._id}`}>
-                                                        <h3 className="font-bold text-black mb-3 line-clamp-2 text-lg group-hover:text-pink-500 transition-colors">
-                                                            {product?.name}
-                                                        </h3>
-                                                    </Link>
-
-                                                    <div className="flex items-center gap-2 mb-3">
-                                                        <div className="flex items-center">
-                                                            {[...Array(5)].map((_, i) => (
-                                                                <Star
-                                                                    key={i}
-                                                                    className={`w-4 h-4 ${i < Math.floor(product?.ratingAverage || 0)
-                                                                        ? 'text-pink-500 fill-pink-500'
-                                                                        : 'text-gray-300'
-                                                                        }`}
-                                                                />
-                                                            ))}
+                                                    {viewMode === 'grid' && (
+                                                        <div className="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300">
+                                                            <Button
+                                                                size="lg"
+                                                                className="w-full bg-gradient-to-r from-pink-400 to-pink-600 text-white font-bold rounded-full shadow-xl"
+                                                                onClick={() => {
+                                                                    setSelectedProduct(product)
+                                                                    setIsVariantModalOpen(true)
+                                                                }}
+                                                            >
+                                                                <ShoppingBag className="w-4 h-4 mr-2" />
+                                                                Thêm vào giỏ
+                                                            </Button>
                                                         </div>
-                                                        <span className="text-sm text-gray-600 font-semibold">
-                                                            {product?.ratingAverage?.toFixed(1) ?? 0} ({product?.reviewCount ?? 0})
-                                                        </span>
-                                                    </div>
+                                                    )}
                                                 </div>
 
-                                                <div className={viewMode === 'list' ? 'flex items-end justify-between' : ''}>
-                                                    <div className="flex items-center gap-3">
-                                                        <span className="text-2xl font-black bg-gradient-to-r from-pink-400 to-pink-600 bg-clip-text text-transparent">
-                                                            {product?.sellingPrice?.toLocaleString('vi-VN')}đ
-                                                        </span>
-                                                        {product.originalPrice > product.sellingPrice && (
-                                                            <span className="text-sm text-gray-500 line-through font-medium">
-                                                                {product?.originalPrice?.toLocaleString('vi-VN')}đ
+                                                <div className={`p-6 bg-white flex-1 flex flex-col justify-between`}>
+                                                    <div>
+                                                        {/* Brand & Material */}
+                                                        <div className="text-[10px] uppercase font-black tracking-wider text-pink-500 mb-1">
+                                                            {product?.brand || 'FashionStore'} • {product?.material || 'Chất lượng cao'}
+                                                        </div>
+
+                                                        <Link to={`/product/${product?._id}`}>
+                                                            <h3 className="font-bold text-black mb-2 line-clamp-2 text-base group-hover:text-pink-500 transition-colors leading-snug">
+                                                                {product?.name}
+                                                            </h3>
+                                                        </Link>
+
+                                                        {/* Short description for list mode */}
+                                                        {viewMode === 'list' && product?.shortDescription && (
+                                                            <p className="text-sm text-gray-500 mb-3 line-clamp-2">{product?.shortDescription}</p>
+                                                        )}
+
+                                                        {/* Rating */}
+                                                        <div className="flex items-center gap-1.5 mb-2.5">
+                                                            <div className="flex items-center">
+                                                                {[...Array(5)].map((_, i) => (
+                                                                    <Star
+                                                                        key={i}
+                                                                        className={`w-3.5 h-3.5 ${i < Math.floor(product?.ratingAverage || 0)
+                                                                            ? 'text-pink-500 fill-pink-500'
+                                                                            : 'text-gray-300'
+                                                                            }`}
+                                                                    />
+                                                                ))}
+                                                            </div>
+                                                            <span className="text-xs text-gray-600 font-bold">
+                                                                {product?.ratingAverage?.toFixed(1) ?? 0} ({product?.reviewCount ?? 0})
                                                             </span>
+                                                        </div>
+
+                                                        {/* Colors & Sizes Swatches */}
+                                                        {(colors.length > 0 || sizes.length > 0) && (
+                                                            <div className="flex items-center justify-between gap-2 border-t border-gray-50 pt-2.5 mb-3">
+                                                                {colors.length > 0 ? (
+                                                                    <div className="flex items-center gap-1">
+                                                                        {colors.slice(0, 4).map((c, idx) => {
+                                                                            const bgCol = colorMap[c] || '#CBD5E1';
+                                                                            return (
+                                                                                <span
+                                                                                    key={idx}
+                                                                                    className="w-3 h-3 rounded-full border border-gray-200 inline-block shadow-sm"
+                                                                                    style={{ backgroundColor: bgCol }}
+                                                                                    title={c}
+                                                                                />
+                                                                            );
+                                                                        })}
+                                                                        {colors.length > 4 && (
+                                                                            <span className="text-[9px] text-gray-400 font-bold">+{colors.length - 4}</span>
+                                                                        )}
+                                                                    </div>
+                                                                ) : <div />}
+
+                                                                {sizes.length > 0 && (
+                                                                    <div className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">
+                                                                        Sizes: {sizes.slice(0, 3).join(', ')}{sizes.length > 3 && '...'}
+                                                                    </div>
+                                                                )}
+                                                            </div>
                                                         )}
                                                     </div>
 
-                                                    {viewMode === 'list' && (
-                                                        <Button
-                                                            size="lg"
-                                                            className="bg-gradient-to-r from-pink-400 to-pink-600 text-white font-bold rounded-full"
-                                                            onClick={() => {
-                                                                setSelectedProduct(product)
-                                                                setIsVariantModalOpen(true)
-                                                            }}
-                                                        >
-                                                            <ShoppingBag className="w-4 h-4 mr-2" />
-                                                            Thêm vào giỏ
-                                                        </Button>
-                                                    )}
-                                                </div>
-                                            </div>
+                                                    <div className="flex items-end justify-between">
+                                                        <div className="flex items-baseline gap-2.5">
+                                                            <span className="text-xl font-black bg-gradient-to-r from-pink-400 to-pink-600 bg-clip-text text-transparent">
+                                                                {product?.sellingPrice?.toLocaleString('vi-VN')}đ
+                                                            </span>
+                                                            {product.originalPrice > product.sellingPrice && (
+                                                                <span className="text-xs text-gray-400 line-through font-medium">
+                                                                    {product?.originalPrice?.toLocaleString('vi-VN')}đ
+                                                                </span>
+                                                            )}
+                                                        </div>
 
-                                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 pointer-events-none"></div>
-                                        </div>
-                                    ))}
+                                                        {viewMode === 'list' && (
+                                                            <Button
+                                                                size="lg"
+                                                                className="bg-gradient-to-r from-pink-400 to-pink-600 text-white font-bold rounded-full"
+                                                                onClick={() => {
+                                                                    setSelectedProduct(product)
+                                                                    setIsVariantModalOpen(true)
+                                                                }}
+                                                            >
+                                                                <ShoppingBag className="w-4 h-4 mr-2" />
+                                                                Thêm vào giỏ
+                                                            </Button>
+                                                        )}
+                                                    </div>
+                                                </div>
+
+                                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 pointer-events-none"></div>
+                                            </div>
+                                        );
+                                    })}
                                 </div>
 
                                 {/* Pagination */}

@@ -1,8 +1,9 @@
 import apiAdmin from '@/service/apiAdmin'
 import React, { useEffect, useState, useMemo } from 'react'
 import { toast } from 'react-toastify'
-import { PlusIcon, FunnelIcon, TrashIcon } from '@heroicons/react/24/outline'
+import { PlusIcon, FunnelIcon, TrashIcon, PencilIcon, UserIcon } from '@heroicons/react/24/outline'
 import { useDebounce } from '@/hooks/useDebounce'
+import AdminSpinner from '@/components/AdminSpinner'
 
 
 const FilterItem = ({ label, children }) => (
@@ -31,48 +32,37 @@ const CustomerCard = ({ customer, setEditingCustomer, setActivePage }) => {
   }
 
   return (
-    <div className="bg-white p-6 rounded-2xl shadow-lg flex flex-col items-center text-center">
-      <div className="w-16 h-16 rounded-full bg-pink-100 flex items-center justify-center mb-4 text-pink-600">
-        <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M12 12c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path>
-        </svg>
+    <div className="bg-white p-6 rounded-2xl shadow-lg flex flex-col items-center text-center border border-gray-100 hover:shadow-xl transition-shadow duration-300">
+      <div className="w-16 h-16 rounded-full bg-pink-100 flex items-center justify-center mb-4 text-pink-600 shadow-inner">
+        <UserIcon className="w-8 h-8 text-pink-500" />
       </div>
-      <h3 className="text-xl font-semibold text-gray-800">{customer?.name}</h3>
-      <p className="text-sm text-gray-500 mb-4">{customer?.email}</p>
-      <div className="flex justify-between w-full text-sm text-gray-600 mb-4">
+      <h3 className="text-lg font-bold text-gray-800">{customer?.name}</h3>
+      <p className="text-xs text-gray-500 mb-4">{customer?.email}</p>
+      <div className="flex justify-between w-full text-sm text-gray-600 mb-4 bg-gray-50 p-3 rounded-xl">
         <div className="text-left">
-          <p>Tổng đơn hàng:</p>
-          <p className="font-bold text-lg text-pink-600">{customer?.orderCount || 0}</p>
+          <p className="text-xxs text-gray-400 font-semibold uppercase tracking-wider">Đơn hàng</p>
+          <p className="font-bold text-base text-pink-600">{customer?.orderCount || 0}</p>
         </div>
         <div className="text-right">
-          <p>Tổng chi tiêu:</p>
-          <p className="font-bold text-lg text-pink-600">
+          <p className="text-xxs text-gray-400 font-semibold uppercase tracking-wider">Chi tiêu</p>
+          <p className="font-bold text-base text-pink-600">
             {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(customer?.totalSpent || 0)}
           </p>
         </div>
       </div>
-      <p className="text-xs text-gray-400">
+      <p className="text-xxs text-gray-400">
         Tham gia:{' '}
         {customer?.createdAt
-          ? new Date(customer.createdAt).toLocaleString('vi-VN', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-          })
+          ? new Date(customer.createdAt).toLocaleDateString('vi-VN')
           : ''}
       </p>
-      <div className="flex space-x-2 mt-4">
+      <div className="flex space-x-2 mt-4 w-full">
         <button
           onClick={handleEditClick}
-          className="flex items-center space-x-2 px-4 py-2 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600 transition-colors"
+          className="w-full flex items-center justify-center space-x-1.5 px-4 py-2 bg-pink-600 text-white rounded-xl font-bold hover:bg-pink-700 transition-all text-xs shadow-md shadow-pink-200"
         >
-          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"></path>
-          </svg>
-          <span>Sửa</span>
+          <PencilIcon className="w-3.5 h-3.5" />
+          <span>Sửa thông tin</span>
         </button>
       </div>
     </div>
@@ -229,9 +219,9 @@ const Customers = ({ setEditingCustomer, setActivePage, data }) => {
           </div>
           <button
             onClick={() => setActivePage('add-customer')}
-            className="flex items-center space-x-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors bg-[#ff69b4] hover:bg-[#ff4f9f] text-white"
+            className="flex items-center space-x-2 px-4 py-2.5 text-sm font-semibold rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white shadow-md shadow-pink-200 transition-all"
           >
-            <PlusIcon className="w-5 h-5" />
+            <PlusIcon className="w-4 h-4" />
             <span>Thêm khách hàng</span>
           </button>
         </div>
@@ -377,13 +367,7 @@ const Customers = ({ setEditingCustomer, setActivePage, data }) => {
 
 
         {isLoading ? (
-          <div className="text-center py-10 text-gray-500">
-            <svg className="animate-spin h-8 w-8 text-pink-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            Đang tải dữ liệu khách hàng...
-          </div>
+          <AdminSpinner message="Đang tải dữ liệu khách hàng..." />
         ) : customersData?.length > 0 ? (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">

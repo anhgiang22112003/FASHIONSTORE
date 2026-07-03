@@ -1,11 +1,4 @@
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import React, { useState, useEffect } from 'react';
 import { 
   Eye, 
   CheckCircle, 
@@ -16,7 +9,9 @@ import {
   DollarSign,
   FileText,
   MessageSquare,
-  Loader2
+  Loader2,
+  X,
+  AlertCircle
 } from 'lucide-react';
 import apiAdmin from '@/service/apiAdmin';
 import { 
@@ -26,6 +21,66 @@ import {
   ORDER_STATUS_LABELS 
 } from '@/data/constants';
 
+// ── Custom Modal Shell ──────────────────────────────────────────────────────
+const Modal = ({ isOpen, onClose, title, children }) => {
+  useEffect(() => {
+    if (isOpen) document.body.style.overflow = 'hidden';
+    else document.body.style.overflow = '';
+    return () => { document.body.style.overflow = ''; };
+  }, [isOpen]);
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Backdrop */}
+      <div
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        onClick={onClose}
+      />
+      {/* Panel */}
+      <div className="relative z-10 w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-white rounded-2xl shadow-2xl border border-gray-100 [&::-webkit-scrollbar]:hidden">
+        {/* Header */}
+        <div className="sticky top-0 z-20 flex items-center justify-between p-6 bg-gradient-to-r from-pink-500 to-purple-600 rounded-t-2xl">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center">
+              <FileText className="w-5 h-5 text-white" />
+            </div>
+            <h2 className="text-lg font-bold text-white">{title}</h2>
+          </div>
+          <button
+            onClick={onClose}
+            className="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-lg flex items-center justify-center text-white transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+        {/* Body */}
+        <div className="p-6">
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ── Section Card Component ──────────────────────────────────────────────────
+const SectionCard = ({ title, icon: Icon, children, badge = null }) => (
+  <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm space-y-4">
+    <div className="flex items-center justify-between border-b border-gray-50 pb-2">
+      <div className="flex items-center gap-2">
+        {Icon && <Icon className="w-5 h-5 text-pink-500" />}
+        <h3 className="font-bold text-gray-800 text-base">{title}</h3>
+      </div>
+      {badge}
+    </div>
+    <div className="text-sm text-gray-600">
+      {children}
+    </div>
+  </div>
+);
+
+// ── Main Detail Component ────────────────────────────────────────────────────
 const ComplaintDetail = ({ 
   complaint, 
   isOpen, 
@@ -38,26 +93,23 @@ const ComplaintDetail = ({
   const [error, setError] = useState('');
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND'
-    }).format(amount);
+    return new Intl.NumberFormat('vi-VN').format(amount);
   };
 
   const formatDateTime = (date) => {
     return new Date(date).toLocaleString('vi-VN');
   };
 
-  const getStatusBadgeVariant = (status) => {
+  const getStatusBadgeStyle = (status) => {
     switch (status) {
       case COMPLAINT_STATUS.PENDING:
-        return 'default';
+        return 'bg-amber-50 text-amber-700 border border-amber-200';
       case COMPLAINT_STATUS.APPROVED:
-        return 'success';
+        return 'bg-emerald-50 text-emerald-700 border border-emerald-200';
       case COMPLAINT_STATUS.REJECTED:
-        return 'destructive';
+        return 'bg-red-50 text-red-700 border border-red-200';
       default:
-        return 'secondary';
+        return 'bg-gray-50 text-gray-600 border border-gray-200';
     }
   };
 
@@ -66,16 +118,14 @@ const ComplaintDetail = ({
       setError('Vui lòng nhập ghi chú duyệt');
       return;
     }
-
     setActionLoading(true);
     setError('');
-
     try {
-      await apiAdmin.put(`/complaints/${complaint._id}/approve`, {actionNote});
+      await apiAdmin.put(`/complaints/${complaint._id}/approve`, { actionNote });
       onUpdate?.();
       onClose();
     } catch (err) {
-      setError(err.message || 'Có lỗi xảy ra khi duyệt khiếu nại');
+      setError(err.response?.data?.error || err.message || 'Có lỗi xảy ra khi duyệt khiếu nại');
     } finally {
       setActionLoading(false);
     }
@@ -86,16 +136,14 @@ const ComplaintDetail = ({
       setError('Vui lòng nhập lý do từ chối');
       return;
     }
-
     setActionLoading(true);
     setError('');
-
     try {
-      await apiAdmin.put(`/complaints/${complaint._id}/reject`,{actionNote});
+      await apiAdmin.put(`/complaints/${complaint._id}/reject`, { actionNote });
       onUpdate?.();
       onClose();
     } catch (err) {
-      setError(err.message || 'Có lỗi xảy ra khi từ chối khiếu nại');
+      setError(err.response?.data?.error || err.message || 'Có lỗi xảy ra khi từ chối khiếu nại');
     } finally {
       setActionLoading(false);
     }
@@ -105,245 +153,189 @@ const ComplaintDetail = ({
 
   const isPending = complaint.status === COMPLAINT_STATUS.PENDING;
   const isApproved = complaint.status === COMPLAINT_STATUS.APPROVED;
-  const isRejected = complaint.status === COMPLAINT_STATUS.REJECTED;
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
-            Chi tiết khiếu nại #{complaint.code}
-          </DialogTitle>
-        </DialogHeader>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={`Chi tiết khiếu nại #${complaint.code}`}
+    >
+      <div className="space-y-6">
+        {error && (
+          <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
+            <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+            <span>{error}</span>
+          </div>
+        )}
 
-        <div className="space-y-6">
-          {error && (
-            <Alert variant="destructive">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Status and Basic Info */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center justify-between">
-                Thông tin cơ bản
-                <Badge variant={getStatusBadgeVariant(complaint.status)}>
-                  {COMPLAINT_STATUS_LABELS[complaint.status]}
-                </Badge>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm">
-                    <FileText className="h-4 w-4 text-gray-500" />
-                    <span className="font-medium">Mã khiếu nại:</span>
-                    <span>{complaint.code}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <Package className="h-4 w-4 text-gray-500" />
-                    <span className="font-medium">Mã đơn hàng:</span>
-                    <span>{complaint.orderCode}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <User className="h-4 w-4 text-gray-500" />
-                    <span className="font-medium">Khách hàng:</span>
-                    <span>{complaint.customerName}</span>
-                  </div>
+          <SectionCard 
+            title="Thông tin cơ bản" 
+            icon={FileText}
+            badge={
+              <span className={`px-3 py-1 text-xs font-semibold rounded-full uppercase tracking-wider ${getStatusBadgeStyle(complaint.status)}`}>
+                {COMPLAINT_STATUS_LABELS[complaint.status]}
+              </span>
+            }
+          >
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-3">
+                <div className="flex flex-col">
+                  <span className="text-xs text-gray-400">Mã khiếu nại</span>
+                  <span className="font-semibold text-gray-800">{complaint.code}</span>
                 </div>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm">
-                    <Calendar className="h-4 w-4 text-gray-500" />
-                    <span className="font-medium">Ngày tạo:</span>
-                    <span>{formatDateTime(complaint.createdAt)}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <span className="font-medium">Loại khiếu nại:</span>
-                    <Badge variant="outline">
-                      {COMPLAINT_TYPE_LABELS[complaint.complaintType]}
-                    </Badge>
-                  </div>
-                  {isApproved && complaint.approvedAt && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <CheckCircle className="h-4 w-4 text-green-500" />
-                      <span className="font-medium">Ngày duyệt:</span>
-                      <span>{formatDateTime(complaint.approvedAt)}</span>
-                    </div>
-                  )}
+                <div className="flex flex-col">
+                  <span className="text-xs text-gray-400">Mã đơn hàng</span>
+                  <span className="font-semibold text-gray-800">{complaint.orderCode}</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-xs text-gray-400">Khách hàng</span>
+                  <span className="font-medium text-gray-800">{complaint.customerName}</span>
                 </div>
               </div>
-            </CardContent>
-          </Card>
 
-          {/* Financial Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <DollarSign className="h-5 w-5" />
-                Thông tin tài chính
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="text-center p-4 bg-blue-50 rounded-lg">
-                  <div className="text-2xl font-bold text-blue-600">
-                    {formatCurrency(complaint.orderTotal)}
-                  </div>
-                  <div className="text-sm text-gray-600">Tổng đơn hàng</div>
+              <div className="space-y-3">
+                <div className="flex flex-col">
+                  <span className="text-xs text-gray-400">Ngày tạo</span>
+                  <span className="font-medium text-gray-700">{formatDateTime(complaint.createdAt)}</span>
                 </div>
-                <div className="text-center p-4 bg-orange-50 rounded-lg">
-                  <div className="text-2xl font-bold text-orange-600">
-                    {formatCurrency(complaint.complaintAmount)}
-                  </div>
-                  <div className="text-sm text-gray-600">Số tiền yêu cầu</div>
-                  <div className="text-xs text-gray-500">
-                    ({complaint.percent}% đơn hàng)
-                  </div>
+                <div className="flex flex-col">
+                  <span className="text-xs text-gray-400">Loại khiếu nại</span>
+                  <span className="mt-1 inline-block self-start px-2 py-0.5 rounded bg-purple-50 text-purple-700 border border-purple-200 text-xs font-medium">
+                    {COMPLAINT_TYPE_LABELS[complaint.complaintType]}
+                  </span>
                 </div>
-                {isApproved && complaint.discountGiven && (
-                  <div className="text-center p-4 bg-green-50 rounded-lg">
-                    <div className="text-2xl font-bold text-green-600">
-                      {formatCurrency(complaint.discountGiven)}
-                    </div>
-                    <div className="text-sm text-gray-600">Số tiền đã duyệt</div>
+                {isApproved && complaint.approvedAt && (
+                  <div className="flex flex-col">
+                    <span className="text-xs text-gray-400">Ngày duyệt</span>
+                    <span className="font-semibold text-emerald-600">{formatDateTime(complaint.approvedAt)}</span>
                   </div>
                 )}
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </SectionCard>
 
-          {/* Order Information */}
-          {complaint.orderId && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Package className="h-5 w-5" />
-                  Thông tin đơn hàng
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="font-medium">Mã đơn:</span>
-                      <span>{complaint.orderId.code || complaint.orderCode}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="font-medium">Trạng thái:</span>
-                      <Badge variant="outline">
-                        {ORDER_STATUS_LABELS[complaint.orderId.status] || complaint.orderId.status}
-                      </Badge>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="font-medium">Tổng tiền:</span>
-                      <span>{formatCurrency(complaint.orderId.total || complaint.orderTotal)}</span>
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    {complaint.orderId.discount && (
-                      <div className="flex justify-between">
-                        <span className="font-medium">Đã giảm:</span>
-                        <span className="text-red-600">
-                          -{formatCurrency(complaint.orderId.discount)}
-                        </span>
-                      </div>
-                    )}
-                    <div className="flex justify-between">
-                      <span className="font-medium">Ngày tạo:</span>
-                      <span>{formatDateTime(complaint.orderId.createdAt || complaint.createdAt)}</span>
-                    </div>
-                  </div>
+          {/* Financial Information */}
+          <SectionCard title="Thông tin tài chính" icon={DollarSign}>
+            <div className="grid grid-cols-3 gap-3">
+              <div className="text-center p-3 bg-blue-50/50 border border-blue-100 rounded-xl flex flex-col justify-center">
+                <span className="text-sm font-bold text-blue-700">{formatCurrency(complaint.orderTotal)}đ</span>
+                <span className="text-xxs text-gray-500 mt-1 uppercase tracking-wider font-semibold">Tổng đơn</span>
+              </div>
+              <div className="text-center p-3 bg-pink-50/50 border border-pink-100 rounded-xl flex flex-col justify-center">
+                <span className="text-sm font-bold text-pink-600">{formatCurrency(complaint.complaintAmount)}đ</span>
+                <span className="text-xxs text-gray-500 mt-1 uppercase tracking-wider font-semibold">Yêu cầu hoàn</span>
+                <span className="text-xxs text-gray-400 mt-0.5">({complaint.percent}%)</span>
+              </div>
+              <div className="text-center p-3 bg-emerald-50/50 border border-emerald-100 rounded-xl flex flex-col justify-center">
+                <span className="text-sm font-bold text-emerald-700">
+                  {isApproved && complaint.discountGiven ? `${formatCurrency(complaint.discountGiven)}đ` : '---'}
+                </span>
+                <span className="text-xxs text-gray-500 mt-1 uppercase tracking-wider font-semibold">Đã duyệt</span>
+              </div>
+            </div>
+          </SectionCard>
+        </div>
+
+        {/* Order Details */}
+        {complaint.orderId && (
+          <SectionCard title="Chi tiết Đơn hàng liên quan" icon={Package}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <div className="flex justify-between border-b border-gray-50 py-1">
+                  <span className="text-gray-500">Mã đơn:</span>
+                  <span className="font-medium text-gray-800">{complaint.orderId.code || complaint.orderCode}</span>
                 </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Complaint Details */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <MessageSquare className="h-5 w-5" />
-                Chi tiết khiếu nại
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label className="font-medium">Lý do khiếu nại:</Label>
-                <div className="mt-2 p-3 bg-gray-50 rounded-lg">
-                  <p className="text-sm whitespace-pre-wrap">{complaint.reason}</p>
+                <div className="flex justify-between border-b border-gray-50 py-1">
+                  <span className="text-gray-500">Trạng thái đơn:</span>
+                  <span className="inline-block px-2 py-0.5 rounded bg-gray-100 text-gray-700 text-xs font-semibold uppercase">
+                    {ORDER_STATUS_LABELS[complaint.orderId.status] || complaint.orderId.status}
+                  </span>
                 </div>
               </div>
-              
-              {complaint.note && (
-                <div>
-                  <Label className="font-medium">Ghi chú:</Label>
-                  <div className="mt-2 p-3 bg-gray-50 rounded-lg">
-                    <p className="text-sm whitespace-pre-wrap">{complaint.note}</p>
+              <div className="space-y-2">
+                <div className="flex justify-between border-b border-gray-50 py-1">
+                  <span className="text-gray-500">Tổng thanh toán:</span>
+                  <span className="font-semibold text-gray-800">{formatCurrency(complaint.orderId.total || complaint.orderTotal)}đ</span>
+                </div>
+                {complaint.orderId.discount && (
+                  <div className="flex justify-between border-b border-gray-50 py-1">
+                    <span className="text-gray-500">Đã áp dụng voucher:</span>
+                    <span className="text-red-500 font-semibold">-{formatCurrency(complaint.orderId.discount)}đ</span>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
+            </div>
+          </SectionCard>
+        )}
 
-              {complaint.approvedBy && (
-                <div>
-                  <Label className="font-medium">Người duyệt:</Label>
-                  <div className="mt-2 p-3 bg-green-50 rounded-lg">
-                    <p className="text-sm">{complaint.approvedBy.name || 'N/A'}</p>
-                  </div>
+        {/* Complaint Reason & Note */}
+        <SectionCard title="Mô tả khiếu nại" icon={MessageSquare}>
+          <div className="space-y-4">
+            <div>
+              <span className="text-xs font-semibold text-gray-400 block mb-1 uppercase tracking-wider">Lý do khiếu nại</span>
+              <div className="p-4 bg-gray-50 border border-gray-100 rounded-xl text-gray-700 text-sm whitespace-pre-wrap leading-relaxed">
+                {complaint.reason}
+              </div>
+            </div>
+            {complaint.note && (
+              <div>
+                <span className="text-xs font-semibold text-gray-400 block mb-1 uppercase tracking-wider">Ghi chú thêm</span>
+                <div className="p-4 bg-gray-50 border border-gray-100 rounded-xl text-gray-700 text-sm whitespace-pre-wrap leading-relaxed">
+                  {complaint.note}
                 </div>
-              )}
-            </CardContent>
-          </Card>
+              </div>
+            )}
+            {complaint.approvedBy && (
+              <div className="flex items-center gap-2 text-sm text-gray-500 pt-2 border-t border-gray-50">
+                <span>Người duyệt:</span>
+                <strong className="text-gray-700">{complaint.approvedBy.name || 'N/A'}</strong>
+              </div>
+            )}
+          </div>
+        </SectionCard>
 
-          {/* Action Section for Pending Complaints */}
-          {isPending && showActions && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Xử lý khiếu nại</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label htmlFor="actionNote">
-                    Ghi chú xử lý *
-                  </Label>
-                  <Textarea
-                    id="actionNote"
-                    placeholder="Nhập ghi chú cho việc duyệt hoặc từ chối..."
-                    value={actionNote}
-                    onChange={(e) => setActionNote(e.target.value)}
-                    rows={3}
-                    className="mt-2"
-                  />
-                </div>
-                
-                <div className="flex justify-end gap-2">
-                  <Button
-                    variant="destructive"
-                    onClick={handleReject}
-                    disabled={actionLoading}
-                    className="gap-2"
-                  >
-                    {actionLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-                    <XCircle className="h-4 w-4" />
-                    Từ chối
-                  </Button>
-                  <Button
-                    onClick={handleApprove}
-                    disabled={actionLoading}
-                    className="gap-2"
-                  >
-                    {actionLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-                    <CheckCircle className="h-4 w-4" />
-                    Duyệt khiếu nại
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </div>
-      </DialogContent>
-    </Dialog>
+        {/* Action Section for Pending Complaints */}
+        {isPending && showActions && (
+          <div className="bg-gradient-to-r from-pink-50 to-purple-50 border border-pink-100 rounded-2xl p-5 shadow-sm space-y-4">
+            <h3 className="font-bold text-gray-800 text-base">Xử lý khiếu nại & phê duyệt</h3>
+            <div className="space-y-1.5">
+              <label htmlFor="actionNote" className="block text-xs font-bold text-gray-600 uppercase tracking-wider">
+                Ghi chú xử lý / lý do duyệt/từ chối *
+              </label>
+              <textarea
+                id="actionNote"
+                placeholder="Nhập lý do chi tiết..."
+                value={actionNote}
+                onChange={(e) => setActionNote(e.target.value)}
+                rows={3}
+                className="w-full px-4 py-2.5 text-sm text-gray-800 border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-400 transition-all placeholder-gray-400 resize-none"
+              />
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                onClick={handleReject}
+                disabled={actionLoading}
+                className="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-red-500 hover:bg-red-600 rounded-xl transition-all shadow-md shadow-red-100 disabled:opacity-60"
+              >
+                {actionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <XCircle className="w-4 h-4" />}
+                Từ chối
+              </button>
+              <button
+                onClick={handleApprove}
+                disabled={actionLoading}
+                className="flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 rounded-xl transition-all shadow-md shadow-pink-200 disabled:opacity-60"
+              >
+                {actionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
+                Duyệt & hoàn tiền
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </Modal>
   );
 };
 
@@ -355,15 +347,13 @@ export const ViewComplaintButton = ({ complaint, onUpdate }) => {
 
   return (
     <>
-      <Button
-        variant="outline"
-        size="sm"
+      <button
         onClick={() => setIsOpen(true)}
-        className="gap-2"
+        className="p-1.5 text-pink-600 hover:text-pink-800 hover:bg-pink-50 rounded-lg transition-colors"
+        title="Xem chi tiết"
       >
         <Eye className="h-4 w-4" />
-        Xem
-      </Button>
+      </button>
       <ComplaintDetail
         complaint={complaint}
         isOpen={isOpen}

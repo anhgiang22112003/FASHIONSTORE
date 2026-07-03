@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
+import { ChevronUpDownIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline'
 
 // Danh sách màu sắc cố định (cho bảng chọn nhanh)
 const colors = [
@@ -176,13 +177,18 @@ const ProductVariations = ({ variations, setVariations, setStock }) => {
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-3">
                                             <button 
                                                 onClick={() => handleEditVariation(index)} 
-                                                className="text-blue-600 hover:text-blue-900 font-medium"
+                                                className="p-1.5 text-blue-600 hover:text-blue-900 hover:bg-blue-50 rounded-lg transition-colors"
                                                 disabled={editingIndex !== null && editingIndex !== index}
+                                                title="Chỉnh sửa"
                                             >
-                                                Chỉnh sửa
+                                                <PencilIcon className="h-4 w-4" />
                                             </button>
-                                            <button onClick={() => handleDeleteVariation(index)} className="text-red-600 hover:text-red-900 font-medium">
-                                                Xóa
+                                            <button 
+                                                onClick={() => handleDeleteVariation(index)} 
+                                                className="p-1.5 text-red-600 hover:text-red-900 hover:bg-red-50 rounded-lg transition-colors"
+                                                title="Xóa"
+                                            >
+                                                <TrashIcon className="h-4 w-4" />
                                             </button>
                                         </td>
                                     </tr>
@@ -286,9 +292,7 @@ const ProductVariations = ({ variations, setVariations, setStock }) => {
                                 className="absolute right-2 top-7 flex items-center p-1 bg-white border border-gray-300 rounded-full shadow-sm hover:shadow-md transition-shadow z-10"
                                 title="Mở gợi ý kích thước"
                             >
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
-                                </svg>
+                                <ChevronUpDownIcon className="h-4 w-4 text-gray-600" />
                             </button>
 
 

@@ -41,7 +41,7 @@ const CategoryPage = () => {
             sortBy,
           },
         })
-        console.log(response);
+
         
 
         setProducts(response.data.products)

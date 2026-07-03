@@ -8,6 +8,7 @@ const baseURL =
 
 const apiChatbot = axios.create({
   baseURL,
+  withCredentials: true,
   headers: {
     "Content-Type": "application/json",
   },
@@ -17,7 +18,7 @@ const apiChatbot = axios.create({
 apiChatbot.interceptors.request.use(
   (config) => {
     const token = sessionStorage.getItem("accessToken")
-    if (user?.accessToken) {
+    if (token) {
       config.headers.Authorization = `Admin ${token}`;
     }
     return config;
