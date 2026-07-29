@@ -1,42 +1,42 @@
 import React, { Suspense, lazy, useEffect, useState } from "react"
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
-import "./index.css"
-import Header from "./components/fashion/Header"
-import Footer from "./components/fashion/Footer"
+import "@/index.css"
+import Header from "@/components/fashion/Header"
+import Footer from "@/components/fashion/Footer"
 import { toast, ToastContainer } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
-import { AdminRoute } from "./guards/AdminRoute"
+import { AdminRoute } from "@/guards/AdminRoute"
 import { AuthProvider } from "@/context/AuthContext"
-import { CartProvider, CartContext } from "./context/CartContext"
-import OrderHistory from "./pages/OrderHistory"
-import { socket } from "./service/socket"
-import { ShoppingBag } from 'lucide-react'
-import SideCartDrawer from "./components/fashion/SideCartDrawer"
-import { WishlistProvider } from "./context/WishlistContext"
-import ChatBot from "./pages/ChatBot"
-import OrderReturn from "./pages/OrderReturn"
+import { CartProvider, CartContext } from "@/context/CartContext"
+import OrderHistory from "@/pages/OrderHistory"
+import { socket } from "@/service/socket"
+import { ShoppingBag } from "lucide-react"
+import SideCartDrawer from "@/components/fashion/SideCartDrawer"
+import { WishlistProvider } from "@/context/WishlistContext"
+import ChatBot from "@/pages/ChatBot"
+import OrderReturn from "@/pages/OrderReturn"
 
-const CustomerDisplayScreen = lazy(() => import("./components/CustomerDisplayScreen"))
-const Products = lazy(() => import("./pages/Products"))
-const AdminLoginForm = lazy(() => import("./pages/Admin/LoginAdmin"))
-const HomePage = lazy(() => import("./pages/HomePage"))
-const ProductPage = lazy(() => import("./pages/ProductPage"))
-const CategoryPage = lazy(() => import("./pages/CategoryPage"))
-const CartPage = lazy(() => import("./pages/CartPage"))
-const AboutPage = lazy(() => import("./pages/AboutPage"))
-const ContactPage = lazy(() => import("./pages/ContactPage"))
-const BlogPage = lazy(() => import("./pages/BlogPage"))
-const BlogArticlePage = lazy(() => import("./pages/BlogArticlePage"))
-const Checkout = lazy(() => import("./pages/Checkout"))
-const Wishlist = lazy(() => import("./pages/Wishlist"))
-const AuthPage = lazy(() => import("./pages/AuthPage"))
-const CollectionPage = lazy(() => import("./pages/Collection"))
-const ProductCategoryPage = lazy(() => import("./pages/Category"))
-const AdminLayout = lazy(() => import("./pages/Admin/AdminLayout"))
-const UserProfile = lazy(() => import("./pages/UserProfile"))
-const ResetPassword = lazy(() => import("./pages/ResetPassword"))
-const ForgotPassword = lazy(() => import("./pages/ForgotPassword"))
-const AuthCallback = lazy(() => import("./pages/AuthCallback"))
+const CustomerDisplayScreen = lazy(() => import("@/components/CustomerDisplayScreen"))
+const Products = lazy(() => import("@/pages/Products"))
+const AdminLoginForm = lazy(() => import("@/pages/Admin/LoginAdmin"))
+const HomePage = lazy(() => import("@/pages/HomePage"))
+const ProductPage = lazy(() => import("@/pages/ProductPage"))
+const CategoryPage = lazy(() => import("@/pages/CategoryPage"))
+const CartPage = lazy(() => import("@/pages/CartPage"))
+const AboutPage = lazy(() => import("@/pages/AboutPage"))
+const ContactPage = lazy(() => import("@/pages/ContactPage"))
+const BlogPage = lazy(() => import("@/pages/BlogPage"))
+const BlogArticlePage = lazy(() => import("@/pages/BlogArticlePage"))
+const Checkout = lazy(() => import("@/pages/Checkout"))
+const Wishlist = lazy(() => import("@/pages/Wishlist"))
+const AuthPage = lazy(() => import("@/pages/AuthPage"))
+const CollectionPage = lazy(() => import("@/pages/Collection"))
+const ProductCategoryPage = lazy(() => import("@/pages/Category"))
+const AdminLayout = lazy(() => import("@/pages/Admin/AdminLayout"))
+const UserProfile = lazy(() => import("@/pages/UserProfile"))
+const ResetPassword = lazy(() => import("@/pages/ResetPassword"))
+const ForgotPassword = lazy(() => import("@/pages/ForgotPassword"))
+const AuthCallback = lazy(() => import("@/pages/AuthCallback"))
 
 const orderStatusText = {
   PENDING: "Chờ xác nhận",
