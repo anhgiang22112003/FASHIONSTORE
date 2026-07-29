@@ -13,6 +13,13 @@ module.exports = {
     },
     configure: (webpackConfig) => {
       
+      // Explicitly set @ alias (craco v7 workaround for alias merge bug)
+      webpackConfig.resolve = webpackConfig.resolve || {};
+      webpackConfig.resolve.alias = {
+        ...webpackConfig.resolve.alias,
+        '@': path.resolve(__dirname, 'src'),
+      };
+
       // Disable hot reload completely if environment variable is set
       if (config.disableHotReload) {
         // Remove hot reload related plugins
