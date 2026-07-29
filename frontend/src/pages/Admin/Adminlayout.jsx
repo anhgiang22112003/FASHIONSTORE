@@ -15,7 +15,7 @@ const Suppliers = React.lazy(() => import("./Suppliers"))
 const StaffPage = React.lazy(() => import("./StaffPage"))
 const Bank = React.lazy(() => import("./Bank"))
 const PosPage = React.lazy(() => import("./PosPage"))
-const Dashboard = React.lazy(() => import("./AdminDasbroad"))
+const Dashboard = React.lazy(() => import("./AdminDashboard"))
 const Orders = React.lazy(() => import("./OrdersContent"))
 const Products = React.lazy(() => import("./ProductsContent"))
 const Customers = React.lazy(() => import("./Customers"))
@@ -140,8 +140,7 @@ const AdminLayout = () => {
 
   return (
     <ThemeProvider>
-      <div className="flex h-screen">
-
+      <div className="admin-dashboard-root flex h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300">
 
         <Sidebar
           activeTab={activeTab}
@@ -149,14 +148,20 @@ const AdminLayout = () => {
           isOpen={isSidebarOpen}
           toggleSidebar={toggleSidebar}
         />
-        <div className="flex-1 flex flex-col">
-          <div className="sticky  h-[70px]  items-center  shadow-sm sticky top-0 z-40 ">
+        {isSidebarOpen && (
+          <div
+            className="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-45 lg:hidden transition-all duration-300"
+            onClick={toggleSidebar}
+          />
+        )}
+        <div className="flex-1 flex flex-col min-w-0">
+          <div className="sticky h-[70px] items-center shadow-sm sticky top-0 z-40">
             <Header toggleSidebar={toggleSidebar} setActiveTab={setActiveTab} setEditingProductId={setEditingProductId} setEditingOrder={setEditingOrder} />
 
           </div>
 
           {/* Nội dung chính */}
-          <div className="flex-1  overflow-y-auto">
+          <div className="flex-1 overflow-y-auto bg-slate-50 dark:bg-slate-950 transition-colors duration-300">
             <Suspense fallback={<AdminSpinner message="Đang tải trang..." />}>
               {activeTab === "dashboard" && <Dashboard />}
               {activeTab === "chat" && <AdminChatDashboard adminId={userId?.id} />}

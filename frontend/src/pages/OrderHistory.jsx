@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback, useMemo } from "react"
+import { useLocation } from "react-router-dom"
 import api from "@/service/api"
 import { toast } from "react-toastify"
 import { format } from "date-fns"
@@ -178,6 +179,8 @@ const EmptyState = React.memo(() => (
 EmptyState.displayName = "EmptyState"
 
 const OrderHistory = () => {
+  const location = useLocation()
+  const highlightOrderId = location.state?.highlightOrderId
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
   const [selectedOrder, setSelectedOrder] = useState(null)
@@ -196,6 +199,15 @@ const OrderHistory = () => {
   useEffect(() => {
     fetchOrders()
   }, [fetchOrders])
+
+  useEffect(() => {
+    if (!loading && highlightOrderId && orders.length > 0) {
+      const match = orders.find(o => o._id === highlightOrderId)
+      if (match) {
+        setSelectedOrder(match)
+      }
+    }
+  }, [loading, highlightOrderId, orders])
 
   const handleOrderClick = useCallback((order) => {
     setSelectedOrder(order)

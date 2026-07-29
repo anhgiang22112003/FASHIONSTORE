@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import VariantSelectionModal from "@/components/fashion/VariantSelectionModal"
 import SideCartDrawer from "@/components/fashion/SideCartDrawer"
 import { Link } from "react-router-dom"
-import { AuthContext } from "@/context/Authcontext"
+import { AuthContext } from "@/context/AuthContext"
 
 const Wishlist = () => {
   const [products, setProducts] = useState([])

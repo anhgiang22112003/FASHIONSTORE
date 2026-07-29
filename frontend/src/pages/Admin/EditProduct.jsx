@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import ProductVariations from './ProductVariations'
 import { toast } from 'react-toastify'
 import apiAdmin from '@/service/apiAdmin'
-
+import { AdminInput, AdminSelect, AdminTextarea, AdminButton, AdminCard } from '@/components/admin/ui'
 
 const EditProduct = ({ productId, onBack, fetchProducts }) => {
     const [productName, setProductName] = useState('')
@@ -238,104 +238,104 @@ const EditProduct = ({ productId, onBack, fetchProducts }) => {
 
 
     return (
-        <div className="flex flex-col lg:flex-row lg:space-x-8 h-full p-6 lg:p-8">
+        <div className="flex flex-col lg:flex-row lg:space-x-8 h-full p-6 lg:p-8 bg-slate-50 dark:bg-slate-950 min-h-screen text-slate-800 dark:text-slate-100">
             {/* Main content - Left side with scroll on desktop, full on mobile */}
             <div className="flex-1 lg:overflow-y-auto lg:pr-4 space-y-8 pb-8 scrollbar-hidden">
-                <div className="bg-white p-8 rounded-2xl shadow-xl space-y-6">
-                    <h3 className="text-xl font-bold text-gray-800">Thông tin cơ bản</h3>
-                    <label className="block space-y-2">
-                        <span className="text-gray-600">Tên sản phẩm</span>
-                        <input type="text" value={productName} onChange={(e) => setProductName(e.target.value)} placeholder="Nhập tên sản phẩm" className="w-full text-black px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200" />
-                    </label>
-                    <label className="block space-y-2">
-                        <span className="text-gray-600">Mô tả ngắn gọn về sản phẩm</span>
-                        <input type="text" value={shortDesc} onChange={(e) => setShortDesc(e.target.value)} placeholder="Mô tả ngắn gọn" className="w-full px-4 py-3 text-black border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200" />
-                    </label>
-                    <label className="block space-y-2">
-                        <span className="text-gray-600">Mô tả chi tiết</span>
-                        <textarea value={detailedDesc} onChange={(e) => setDetailedDesc(e.target.value)} placeholder="Mô tả chi tiết sản phẩm, chất liệu, cách sử dụng..." rows="5" className="w-full text-black px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200 resize-none"></textarea>
-                    </label>
-                </div>
+                <AdminCard title="Thông tin cơ bản" className="space-y-6">
+                    <AdminInput
+                        label="Tên sản phẩm"
+                        type="text"
+                        value={productName}
+                        onChange={(e) => setProductName(e.target.value)}
+                        placeholder="Nhập tên sản phẩm"
+                    />
+                    <AdminInput
+                        label="Mô tả ngắn gọn về sản phẩm"
+                        type="text"
+                        value={shortDesc}
+                        onChange={(e) => setShortDesc(e.target.value)}
+                        placeholder="Mô tả ngắn gọn"
+                    />
+                    <AdminTextarea
+                        label="Mô tả chi tiết"
+                        value={detailedDesc}
+                        onChange={(e) => setDetailedDesc(e.target.value)}
+                        placeholder="Mô tả chi tiết sản phẩm, chất liệu, cách sử dụng..."
+                        rows={5}
+                    />
+                </AdminCard>
 
                 {/* Price & Finance Section */}
-                <div className="bg-white p-8 rounded-2xl shadow-xl space-y-6">
-                    <h3 className="text-xl font-bold text-gray-800">Giá cả và tài chính</h3>
+                <AdminCard title="Giá cả và tài chính" className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <label className="block space-y-2">
-                            <span className="text-gray-600">Giá gốc</span>
-                            <input
-                                type="text" // Đổi thành text để sử dụng formatCurrency
-                                value={formatCurrency(originalPrice)}
-                                onChange={(e) => setOriginalPrice(parseCurrency(e.target.value))}
-                                placeholder="₫"
-                                className="w-full text-black px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
-                            />
-                        </label>
-                        <label className="block space-y-2">
-                            <span className="text-gray-600">Giá bán</span>
-                            <input
-                                type="text" // Đổi thành text để sử dụng formatCurrency
-                                value={formatCurrency(sellingPrice)}
-                                onChange={(e) => setSellingPrice(parseCurrency(e.target.value))}
-                                placeholder="₫"
-                                className="w-full text-black px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
-                            />
-                        </label>
-                        <label className="block space-y-2">
-                            <span className="text-gray-600">Phần trăm giảm giá</span>
-                            <input type="number" value={discount} onChange={(e) => setDiscount(e.target.value)} placeholder="%" className="w-full text-black px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200" />
-                        </label>
+                        <AdminInput
+                            label="Giá gốc"
+                            type="text"
+                            value={formatCurrency(originalPrice)}
+                            onChange={(e) => setOriginalPrice(parseCurrency(e.target.value))}
+                            placeholder="₫"
+                        />
+                        <AdminInput
+                            label="Giá bán"
+                            type="text"
+                            value={formatCurrency(sellingPrice)}
+                            onChange={(e) => setSellingPrice(parseCurrency(e.target.value))}
+                            placeholder="₫"
+                        />
+                        <AdminInput
+                            label="Phần trăm giảm giá"
+                            type="number"
+                            value={discount}
+                            onChange={(e) => setDiscount(e.target.value)}
+                            placeholder="%"
+                        />
                     </div>
-                </div>
+                </AdminCard>
 
                 {/* Product Type Section */}
-                <div className="bg-white p-8 rounded-2xl shadow-xl space-y-6">
-                    <h3 className="text-xl font-bold text-gray-800">Phân loại sản phẩm</h3>
+                <AdminCard title="Phân loại sản phẩm" className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <label className="block space-y-2">
-                            <span className="text-gray-600">Danh mục</span>
-                            <select
-                                value={category}
-                                onChange={(e) => setCategory(e.target.value)}
-                                className="w-full text-black px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
-                            >
-                                <option value="">Chọn danh mục</option>
-                                {categories.map((item) => (
-                                    <option key={item._id} value={item._id}>
-                                        {item.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </label>
-                        <label className="block space-y-2">
-                            <span className="text-gray-600">Bộ sưu tập (Collection)</span>
-                            <select
-                                value={collection}
-                                onChange={(e) => setCollection(e.target.value)}
-                                className="w-full text-black px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
-                            >
-                                <option value="">Không</option>
-                                {collections.map((item) => (
-                                    <option key={item._id} value={item._id}>
-                                        {item.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </label>
-                        <label className="block space-y-2">
-                            <span className="text-gray-600">Xuất xứ</span>
-                            <input type="text" value={origin} onChange={(e) => setOrigin(e.target.value)} placeholder="Nhập Xuất xứ " className="w-full text-black px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200" />
-                        </label>
+                        <AdminSelect
+                            label="Danh mục"
+                            value={category}
+                            onChange={(e) => setCategory(e.target.value)}
+                        >
+                            <option value="">Chọn danh mục</option>
+                            {categories.map((item) => (
+                                <option key={item._id} value={item._id}>
+                                    {item.name}
+                                </option>
+                            ))}
+                        </AdminSelect>
+                        <AdminSelect
+                            label="Bộ sưu tập (Collection)"
+                            value={collection}
+                            onChange={(e) => setCollection(e.target.value)}
+                        >
+                            <option value="">Không</option>
+                            {collections.map((item) => (
+                                <option key={item._id} value={item._id}>
+                                    {item.name}
+                                </option>
+                            ))}
+                        </AdminSelect>
+                        <AdminInput
+                            label="Xuất xứ"
+                            type="text"
+                            value={origin}
+                            onChange={(e) => setOrigin(e.target.value)}
+                            placeholder="Nhập Xuất xứ"
+                        />
                     </div>
-                    {/* ... (Phần Tags tương tự AddProduct) */}
-                    <label className="block space-y-2">
-                        <span className="text-gray-600">Tags</span>
-                        <div className="flex flex-wrap gap-2 mb-2">
+                    {/* Tags */}
+                    <div>
+                        <span className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Tags</span>
+                        <div className="flex flex-wrap gap-2 mb-3">
                             {tags.map((tag, index) => (
-                                <span key={index} className="flex items-center space-x-1 px-3 py-1 bg-pink-100 text-pink-700 rounded-full text-sm">
+                                <span key={index} className="flex items-center space-x-1 px-3 py-1 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-650 dark:text-indigo-405 rounded-full text-sm border border-indigo-100 dark:border-indigo-900/30">
                                     <span>{tag}</span>
-                                    <button onClick={() => handleRemoveTag(tag)} className="text-pink-500 hover:text-pink-800" aria-label={`Xóa tag ${tag}`}>
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                                    <button onClick={() => handleRemoveTag(tag)} className="text-indigo-500 hover:text-indigo-700" aria-label={`Xóa tag ${tag}`}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                                     </button>
                                 </span>
                             ))}
@@ -352,99 +352,103 @@ const EditProduct = ({ productId, onBack, fetchProducts }) => {
                                         handleAddTag()
                                     }
                                 }}
-                                className="w-full text-black px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
+                                className="w-full px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                             />
-                            <button onClick={handleAddTag} className="p-3 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+                            <button onClick={handleAddTag} className="p-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors shadow-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
                             </button>
                         </div>
-                    </label>
-                </div>
+                    </div>
+                </AdminCard>
 
                 {/* Product Attributes Section */}
                 <ProductVariations setStock={setStock} variations={variations} setVariations={setVariations} />
 
 
                 {/* Stock Management Section */}
-                <div className="bg-white p-8 rounded-2xl shadow-xl space-y-6">
-                    <h3 className="text-xl font-bold text-gray-800">Quản lý kho hàng</h3>
+                <AdminCard title="Quản lý kho hàng" className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <label className="block text-black space-y-2">
-                            <span className="text-gray-600">Số lượng tồn kho</span>
-                            <input type="number" value={stock} onChange={(e) => setStock(e.target.value)} placeholder="0" className="w-full px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200" />
-                        </label>
-                        <label className="block text-black space-y-2">
-                            <span className="text-gray-600">Mã (SKU) sản phẩm</span>
-                            <input type="text" value={sku} onChange={(e) => setSku(e.target.value)} placeholder="PF001" className="w-full px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200" />
-                        </label>
+                        <AdminInput
+                            label="Số lượng tồn kho"
+                            type="number"
+                            value={stock}
+                            onChange={(e) => setStock(e.target.value)}
+                            placeholder="0"
+                        />
+                        <AdminInput
+                            label="Mã (SKU) sản phẩm"
+                            type="text"
+                            value={sku}
+                            onChange={(e) => setSku(e.target.value)}
+                            placeholder="PF001"
+                        />
                     </div>
                     <div className="space-y-2">
-                        <span className="text-gray-600">Trạng thái</span>
+                        <span className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Trạng thái</span>
                         <div className="flex items-center space-x-6">
-                            <label className="inline-flex text-black items-center space-x-2">
-                                <input type="radio" name="status" value="Còn hàng" checked={status === 'Còn hàng'} onChange={(e) => setStatus(e.target.value)} className="text-pink-600 focus:ring-pink-500" />
+                            <label className="inline-flex items-center space-x-2 text-sm text-slate-700 dark:text-slate-300 cursor-pointer">
+                                <input type="radio" name="status" value="Còn hàng" checked={status === 'Còn hàng'} onChange={(e) => setStatus(e.target.value)} className="text-indigo-600 focus:ring-indigo-500 bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700" />
                                 <span>Còn hàng</span>
                             </label>
-                            <label className="inline-flex text-black items-center space-x-2">
-                                <input type="radio" name="status" value="Hết hàng" checked={status === 'Hết hàng'} onChange={(e) => setStatus(e.target.value)} className="text-pink-600 focus:ring-pink-500" />
+                            <label className="inline-flex items-center space-x-2 text-sm text-slate-700 dark:text-slate-300 cursor-pointer">
+                                <input type="radio" name="status" value="Hết hàng" checked={status === 'Hết hàng'} onChange={(e) => setStatus(e.target.value)} className="text-indigo-600 focus:ring-indigo-500 bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700" />
                                 <span>Hết hàng</span>
                             </label>
-                            <label className="inline-flex text-black items-center space-x-2">
-                                <input type="radio" name="status" value="Ngừng bán" checked={status === 'Ngừng bán'} onChange={(e) => setStatus(e.target.value)} className="text-pink-600 focus:ring-pink-500" />
+                            <label className="inline-flex items-center space-x-2 text-sm text-slate-700 dark:text-slate-300 cursor-pointer">
+                                <input type="radio" name="status" value="Ngừng bán" checked={status === 'Ngừng bán'} onChange={(e) => setStatus(e.target.value)} className="text-indigo-600 focus:ring-indigo-500 bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700" />
                                 <span>Ngừng bán</span>
                             </label>
                         </div>
                     </div>
-                </div>
+                </AdminCard>
 
                 {/* Image Section */}
-                <div className="bg-white p-8 rounded-2xl shadow-xl space-y-6">
-                    <h3 className="text-xl font-bold text-gray-800">Hình ảnh sản phẩm</h3>
-                    <h4 className="text-lg font-semibold text-gray-700">Hình ảnh chính</h4>
-                    <div className="border border-dashed border-pink-400 p-8 rounded-lg flex flex-col items-center justify-center text-center space-y-4 relative">
+                <AdminCard title="Hình ảnh sản phẩm" className="space-y-6">
+                    <h4 className="text-sm font-bold text-slate-500 uppercase tracking-wider">Hình ảnh chính</h4>
+                    <div className="border border-dashed border-slate-300 dark:border-slate-700 p-8 rounded-2xl flex flex-col items-center justify-center text-center space-y-4 relative bg-slate-50/50 dark:bg-slate-900/50">
                         {mainImagePreview ? (
                             <>
-                                <img src={mainImagePreview} alt="Main Preview" className="w-48 h-48 object-cover rounded-lg" />
+                                <img src={mainImagePreview} alt="Main Preview" className="w-48 h-48 object-cover rounded-xl shadow-md" />
                                 <button
                                     onClick={handleRemoveMainImage}
-                                    className="absolute top-2 right-2 p-1 bg-white rounded-full text-gray-600 hover:bg-gray-200 transition-colors"
+                                    className="absolute top-4 right-4 p-1.5 bg-white dark:bg-slate-800 rounded-full text-slate-500 hover:text-slate-750 dark:hover:text-slate-300 shadow-md transition-colors"
                                     aria-label="Xóa ảnh chính"
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                                 </button>
-                                <label className="cursor-pointer text-pink-600 hover:underline">
+                                <label className="cursor-pointer text-indigo-600 dark:text-indigo-400 hover:underline text-sm font-semibold">
                                     Thay đổi ảnh
                                     <input type="file" onChange={handleFileChange} className="hidden" accept="image/*" />
                                 </label>
                             </>
                         ) : (
                             <>
-                                <svg className="w-12 h-12 text-pink-600" fill="currentColor" viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4c-3.72 0-6.85 2.59-7.46 6.04-.32 1.94.49 3.82 1.83 5.06L7 16h10.42c1.78-.11 3.25-1.4 3.5-3.17.2-1.46-.23-2.91-1.57-3.79zM15 13l-3-3-3 3h2v4h2v-4h2z"></path></svg>
-                                <p className="text-gray-600">Kéo thả hình ảnh vào đây hoặc</p>
-                                <label className="px-6 py-3 bg-pink-600 text-white rounded-lg font-semibold cursor-pointer hover:bg-pink-700 transition-colors">
+                                <svg className="w-12 h-12 text-slate-400 dark:text-slate-600" fill="currentColor" viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4c-3.72 0-6.85 2.59-7.46 6.04-.32 1.94.49 3.82 1.83 5.06L7 16h10.42c1.78-.11 3.25-1.4 3.5-3.17.2-1.46-.23-2.91-1.57-3.79zM15 13l-3-3-3 3h2v4h2v-4h2z"></path></svg>
+                                <p className="text-sm text-slate-500">Kéo thả hình ảnh vào đây hoặc</p>
+                                <label className="px-5 py-2.5 bg-indigo-600 text-white rounded-xl font-bold cursor-pointer hover:bg-indigo-700 transition-colors text-xs shadow-sm">
                                     Chọn file
                                     <input type="file" onChange={handleFileChange} className="hidden" accept="image/*" />
                                 </label>
                             </>
                         )}
-                        <p className="text-sm text-gray-500">PNG, JPG, JPEG tối đa 5MB</p>
+                        <p className="text-xs text-slate-400">PNG, JPG, JPEG tối đa 5MB</p>
                     </div>
 
-                    <h4 className="text-lg font-semibold text-gray-700 mt-8">Hình ảnh phụ <span className="text-gray-500 text-sm">(tối đa 5 ảnh)</span></h4>
+                    <h4 className="text-sm font-bold text-slate-500 uppercase tracking-wider mt-8">Hình ảnh phụ <span className="text-slate-400 text-xs">(tối đa 5 ảnh)</span></h4>
                     <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                         {subImageFiles.map((image, index) => (
                             <div
                                 key={index}
-                                className="relative border border-dashed border-gray-300 p-4 rounded-lg flex flex-col items-center justify-center space-y-2 h-32"
+                                className="relative border border-slate-200 dark:border-slate-800 p-2 rounded-2xl flex flex-col items-center justify-center space-y-2 h-32 bg-slate-50/50 dark:bg-slate-900/50 overflow-hidden group"
                             >
                                 <img
                                     src={image}
                                     alt={`Sub image ${index + 1}`}
-                                    className="w-full h-full object-cover rounded-lg"
+                                    className="w-full h-full object-cover rounded-xl"
                                 />
                                 <button
                                     onClick={() => handleRemoveSubImage(index)}
-                                    className="absolute top-2 right-2 p-1 bg-white rounded-full text-gray-600 hover:bg-gray-200 transition-colors"
+                                    className="absolute top-2.5 right-2.5 p-1 bg-white dark:bg-slate-800 rounded-full text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none"
                                         viewBox="0 0 24 24" stroke="currentColor">
@@ -457,92 +461,92 @@ const EditProduct = ({ productId, onBack, fetchProducts }) => {
 
                         {/* Ô upload ảnh luôn hiển thị nếu chưa đạt 5 ảnh */}
                         {subImageFiles.length < 5 && (
-                            <label className="border border-dashed border-gray-300 p-4 rounded-lg flex flex-col items-center justify-center space-y-2 h-32 cursor-pointer">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-400" fill="none"
+                            <label className="border border-dashed border-slate-300 dark:border-slate-700 p-4 rounded-2xl flex flex-col items-center justify-center space-y-1.5 h-32 cursor-pointer bg-slate-50/30 dark:bg-slate-900/30 hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-slate-400 dark:text-slate-600" fill="none"
                                     viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                                         d="M12 4v16m8-8H4" />
                                 </svg>
-                                <span className="text-sm text-gray-500">Thêm ảnh</span>
+                                <span className="text-xs font-semibold text-slate-500">Thêm ảnh</span>
                                 <input type="file" onChange={handleSubImagesUpload} className="hidden" />
                             </label>
                         )}
                     </div>
-                </div>
+                </AdminCard>
 
                 {/* Action Buttons */}
-                <div className="flex flex-col md:flex-row justify-start space-y-4 md:space-y-0 md:space-x-4 mt-8">
-                    <button onClick={handldeSubmitProduct} className="px-6 py-3 bg-pink-600 text-white rounded-xl font-semibold hover:bg-pink-700 transition-colors">
+                <div className="flex flex-col md:flex-row justify-start gap-4 mt-8">
+                    <AdminButton onClick={handldeSubmitProduct} variant="primary" size="md">
                         <span className="flex items-center space-x-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M5 2a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V4a2 2 0 00-2-2H5zM10 5a1 1 0 00-1 1v3H6a1 1 0 100 2h3v3a1 1 0 102 0v-3h3a1 1 0 100-2h-3V6a1 1 0 00-1-1z" /></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M5 2a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V4a2 2 0 00-2-2H5zM10 5a1 1 0 00-1 1v3H6a1 1 0 100 2h3v3a1 1 0 102 0v-3h3a1 1 0 100-2h-3V6a1 1 0 00-1-1z" /></svg>
                             <span>Cập nhật sản phẩm</span>
                         </span>
-                    </button>
-                    <button onClick={onBack} className="px-6 py-3 bg-white text-gray-600 rounded-xl font-semibold border border-gray-300 hover:bg-gray-100 transition-colors">
+                    </AdminButton>
+                    <AdminButton onClick={onBack} variant="ghost" size="md">
                         Hủy
-                    </button>
+                    </AdminButton>
                 </div>
             </div>
 
             {/* Preview Section - Right side, fixed on desktop */}
             <div className="w-full lg:w-96 flex-shrink-0 space-y-6 mt-8 lg:mt-0">
-                <div className="bg-white p-8 rounded-2xl shadow-xl space-y-4">
-                    <h3 className="text-xl font-bold text-gray-800">Xem trước sản phẩm</h3>
-                    <div className="w-full h-64 bg-gray-200 rounded-xl flex items-center justify-center relative">
+                <div className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+                    <h3 className="text-base font-bold text-slate-800 dark:text-slate-200">Xem trước sản phẩm</h3>
+                    <div className="w-full h-64 bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center border border-slate-200/60 dark:border-slate-700/60 relative">
                         {mainImagePreview ? (
                             <>
-                                <img src={mainImagePreview} alt="Main Preview" className="w-48 h-48 object-cover rounded-lg" />
+                                <img src={mainImagePreview} alt="Main Preview" className="w-full h-full object-cover rounded-xl" />
                             </>
                         ) : (
-                            <span className="text-gray-400">Hình ảnh sản phẩm</span>
+                            <span className="text-sm text-slate-400">Hình ảnh sản phẩm</span>
                         )}
                     </div>
                     <div className="space-y-1">
-                        <p className="font-semibold text-gray-800">{productName}</p>
-                        <p className="text-sm text-gray-500">{shortDesc}</p>
+                        <p className="font-bold text-slate-800 dark:text-slate-200">{productName || 'Tên sản phẩm'}</p>
+                        <p className="text-xs text-slate-400 dark:text-slate-500 line-clamp-2">{shortDesc || 'Mô tả ngắn'}</p>
                     </div>
-                  <div className="flex items-center space-x-2">
-                        <p className="text-lg font-bold text-pink-600">{formatCurrency(sellingPrice)}₫</p>
-                        <p className="text-sm text-gray-400 line-through">{formatCurrency(originalPrice)}₫</p>
+                    <div className="flex items-center space-x-2 pt-2 border-t border-slate-100 dark:border-slate-850">
+                        <p className="text-base font-extrabold text-indigo-600 dark:text-indigo-400">{formatCurrency(sellingPrice)}₫</p>
+                        <p className="text-xs text-slate-400 line-through">{formatCurrency(originalPrice)}₫</p>
                     </div>
 
-                    <div className="flex items-center justify-between text-sm text-gray-500">
+                    <div className="flex items-center justify-between text-xs text-slate-500 pt-2">
                         <span>Tồn kho: </span>
-                        <span>{getTotalStock()}</span>
+                        <span className="font-bold text-slate-800 dark:text-slate-200">{getTotalStock()}</span>
                     </div>
-                    <div className="flex items-center justify-between text-sm text-gray-500">
+                    <div className="flex items-center justify-between text-xs text-slate-500">
                         <span>SKU: </span>
-                        <span>{sku || '-'}</span>
+                        <span className="font-bold text-slate-800 dark:text-slate-200">{sku || '-'}</span>
                     </div>
-                    <div className="flex items-center justify-between text-sm text-gray-500">
+                    <div className="flex items-center justify-between text-xs text-slate-500">
                         <span>Trạng thái: </span>
-                        <span className={status === 'Còn hàng' ? 'text-green-600' : 'text-red-600'}>
+                        <span className={`font-bold ${status === 'Còn hàng' ? 'text-green-600 dark:text-green-400' : 'text-red-650 dark:text-red-400'}`}>
                             {status}
                         </span>
                     </div>
                 </div>
 
-                <div className="bg-white p-8 rounded-2xl shadow-xl space-y-4 mt-8">
-                    <h3 className="text-xl font-bold text-gray-800">Hướng dẫn</h3>
-                    <ul className="text-sm text-gray-600 space-y-2">
+                <div className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+                    <h3 className="text-base font-bold text-slate-800 dark:text-slate-200">Hướng dẫn</h3>
+                    <ul className="text-xs text-slate-500 dark:text-slate-400 space-y-2.5">
                         <li className="flex items-start space-x-2">
-                            <span className="text-pink-600 font-bold">&#x2022;</span>
+                            <span className="text-indigo-600 font-bold">&#x2022;</span>
                             <span>Điền đầy đủ thông tin cơ bản của sản phẩm.</span>
                         </li>
                         <li className="flex items-start space-x-2">
-                            <span className="text-pink-600 font-bold">&#x2022;</span>
+                            <span className="text-indigo-600 font-bold">&#x2022;</span>
                             <span>Thiết lập giá bán và giá gốc hợp lý.</span>
                         </li>
                         <li className="flex items-start space-x-2">
-                            <span className="text-pink-600 font-bold">&#x2022;</span>
+                            <span className="text-indigo-600 font-bold">&#x2022;</span>
                             <span>Chọn danh mục và thêm tags phù hợp.</span>
                         </li>
                         <li className="flex items-start space-x-2">
-                            <span className="text-pink-600 font-bold">&#x2022;</span>
+                            <span className="text-indigo-600 font-bold">&#x2022;</span>
                             <span>Cung cấp hình ảnh chất lượng cao.</span>
                         </li>
                         <li className="flex items-start space-x-2">
-                            <span className="text-pink-600 font-bold">&#x2022;</span>
+                            <span className="text-indigo-600 font-bold">&#x2022;</span>
                             <span>Kiểm tra lại thông tin trước khi lưu.</span>
                         </li>
                     </ul>

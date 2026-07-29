@@ -8,38 +8,34 @@ import { CartContext } from '@/context/CartContext'
 
 const CartPage = () => {
   const navigate = useNavigate()
-  const [cart, setCarts] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
-  const { fetchCart, setCart } = useContext(CartContext)
+  const { cart, setCart, fetchCart } = useContext(CartContext)
   const [qtyInput, setQtyInput] = useState({});
 
-  const fetchCarts = useCallback(async () => {
-    setIsLoading(true)
-    try {
-      const res = await api.get('/cart')
-      setCarts(res.data)
-      setCart(res.data)
-    } catch (err) {
-      console.error(err)
-      toast.error('Lấy giỏ hàng thất bại')
-    } finally {
-      setTimeout(() => setIsLoading(false), 800)
-    }
-  }, [setCart])
-
+  // Chỉ fetch khi mount và context chưa có dữ liệu → hạn chế gọi API
   useEffect(() => {
-    fetchCarts()
-  }, [fetchCarts])
+    if (cart === null) {
+      setIsLoading(true)
+      fetchCart().finally(() => setTimeout(() => setIsLoading(false), 500))
+    } else {
+      setIsLoading(false)
+    }
+  }, [])  // eslint-disable-line
+
+  // Tự cập nhật khi CartContext thay đổi (chatbot thêm giỏ, v.v.)
+  useEffect(() => {
+    if (cart !== null) setIsLoading(false)
+  }, [cart])
 
   const removeItem = useCallback(async (itemId) => {
     try {
       await api.delete(`/cart/remove/${itemId}`)
       toast.success('Đã xóa sản phẩm khỏi giỏ hàng')
-      fetchCarts()
+      fetchCart()
     } catch (err) {
       toast.error('Xóa thất bại')
     }
-  }, [fetchCarts])
+  }, [fetchCart])
 
   const updateQuantity = useCallback(async (itemId, newQuantity) => {
     if (newQuantity <= 0) {
@@ -47,53 +43,39 @@ const CartPage = () => {
       return
     }
 
-    // Lấy item hiện tại
-    const currentItem = cart.items.find(i => i._id === itemId)
+    const currentItem = cart?.items?.find(i => i._id === itemId)
     if (!currentItem) return
 
-    // Lấy stock thực tế từ biến thể
-    const currentVariant = currentItem.product.variations.find(
+    const currentVariant = currentItem.product?.variations?.find(
       v => v.color === currentItem.color && v.size === currentItem.size
     )
     const maxStock = currentVariant ? currentVariant.stock : 0
 
-    // Nếu nhập vượt stock, ép về maxStock và thông báo
     if (newQuantity > maxStock) {
       newQuantity = maxStock
       toast.warning(`Chỉ còn ${maxStock} sản phẩm, đã điều chỉnh số lượng`)
     }
 
     try {
-      const res = await api.patch(`/cart/update/${itemId}`, { quantity: newQuantity })
+      await api.patch(`/cart/update/${itemId}`, { quantity: newQuantity })
 
-      // Cập nhật cart state
-      setCarts(prev => {
+      // Optimistic update CartContext trực tiếp, không cần gọi API lại
+      setCart(prev => {
+        if (!prev) return prev
         const updatedItems = prev.items.map(item =>
           item._id === itemId ? { ...item, quantity: newQuantity } : item
         )
         const updatedSubtotal = updatedItems.reduce(
-          (sum, item) => sum + item.product.sellingPrice * item.quantity,
+          (sum, item) => sum + (item.price ?? item.product?.sellingPrice ?? 0) * item.quantity,
           0
         )
-        return {
-          ...prev,
-          items: updatedItems,
-          subtotal: updatedSubtotal,
-          total: updatedSubtotal + (prev.shipping || 0)
-        }
+        return { ...prev, items: updatedItems, subtotal: updatedSubtotal, total: updatedSubtotal + (prev.shipping || 0) }
       })
-
-      // Đồng bộ CartContext
-      setCart(res.data)
-
-      // **Cập nhật luôn qtyInput để input hiển thị đúng**
       setQtyInput(prev => ({ ...prev, [itemId]: String(newQuantity) }))
     } catch (err) {
       toast.error(err?.response?.data?.message || 'Cập nhật thất bại')
     }
   }, [cart, removeItem, setCart])
-
-
 
   const cartItems = useMemo(() => cart?.items || [], [cart?.items])
   const subtotal = useMemo(() => cart?.subtotal || 0, [cart?.subtotal])
@@ -289,27 +271,22 @@ const CartPage = () => {
 
                               // Cập nhật quantity lên server
                               try {
-                                const res = await api.patch(`/cart/update/${item._id}`, { quantity: num });
+                                await api.patch(`/cart/update/${item._id}`, { quantity: num });
 
-                                // Đồng bộ state local với server và input
-                                setCarts(prev => {
+                                // Optimistic update CartContext
+                                setCart(prev => {
+                                  if (!prev) return prev
                                   const updatedItems = prev.items.map(i =>
                                     i._id === item._id ? { ...i, quantity: num } : i
                                   );
                                   const updatedSubtotal = updatedItems.reduce(
-                                    (sum, i) => sum + i.product.sellingPrice * i.quantity,
+                                    (sum, i) => sum + (i.price ?? i.product?.sellingPrice ?? 0) * i.quantity,
                                     0
                                   );
-                                  return {
-                                    ...prev,
-                                    items: updatedItems,
-                                    subtotal: updatedSubtotal,
-                                    total: updatedSubtotal + (prev.shipping || 0)
-                                  };
+                                  return { ...prev, items: updatedItems, subtotal: updatedSubtotal, total: updatedSubtotal + (prev.shipping || 0) };
                                 });
 
                                 setQtyInput(prev => ({ ...prev, [item._id]: String(num) }));
-                                setCart(res.data); // nếu bạn muốn đồng bộ CartContext
                               } catch (err) {
                                 toast.error(err?.response?.data?.message || 'Cập nhật thất bại');
                               }

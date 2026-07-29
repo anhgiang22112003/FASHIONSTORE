@@ -2,11 +2,9 @@ import React, { useEffect, useState } from "react"
 import apiAdmin from "@/service/apiAdmin"
 import {
   PlusIcon,
-  MagnifyingGlassIcon,
   CheckIcon,
   PhotoIcon,
   UserIcon,
-  FunnelIcon,
   XMarkIcon,
   ComputerDesktopIcon
 } from "@heroicons/react/24/outline"
@@ -16,6 +14,7 @@ import CartSidebar from "@/components/CartSidebar"
 import VoucherModal from "@/components/VoucherModal"
 import BankPaymentModal from "@/components/BankPaymentSection"
 import BankPaymentPos from "@/components/BankPaymentPos"
+import { PageHeader, Toolbar, FilterPanel, Pagination, AdminButton } from "@/components/admin/ui"
 
 const PosPage = () => {
   const [products, setProducts] = useState([])
@@ -68,6 +67,7 @@ const PosPage = () => {
   const [showVoucherModal, setShowVoucherModal] = useState(false)
   const [page, setPage] = useState(1)
   const [totalPage, setTotalPage] = useState(0)
+  const [totalProducts, setTotalProducts] = useState(0)
   const [debouncedSearch, setDebouncedSearch] = useState(searchTerm)
 
   useEffect(() => {
@@ -103,6 +103,7 @@ const PosPage = () => {
       const res = await apiAdmin.get("/products", { params })
       setProducts(res.data.products || [])
       setTotalPage(res.data.totalPages || 1)
+      setTotalProducts(res.data.total || 0)
     } catch (err) {
       console.error("Error fetching products:", err)
     }
@@ -476,31 +477,31 @@ const PosPage = () => {
     <div style={{ backgroundColor: "var(--bg-color)", color: "var(--text-color)" }} className="min-h-screen from-pink-50 to-purple-50 p-4">
       <div className="max-w-full mx-auto">
         {/* Header */}
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold mb-1">Bán hàng tại chỗ (POS)</h1>
-            <p className="text-sm text-gray-500">Quản lý bán hàng trực tiếp tại cửa hàng</p>
-          </div>
-          <button
+        <PageHeader
+          title="Bán hàng tại chỗ (POS)"
+          description="Quản lý bán hàng trực tiếp tại cửa hàng"
+        >
+          <AdminButton
             onClick={() => window.open('/customer-display', '_blank', 'width=1024,height=768,toolbar=no,menubar=no')}
-            className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl font-semibold shadow-lg hover:from-indigo-600 hover:to-purple-700 transition-all duration-200 transform hover:scale-105"
+            variant="primary"
+            size="md"
           >
-            <ComputerDesktopIcon className="w-5 h-5" />
+            <ComputerDesktopIcon className="w-5 h-5 mr-2" />
             Màn hình khách hàng
-          </button>
-        </div>
+          </AdminButton>
+        </PageHeader>
 
         {/* Staff & Customer Selection */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           {/* Staff Selection */}
-          <div className="bg-white rounded-xl p-4 shadow-lg border border-gray-100">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+          <div className="bg-white dark:bg-slate-900 rounded-xl p-4 shadow-sm border border-slate-200 dark:border-slate-800">
+            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-350 mb-2">
               Nhân viên bán hàng *
             </label>
             <select
               value={selectedStaff}
               onChange={(e) => setSelectedStaff(e.target.value)}
-              className="w-full px-3 py-2 border text-black border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+              className="w-full px-3 py-2 border text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-800 rounded-lg focus:ring-2 focus:ring-pink-500 bg-white dark:bg-slate-900"
             >
               <option value="">Chọn nhân viên...</option>
               {staffList.map(staff => (
@@ -512,8 +513,8 @@ const PosPage = () => {
           </div>
 
           {/* Customer Selection */}
-          <div className="bg-white rounded-xl p-4 shadow-lg border border-gray-100">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+          <div className="bg-white dark:bg-slate-900 rounded-xl p-4 shadow-sm border border-slate-200 dark:border-slate-800">
+            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-350 mb-2">
               Khách hàng (tùy chọn)
             </label>
             <div className="flex gap-2">
@@ -523,7 +524,7 @@ const PosPage = () => {
                   const customer = customers.find(c => c._id === e.target.value)
                   setSelectedCustomer(customer || null)
                 }}
-                className="flex-1 px-3 py-2 border text-black border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                className="flex-1 px-3 py-2 border text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-800 rounded-lg focus:ring-2 focus:ring-pink-500 bg-white dark:bg-slate-900"
               >
                 <option value="">Khách vãng lai</option>
                 {customers?.map(customer => (
@@ -532,13 +533,14 @@ const PosPage = () => {
                   </option>
                 ))}
               </select>
-              <button
+              <AdminButton
                 onClick={() => setShowCustomerForm(true)}
-                className="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 flex items-center gap-2"
+                variant="secondary"
+                size="sm"
               >
-                <UserIcon className="w-4 h-4" />
+                <UserIcon className="w-4 h-4 mr-1.5" />
                 Thêm
-              </button>
+              </AdminButton>
             </div>
           </div>
         </div>
@@ -546,58 +548,48 @@ const PosPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Danh sách sản phẩm */}
           <div className="lg:col-span-3">
-            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
-              {/* Search & Filter Header */}
-              <div className="p-5 border-b border-gray-100 bg-gradient-to-r from-pink-500 to-purple-600">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-semibold text-white">Danh sách sản phẩm</h2>
-                  <span className="bg-white/20 text-white text-xs font-medium px-3 py-1 rounded-full">{products.length} sản phẩm</span>
-                </div>
-                <div className="flex gap-3">
-                  <div className="relative flex-1">
-                    <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <input
-                      type="text"
-                      placeholder="Tìm kiếm sản phẩm..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full text-black pl-9 pr-4 py-2.5 rounded-xl border-0 focus:ring-2 focus:ring-white/50 transition-all bg-white/95 text-sm"
-                    />
-                  </div>
-                  <button
-                    onClick={() => setShowFilters(!showFilters)}
-                    className={`px-4 py-2.5 rounded-xl transition-all flex items-center gap-2 text-sm font-medium ${
-                      showFilters ? 'bg-white text-pink-600' : 'bg-white/20 text-white hover:bg-white/30'
-                    }`}
-                  >
-                    <FunnelIcon className="w-4 h-4" />
-                    Lọc
-                  </button>
-                </div>
-                {showFilters && (
-                  <div className="mt-3 p-3 bg-white/10 rounded-xl grid grid-cols-2 gap-2">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
+              {/* Search & Filter Toolbar */}
+              <div className="p-5 border-b border-slate-100 dark:border-slate-800">
+                <Toolbar
+                  searchValue={searchTerm}
+                  onSearchChange={(val) => setSearchTerm(val)}
+                  searchPlaceholder="Tìm kiếm sản phẩm..."
+                  onFilterToggle={() => setShowFilters(!showFilters)}
+                  filterActive={showFilters}
+                  filterCount={Object.values(filters).filter(Boolean).length}
+                  actions={
+                    <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                      {totalProducts} sản phẩm
+                    </span>
+                  }
+                />
+
+                <FilterPanel isOpen={showFilters} onReset={() => setFilters({ category: "", collection: "", status: "", minPrice: "", maxPrice: "", sortBy: "" })}>
+                  <FilterPanel.Field label="Trạng thái">
                     <select
                       value={filters.status}
                       onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-                      className="px-3 py-2 text-black rounded-lg text-sm bg-white/95 border-0 focus:ring-2 focus:ring-white/50"
                     >
                       <option value="">Tất cả trạng thái</option>
                       <option value="Còn hàng">Còn hàng</option>
                       <option value="Hết hàng">Hết hàng</option>
                     </select>
+                  </FilterPanel.Field>
+
+                  <FilterPanel.Field label="Sắp xếp">
                     <select
                       value={filters.sortBy}
                       onChange={(e) => setFilters({ ...filters, sortBy: e.target.value })}
-                      className="px-3 py-2 text-black rounded-lg text-sm bg-white/95 border-0 focus:ring-2 focus:ring-white/50"
                     >
-                      <option value="">Sắp xếp</option>
+                      <option value="">Mặc định</option>
                       <option value="name">Tên A-Z</option>
                       <option value="-name">Tên Z-A</option>
                       <option value="sellingPrice">Giá thấp - cao</option>
                       <option value="-sellingPrice">Giá cao - thấp</option>
                     </select>
-                  </div>
-                )}
+                  </FilterPanel.Field>
+                </FilterPanel>
               </div>
 
               {/* Product Grid */}
@@ -719,29 +711,12 @@ const PosPage = () => {
                 )}
 
                 {/* Pagination */}
-                {totalPage > 1 && (
-                  <div className="flex justify-center items-center mt-5 gap-2">
-                    <button
-                      onClick={() => setPage(prev => Math.max(prev - 1, 1))}
-                      disabled={page === 1}
-                      className="px-3 py-1.5 border rounded-lg bg-gray-50 hover:bg-gray-100 disabled:opacity-40 text-sm"
-                    >← Trước</button>
-                    {Array.from({ length: totalPage }, (_, i) => (
-                      <button
-                        key={i}
-                        onClick={() => setPage(i + 1)}
-                        className={`px-3 py-1.5 border rounded-lg text-sm font-semibold ${
-                          page === i + 1 ? 'bg-pink-600 text-white border-pink-600' : 'bg-white hover:bg-gray-50'
-                        }`}
-                      >{i + 1}</button>
-                    ))}
-                    <button
-                      onClick={() => setPage(prev => Math.min(prev + 1, totalPage))}
-                      disabled={page === totalPage}
-                      className="px-3 py-1.5 border rounded-lg bg-gray-50 hover:bg-gray-100 disabled:opacity-40 text-sm"
-                    >Sau →</button>
-                  </div>
-                )}
+                <Pagination
+                  page={page}
+                  total={totalProducts}
+                  limit={20}
+                  onPageChange={(p) => setPage(p)}
+                />
               </div>
             </div>
           </div>

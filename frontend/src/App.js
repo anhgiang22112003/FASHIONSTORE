@@ -5,8 +5,8 @@ import Header from "./components/fashion/Header"
 import Footer from "./components/fashion/Footer"
 import { toast, ToastContainer } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
-import { AdminRoute } from "./service/AdminRoute"
-import { AuthProvider } from "./context/Authcontext"
+import { AdminRoute } from "./guards/AdminRoute"
+import { AuthProvider } from "./context/AuthContext"
 import { CartProvider, CartContext } from "./context/CartContext"
 import OrderHistory from "./pages/OrderHistory"
 import { socket } from "./service/socket"
@@ -32,7 +32,7 @@ const Wishlist = lazy(() => import("./pages/Wishlist"))
 const AuthPage = lazy(() => import("./pages/AuthPage"))
 const CollectionPage = lazy(() => import("./pages/Collection"))
 const ProductCategoryPage = lazy(() => import("./pages/Category"))
-const AdminLayout = lazy(() => import("./pages/Admin/Adminlayout"))
+const AdminLayout = lazy(() => import("./pages/Admin/AdminLayout"))
 const UserProfile = lazy(() => import("./pages/UserProfile"))
 const ResetPassword = lazy(() => import("./pages/ResetPassword"))
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"))

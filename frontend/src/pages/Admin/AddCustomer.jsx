@@ -1,7 +1,17 @@
 import React, { useEffect, useState } from 'react'
-import { UserCircleIcon, CheckCircleIcon, XMarkIcon, ArrowLeftIcon } from '@heroicons/react/24/solid'
 import { toast } from 'react-toastify'
 import apiAdmin from '@/service/apiAdmin'
+import {
+  ArrowLeftIcon, UserCircleIcon, CheckCircleIcon, XMarkIcon,
+  UserIcon, EnvelopeIcon, PhoneIcon, CalendarIcon, MapPinIcon,
+  TagIcon, Cog6ToothIcon
+} from '@heroicons/react/24/outline'
+import {
+  AdminInput, AdminSelect, AdminTextarea, AdminCard, AdminButton
+} from '@/components/admin/ui'
+
+// ─────────────────────────────────────────────
+const PRESET_TAGS = ['Vip', 'Đã mua', 'Chưa mua', 'Phụ nữ', 'Đàn ông', 'Gucci']
 
 const AddCustomerPage = ({ onBack, refreshCustomers }) => {
   const [formData, setFormData] = useState({
@@ -26,351 +36,340 @@ const AddCustomerPage = ({ onBack, refreshCustomers }) => {
   const [provinces, setProvinces] = useState([])
   const [districts, setDistricts] = useState([])
   const [wards, setWards] = useState([])
+  const [isSaving, setIsSaving] = useState(false)
 
-  // ✅ Lấy danh sách tỉnh/thành Việt Nam khi mở form
- useEffect(() => {
+  useEffect(() => {
     import('@/data/provinces.json')
       .then((module) => setProvinces(module.default))
-      .catch((err) => console.error('Lỗi tải tỉnh thành từ JSON:', err));
-  }, []);
+      .catch((err) => console.error('Lỗi tải tỉnh thành từ JSON:', err))
+  }, [])
 
-  // ✅ Khi chọn tỉnh thì load quận/huyện
   useEffect(() => {
     if (formData.province) {
-      const province = provinces.find((p) => p.name === formData.province);
-      setDistricts(province?.districts || []);
-      setFormData((prev) => ({ ...prev, district: '', ward: '' }));
-      setWards([]);
+      const province = provinces.find((p) => p.name === formData.province)
+      setDistricts(province?.districts || [])
+      setFormData((prev) => ({ ...prev, district: '', ward: '' }))
+      setWards([])
     } else {
-      setDistricts([]);
-      setWards([]);
-      setFormData((prev) => ({ ...prev, district: '', ward: '' }));
+      setDistricts([])
+      setWards([])
+      setFormData((prev) => ({ ...prev, district: '', ward: '' }))
     }
-  }, [formData.province, provinces]);
+  }, [formData.province, provinces])
 
-  // ✅ Khi chọn quận/huyện thì load phường/xã
   useEffect(() => {
     if (formData.district) {
-      const district = districts.find((d) => d.name === formData.district);
-      setWards(district?.wards || []);
-      setFormData((prev) => ({ ...prev, ward: '' }));
+      const district = districts.find((d) => d.name === formData.district)
+      setWards(district?.wards || [])
+      setFormData((prev) => ({ ...prev, ward: '' }))
     } else {
-      setWards([]);
-      setFormData((prev) => ({ ...prev, ward: '' }));
+      setWards([])
+      setFormData((prev) => ({ ...prev, ward: '' }))
     }
-  }, [formData.district, districts]);
+  }, [formData.district, districts])
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target
-    setFormData({
-      ...formData,
-      [name]: type === 'checkbox' ? checked : value,
-    })
+    setFormData({ ...formData, [name]: type === 'checkbox' ? checked : value })
   }
 
   const handleTagClick = (tag) => {
-    setFormData((prev) => {
-      if (prev.tags.includes(tag)) {
-        return { ...prev, tags: prev.tags.filter((t) => t !== tag) }
-      } else {
-        return { ...prev, tags: [...prev.tags, tag] }
-      }
-    })
+    setFormData((prev) => ({
+      ...prev,
+      tags: prev.tags.includes(tag) ? prev.tags.filter((t) => t !== tag) : [...prev.tags, tag],
+    }))
   }
 
-  const isFormValid = () => {
-    return formData.firstName.trim() !== '' && formData.lastName.trim() !== '' && formData.email.trim() !== ''
-  }
+  const isFormValid = () =>
+    formData.firstName.trim() !== '' &&
+    formData.lastName.trim() !== '' &&
+    formData.email.trim() !== ''
 
   const handleSave = async () => {
+    if (!isFormValid()) { toast.warn('Vui lòng điền đầy đủ họ, tên và email.'); return }
+    setIsSaving(true)
     try {
       const response = await apiAdmin.post('/users', formData)
       if (response.status === 201) {
-        toast.success("Thêm khách hàng thành công!")
-        await refreshCustomers() // Tải lại danh sách khách hàng
+        toast.success('Thêm khách hàng thành công!')
+        await refreshCustomers()
         onBack()
       } else {
-        toast.error("Thêm khách hàng thất bại!")
+        toast.error('Thêm khách hàng thất bại!')
       }
     } catch (error) {
-      toast.error(error?.response?.data?.message || "Đã có lỗi xảy ra!")
+      toast.error(error?.response?.data?.message || 'Đã có lỗi xảy ra!')
+    } finally {
+      setIsSaving(false)
     }
-
   }
 
-
   return (
-    <div style={{ backgroundColor: "var(--bg-color)", color: "var(--text-color)" }} className="min-h-screen rounded-2xl shadow-xl mb-8 space-y-8 p-8 font-sans text-gray-800">
-      <header className="flex justify-between items-center mb-6 border-b border-gray-100 pb-4">
-        <div className="flex items-center space-x-3">
+    <div className="space-y-6 p-5">
+      {/* ── Page Header ── */}
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
           <button
             onClick={onBack}
-            className="p-2 bg-white border border-gray-200 text-gray-600 rounded-xl hover:bg-gray-50 hover:text-gray-900 transition-all shadow-sm"
+            className="p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-sm"
             title="Quay lại"
           >
-            <ArrowLeftIcon className="w-5 h-5" />
+            <ArrowLeftIcon className="w-4 h-4" />
           </button>
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">Thêm khách hàng mới</h1>
-            <p className="text-xs text-gray-500 mt-0.5">Nhập các thông tin chi tiết để tạo hồ sơ khách hàng mới</p>
+            <h1 className="text-xl font-bold text-slate-800 dark:text-slate-200">Thêm khách hàng mới</h1>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Nhập thông tin để tạo hồ sơ khách hàng mới</p>
           </div>
         </div>
-        <div className="flex space-x-2">
-          <button
-            onClick={handleSave}
-            disabled={!isFormValid()}
-            className={`flex items-center space-x-2 px-5 py-2.5 text-sm font-semibold rounded-xl transition-all shadow-md ${isFormValid() ? 'bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white shadow-pink-200' : 'bg-gray-100 text-gray-400 cursor-not-allowed shadow-none'
-              }`}
-          >
-            <CheckCircleIcon className="w-4 h-4" />
-            <span>Lưu khách hàng</span>
-          </button>
+        <div className="flex items-center gap-2">
+          <AdminButton variant="ghost" size="sm" onClick={onBack}>
+            <XMarkIcon className="w-4 h-4 mr-1.5" />
+            Hủy
+          </AdminButton>
+          <AdminButton variant="primary" size="sm" onClick={handleSave} disabled={!isFormValid() || isSaving}>
+            <CheckCircleIcon className="w-4 h-4 mr-1.5" />
+            {isSaving ? 'Đang lưu…' : 'Lưu khách hàng'}
+          </AdminButton>
         </div>
-      </header>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main Content Area */}
+        {/* ── Left / Main Content ── */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Thông tin cá nhân */}
-          <div className="bg-white rounded-xl shadow-md p-6">
-            <h2 className="text-xl font-semibold mb-4 border-b text-gray-700 border-gray-200 pb-2">Thông tin cá nhân</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Họ</label>
-                <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} className="w-full text-black px-3 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-400 transition-all" placeholder="Nhập họ" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Tên</label>
-                <input type="text" name="firstName" value={formData.firstName} onChange={handleChange} className="w-full text-black px-3 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-400 transition-all" placeholder="Nhập tên" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                <input type="email" name="email" value={formData.email} onChange={handleChange} className="w-full px-3 text-black py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-400 transition-all" placeholder="vd: example@mail.com" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Số điện thoại</label>
-                <input type="tel" name="phone" value={formData.phone} onChange={handleChange} className="w-full px-3 text-black py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-400 transition-all" placeholder="Nhập số điện thoại" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Ngày sinh</label>
-                <input type="date" name="birthDate" value={formData.birthDate} onChange={handleChange} className="w-full text-black px-3 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-400 transition-all" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Giới tính</label>
-                <select name="gender" value={formData.gender} onChange={handleChange} className="w-full px-3 py-2.5 border text-black border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-400 bg-white transition-all">
-                  <option value="N/A">Chọn giới tính</option>
-                  <option value="male">Nam</option>
-                  <option value="female">Nữ</option>
-                  <option value="other">Khác</option>
-                </select>
-              </div>
-            </div>
-          </div>
 
-          {/* Địa chỉ */}
-          <div className="bg-white rounded-xl shadow-md p-6">
-            <h2 className="text-xl text-black font-semibold mb-4 border-b border-gray-200 pb-2">Địa chỉ</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="col-span-1 md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Địa chỉ</label>
-                <input type="text" name="address" value={formData.address} onChange={handleChange} className="w-full text-black px-3 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-400 transition-all" placeholder="vd: 123 Lê Duẩn" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Tỉnh/Thành phố</label>
-                <select
+          {/* Personal Info */}
+          <AdminCard title="Thông tin cá nhân" icon={<UserIcon />}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <AdminInput
+                label="Họ"
+                name="lastName"
+                value={formData.lastName}
+                onChange={handleChange}
+                placeholder="Nhập họ"
+                required
+              />
+              <AdminInput
+                label="Tên"
+                name="firstName"
+                value={formData.firstName}
+                onChange={handleChange}
+                placeholder="Nhập tên"
+                required
+              />
+              <AdminInput
+                label="Email"
+                name="email"
+                type="email"
+                value={formData.email}
+                onChange={handleChange}
+                icon={<EnvelopeIcon />}
+                placeholder="vd: example@mail.com"
+                required
+              />
+              <AdminInput
+                label="Số điện thoại"
+                name="phone"
+                type="tel"
+                value={formData.phone}
+                onChange={handleChange}
+                icon={<PhoneIcon />}
+                placeholder="Nhập số điện thoại"
+              />
+              <AdminInput
+                label="Ngày sinh"
+                name="birthDate"
+                type="date"
+                value={formData.birthDate}
+                onChange={handleChange}
+                icon={<CalendarIcon />}
+              />
+              <AdminSelect
+                label="Giới tính"
+                name="gender"
+                value={formData.gender}
+                onChange={handleChange}
+              >
+                <option value="N/A">Chọn giới tính</option>
+                <option value="male">Nam</option>
+                <option value="female">Nữ</option>
+                <option value="other">Khác</option>
+              </AdminSelect>
+            </div>
+          </AdminCard>
+
+          {/* Address */}
+          <AdminCard title="Địa chỉ" icon={<MapPinIcon />}>
+            <div className="space-y-4">
+              <AdminInput
+                label="Địa chỉ"
+                name="address"
+                value={formData.address}
+                onChange={handleChange}
+                placeholder="vd: 123 Lê Duẩn"
+              />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <AdminSelect
+                  label="Tỉnh/Thành phố"
                   name="province"
                   value={formData.province}
-                  onChange={(e) => {
-                    setFormData({
-                      ...formData,
-                      province: e.target.value,
-                      district: '',
-                      ward: '',
-                    })
-                  }}
-                  className="w-full text-black px-3 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-pink-300 focus:border-pink-400 bg-white transition-all"
+                  onChange={(e) => setFormData({ ...formData, province: e.target.value, district: '', ward: '' })}
                 >
                   <option value="">-- Chọn tỉnh/thành phố --</option>
-                  {provinces.map((p) => (
-                    <option key={p.code} value={p.name}>
-                      {p.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Chọn quận/huyện */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Quận/Huyện</label>
-                <select
+                  {provinces.map((p) => <option key={p.code} value={p.name}>{p.name}</option>)}
+                </AdminSelect>
+                <AdminSelect
+                  label="Quận/Huyện"
                   name="district"
                   value={formData.district}
-                  onChange={(e) => {
-                    setFormData({
-                      ...formData,
-                      district: e.target.value,
-                      ward: '',
-                    })
-                  }}
                   disabled={!formData.province}
-                  className="w-full px-3 text-black py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-pink-300 focus:border-pink-400 bg-white transition-all disabled:bg-gray-50"
+                  onChange={(e) => setFormData({ ...formData, district: e.target.value, ward: '' })}
                 >
                   <option value="">-- Chọn quận/huyện --</option>
-                  {districts.map((d) => (
-                    <option key={d.code} value={d.name}>
-                      {d.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Chọn phường/xã */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Phường/Xã</label>
-                <select
+                  {districts.map((d) => <option key={d.code} value={d.name}>{d.name}</option>)}
+                </AdminSelect>
+                <AdminSelect
+                  label="Phường/Xã"
                   name="ward"
                   value={formData.ward}
-                  onChange={handleChange}
                   disabled={!formData.district}
-                  className="w-full px-3 text-black py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-pink-300 focus:border-pink-400 bg-white transition-all disabled:bg-gray-50"
+                  onChange={handleChange}
                 >
                   <option value="">-- Chọn phường/xã --</option>
-                  {wards.map((w) => (
-                    <option key={w.code} value={w.name}>
-                      {w.name}
-                    </option>
+                  {wards.map((w) => <option key={w.code} value={w.name}>{w.name}</option>)}
+                </AdminSelect>
+              </div>
+              <AdminInput
+                label="Quốc gia"
+                name="country"
+                value={formData.country}
+                onChange={handleChange}
+                placeholder="Quốc gia"
+              />
+            </div>
+          </AdminCard>
+
+          {/* Tags & Marketing */}
+          <AdminCard title="Thẻ & Marketing" icon={<TagIcon />}>
+            <div className="space-y-4">
+              <div>
+                <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Thẻ khách hàng</p>
+                <div className="flex flex-wrap gap-2">
+                  {PRESET_TAGS.map((tag) => (
+                    <button
+                      key={tag}
+                      type="button"
+                      onClick={() => handleTagClick(tag)}
+                      className={`px-3 py-1.5 text-sm rounded-full border transition-all font-medium ${formData.tags.includes(tag)
+                          ? 'bg-indigo-100 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-700'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-indigo-300'
+                        }`}
+                    >
+                      {tag}
+                    </button>
                   ))}
-                </select>
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Quốc gia</label>
-                <input type="text" name="country" value={formData.country} onChange={handleChange} className="w-full text-black px-3 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-400 transition-all" placeholder="Quốc gia" />
+              <div className="space-y-3 pt-2 border-t border-slate-100 dark:border-slate-800">
+                {[
+                  { name: 'newsletter', label: 'Đăng ký nhận Newsletter' },
+                  { name: 'smsMarketing', label: 'Marketing qua SMS' },
+                ].map(({ name, label }) => (
+                  <div key={name} className="flex items-center justify-between">
+                    <span className="text-sm text-slate-700 dark:text-slate-300">{label}</span>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" name={name} checked={formData[name]} onChange={handleChange} className="sr-only peer" />
+                      <div className="w-10 h-6 bg-slate-200 dark:bg-slate-700 rounded-full peer peer-checked:bg-indigo-600 peer-focus:ring-2 peer-focus:ring-indigo-400 after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full" />
+                    </label>
+                  </div>
+                ))}
               </div>
             </div>
-          </div>
+          </AdminCard>
 
-          {/* Sở thích & Marketing */}
-          <div className="bg-white rounded-xl shadow-md p-6">
-            <h2 className="text-xl text-black font-semibold mb-4 border-b border-gray-200 pb-2">Sở thích & Marketing</h2>
-            <div className="flex flex-wrap items-center gap-2 mb-4">
-              <span className="text-sm font-medium text-gray-700 mr-2">Thẻ khách hàng:</span>
-              {['Vip', 'Đã mua', 'Chưa mua', 'Phụ nữ', 'Đàn ông', 'Gucci'].map((tag) => (
-                <button
-                  key={tag}
-                  type="button"
-                  onClick={() => handleTagClick(tag)}
-                  className={`px-3 py-1 text-sm rounded-full transition-colors ${formData.tags.includes(tag) ? 'bg-pink-100 text-pink-600 border border-pink-200' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                    }`}
-                >
-                  {tag}
-                </button>
-              ))}
-            </div>
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium text-gray-700">Đăng ký nhận Newsletter</span>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" name="newsletter" checked={formData.newsletter} onChange={handleChange} className="sr-only peer" />
-                  <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-2 peer-focus:ring-pink-300 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-pink-600"></div>
-                </label>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium text-gray-700">Marketing qua SMS</span>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" name="smsMarketing" checked={formData.smsMarketing} onChange={handleChange} className="sr-only peer" />
-                  <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-2 peer-focus:ring-pink-300 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-pink-600"></div>
-                </label>
-              </div>
-            </div>
-          </div>
-
-          {/* Cài đặt tài khoản */}
-          <div className="bg-white rounded-xl shadow-md p-6">
-            <h2 className="text-xl font-semibold mb-4 border-b border-gray-200 pb-2">Cài đặt tài khoản</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nhóm khách hàng</label>
-                <select name="customerGroup" value={formData.customerGroup} onChange={handleChange} className="w-full px-3 text-black py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-400 bg-white transition-all">
-                  <option value="">Chọn nhóm</option>
-                  <option value="Nhóm VIP">Nhóm VIP</option>
-                  <option value="Khách hàng thường">Khách hàng thường</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Trạng thái</label>
-                <select name="status" value={formData.status} onChange={handleChange} className="w-full px-3 py-2.5 border text-black border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-400 bg-white transition-all">
-                  <option value="Hoạt động">Hoạt động</option>
-                  <option value="Không hoạt động">Không hoạt động</option>
-                </select>
-              </div>
-              <div className="col-span-1 md:col-span-2">
-                <label className="block text-sm  font-medium text-gray-700 mb-1">Ghi chú phụ về khách hàng</label>
-                <textarea name="notes" value={formData.notes} onChange={handleChange} className="w-full px-3 py-2.5 text-black border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-pink-400 transition-all resize-none h-24" placeholder="Nhập ghi chú..."></textarea>
+          {/* Account Settings */}
+          <AdminCard title="Cài đặt tài khoản" icon={<Cog6ToothIcon />}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <AdminSelect
+                label="Nhóm khách hàng"
+                name="customerGroup"
+                value={formData.customerGroup}
+                onChange={handleChange}
+              >
+                <option value="">Chọn nhóm</option>
+                <option value="Nhóm VIP">Nhóm VIP</option>
+                <option value="Khách hàng thường">Khách hàng thường</option>
+              </AdminSelect>
+              <AdminSelect
+                label="Trạng thái"
+                name="status"
+                value={formData.status}
+                onChange={handleChange}
+              >
+                <option value="Hoạt động">Hoạt động</option>
+                <option value="Không hoạt động">Không hoạt động</option>
+              </AdminSelect>
+              <div className="md:col-span-2">
+                <AdminTextarea
+                  label="Ghi chú phụ về khách hàng"
+                  name="notes"
+                  value={formData.notes}
+                  onChange={handleChange}
+                  placeholder="Nhập ghi chú…"
+                  rows={3}
+                />
               </div>
             </div>
-          </div>
+          </AdminCard>
         </div>
 
-        {/* Sidebar Preview */}
+        {/* ── Right Sidebar ── */}
         <div className="space-y-6">
-          <div className="bg-white rounded-xl shadow-md p-6">
-            <h2 className="text-xl text-black font-semibold mb-4 border-b border-gray-200 pb-2">Xem trước thông tin</h2>
-            <div className="flex flex-col items-center text-center">
-              <div className="relative w-20 h-20 rounded-full bg-pink-100 flex items-center justify-center mb-2">
-                <UserCircleIcon className="w-12 h-12 text-pink-500" />
+          {/* Preview Card */}
+          <AdminCard title="Xem trước thông tin">
+            <div className="flex flex-col items-center text-center pb-4 border-b border-slate-100 dark:border-slate-800">
+              <div className="w-20 h-20 rounded-full bg-indigo-100 dark:bg-indigo-950/50 flex items-center justify-center mb-3">
+                <UserCircleIcon className="w-12 h-12 text-indigo-500" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900">{formData.lastName} {formData.firstName}</h3>
-              <p className="text-gray-600 text-sm">{formData.email}</p>
+              <h3 className="text-base font-bold text-slate-800 dark:text-slate-200">
+                {[formData.lastName, formData.firstName].filter(Boolean).join(' ') || 'Chưa nhập tên'}
+              </h3>
+              <p className="text-sm text-slate-500 dark:text-slate-400">{formData.email || '—'}</p>
             </div>
-            <div className="mt-4 pt-4 border-t border-gray-200">
-              <div className="text-sm mb-2">
-                <span className="font-semibold text-gray-700">Ngày sinh:</span>
-                <span className="ml-2 text-gray-600">{formData.birthDate || 'N/A'}</span>
-              </div>
-              <div className="text-sm mb-2">
-                <span className="font-semibold text-gray-700">Giới tính:</span>
-                <span className="ml-2 text-gray-600">{formData.gender=="female" ? "Nữ" :"Nam" }</span>
-              </div>
-              <div className="text-sm mb-2">
-                <span className="font-semibold text-gray-700">Thẻ khách hàng:</span>
-                <span className="ml-2 text-gray-600">{formData.tags.join(', ') || 'N/A'}</span>
-              </div>
-              <div className="text-sm mb-2">
-                <span className="font-semibold text-gray-700">Địa chỉ:</span>
-                <span className="ml-2 text-gray-600">{formData.address || 'N/A'}</span>
-              </div>
-              <div className="text-sm mb-2">
-                <span className="font-semibold text-gray-700">Ghi chú:</span>
-                <span className="ml-2 text-gray-600">{formData.notes || 'N/A'}</span>
-              </div>
+            <div className="mt-4 space-y-2">
+              {[
+                { label: 'Ngày sinh', value: formData.birthDate || 'N/A' },
+                { label: 'Giới tính', value: formData.gender === 'female' ? 'Nữ' : formData.gender === 'male' ? 'Nam' : 'N/A' },
+                { label: 'Tags', value: formData.tags.join(', ') || 'N/A' },
+                { label: 'Địa chỉ', value: formData.address || 'N/A' },
+                { label: 'Ghi chú', value: formData.notes || 'N/A' },
+              ].map(({ label, value }) => (
+                <div key={label} className="flex gap-2 text-sm">
+                  <span className="font-semibold text-slate-600 dark:text-slate-400 w-24 flex-shrink-0">{label}:</span>
+                  <span className="text-slate-700 dark:text-slate-300 truncate">{value}</span>
+                </div>
+              ))}
             </div>
-          </div>
+          </AdminCard>
 
-          <div className="bg-white rounded-xl shadow-md p-6">
-            <h2 className="text-xl text-black  font-semibold mb-4 border-b border-gray-200 pb-2">Hướng dẫn</h2>
-            <ul className="space-y-3 text-sm">
-              <li className="flex items-start text-gray-700">
-                <span className="w-6 h-6 rounded-full flex items-center justify-center bg-pink-100 text-pink-600 font-bold text-xs mr-2 flex-shrink-0">1</span>
-                <span>Điền đầy đủ thông tin cá nhân và địa chỉ</span>
-              </li>
-              <li className="flex items-start text-gray-700">
-                <span className="w-6 h-6 rounded-full flex items-center justify-center bg-pink-100 text-pink-600 font-bold text-xs mr-2 flex-shrink-0">2</span>
-                <span>Chọn các thẻ phù hợp cho khách hàng</span>
-              </li>
-              <li className="flex items-start text-gray-700">
-                <span className="w-6 h-6 rounded-full flex items-center justify-center bg-pink-100 text-pink-600 font-bold text-xs mr-2 flex-shrink-0">3</span>
-                <span>Cập nhật trạng thái và nhóm khách hàng</span>
-              </li>
-              <li className="flex items-start text-gray-700">
-                <span className="w-6 h-6 rounded-full flex items-center justify-center bg-pink-100 text-pink-600 font-bold text-xs mr-2 flex-shrink-0">4</span>
-                <span>Thêm ghi chú nếu cần thiết</span>
-              </li>
-              <li className="flex items-start text-gray-700">
-                <span className="w-6 h-6 rounded-full flex items-center justify-center bg-pink-100 text-pink-600 font-bold text-xs mr-2 flex-shrink-0">5</span>
-                <span>Kiểm tra lại thông tin trước khi lưu</span>
-              </li>
-            </ul>
-          </div>
+          {/* Guide Card */}
+          <AdminCard title="Hướng dẫn" variant="highlight">
+            <ol className="space-y-3">
+              {[
+                'Điền đầy đủ thông tin cá nhân và địa chỉ',
+                'Chọn các thẻ phù hợp cho khách hàng',
+                'Cập nhật trạng thái và nhóm khách hàng',
+                'Thêm ghi chú nếu cần thiết',
+                'Kiểm tra lại thông tin trước khi lưu',
+              ].map((step, i) => (
+                <li key={i} className="flex items-start gap-2.5 text-sm text-slate-700 dark:text-slate-300">
+                  <span className="w-6 h-6 rounded-full bg-indigo-600 text-white font-bold text-xs flex items-center justify-center flex-shrink-0 mt-0.5">
+                    {i + 1}
+                  </span>
+                  <span>{step}</span>
+                </li>
+              ))}
+            </ol>
+          </AdminCard>
         </div>
       </div>
     </div>

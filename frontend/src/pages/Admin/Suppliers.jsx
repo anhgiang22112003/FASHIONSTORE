@@ -1,21 +1,14 @@
-import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
 import React, { useEffect, useState } from 'react';
-import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Filter, Plus, Pencil, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { toast } from 'react-toastify';
+import { Pencil, Trash2 } from 'lucide-react';
 import apiAdmin from '@/service/apiAdmin';
-import Switch from '@/components/ui/switch'
+import { Switch } from '@headlessui/react'
 import AdminSpinner from '@/components/AdminSpinner';
+import {
+  PageHeader, Toolbar, FilterPanel, DataTable, Pagination,
+  StatusBadge, AdminButton, ConfirmDialog,
+  AdminModal, AdminInput, AdminSelect, AdminTextarea
+} from "@/components/admin/ui"
 
 const Suppliers = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -59,7 +52,6 @@ const Suppliers = () => {
       const province = provinces.find((p) => p.name === selectedProvince);
       if (province && province.districts) {
         setDistricts(province.districts);
-        // Giữ district và ward nếu đang edit và có dữ liệu
         if (!editSupplier) {
           setSelectedDistrict('');
           setSelectedWard('');
@@ -72,7 +64,7 @@ const Suppliers = () => {
       setWards([]);
       setSelectedWard('');
     }
-  }, [selectedProvince, provinces]);
+  }, [selectedProvince, provinces, editSupplier]);
 
   // Update wards when district changes
   useEffect(() => {
@@ -80,7 +72,6 @@ const Suppliers = () => {
       const district = districts.find((d) => d.name === selectedDistrict);
       if (district && district.wards) {
         setWards(district.wards);
-        // Giữ ward nếu đang edit và có dữ liệu
         if (!editSupplier) {
           setSelectedWard('');
         }
@@ -89,7 +80,7 @@ const Suppliers = () => {
       setWards([]);
       setSelectedWard('');
     }
-  }, [selectedDistrict, districts]);
+  }, [selectedDistrict, districts, editSupplier]);
 
   // Debounce filterName
   useEffect(() => {
@@ -154,10 +145,9 @@ const Suppliers = () => {
     setFilterEmail('');
     setFilterActive('all');
     setPage(1);
-  };
-
-  const toggleFilterDropdown = () => {
-    setIsFilterVisible(!isFilterVisible);
+    setDebouncedFilterName('');
+    setDebouncedFilterPhone('');
+    setDebouncedFilterEmail('');
   };
 
   const handleSubmit = async (e) => {
@@ -176,6 +166,12 @@ const Suppliers = () => {
       isActive: isNewSupplierActive,
     };
 
+    if (!supplierData.name) {
+      toast.error("Tên nhà cung cấp không được để trống!");
+      setIsLoading(false);
+      return;
+    }
+
     try {
       if (editSupplier) {
         await apiAdmin.patch(`/supplier/${editSupplier._id}`, supplierData);
@@ -184,14 +180,13 @@ const Suppliers = () => {
         await apiAdmin.post('/supplier', supplierData);
         toast.success('Thêm nhà cung cấp thành công');
       }
-      fetchSuppliers();
+      fetchSuppliers({ page, limit });
+      handleCloseForm();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Có lỗi xảy ra!');
     } finally {
       setIsLoading(false);
     }
-
-    handleCloseForm();
   };
 
   const handleDeleteClick = (id, name) => {
@@ -206,7 +201,7 @@ const Suppliers = () => {
         const res = await apiAdmin.delete(`/supplier/${itemToDelete.id}`);
         if (res.status === 200) {
           toast.success('Xóa nhà cung cấp thành công');
-          fetchSuppliers();
+          fetchSuppliers({ page, limit });
         }
       } catch (err) {
         toast.error(err.response?.data?.message || 'Lỗi khi xóa!');
@@ -217,16 +212,6 @@ const Suppliers = () => {
     setIsModalOpen(false);
     setItemToDelete(null);
   };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setItemToDelete(null);
-  };
-
-  const modalTitle = 'Xác nhận xóa nhà cung cấp';
-  const modalMessage = itemToDelete
-    ? `Bạn có chắc chắn muốn xóa "${itemToDelete.name}"? Thao tác này không thể hoàn tác.`
-    : '';
 
   const handleOpenForm = (supplier = null) => {
     setEditSupplier(supplier);
@@ -239,17 +224,14 @@ const Suppliers = () => {
       setAddress(supplier.address || '');
       setIsNewSupplierActive(supplier.isActive);
       
-      // Load province first
       setSelectedProvince(supplier.province || '');
       
-      // Load districts and district selection
       if (supplier.province && provinces.length > 0) {
         const province = provinces.find((p) => p.name === supplier.province);
         if (province) {
           setDistricts(province.districts || []);
           setSelectedDistrict(supplier.district || '');
           
-          // Load wards and ward selection
           if (supplier.district) {
             const district = province.districts?.find((d) => d.name === supplier.district);
             if (district) {
@@ -276,369 +258,245 @@ const Suppliers = () => {
     setIsNewSupplierActive(true);
   };
 
+  const columns = [
+    {
+      header: "Tên nhà cung cấp",
+      render: (row) => <span className="font-bold text-slate-800">{row.name}</span>
+    },
+    {
+      header: "Người liên hệ",
+      render: (row) => <span className="text-slate-600 font-medium text-xs">{row.contactName || '-'}</span>
+    },
+    {
+      header: "Số điện thoại",
+      render: (row) => <span className="text-slate-600 text-xs">{row.phone || '-'}</span>
+    },
+    {
+      header: "Email",
+      render: (row) => <span className="text-slate-600 text-xs">{row.email || '-'}</span>
+    },
+    {
+      header: "Địa chỉ",
+      render: (row) => (
+        <p className="text-xs text-slate-500 max-w-xs truncate">
+          {[row.address, row.ward, row.district, row.province]
+            .filter(Boolean)
+            .join(', ') || '-'}
+        </p>
+      )
+    },
+    {
+      header: "Trạng thái",
+      render: (row) => (
+        <StatusBadge status={row.isActive ? 'active' : 'inactive'} />
+      )
+    },
+    {
+      header: "Hành động",
+      sticky: true,
+      width: "100px",
+      render: (row) => (
+        <div className="flex items-center gap-1.5">
+          <button
+            onClick={() => handleOpenForm(row)}
+            className="p-1.5 bg-slate-50 hover:bg-slate-100 text-blue-600 hover:text-blue-700 rounded-lg transition-colors border border-slate-200 shadow-sm"
+            title="Chỉnh sửa"
+          >
+            <Pencil className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => handleDeleteClick(row._id, row.name)}
+            className="p-1.5 bg-slate-50 hover:bg-slate-100 text-red-600 hover:text-red-700 rounded-lg transition-colors border border-slate-200 shadow-sm"
+            title="Xóa"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
+      )
+    }
+  ]
+
   return (
-    <div style={{ backgroundColor: "var(--bg-color)", color: "var(--text-color)" }} className="min-h-screen  from-gray-50 to-blue-50 p-6">
-      <div className="max-w-full mx-auto space-y-6">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center space-x-4">
-            <h1 className="text-3xl font-bold ">Quản lý nhà cung cấp</h1>
-            <Button
-              onClick={toggleFilterDropdown}
-              variant={isFilterVisible ? 'default' : 'outline'}
-              className={isFilterVisible ? 'bg-pink-600 hover:bg-pink-700' : ''}
+    <div className="p-6 bg-slate-50 dark:bg-slate-950 min-h-screen">
+      <PageHeader
+        title="Quản lý nhà cung cấp"
+        description="Quản lý thông tin đối tác, nhà sản xuất cung cấp hàng hóa cho doanh nghiệp."
+        badge={`${total} nhà cung cấp`}
+      />
+
+      <Toolbar
+        onFilterToggle={() => setIsFilterVisible(!isFilterVisible)}
+        filterActive={isFilterVisible}
+        filterCount={Object.values({ filterName, filterPhone, filterEmail }).filter(Boolean).length + (filterActive !== 'all' ? 1 : 0)}
+        actions={
+          <AdminButton
+            variant="primary"
+            size="sm"
+            onClick={() => handleOpenForm()}
+          >
+            + Thêm nhà cung cấp mới
+          </AdminButton>
+        }
+      />
+
+      <AdminModal
+        open={isFormOpen}
+        onClose={handleCloseForm}
+        title={editSupplier ? 'Chỉnh sửa nhà cung cấp' : 'Thêm nhà cung cấp mới'}
+        description={editSupplier ? `Cập nhật thông tin: ${editSupplier.name}` : 'Nhập thông tin nhà cung cấp mới'}
+        size="xl"
+        footer={
+          <>
+            <AdminButton variant="ghost" size="sm" onClick={handleCloseForm} disabled={isLoading}>Hủy</AdminButton>
+            <AdminButton variant="primary" size="sm" onClick={handleSubmit} disabled={isLoading}>
+              {isLoading ? 'Đang lưu…' : 'Lưu lại'}
+            </AdminButton>
+          </>
+        }
+      >
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <AdminInput
+              label="Tên nhà cung cấp"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Nhập tên nhà cung cấp"
+              required
+            />
+            <AdminInput
+              label="Tên người liên hệ"
+              value={contactName}
+              onChange={(e) => setContactName(e.target.value)}
+              placeholder="Nhập tên người liên hệ"
+            />
+            <AdminInput
+              label="Số điện thoại"
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="Nhập số điện thoại"
+            />
+            <AdminInput
+              label="Email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Nhập email"
+            />
+            <AdminSelect
+              label="Tỉnh/Thành phố"
+              value={selectedProvince}
+              onChange={(e) => setSelectedProvince(e.target.value)}
             >
-              <Filter className="w-4 h-4 mr-2" />
-              Bộ lọc
-            </Button>
-          </div>
-
-          <Button onClick={() => handleOpenForm()} className="bg-pink-600 hover:bg-pink-700">
-            <Plus className="w-4 h-4 mr-2" />
-            Thêm nhà cung cấp mới
-          </Button>
-        </div>
-
-        {/* FORM */}  
-        {isFormOpen && (
-          <div className="bg-white p-8 rounded-2xl shadow-xl">
-            <h3 className="text-xl font-bold text-gray-800 mb-6">
-              {editSupplier ? 'Chỉnh sửa nhà cung cấp' : 'Thêm nhà cung cấp mới'}
-            </h3>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2 text-black">
-                  <Label  htmlFor="name">
-                    Tên nhà cung cấp <span className="text-red-500">*</span>
-                  </Label>
-                  <Input
-                    id="name"
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Nhập tên nhà cung cấp"
-                    className="text-black"
-                  />
-                </div>
-
-                <div className="space-y-2 text-black">
-                  <Label htmlFor="contactName">Tên người liên hệ</Label>
-                  <Input
-                    id="contactName"
-                    type="text"
-                    value={contactName}
-                    onChange={(e) => setContactName(e.target.value)}
-                    placeholder="Nhập tên người liên hệ"
-                    className="text-black"
-                  />
-                </div>
-
-                <div className="space-y-2 text-black">
-                  <Label htmlFor="phone">Số điện thoại</Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="Nhập số điện thoại"
-                  />
-                </div>
-
-                <div className="space-y-2 text-black">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Nhập email"
-                  />
-                </div>
-
-                <div className="space-y-2 text-black">
-                  <Label htmlFor="province">Tỉnh/Thành phố</Label>
-                  <Select value={selectedProvince} onValueChange={setSelectedProvince}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Chọn tỉnh/thành phố" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {provinces.map((province) => (
-                        <SelectItem key={province.code} value={province.name}>
-                          {province.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2 text-black">
-                  <Label htmlFor="district">Quận/Huyện</Label>
-                  <Select
-                    value={selectedDistrict}
-                    onValueChange={setSelectedDistrict}
-                    disabled={!selectedProvince}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Chọn quận/huyện" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {districts.map((district) => (
-                        <SelectItem key={district.code} value={district.name}>
-                          {district.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2 text-black">
-                  <Label htmlFor="ward">Phường/Xã</Label>
-                  <Select
-                    value={selectedWard}
-                    onValueChange={setSelectedWard}
-                    disabled={!selectedDistrict}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Chọn phường/xã" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {wards.map((ward) => (
-                        <SelectItem key={ward.code} value={ward.name}>
-                          {ward.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2 md:col-span-2 text-black  ">
-                  <Label htmlFor="address ">Địa chỉ chi tiết</Label>
-                  <Textarea
-                    id="address"
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                    placeholder="Nhập địa chỉ chi tiết"
-                    rows={3}
-                  />
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                <span className="font-medium text-gray-700">
-                  Trạng thái: {isNewSupplierActive ? 'Đang hoạt động' : 'Ngừng hoạt động'}
-                </span>
-                <Switch checked={isNewSupplierActive} onChange={setIsNewSupplierActive} />
-              </div>
-
-              <div className="flex text-black justify-end space-x-4">
-                <Button type="button" onClick={handleCloseForm} variant="outline">
-                  Hủy
-                </Button>
-                <Button type="submit" disabled={isLoading} className="bg-blue-600 hover:bg-blue-700">
-                  {isLoading ? 'Đang xử lý...' : editSupplier ? 'Lưu thay đổi' : 'Thêm nhà cung cấp'}
-                </Button>
-              </div>
-            </form>
-          </div>
-        )}
-
-        {/* FILTER */}
-        {isFilterVisible && (
-          <div className=" p-6 rounded-2xl shadow-lg">
-            <h4 className="text-lg font-semibold  mb-4 border-b pb-2">
-              Bộ lọc nhà cung cấp
-            </h4>
-            <div className="grid grid-cols-1  md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="filterName">Tên nhà cung cấp</Label>
-                <Input
-                  id="filterName"
-                  type="text"
-                  value={filterName}
-                  onChange={(e) => setFilterName(e.target.value)}
-                  placeholder="Nhập tên..."
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="filterPhone">Số điện thoại</Label>
-                <Input
-                  id="filterPhone"
-                  type="text"
-                  value={filterPhone}
-                  onChange={(e) => setFilterPhone(e.target.value)}
-                  placeholder="Nhập số điện thoại..."
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="filterEmail">Email</Label>
-                <Input
-                  id="filterEmail"
-                  type="text"
-                  value={filterEmail}
-                  onChange={(e) => setFilterEmail(e.target.value)}
-                  placeholder="Nhập email..."
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="filterActive">Trạng thái</Label>
-                <Select value={filterActive} onValueChange={setFilterActive}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Tất cả" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Tất cả</SelectItem>
-                    <SelectItem value="true">Hoạt động</SelectItem>
-                    <SelectItem value="false">Ngừng hoạt động</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="flex items-end">
-                <Button onClick={handleResetFilter} variant="outline" className="w-full">
-                  Xóa bộ lọc
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* TABLE */}
-        <div className=" rounded-2xl shadow-xl overflow-hidden">
-          {isLoading ? (
-            <AdminSpinner />
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Tên nhà cung cấp
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Người liên hệ
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Số điện thoại
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Email
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Địa chỉ
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Trạng thái
-                    </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Hành động
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {suppliers.map((supplier) => (
-                    <tr key={supplier._id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-medium ">
-                        {supplier.name}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {supplier.contactName || '-'}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {supplier.phone || '-'}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {supplier.email || '-'}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">
-                        {[supplier.address, supplier.ward, supplier.district, supplier.province]
-                          .filter(Boolean)
-                          .join(', ') || '-'}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span
-                          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            supplier.isActive
-                              ? 'bg-green-100 text-green-800'
-                              : 'bg-red-100 text-red-800'
-                          }`}
-                        >
-                          {supplier.isActive ? 'Hoạt động' : 'Ngừng hoạt động'}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                        <Button
-                          onClick={() => handleOpenForm(supplier)}
-                          variant="ghost"
-                          size="sm"
-                          className="text-blue-600 hover:text-blue-900 hover:bg-blue-50"
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          onClick={() => handleDeleteClick(supplier._id, supplier.name)}
-                          variant="ghost"
-                          size="sm"
-                          className="text-red-600 hover:text-red-900 hover:bg-red-50"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          {/* PAGINATION */}
-          {total > limit && (
-            <div className="flex justify-center items-center py-6 space-x-2 border-t">
-              <Button
-                onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
-                disabled={page === 1}
-                variant="outline"
-                size="sm"
-              >
-                <ChevronLeft className="h-4 w-4 mr-1" />
-                Trước
-              </Button>
-
-              {Array.from({ length: Math.ceil(total / limit) }, (_, i) => (
-                <Button
-                  key={i}
-                  onClick={() => setPage(i + 1)}
-                  variant={page === i + 1 ? 'default' : 'outline'}
-                  size="sm"
-                  className={page === i + 1 ? 'bg-blue-600 hover:bg-blue-700' : ''}
-                >
-                  {i + 1}
-                </Button>
+              <option value="">Chọn tỉnh/thành phố</option>
+              {provinces.map((province) => (
+                <option key={province.code} value={province.name}>{province.name}</option>
               ))}
-
-              <Button
-                onClick={() => setPage((prev) => prev + 1)}
-                disabled={page >= Math.ceil(total / limit)}
-                variant="outline"
-                size="sm"
-              >
-                Sau
-                <ChevronRight className="h-4 w-4 ml-1" />
-              </Button>
+            </AdminSelect>
+            <AdminSelect
+              label="Quận/Huyện"
+              value={selectedDistrict}
+              onChange={(e) => setSelectedDistrict(e.target.value)}
+              disabled={!selectedProvince}
+            >
+              <option value="">Chọn quận/huyện</option>
+              {districts.map((district) => (
+                <option key={district.code} value={district.name}>{district.name}</option>
+              ))}
+            </AdminSelect>
+            <AdminSelect
+              label="Phường/Xã"
+              value={selectedWard}
+              onChange={(e) => setSelectedWard(e.target.value)}
+              disabled={!selectedDistrict}
+            >
+              <option value="">Chọn phường/xã</option>
+              {wards.map((ward) => (
+                <option key={ward.code} value={ward.name}>{ward.name}</option>
+              ))}
+            </AdminSelect>
+            <div className="md:col-span-2">
+              <AdminTextarea
+                label="Địa chỉ chi tiết"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                placeholder="Nhập địa chỉ chi tiết"
+                rows={2}
+              />
             </div>
-          )}
-        </div>
+          </div>
 
-        <DeleteConfirmationModal
-          title={modalTitle}
-          message={modalMessage}
-          isOpen={isModalOpen}
-          onClose={handleCloseModal}
-          onConfirm={handleConfirmDelete}
-          id={itemToDelete?.id}
-        />
-      </div>
+          <div className="flex items-center justify-between py-3 border-y border-slate-100 dark:border-slate-800">
+            <span className="text-sm font-semibold text-slate-600 dark:text-slate-400">Trạng thái hoạt động</span>
+            <Switch
+              checked={isNewSupplierActive}
+              onChange={setIsNewSupplierActive}
+              className={`${isNewSupplierActive ? 'bg-indigo-600' : 'bg-slate-300 dark:bg-slate-600'} relative inline-flex h-6 w-11 items-center rounded-full transition-colors`}
+            >
+              <span className={`${isNewSupplierActive ? 'translate-x-6' : 'translate-x-1'} inline-block h-4 w-4 transform rounded-full bg-white transition-transform`} />
+            </Switch>
+          </div>
+        </form>
+      </AdminModal>
+
+      <FilterPanel isOpen={isFilterVisible} onReset={handleResetFilter}>
+        <FilterPanel.Field label="Tên nhà cung cấp">
+          <input
+            type="text"
+            value={filterName}
+            onChange={(e) => setFilterName(e.target.value)}
+            placeholder="Nhập tên..."
+          />
+        </FilterPanel.Field>
+
+        <FilterPanel.Field label="Số điện thoại">
+          <input
+            type="text"
+            value={filterPhone}
+            onChange={(e) => setFilterPhone(e.target.value)}
+            placeholder="Nhập số điện thoại..."
+          />
+        </FilterPanel.Field>
+
+        <FilterPanel.Field label="Email">
+          <input
+            type="text"
+            value={filterEmail}
+            onChange={(e) => setFilterEmail(e.target.value)}
+            placeholder="Nhập email..."
+          />
+        </FilterPanel.Field>
+
+        <FilterPanel.Field label="Trạng thái">
+          <select value={filterActive} onChange={(e) => setFilterActive(e.target.value)}>
+            <option value="all">Tất cả</option>
+            <option value="true">Hoạt động</option>
+            <option value="false">Ngừng hoạt động</option>
+          </select>
+        </FilterPanel.Field>
+      </FilterPanel>
+
+      <DataTable
+        columns={columns}
+        data={suppliers}
+        loading={isLoading}
+        keyExtractor={(row) => row._id}
+      />
+
+      <Pagination
+        page={page}
+        total={total}
+        limit={limit}
+        onPageChange={setPage}
+      />
+
+      <ConfirmDialog
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onConfirm={handleConfirmDelete}
+        title="Xác nhận xóa nhà cung cấp"
+        description={`Bạn có chắc chắn muốn xóa "${itemToDelete?.name}"? Thao tác này không thể hoàn tác.`}
+      />
     </div>
   );
 };

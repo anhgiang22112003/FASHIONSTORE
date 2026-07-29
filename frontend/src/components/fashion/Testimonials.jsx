@@ -1,111 +1,339 @@
+/* Hallmark · macrostructure: Marquee Hero · section: Testimonials · tone: Vercel Infinite Marquee */
 import React from 'react';
-import { Star, Quote, Sparkles } from 'lucide-react';
+import { Star } from 'lucide-react';
 import { testimonials } from '../../data/fashionMock';
 
 const Testimonials = () => {
-  return (
-    <section className="py-20 bg-white relative overflow-hidden">
-      {/* Decorative background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-pink-50/30 to-transparent"></div>
-      <div className="absolute top-20 right-20 w-72 h-72 bg-pink-100/50 rounded-full blur-3xl animate-float"></div>
-      <div className="absolute bottom-20 left-20 w-96 h-96 bg-purple-100/50 rounded-full blur-3xl animate-float" style={{ animationDelay: '1s' }}></div>
+  // Repeat testimonials enough times for seamless infinite scroll on both rows
+  const marqueeRow1 = [...testimonials, ...testimonials, ...testimonials, ...testimonials];
+  const marqueeRow2 = [...testimonials, ...testimonials, ...testimonials, ...testimonials];
 
-      <div className="container mx-auto px-4 relative z-10">
-        <div className="text-center mb-16 animate-slide-up">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-pink-50 rounded-full border border-pink-200 mb-4 shadow-sm">
-            <Sparkles className="w-4 h-4 text-pink-500 animate-pulse" />
-            <span className="text-sm font-bold text-pink-500">TESTIMONIALS</span>
+  return (
+    <>
+      <style>{`
+        .tm-section {
+          background-color: #020204;
+          color: white;
+          padding: 8rem 0;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .tm-section::before {
+          content: '';
+          display: block;
+          position: absolute;
+          top: 0; left: 0; right: 0;
+          height: 1px;
+          background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Ambient Glow Blobs */
+        .tm-glow-bg {
+          position: absolute;
+          width: 30vw;
+          height: 30vw;
+          background: radial-gradient(circle, rgba(168, 85, 247, 0.04) 0%, transparent 70%);
+          bottom: 10%;
+          left: 10%;
+          pointer-events: none;
+          z-index: 1;
+        }
+
+        .tm-container {
+          max-width: 1400px;
+          margin: 0 auto;
+          padding: 0 2rem;
+          position: relative;
+          z-index: 2;
+        }
+
+        .tm-header {
+          text-align: center;
+          margin-bottom: 5rem;
+        }
+
+        .tm-eyebrow {
+          font-family: var(--font-body, 'Inter', sans-serif);
+          font-size: 0.6875rem;
+          font-weight: 600;
+          letter-spacing: 0.25em;
+          text-transform: uppercase;
+          color: #a855f7;
+          margin-bottom: 1rem;
+        }
+
+        .tm-title {
+          font-family: var(--font-display, 'Playfair Display', serif);
+          font-size: clamp(2rem, 3.5vw, 3rem);
+          font-weight: 900;
+          line-height: 1.1;
+          color: white;
+          margin: 0;
+        }
+
+        .tm-title em {
+          font-style: italic;
+          color: #a855f7;
+          font-weight: 400;
+        }
+
+        /* Marquee layout wrappers */
+        .tm-marquee-container {
+          display: flex;
+          flex-direction: column;
+          gap: 2rem;
+          position: relative;
+          width: 100vw;
+          left: 50%;
+          transform: translateX(-50%);
+          overflow: hidden;
+          padding: 1rem 0;
+        }
+
+        /* Continuous scrolling track */
+        .tm-marquee-track {
+          display: flex;
+          width: max-content;
+          gap: 2rem;
+          will-change: transform;
+        }
+
+        /* Infinite animation logic */
+        .tm-marquee-left {
+          animation: marqueeLeft 45s linear infinite;
+        }
+
+        .tm-marquee-right {
+          animation: marqueeRight 45s linear infinite;
+        }
+
+        /* Pause scroll on hover */
+        .tm-marquee-track:hover {
+          animation-play-state: paused;
+        }
+
+        @keyframes marqueeLeft {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-50%, 0, 0); }
+        }
+
+        @keyframes marqueeRight {
+          0% { transform: translate3d(-50%, 0, 0); }
+          100% { transform: translate3d(0, 0, 0); }
+        }
+
+        /* Premium Glass Card */
+        .tm-card {
+          width: 360px;
+          background: rgba(255, 255, 255, 0.02);
+          border: 1px solid rgba(255, 255, 255, 0.05);
+          border-radius: 16px;
+          padding: 2.5rem;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          backdrop-filter: blur(12px);
+          transition: border-color 0.3s, background 0.3s, transform 0.3s;
+          box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        }
+
+        .tm-card:hover {
+          border-color: #a855f7;
+          background: rgba(255, 255, 255, 0.04);
+          transform: translateY(-4px);
+        }
+
+        .tm-stars {
+          display: flex;
+          gap: 0.2rem;
+          margin-bottom: 1.5rem;
+        }
+
+        .tm-star-filled { color: #a855f7; }
+        .tm-star-empty { color: rgba(255, 255, 255, 0.15); }
+
+        .tm-quote {
+          font-family: var(--font-display, 'Playfair Display', serif);
+          font-size: 1.0625rem;
+          font-style: italic;
+          font-weight: 400;
+          line-height: 1.7;
+          color: rgba(255, 255, 255, 0.85);
+          margin: 0 0 2rem;
+        }
+
+        .tm-author {
+          display: flex;
+          align-items: center;
+          gap: 0.875rem;
+          padding-top: 1.5rem;
+          border-top: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        /* Glowing circular outline on avatar */
+        .tm-avatar-box {
+          position: relative;
+          width: 2.75rem;
+          height: 2.75rem;
+          border-radius: 50%;
+          padding: 2px;
+          background: linear-gradient(135deg, #a855f7, #ef4444);
+          box-shadow: 0 0 10px rgba(168, 85, 247, 0.3);
+        }
+
+        .tm-avatar {
+          width: 100%;
+          height: 100%;
+          border-radius: 50%;
+          object-fit: cover;
+          display: block;
+          border: 1px solid #020204;
+        }
+
+        .tm-author-name {
+          font-family: var(--font-body, 'Inter', sans-serif);
+          font-size: 0.875rem;
+          font-weight: 600;
+          color: white;
+          margin: 0 0 0.15rem;
+        }
+
+        .tm-author-role {
+          font-family: var(--font-body, 'Inter', sans-serif);
+          font-size: 0.6875rem;
+          color: rgba(255, 255, 255, 0.4);
+          margin: 0;
+        }
+
+        /* Trust footer panel */
+        .tm-trust {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 3rem;
+          flex-wrap: wrap;
+          margin-top: 5rem;
+          padding-top: 3rem;
+          border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .tm-trust-label {
+          font-family: var(--font-body, 'Inter', sans-serif);
+          font-size: 0.6875rem;
+          font-weight: 600;
+          letter-spacing: 0.15em;
+          text-transform: uppercase;
+          color: rgba(255, 255, 255, 0.4);
+        }
+
+        .tm-trust-divider {
+          width: 1px;
+          height: 1rem;
+          background: rgba(255, 255, 255, 0.1);
+          flex-shrink: 0;
+        }
+
+        @media (max-width: 639px) { .tm-trust-divider { display: none; } }
+
+        .tm-platform {
+          font-family: var(--font-body, 'Inter', sans-serif);
+          font-size: 0.875rem;
+          font-weight: 800;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          color: rgba(255, 255, 255, 0.35);
+          transition: color 0.3s;
+          cursor: default;
+        }
+
+        .tm-platform:hover { color: #a855f7; }
+      `}</style>
+
+      <section className="tm-section">
+        <div className="tm-glow-bg" />
+
+        <div className="tm-container">
+          <div className="tm-header">
+            <p className="tm-eyebrow">Đánh giá</p>
+            <h2 className="tm-title">Nhận Xét Từ <em>Khách Hàng</em></h2>
           </div>
-          <h2 className="text-4xl lg:text-6xl font-black mb-6">
-            Khách Hàng <span className="bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">Nói Gì</span>
-          </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Những phản hồi tích cực từ khách hàng là động lực để chúng tôi phát triển
-          </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8 mb-16">
-          {testimonials.map((testimonial, index) => (
-            <div
-              key={testimonial.id}
-              className="group relative bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 p-8 border border-gray-100 hover:border-pink-300 hover:-translate-y-2 animate-slide-up"
-              style={{ animationDelay: `${index * 0.1}s` }}
-            >
-              {/* Quote Icon */}
-              <div className="absolute -top-4 left-8 w-12 h-12 bg-gradient-to-r from-pink-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                <Quote className="w-6 h-6 text-white" />
-              </div>
-
-              {/* Rating */}
-              <div className="flex items-center gap-1 mb-6 mt-4">
-                {[...Array(5)].map((_, i) => (
-                  <Star
-                    key={i}
-                    className={`w-5 h-5 ${
-                      i < testimonial.rating
-                        ? 'text-pink-500 fill-pink-500'
-                        : 'text-gray-300'
-                    }`}
-                  />
-                ))}
-              </div>
-
-              {/* Content */}
-              <p className="text-gray-700 mb-8 leading-relaxed text-lg">
-                "{testimonial.content}"
-              </p>
-
-              {/* Author */}
-              <div className="flex items-center gap-4 pt-6 border-t border-gray-200">
-                <div className="relative">
-                  <img
-                    src={testimonial.avatar}
-                    alt={testimonial.name}
-                    className="w-14 h-14 rounded-full object-cover ring-4 ring-pink-100"
-                  />
-                  <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center">
-                    <span className="text-xs text-white font-bold">✓</span>
+        {/* Double Row Infinite Marquee tracks */}
+        <div className="tm-marquee-container">
+          {/* First Row (moves left) */}
+          <div className="tm-marquee-track tm-marquee-left">
+            {marqueeRow1.map((t, i) => (
+              <div key={i} className="tm-card">
+                <div>
+                  <div className="tm-stars">
+                    {[...Array(5)].map((_, s) => (
+                      <Star
+                        key={s}
+                        size={12}
+                        className={s < t.rating ? 'tm-star-filled' : 'tm-star-empty'}
+                        fill={s < t.rating ? 'currentColor' : 'none'}
+                      />
+                    ))}
+                  </div>
+                  <p className="tm-quote">"{t.content}"</p>
+                </div>
+                <div className="tm-author">
+                  <div className="tm-avatar-box">
+                    <img src={t.avatar} alt={t.name} className="tm-avatar" loading="lazy" />
+                  </div>
+                  <div>
+                    <p className="tm-author-name">{t.name}</p>
+                    <p className="tm-author-role">{t.role}</p>
                   </div>
                 </div>
-                <div>
-                  <h4 className="font-black text-gray-900 text-lg">
-                    {testimonial.name}
-                  </h4>
-                  <p className="text-sm text-gray-600 font-medium">
-                    {testimonial.role}
-                  </p>
-                </div>
               </div>
+            ))}
+          </div>
 
-              {/* Decorative corner */}
-              <div className="absolute bottom-4 right-4 w-16 h-16 border-b-2 border-r-2 border-pink-200 rounded-br-3xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-            </div>
-          ))}
-        </div>
-
-        {/* Trust badges */}
-        <div className="text-center animate-slide-up">
-          <p className="text-sm text-gray-600 font-bold mb-8 flex items-center justify-center gap-2">
-            <Sparkles className="w-4 h-4 text-pink-500" />
-            Được tin tưởng bởi hơn 10,000 khách hàng
-            <Sparkles className="w-4 h-4 text-pink-500" />
-          </p>
-          <div className="flex justify-center items-center gap-12 flex-wrap">
-            {['SHOPEE', 'LAZADA', 'TIKI', 'SENDO'].map((brand, index) => (
-              <div 
-                key={brand} 
-                className="group cursor-pointer"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
-                <div className="text-2xl font-black text-gray-400 group-hover:bg-gradient-to-r group-hover:from-pink-500 group-hover:to-purple-600 group-hover:bg-clip-text group-hover:text-transparent transition-all group-hover:scale-110 transform">
-                  {brand}
+          {/* Second Row (moves right) */}
+          <div className="tm-marquee-track tm-marquee-right">
+            {marqueeRow2.map((t, i) => (
+              <div key={i} className="tm-card">
+                <div>
+                  <div className="tm-stars">
+                    {[...Array(5)].map((_, s) => (
+                      <Star
+                        key={s}
+                        size={12}
+                        className={s < t.rating ? 'tm-star-filled' : 'tm-star-empty'}
+                        fill={s < t.rating ? 'currentColor' : 'none'}
+                      />
+                    ))}
+                  </div>
+                  <p className="tm-quote">"{t.content}"</p>
+                </div>
+                <div className="tm-author">
+                  <div className="tm-avatar-box">
+                    <img src={t.avatar} alt={t.name} className="tm-avatar" loading="lazy" />
+                  </div>
+                  <div>
+                    <p className="tm-author-name">{t.name}</p>
+                    <p className="tm-author-role">{t.role}</p>
+                  </div>
                 </div>
               </div>
             ))}
           </div>
         </div>
-      </div>
-    </section>
+
+        <div className="tm-container">
+          <div className="tm-trust">
+            <span className="tm-trust-label">Cũng có mặt trên</span>
+            <div className="tm-trust-divider" />
+            {['SHOPEE', 'LAZADA', 'TIKI', 'SENDO'].map((p) => (
+              <span key={p} className="tm-platform">{p}</span>
+            ))}
+          </div>
+        </div>
+      </section>
+    </>
   );
 };
 

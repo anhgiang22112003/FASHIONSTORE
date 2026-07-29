@@ -1,50 +1,28 @@
 import React, { useEffect, useState } from "react"
 import apiAdmin from "@/service/apiAdmin"
 import EditStaff from "./EditStaff"
-import { PlusIcon, FunnelIcon, TrashIcon } from '@heroicons/react/24/outline'
+import { PlusIcon } from '@heroicons/react/24/outline'
 import AdminSpinner from "@/components/AdminSpinner"
+import { PageHeader, Toolbar, FilterPanel, EmptyState, StatusBadge, AdminButton } from "@/components/admin/ui"
 
 const StaffCard = ({ staff, onEdit }) => {
   return (
-    <div className="bg-white p-6 rounded-2xl shadow-lg flex flex-col items-center text-center">
-      <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center mb-4 text-blue-600">
-        <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M12 12c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path>
-        </svg>
+    <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 hover:shadow-md transition-all duration-300 flex flex-col items-center text-center">
+      <div className="w-16 h-16 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 flex items-center justify-center mb-4 text-indigo-600 border border-indigo-100 dark:border-indigo-800 font-extrabold text-lg">
+        {staff?.name ? staff.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "NV"}
       </div>
-      <h3 className="text-xl font-semibold text-gray-800">{staff?.name}</h3>
-      <p className="text-sm text-gray-500 mb-2">{staff?.email}</p>
-      <p className="text-sm text-gray-600 mb-4">{staff?.phone || "--"}</p>
-      <div className="flex justify-center w-full mb-4">
-        <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-          staff?.status === "active" 
-            ? "bg-green-100 text-green-700" 
-            : "bg-red-100 text-red-700"
-        }`}>
-          {staff?.status === "active" ? "Hoạt động" : "Ngừng hoạt động"}
-        </span>
-      </div>
-      <div className="flex space-x-2 mt-4">
-        <button
-          onClick={() => onEdit(staff)}
-          className="flex items-center space-x-2 px-4 py-2 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600 transition-colors"
-        >
-          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"></path>
-          </svg>
-          <span>Sửa</span>
-        </button>
+      <h3 className="font-bold text-slate-800 dark:text-slate-200 text-base">{staff?.name}</h3>
+      <p className="text-xs text-slate-400 dark:text-slate-500 mt-1 font-mono">{staff?.email}</p>
+      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{staff?.phone || "--"}</p>
+      <div className="mt-4 flex flex-col items-center gap-3 w-full">
+        <StatusBadge status={staff?.status === "active" ? "active" : "inactive"} />
+        <AdminButton variant="secondary" size="sm" onClick={() => onEdit(staff)} className="w-full mt-2">
+          Chỉnh sửa
+        </AdminButton>
       </div>
     </div>
   )
 }
-
-const FilterItem = ({ label, children }) => (
-  <div className="flex flex-col space-y-1">
-    <label className="text-sm font-medium">{label}</label>
-    {children}
-  </div>
-)
 
 const StaffPage = () => {
   const [staffs, setStaffs] = useState([])
@@ -75,11 +53,6 @@ const StaffPage = () => {
     fetchStaff()
   }, [])
 
-  const handleFilterChange = (e) => {
-    const { name, value } = e.target
-    setFilters({ ...filters, [name]: value })
-  }
-
   const clearFilters = () => {
     setFilters(defaultFilters)
   }
@@ -101,100 +74,70 @@ const StaffPage = () => {
   })
 
   return (
-    <div style={{ backgroundColor: 'var(--bg-color)', color: 'var(--text-color)' }} className="min-h-screen font-sans antialiased">
-      <div className="space-y-6 p-5">
-        <div className="flex justify-between items-center mb-4">
-          <div className="flex items-center space-x-4">
-            <h1 className="text-3xl font-bold">Quản lý nhân viên</h1>
-            <button
-              onClick={() => setIsFilterOpen(!isFilterOpen)}
-              className={`px-4 py-2 rounded-xl flex items-center space-x-1 font-medium transition-all ${
-                isFilterOpen 
-                  ? 'bg-blue-600 text-white hover:bg-blue-700' 
-                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100'
-              }`}
-            >
-              <FunnelIcon className="w-5 h-5" />
-              <span>Bộ lọc</span>
-            </button>
-          </div>
-          <button
+    <div className="p-6 bg-slate-50 dark:bg-slate-950 min-h-screen">
+      <PageHeader
+        title="Quản lý nhân viên"
+        description="Xem xét và thiết lập quyền truy cập cho đội ngũ nhân sự quản trị hệ thống."
+        badge={`${filteredStaffs.length} nhân viên`}
+      />
+
+      <Toolbar
+        searchValue={filters.nameOrEmail}
+        onSearchChange={(val) => setFilters({ ...filters, nameOrEmail: val })}
+        searchPlaceholder="Tìm kiếm nhân viên..."
+        onFilterToggle={() => setIsFilterOpen(!isFilterOpen)}
+        filterActive={isFilterOpen}
+        filterCount={Object.values(filters).filter(val => val !== "" && val !== "Tất cả").length}
+        actions={
+          <AdminButton
+            variant="primary"
+            size="sm"
             onClick={() => { setEditData(null); setOpenForm(true); }}
-            className="flex items-center space-x-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors bg-blue-600 hover:bg-blue-700 text-white"
+            icon={<PlusIcon className="w-4 h-4" />}
           >
-            <PlusIcon className="w-5 h-5" />
-            <span>Thêm nhân viên</span>
-          </button>
+            Thêm nhân viên
+          </AdminButton>
+        }
+      />
+
+      <FilterPanel isOpen={isFilterOpen} onReset={clearFilters}>
+        <FilterPanel.Field label="Trạng thái">
+          <select 
+            value={filters.status} 
+            onChange={(e) => setFilters({ ...filters, status: e.target.value })} 
+          >
+            <option value="Tất cả">Tất cả</option>
+            <option value="active">Hoạt động</option>
+            <option value="inactive">Ngừng hoạt động</option>
+          </select>
+        </FilterPanel.Field>
+      </FilterPanel>
+
+      {loading ? (
+        <AdminSpinner message="Đang tải dữ liệu nhân viên..." />
+      ) : filteredStaffs?.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {filteredStaffs.map((staff) => (
+            <StaffCard
+              key={staff._id}
+              staff={staff}
+              onEdit={handleEdit}
+            />
+          ))}
         </div>
+      ) : (
+        <EmptyState
+          title="Không tìm thấy nhân viên"
+          description="Chưa có tài khoản nhân viên nào phù hợp với bộ lọc tìm kiếm hiện tại."
+        />
+      )}
 
-        <div
-          className={`transition-all duration-300 ease-in-out overflow-hidden ${
-            isFilterOpen ? 'max-h-full opacity-100 mb-6' : 'max-h-0 opacity-0 mb-0'
-          }`}
-        >
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 p-4 rounded-xl shadow relative">
-            <FilterItem label="Tìm kiếm (Tên, Email, SĐT)">
-              <input
-                type="text"
-                name="nameOrEmail"
-                placeholder="Nhập từ khóa tìm kiếm..."
-                value={filters.nameOrEmail}
-                onChange={handleFilterChange}
-                className="px-3 py-2 border rounded-lg text-black focus:ring-2 focus:ring-blue-300"
-              />
-            </FilterItem>
-
-            <FilterItem label="Trạng thái">
-              <select 
-                name="status" 
-                value={filters.status} 
-                onChange={handleFilterChange} 
-                className="px-3 py-2 border rounded-lg text-black bg-white"
-              >
-                <option value="Tất cả">Tất cả</option>
-                <option value="active">Hoạt động</option>
-                <option value="inactive">Ngừng hoạt động</option>
-              </select>
-            </FilterItem>
-
-            <div className="col-span-full flex justify-end pt-2 border-t border-gray-100">
-              <button
-                onClick={clearFilters}
-                className="px-4 py-2 rounded-lg flex items-center space-x-1 font-medium transition-all bg-red-100 text-red-600 border border-red-300 hover:bg-red-200"
-              >
-                <TrashIcon className="w-5 h-5" />
-                <span>Xóa bộ lọc</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {loading ? (
-          <AdminSpinner message="Đang tải dữ liệu nhân viên..." />
-        ) : filteredStaffs?.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-            {filteredStaffs.map((staff) => (
-              <StaffCard
-                key={staff._id}
-                staff={staff}
-                onEdit={handleEdit}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-10 text-gray-500">
-            Không tìm thấy nhân viên nào phù hợp với bộ lọc.
-          </div>
-        )}
-
-        {openForm && (
-          <EditStaff
-            onClose={() => setOpenForm(false)}
-            refresh={fetchStaff}
-            editData={editData}
-          />
-        )}
-      </div>
+      <EditStaff
+        onClose={() => setOpenForm(false)}
+        refresh={fetchStaff}
+        editData={editData}
+        open={openForm}
+      />
     </div>
   )
 }

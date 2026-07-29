@@ -1,27 +1,31 @@
+/* Hallmark · macrostructure: Marquee Hero · section: FeaturedCollections · tone: Vercel 3D Cover Flow */
 import React, { useEffect, useState, useRef } from 'react';
-import { ArrowRight, Sparkles } from 'lucide-react';
-import { Button } from '../ui/button';
+import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import api from '@/service/api';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Pagination, Navigation, Autoplay } from 'swiper/modules';
+import { Pagination, Navigation, EffectCoverflow } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/navigation';
+import 'swiper/css/effect-coverflow';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 
 const FeaturedCollections = () => {
   const [collection, setCollection] = useState([]);
+  const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
+  const [showCursor, setShowCursor] = useState(false);
   const containerRef = useRef(null);
-  
+  const sectionRef = useRef(null);
+
   const featuredCollections = async () => {
     try {
       const response = await api.get('/collection');
       const activeCollection = response?.data?.data?.filter(item => item.isActive);
       setCollection(activeCollection);
     } catch (error) {
-      // console.log('Error fetching featured collections:', error);
+      // silently fail
     }
   };
 
@@ -32,181 +36,423 @@ const FeaturedCollections = () => {
   useGSAP(() => {
     if (collection.length === 0) return;
 
-    // Header reveal
-    gsap.from('.collections-header-badge', {
-      scrollTrigger: {
-        trigger: containerRef.current,
-        start: 'top 80%',
-      },
-      y: -30,
+    gsap.from('.fc-heading-group', {
+      scrollTrigger: { trigger: containerRef.current, start: 'top 85%' },
+      y: 45,
       opacity: 0,
-      duration: 0.6,
+      duration: 0.9,
       ease: 'power3.out'
     });
 
-    gsap.from('.collections-title', {
-      scrollTrigger: {
-        trigger: containerRef.current,
-        start: 'top 80%',
-      },
+    gsap.from('.fc-swiper-wrap', {
+      scrollTrigger: { trigger: '.fc-swiper-wrap', start: 'top 80%' },
+      opacity: 0,
       y: 50,
-      opacity: 0,
-      duration: 0.8,
-      ease: 'power3.out',
-      delay: 0.1
-    });
-
-    gsap.from('.collections-desc', {
-      scrollTrigger: {
-        trigger: containerRef.current,
-        start: 'top 80%',
-      },
-      y: 30,
-      opacity: 0,
-      duration: 0.8,
-      ease: 'power3.out',
-      delay: 0.2
-    });
-
-    // Swiper cards entrance - 3D rotate
-    gsap.from('.swiper-slide', {
-      scrollTrigger: {
-        trigger: '.swiper-container-wrapper',
-        start: 'top 75%',
-      },
-      opacity: 0,
-      y: 80,
-      rotationY: 15,
-      transformOrigin: '50% 50% -100px',
-      stagger: 0.15,
-      duration: 1.2,
+      duration: 1.1,
       ease: 'power4.out'
     });
-
-    // View all button fade-in
-    gsap.from('.collections-view-all', {
-      scrollTrigger: {
-        trigger: '.collections-view-all',
-        start: 'top 90%',
-      },
-      scale: 0.9,
-      opacity: 0,
-      duration: 0.8,
-      ease: 'back.out(1.5)'
-    });
-
   }, { scope: containerRef, dependencies: [collection] });
 
-  return (
-    <section ref={containerRef} className="py-20 bg-gradient-to-br from-pink-50 via-white to-pink-100 relative overflow-hidden perspective-1000">
-      {/* Background decoration */}
-      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-pink-300 via-pink-400 to-pink-500"></div>
-      
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
-          <div className="collections-header-badge inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full border border-pink-300 mb-4 shadow-lg">
-            <Sparkles className="w-4 h-4 text-pink-500 animate-pulse" />
-            <span className="text-sm font-bold text-black">COLLECTIONS</span>
-          </div>
-          <h2 className="collections-title text-4xl lg:text-6xl font-black mb-6 text-black tracking-tight leading-none">
-            Bộ Sưu Tập <span className="bg-gradient-to-r from-pink-400 to-pink-600 bg-clip-text text-transparent">Nổi Bật</span>
-          </h2>
-          <p className="collections-desc text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-            Khám phá những bộ sưu tập mới nhất với thiết kế tinh tế và chất lượng cao
-          </p>
-        </div>
+  const handleMouseMove = (e) => {
+    if (!sectionRef.current) return;
+    const rect = sectionRef.current.getBoundingClientRect();
+    setCursorPos({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top
+    });
+  };
 
-        <div className="relative swiper-container-wrapper">
-          {collection && collection.length > 0 ? (
+  return (
+    <>
+      <style>{`
+        .fc-section {
+          padding: 8rem 0;
+          background-color: #030306;
+          position: relative;
+          overflow: hidden;
+          cursor: crosshair;
+        }
+
+        .fc-section::before {
+          content: '';
+          display: block;
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 1px;
+          background: rgba(255, 255, 255, 0.05);
+        }
+
+        .fc-container {
+          max-width: 1400px;
+          margin: 0 auto;
+          padding: 0 2rem;
+          position: relative;
+          z-index: 2;
+        }
+
+        /* Ambient glow backdrop */
+        .fc-glow-bg {
+          position: absolute;
+          width: 40%;
+          height: 40%;
+          background: radial-gradient(circle, rgba(168, 85, 247, 0.08) 0%, transparent 70%);
+          bottom: -10%;
+          right: -5%;
+          pointer-events: none;
+          z-index: 1;
+        }
+
+        /* Custom Floating Cursor */
+        .fc-custom-cursor {
+          position: absolute;
+          width: 5.5rem;
+          height: 5.5rem;
+          background: #ffffff;
+          color: #000000;
+          border-radius: 50%;
+          pointer-events: none;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-family: var(--font-body, 'Inter', sans-serif);
+          font-size: 0.6875rem;
+          font-weight: 700;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          z-index: 99;
+          transform: translate(-50%, -50%) scale(0);
+          opacity: 0;
+          transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+          box-shadow: 0 15px 30px rgba(255, 255, 255, 0.15);
+        }
+
+        .fc-section:hover .fc-custom-cursor {
+          transform: translate(-50%, -50%) scale(1);
+          opacity: 1;
+        }
+
+        .fc-heading-group {
+          display: flex;
+          align-items: flex-end;
+          justify-content: space-between;
+          gap: 2rem;
+          margin-bottom: 5rem;
+          flex-wrap: wrap;
+        }
+
+        .fc-eyebrow {
+          font-family: var(--font-body, 'Inter', sans-serif);
+          font-size: 0.6875rem;
+          font-weight: 600;
+          letter-spacing: 0.25em;
+          text-transform: uppercase;
+          color: #a855f7;
+          margin-bottom: 0.75rem;
+        }
+
+        .fc-title {
+          font-family: var(--font-display, 'Playfair Display', serif);
+          font-size: clamp(2rem, 4vw, 3.5rem);
+          font-weight: 900;
+          line-height: 1.05;
+          color: white;
+          margin: 0;
+        }
+
+        .fc-title em {
+          font-style: italic;
+          color: #a855f7;
+          font-weight: 400;
+        }
+
+        .fc-view-all-link {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.5rem;
+          font-family: var(--font-body, 'Inter', sans-serif);
+          font-size: 0.8125rem;
+          font-weight: 600;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          color: white;
+          text-decoration: none;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+          padding-bottom: 4px;
+          transition: color 0.3s, border-color 0.3s;
+          white-space: nowrap;
+          flex-shrink: 0;
+        }
+
+        .fc-view-all-link:hover {
+          color: #a855f7;
+          border-color: #a855f7;
+        }
+
+        .fc-arrow {
+          transition: transform 0.25s cubic-bezier(0.16,1,0.3,1);
+        }
+        .fc-view-all-link:hover .fc-arrow { transform: translateX(4px); }
+
+        .fc-swiper-wrap {
+          position: relative;
+          padding: 2rem 0 3rem;
+          overflow: visible;
+        }
+
+        /* Swiper Navigation & Pagination */
+        .fc-swiper-wrap .swiper-button-next,
+        .fc-swiper-wrap .swiper-button-prev {
+          width: 3.5rem;
+          height: 3.5rem;
+          background: rgba(255, 255, 255, 0.03);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 50%;
+          color: white;
+          transition: background 0.3s, border-color 0.3s, transform 0.3s;
+          backdrop-filter: blur(8px);
+        }
+
+        .fc-swiper-wrap .swiper-button-next:hover,
+        .fc-swiper-wrap .swiper-button-prev:hover {
+          background: #ffffff;
+          color: #000000;
+          border-color: #ffffff;
+        }
+
+        .fc-swiper-wrap .swiper-button-next::after,
+        .fc-swiper-wrap .swiper-button-prev::after {
+          font-size: 0.75rem;
+          font-weight: 900;
+        }
+
+        .fc-swiper-wrap .swiper-pagination-bullet {
+          background: rgba(255, 255, 255, 0.2);
+          opacity: 1;
+          width: 24px;
+          height: 2px;
+          border-radius: 0;
+          transition: width 0.3s, background-color 0.3s;
+        }
+
+        .fc-swiper-wrap .swiper-pagination-bullet-active {
+          background: #a855f7;
+          width: 48px;
+        }
+
+        /* Collection Card Glass */
+        .fc-card {
+          position: relative;
+          overflow: hidden;
+          aspect-ratio: 3 / 4;
+          background: rgba(255, 255, 255, 0.01);
+          border: 1px solid rgba(255, 255, 255, 0.05);
+          border-radius: 16px;
+          cursor: none;
+          box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+        }
+
+        .fc-card-img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+          display: block;
+        }
+
+        .swiper-slide-active .fc-card:hover .fc-card-img {
+          transform: scale(1.05);
+        }
+
+        .fc-card-overlay {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(to top, #000000 0%, rgba(0,0,0,0.2) 60%, transparent 100%);
+          pointer-events: none;
+        }
+
+        .fc-card-body {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          padding: 2.5rem;
+          z-index: 3;
+        }
+
+        .fc-card-tag {
+          display: inline-block;
+          font-family: var(--font-body, 'Inter', sans-serif);
+          font-size: 0.5625rem;
+          font-weight: 700;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+          color: #a855f7;
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255,255,255,0.08);
+          padding: 0.35rem 0.75rem;
+          border-radius: 4px;
+          margin-bottom: 1rem;
+          transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .fc-card:hover .fc-card-tag {
+          transform: rotate(-3deg) scale(1.05);
+        }
+
+        .fc-card-title {
+          font-family: var(--font-display, 'Playfair Display', serif);
+          font-size: 1.75rem;
+          font-weight: 700;
+          color: white;
+          margin: 0 0 0.5rem;
+          line-height: 1.2;
+        }
+
+        .fc-card-desc {
+          font-family: var(--font-body, 'Inter', sans-serif);
+          font-size: 0.8125rem;
+          color: rgba(255, 255, 255, 0.5);
+          line-height: 1.6;
+          margin: 0 0 1.75rem;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+
+        .fc-card-cta {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.5rem;
+          font-family: var(--font-body, 'Inter', sans-serif);
+          font-size: 0.75rem;
+          font-weight: 600;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          color: white;
+          text-decoration: none;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+          padding-bottom: 2px;
+          transform: translateY(12px);
+          opacity: 0;
+          transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .fc-card:hover .fc-card-cta {
+          opacity: 1;
+          transform: translateY(0);
+        }
+
+        .fc-card-cta:hover { border-color: white; }
+
+        @media (max-width: 1023px) {
+          .fc-section { cursor: default; }
+          .fc-custom-cursor { display: none; }
+          .fc-card { cursor: pointer; }
+          .fc-card-cta { opacity: 1; transform: none; }
+          .fc-swiper-wrap .swiper-slide {
+            transform: none !important;
+            opacity: 1 !important;
+          }
+        }
+      `}</style>
+
+      <section
+        ref={sectionRef}
+        className="fc-section"
+        onMouseMove={handleMouseMove}
+        onMouseEnter={() => setShowCursor(true)}
+        onMouseLeave={() => setShowCursor(false)}
+      >
+        <div className="fc-glow-bg" />
+
+        {/* Custom cursor follower */}
+        {showCursor && (
+          <div
+            className="fc-custom-cursor"
+            style={{
+              left: `${cursorPos.x}px`,
+              top: `${cursorPos.y}px`
+            }}
+          >
+            Khám phá
+          </div>
+        )}
+
+        <div className="fc-container" ref={containerRef}>
+          <div className="fc-heading-group">
+            <div>
+              <p className="fc-eyebrow">Collections</p>
+              <h2 className="fc-title">
+                Bộ Sưu Tập <em>Nổi Bật</em>
+              </h2>
+            </div>
+            <Link to="/collection" className="fc-view-all-link fc-view-all" id="fc-view-all-top">
+              Xem tất cả <ArrowRight className="fc-arrow" size={14} />
+            </Link>
+          </div>
+
+          <div className="fc-swiper-wrap">
+            {collection && collection.length > 0 ? (
             <Swiper
-              modules={[Pagination, Navigation]}
-              autoplay={{
-                delay: 6000,
-                disableOnInteraction: false,
-              }}
-              navigation={true}
-              pagination={{ 
-                clickable: true,
-                dynamicBullets: true 
-              }}
-              slidesPerView={1}
-              spaceBetween={32}
-              breakpoints={{
-                768: { slidesPerView: 2 },
-                1024: { slidesPerView: 3 },
-              }}
-              grabCursor={true}
-              className="pb-16"
-            >
-              {collection.map((item, index) => (
-                <SwiperSlide key={item?.id || index}>
-                  <div className="group relative overflow-hidden rounded-3xl shadow-xl hover:shadow-2xl hover:shadow-pink-100 transition-all duration-500 hover:-translate-y-2">
-                    <div className="aspect-[4/5] overflow-hidden relative">
+                modules={[Pagination, Navigation, EffectCoverflow]}
+                effect="coverflow"
+                coverflowEffect={{
+                  rotate: 35,
+                  stretch: 0,
+                  depth: 120,
+                  modifier: 1,
+                  slideShadows: true
+                }}
+                grabCursor={true}
+                centeredSlides={true}
+                slidesPerView={1.2}
+                spaceBetween={30}
+                navigation={true}
+                pagination={{ clickable: true }}
+                breakpoints={{
+                  640: { slidesPerView: 1.8, spaceBetween: 30 },
+                  1024: { slidesPerView: 3, spaceBetween: 40 },
+                }}
+                className="pb-14"
+              >
+                {collection.map((item, index) => (
+                  <SwiperSlide key={item?.id || index}>
+                    <div className="fc-card">
                       <img
                         src={item?.image}
                         alt={item?.name}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        className="fc-card-img"
                         loading="lazy"
-                        style={{ willChange: 'transform' }}
                       />
-                      
-                      {/* Gradient overlays */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
-                      <div className="absolute inset-0 bg-gradient-to-br from-pink-500/0 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                    </div>
-
-                    {/* Content */}
-                    <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
-                      <div className="mb-4">
-                        <div className="inline-block px-3 py-1 bg-pink-500 rounded-full text-xs font-bold mb-3 shadow-lg">
-                          NEW
-                        </div>
-                        <h3 className="text-3xl font-black mb-3 drop-shadow-lg leading-tight">{item?.name}</h3>
-                        <p className="text-white/95 mb-6 line-clamp-2 text-sm leading-relaxed">
-                          {item?.description}
-                        </p>
-                      </div>
-                      
-                      <div className="flex items-center justify-between opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-4 group-hover:translate-y-0">
-                        <Link to={`/collection/${item?.slug || 'detail'}`}>
-                          <Button
-                            size="lg"
-                            className="bg-white text-black hover:bg-gray-100 rounded-full font-bold shadow-xl"
-                          >
-                            Khám phá ngay
-                            <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                          </Button>
+                      <div className="fc-card-overlay" />
+                      <div className="fc-card-body">
+                        <div className="fc-card-tag">New</div>
+                        <h3 className="fc-card-title">{item?.name}</h3>
+                        <p className="fc-card-desc">{item?.description}</p>
+                        <Link
+                          to={`/collection/${item?.slug || 'detail'}`}
+                          className="fc-card-cta"
+                          id={`fc-card-cta-${index}`}
+                        >
+                          Khám phá <ArrowRight size={12} />
                         </Link>
                       </div>
                     </div>
-
-                    {/* Decorative corner */}
-                    <div className="absolute top-4 right-4 w-16 h-16 border-t-2 border-r-2 border-white/30 rounded-tr-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                  </div>
-                </SwiperSlide>
-              ))}
-            </Swiper>
-          ) : (
-            <div className="text-center text-gray-600 py-16 bg-white rounded-3xl">
-              <p className="text-lg">Không có bộ sưu tập nổi bật nào để hiển thị.</p>
-            </div>
-          )}
+                  </SwiperSlide>
+                ))}
+              </Swiper>
+            ) : (
+              <div className="text-center py-20 text-gray-500">
+                <p>Chưa có bộ sưu tập nào.</p>
+              </div>
+            )}
+          </div>
         </div>
-
-        <div className="collections-view-all text-center mt-16">
-          <Link to={"/collection"}>
-            <Button 
-              variant="outline" 
-              size="lg" 
-              className="border-2 border-pink-500 text-pink-500 hover:bg-pink-50 rounded-full px-8 py-6 text-lg font-bold group shadow-lg hover:shadow-pink-500/20"
-            >
-              Xem tất cả bộ sưu tập
-              <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-2 transition-transform" />
-            </Button>
-          </Link>
-        </div>
-      </div>
-    </section>
+      </section>
+    </>
   );
 };
 

@@ -16,10 +16,11 @@ const Switch = ({ checked, onChange }) => {
       {/* Nền switch */}
       <div className="
         relative w-[80px] h-[32px]
-        bg-gray-200 rounded-full
+        bg-slate-200 peer-checked:bg-slate-800 rounded-full
         transition-all duration-300 ease-in-out
         after:absolute after:content-[''] after:w-[36px] after:h-[26px]
-        after:bg-gradient-to-r from-yellow-400 to-orange-500
+        after:bg-gradient-to-r after:from-yellow-400 after:to-orange-500
+        peer-checked:after:from-indigo-400 peer-checked:after:to-blue-500
         peer-checked:after:translate-x-[38px]
         after:rounded-full after:top-[3px] after:left-[3px]
         after:transition-all after:duration-300 after:ease-in-out shadow-sm

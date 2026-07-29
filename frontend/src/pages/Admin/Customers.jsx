@@ -1,17 +1,11 @@
 import apiAdmin from '@/service/apiAdmin'
 import React, { useEffect, useState, useMemo } from 'react'
 import { toast } from 'react-toastify'
-import { PlusIcon, FunnelIcon, TrashIcon, PencilIcon, UserIcon } from '@heroicons/react/24/outline'
+import { UserIcon, PencilIcon } from '@heroicons/react/24/outline'
 import { useDebounce } from '@/hooks/useDebounce'
 import AdminSpinner from '@/components/AdminSpinner'
+import { PageHeader, Toolbar, FilterPanel, Pagination, EmptyState, AdminButton } from "@/components/admin/ui"
 
-
-const FilterItem = ({ label, children }) => (
-  <div className="flex flex-col space-y-1">
-    <label className="text-sm font-medium ">{label}</label>
-    {children}
-  </div>
-)
 const formatVND = (value) => {
   if (value === '' || value === undefined || value === null) return ''
   const num = String(value).replace(/\D/g, '')
@@ -32,38 +26,40 @@ const CustomerCard = ({ customer, setEditingCustomer, setActivePage }) => {
   }
 
   return (
-    <div className="bg-white p-6 rounded-2xl shadow-lg flex flex-col items-center text-center border border-gray-100 hover:shadow-xl transition-shadow duration-300">
-      <div className="w-16 h-16 rounded-full bg-pink-100 flex items-center justify-center mb-4 text-pink-600 shadow-inner">
-        <UserIcon className="w-8 h-8 text-pink-500" />
+    <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col items-center text-center hover:shadow-md hover:border-indigo-200 dark:hover:border-indigo-700 transition-all duration-300">
+      <div className="w-12 h-12 rounded-xl bg-indigo-50 dark:bg-indigo-950/50 flex items-center justify-center mb-3 text-indigo-600 border border-indigo-100 dark:border-indigo-800">
+        <UserIcon className="w-6 h-6 text-indigo-500" />
       </div>
-      <h3 className="text-lg font-bold text-gray-800">{customer?.name}</h3>
-      <p className="text-xs text-gray-500 mb-4">{customer?.email}</p>
-      <div className="flex justify-between w-full text-sm text-gray-600 mb-4 bg-gray-50 p-3 rounded-xl">
-        <div className="text-left">
-          <p className="text-xxs text-gray-400 font-semibold uppercase tracking-wider">Đơn hàng</p>
-          <p className="font-bold text-base text-pink-600">{customer?.orderCount || 0}</p>
+      <h3 className="font-bold text-slate-800 dark:text-slate-200 text-sm truncate max-w-full">{customer?.name}</h3>
+      <p className="text-xs text-slate-400 dark:text-slate-500 mb-4 truncate max-w-full">{customer?.email}</p>
+      <div className="grid grid-cols-2 gap-2 w-full text-xs text-slate-600 mb-4 bg-slate-50 dark:bg-slate-800 p-3 rounded-xl border border-slate-100 dark:border-slate-700">
+        <div className="text-left border-r border-slate-200 dark:border-slate-600 pr-2">
+          <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">Đơn hàng</p>
+          <p className="font-extrabold text-sm text-indigo-600 dark:text-indigo-400 mt-0.5">{customer?.orderCount || 0}</p>
         </div>
-        <div className="text-right">
-          <p className="text-xxs text-gray-400 font-semibold uppercase tracking-wider">Chi tiêu</p>
-          <p className="font-bold text-base text-pink-600">
+        <div className="text-right pl-2">
+          <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">Chi tiêu</p>
+          <p className="font-extrabold text-sm text-slate-800 dark:text-slate-200 mt-0.5">
             {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(customer?.totalSpent || 0)}
           </p>
         </div>
       </div>
-      <p className="text-xxs text-gray-400">
+      <p className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">
         Tham gia:{' '}
         {customer?.createdAt
           ? new Date(customer.createdAt).toLocaleDateString('vi-VN')
           : ''}
       </p>
-      <div className="flex space-x-2 mt-4 w-full">
-        <button
+      <div className="mt-4 w-full">
+        <AdminButton
+          variant="outline"
+          size="sm"
+          className="w-full text-xs py-1.5"
           onClick={handleEditClick}
-          className="w-full flex items-center justify-center space-x-1.5 px-4 py-2 bg-pink-600 text-white rounded-xl font-bold hover:bg-pink-700 transition-all text-xs shadow-md shadow-pink-200"
+          icon={<PencilIcon className="w-3.5 h-3.5" />}
         >
-          <PencilIcon className="w-3.5 h-3.5" />
-          <span>Sửa thông tin</span>
-        </button>
+          Sửa thông tin
+        </AdminButton>
       </div>
     </div>
   )
@@ -73,6 +69,7 @@ const Customers = ({ setEditingCustomer, setActivePage, data }) => {
   const [provinces, setProvinces] = useState([])
   const [totalCustomers, setTotalCustomers] = useState(0)
   const limit = 12
+
   useEffect(() => {
     import('@/data/provinces.json')
       .then((data) => setProvinces(data.default || data))
@@ -153,7 +150,6 @@ const Customers = ({ setEditingCustomer, setActivePage, data }) => {
     }
   }
 
-
   useEffect(() => {
     fetchCustomers(page)
   }, [page])
@@ -173,7 +169,6 @@ const Customers = ({ setEditingCustomer, setActivePage, data }) => {
     data
   ])
 
-  // --- Handlers ---
   const handleFilterChange = (e) => {
     const { name, value } = e.target
     if (name === 'minTotalSpent' || name === 'maxTotalSpent') {
@@ -196,239 +191,165 @@ const Customers = ({ setEditingCustomer, setActivePage, data }) => {
     }
   }
 
-
-
-
   return (
-    <div style={{ backgroundColor: 'var(--bg-color)', color: 'var(--text-color)' }} className="min-h-screen font-sans antialiased">
-      <div className="space-y-6 p-5">
-        <div className="flex justify-between items-center mb-4">
-          <div className="flex items-center space-x-4">
-            <h1 className="text-3xl font-bold">Quản lý Khách hàng</h1>
-            <button
-              onClick={() => setIsFilterOpen(!isFilterOpen)}
-              className={`px-4 py-2 rounded-xl flex items-center space-x-1 font-medium transition-all ${isFilterOpen ? 'bg-pink-600 text-white hover:bg-pink-700' : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100'
-                }`}
-            >
-              <FunnelIcon className="w-5 h-5" />
-              <span>Bộ lọc</span>
-            </button>
+    <div className="p-6 bg-slate-50 dark:bg-slate-950 min-h-screen">
+      <PageHeader
+        title="Danh sách Khách hàng"
+        description="Quản lý thông tin thành viên, nhóm khách hàng, số lượng đơn hàng và giá trị giao dịch."
+        badge={`${totalCustomers} khách hàng`}
+      />
 
-            {/* Nút Xóa bộ lọc */}
-
-          </div>
-          <button
+      <Toolbar
+        onFilterToggle={() => setIsFilterOpen(!isFilterOpen)}
+        filterActive={isFilterOpen}
+        filterCount={Object.values(filters).filter(val => val !== "" && val !== "Tất cả").length}
+        actions={
+          <AdminButton
+            variant="primary"
+            size="sm"
             onClick={() => setActivePage('add-customer')}
-            className="flex items-center space-x-2 px-4 py-2.5 text-sm font-semibold rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white shadow-md shadow-pink-200 transition-all"
           >
-            <PlusIcon className="w-4 h-4" />
-            <span>Thêm khách hàng</span>
-          </button>
+            + Thêm khách hàng
+          </AdminButton>
+        }
+      />
+
+      <FilterPanel isOpen={isFilterOpen} onReset={clearFilters}>
+        <FilterPanel.Field label="Tìm kiếm">
+          <input
+            type="text"
+            name="nameOrEmail"
+            placeholder="Tên, Email, SĐT..."
+            value={filters.nameOrEmail}
+            onChange={handleFilterChange}
+          />
+        </FilterPanel.Field>
+
+        <FilterPanel.Field label="Giới tính">
+          <select name="gender" value={filters.gender} onChange={handleFilterChange}>
+            <option value="">Tất cả</option>
+            <option value="male">Nam</option>
+            <option value="female">Nữ</option>
+            <option value="other">Khác</option>
+          </select>
+        </FilterPanel.Field>
+
+        <FilterPanel.Field label="Nhóm khách hàng">
+          <input
+            type="text"
+            name="customerGroup"
+            placeholder="Nhập nhóm..."
+            value={filters.customerGroup}
+            onChange={handleFilterChange}
+          />
+        </FilterPanel.Field>
+
+        <FilterPanel.Field label="Tỉnh / Thành phố">
+          <select name="province" value={filters.province} onChange={handleFilterChange}>
+            <option value="">Tất cả</option>
+            {provinces.map(p => (
+              <option key={p.code} value={p.name}>{p.name}</option>
+            ))}
+          </select>
+        </FilterPanel.Field>
+
+        <FilterPanel.Field label="Trạng thái tài khoản">
+          <select name="status" value={filters.status} onChange={handleFilterChange}>
+            <option value="Tất cả">Tất cả</option>
+            <option value="active">Hoạt động</option>
+            <option value="inactive">Bị khóa</option>
+          </select>
+        </FilterPanel.Field>
+
+        <FilterPanel.Field label="Ngày tham gia (Từ)">
+          <input
+            type="date"
+            name="startDate"
+            value={filters.startDate}
+            onChange={handleFilterChange}
+          />
+        </FilterPanel.Field>
+
+        <FilterPanel.Field label="Ngày tham gia (Đến)">
+          <input
+            type="date"
+            name="endDate"
+            value={filters.endDate}
+            onChange={handleFilterChange}
+          />
+        </FilterPanel.Field>
+
+        <div className="flex gap-2">
+          <FilterPanel.Field label="Đơn từ">
+            <input
+              type="number"
+              name="minOrderCount"
+              placeholder="0"
+              value={filters.minOrderCount}
+              onChange={handleFilterChange}
+            />
+          </FilterPanel.Field>
+          <FilterPanel.Field label="Đơn đến">
+            <input
+              type="number"
+              name="maxOrderCount"
+              placeholder="100"
+              value={filters.maxOrderCount}
+              onChange={handleFilterChange}
+            />
+          </FilterPanel.Field>
         </div>
 
-        <div
-    className={`transition-all duration-300 ease-in-out overflow-hidden ${
-        isFilterOpen ? 'max-h-full opacity-100 mb-6' : 'max-h-0 opacity-0 mb-0'
-    }`}
->
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-3  p-4 rounded-xl shadow relative">
-        
-        <FilterItem label="Tìm kiếm (Tên, Email, SĐT)">
+        <div className="flex gap-2">
+          <FilterPanel.Field label="Chi tiêu từ">
             <input
-                type="text"
-                name="nameOrEmail"
-                placeholder="Nhập từ khóa tìm kiếm..."
-                value={filters.nameOrEmail}
-                onChange={handleFilterChange}
-                className="px-3 py-2 border rounded-lg text-black focus:ring-2 focus:ring-pink-300"
+              type="text"
+              name="minTotalSpent"
+              placeholder="Từ ₫"
+              value={formatVND(filters.minTotalSpent)}
+              onChange={handleFilterChange}
             />
-        </FilterItem>
-
-        {/* 2. Giới tính */}
-        <FilterItem label="Giới tính">
-            <select name="gender" value={filters.gender} onChange={handleFilterChange} className="px-3 py-2 border rounded-lg text-black bg-white">
-                <option value="">Tất cả</option>
-                <option value="male">Nam</option>
-                <option value="female">Nữ</option>
-                <option value="other">Khác</option>
-            </select>
-        </FilterItem>
-
-        {/* 3. Nhóm khách hàng (Debounced) */}
-        <FilterItem label="Nhóm khách hàng">
+          </FilterPanel.Field>
+          <FilterPanel.Field label="Chi tiêu đến">
             <input
-                type="text"
-                name="customerGroup"
-                placeholder="Nhập tên nhóm..."
-                value={filters.customerGroup}
-                onChange={handleFilterChange}
-                className="px-3 py-2 border rounded-lg text-black focus:ring-2 focus:ring-pink-300"
+              type="text"
+              name="maxTotalSpent"
+              placeholder="Đến ₫"
+              value={formatVND(filters.maxTotalSpent)}
+              onChange={handleFilterChange}
             />
-        </FilterItem>
-
-        {/* 4. Tỉnh/Thành phố */}
-        <FilterItem label="Tỉnh/Thành phố">
-            <select name="province" value={filters.province} onChange={handleFilterChange} className="px-3 py-2 border rounded-lg text-black bg-white">
-                <option value="">Tất cả</option>
-                {provinces.map(p => (
-                    <option key={p.code} value={p.name}>
-                        {p.name}
-                    </option>
-                ))}
-            </select>
-        </FilterItem>
-
-        {/* 5. Trạng thái hoạt động */}
-        <FilterItem label="Trạng thái tài khoản">
-            <select name="status" value={filters.status} onChange={handleFilterChange} className="px-3 py-2 border rounded-lg text-black bg-white">
-                <option value="Tất cả">Tất cả</option>
-                <option value="active">Hoạt động</option>
-                <option value="inactive">Bị khóa</option>
-            </select>
-        </FilterItem>
-
-        {/* 6. Tổng chi tiêu (₫) */}
-        <FilterItem label="Tổng chi tiêu (₫)">
-            <div className="flex space-x-2">
-                <input
-                    type="text"
-                    name="minTotalSpent"
-                    placeholder="Từ"
-                    value={formatVND(filters.minTotalSpent)}
-                    onChange={handleFilterChange}
-                    className="w-1/2 px-3 py-2 border rounded-lg text-black"
-                />
-                <input
-                    type="text"
-                    name="maxTotalSpent"
-                    placeholder="Đến"
-                    value={formatVND(filters.maxTotalSpent)}
-                    onChange={handleFilterChange}
-                    className="w-1/2 px-3 py-2 border rounded-lg text-black"
-                />
-            </div>
-        </FilterItem>
-
-        {/* 7. Số đơn hàng (Debounced) */}
-        <FilterItem label="Số lượng đơn hàng">
-            <div className="flex space-x-2">
-                <input
-                    type="number"
-                    name="minOrderCount"
-                    placeholder="Từ"
-                    value={filters.minOrderCount}
-                    onChange={handleFilterChange}
-                    className="w-1/2 px-3 py-2 border rounded-lg text-black"
-                />
-                <input
-                    type="number"
-                    name="maxOrderCount"
-                    placeholder="Đến"
-                    value={filters.maxOrderCount}
-                    onChange={handleFilterChange}
-                    className="w-1/2 px-3 py-2 border rounded-lg text-black"
-                />
-            </div>
-        </FilterItem>
-
-        {/* 8. Ngày tham gia */}
-        <FilterItem label="Ngày tham gia (Từ)">
-            <input
-                type="date"
-                name="startDate"
-                value={filters.startDate}
-                onChange={handleFilterChange}
-                className="px-3 py-2 border rounded-lg text-black bg-white"
-            />
-        </FilterItem>
-        <FilterItem label="Ngày tham gia (Đến)">
-            <input
-                type="date"
-                name="endDate"
-                value={filters.endDate}
-                onChange={handleFilterChange}
-                className="px-3 py-2 border rounded-lg text-black bg-white"
-            />
-        </FilterItem>
-
-        {/* Nút Xóa bộ lọc được di chuyển xuống cuối và căn phải */}
-        {/* Thêm class col-span-full để chiếm hết chiều rộng, và flex để căn phải */}
-        <div className="col-span-full flex justify-end pt-2 border-t border-gray-100">
-            <button
-                onClick={clearFilters}
-                className="px-4 py-2 rounded-lg flex items-center space-x-1 font-medium transition-all bg-red-100 text-red-600 border border-red-300 hover:bg-red-200"
-            >
-                <TrashIcon className="w-5 h-5" />
-                <span>Xóa bộ lọc</span>
-            </button>
+          </FilterPanel.Field>
         </div>
-    </div>
-</div>
+      </FilterPanel>
 
-
-        {isLoading ? (
-          <AdminSpinner message="Đang tải dữ liệu khách hàng..." />
-        ) : customersData?.length > 0 ? (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-              {customersData.map((customer) => (
-                <CustomerCard
-                  key={customer._id}
-                  customer={customer}
-                  setEditingCustomer={setEditingCustomer}
-                  setActivePage={setActivePage}
-                />
-              ))}
-            </div>
-
-            {/* Phân trang */}
-            {!isLoading && customersData?.length > 0 && (
-              <div className="mt-6">
-                {totalCustomers > limit && (
-                  <div className="flex justify-center items-center mt-6 space-x-2">
-                    <button
-                      onClick={() => setPage(prev => Math.max(prev - 1, 1))}
-                      disabled={page === 1}
-                      className="px-3 py-1 border rounded-lg hover:bg-gray-200 disabled:opacity-50"
-                    >
-                      &larr; Trước
-                    </button>
-
-                    {Array.from({ length: Math.ceil(totalCustomers / limit) }, (_, i) => (
-                      <button
-                        key={i}
-                        onClick={() => setPage(i + 1)}
-                        className={`px-3 py-1 border rounded-lg font-semibold ${page === i + 1
-                          ? "bg-pink-600 text-white"
-                          : "bg-white text-gray-700 hover:bg-gray-100"
-                          }`}
-                      >
-                        {i + 1}
-                      </button>
-                    )).slice(Math.max(0, page - 3), Math.min(totalPages, page + 2))} {/* Hiển thị tối đa 5 trang xung quanh trang hiện tại */}
-
-                    {totalPages > 5 && page < totalPages - 2 && (
-                      <span className="px-3 py-1">...</span>
-                    )}
-
-                    <button
-                      onClick={() => setPage(prev => prev + 1)}
-                      disabled={page >= totalPages}
-                      className="px-3 py-1 border rounded-lg hover:bg-gray-200 disabled:opacity-50"
-                    >
-                      Sau &rarr;
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-          </>
-        ) : (
-          <div className="text-center py-10 text-gray-500">
-            Không tìm thấy khách hàng nào phù hợp với bộ lọc.
+      {isLoading ? (
+        <AdminSpinner message="Đang tải dữ liệu khách hàng..." />
+      ) : customersData && customersData.length > 0 ? (
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {customersData.map((customer) => (
+              <CustomerCard
+                key={customer._id}
+                customer={customer}
+                setEditingCustomer={setEditingCustomer}
+                setActivePage={setActivePage}
+              />
+            ))}
           </div>
-        )}
-      </div>
+
+          <Pagination
+            page={page}
+            total={totalCustomers}
+            limit={limit}
+            onPageChange={setPage}
+          />
+        </>
+      ) : (
+        <EmptyState
+          title="Không tìm thấy khách hàng"
+          description="Thử thay đổi bộ lọc tìm kiếm hoặc thêm mới một khách hàng để bắt đầu."
+        />
+      )}
     </div>
   )
 }

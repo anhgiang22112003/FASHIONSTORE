@@ -7,7 +7,8 @@ const URL =
 
 // Tạo socket với autoConnect: false để kiểm soát khi nào kết nối
 export const socket = io(URL, {
-  transports: ["websocket"],
+  // polling trước để bypass Render cold-start, upgrade lên websocket sau
+  transports: ["polling", "websocket"],
   autoConnect: false,
 });
 

@@ -1,41 +1,18 @@
 import React, { useCallback, useEffect, useState } from "react"
 import {
-  MagnifyingGlassIcon,
-  ArrowDownTrayIcon,
-  PencilIcon,
   XMarkIcon,
   CheckCircleIcon,
   StarIcon,
   TrashIcon,
+  ChatBubbleLeftRightIcon
 } from "@heroicons/react/24/outline"
-import { ExclamationCircleIcon } from "@heroicons/react/24/solid"
 import apiAdmin from "@/service/apiAdmin"
 import { toast } from "react-toastify"
 import AdminSpinner from "@/components/AdminSpinner"
 import { socket } from "@/service/socket"
 import AsyncSelect from "react-select/async"
 import debounce from "lodash.debounce"
-
-// ===== Modal dùng chung =====
-const CommonModal = ({ title, isOpen, onClose, children }) => {
-  if (!isOpen) return null
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
-      <div className="bg-white rounded-2xl p-6 w-full max-w-lg mx-auto shadow-xl">
-        <div className="flex justify-between items-center pb-3 border-b border-gray-200">
-          <h3 className="text-xl font-semibold text-gray-800">{title}</h3>
-          <button
-            onClick={onClose}
-            className="p-1 rounded-full text-gray-500 hover:bg-gray-100 transition-colors"
-          >
-            <XMarkIcon className="w-5 h-5" />
-          </button>
-        </div>
-        {children}
-      </div>
-    </div>
-  )
-}
+import { PageHeader, Toolbar, FilterPanel, Pagination, EmptyState, StatusBadge, AdminButton, ConfirmDialog, AdminModal, AdminTextarea } from "@/components/admin/ui"
 
 // ===== Modal phản hồi =====
 const ReplyModal = ({ isOpen, onClose, onSendReply, review }) => {
@@ -52,86 +29,44 @@ const ReplyModal = ({ isOpen, onClose, onSendReply, review }) => {
   }
 
   const getStarRating = (rating) => (
-    <div className="flex text-[#ff69b4]">
+    <div className="flex text-amber-400">
       {[...Array(5)].map((_, i) => (
-        <StarIcon
-          key={i}
-          className={`w-4 h-4 ${i < rating ? "fill-current" : "text-gray-300"}`}
-        />
+        <StarIcon key={i} className={`w-3.5 h-3.5 ${i < rating ? "fill-current" : "text-slate-200"}`} />
       ))}
     </div>
   )
 
   return (
-    <CommonModal title="Phản hồi đánh giá" isOpen={isOpen} onClose={onClose}>
-      <div className="mt-4 p-4 border rounded-xl ">
-        <h4 className="font-semibold text-black text-lg">
-          {review?.user?.name || "Người dùng"} {getStarRating(review?.rating)}
-        </h4>
-        <p className="text-sm text-black italic">"{review?.content}"</p>
-      </div>
-      <div className="mt-4">
-        <label className="block text-sm font-medium  mb-1">
-          Nội dung phản hồi
-        </label>
-        <textarea
-          className="w-full text-black h-32 px-4 py-2 border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-[#ff69b4]"
+    <AdminModal
+      open={isOpen}
+      onClose={onClose}
+      title="Phản hồi đánh giá"
+      description={`Tới: ${review?.user?.name || 'Người dùng'}`}
+      size="md"
+      footer={
+        <>
+          <AdminButton variant="ghost" size="sm" onClick={onClose}>Hủy bỏ</AdminButton>
+          <AdminButton variant="primary" size="sm" onClick={handleSend}>Gửi phản hồi</AdminButton>
+        </>
+      }
+    >
+      <div className="space-y-4">
+        <div className="p-4 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl">
+          <div className="flex items-center justify-between mb-2">
+            <span className="font-bold text-xs text-slate-700 dark:text-slate-300">{review?.user?.name || 'Người dùng'}</span>
+            {getStarRating(review?.rating)}
+          </div>
+          <p className="text-xs text-slate-500 dark:text-slate-400 italic">"{review?.content}"</p>
+        </div>
+        <AdminTextarea
+          label="Nội dung phản hồi"
           placeholder="Nhập phản hồi của bạn..."
           value={replyContent}
           onChange={(e) => setReplyContent(e.target.value)}
-        ></textarea>
+          rows={5}
+        />
       </div>
-      <div className="mt-6 flex justify-end space-x-3">
-        <button
-          onClick={onClose}
-          className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-        >
-          Hủy bỏ
-        </button>
-        <button
-          onClick={handleSend}
-          className="px-4 py-2 text-sm font-medium text-white bg-[#ff69b4] rounded-lg hover:bg-[#ff4f9f] transition-colors"
-        >
-          Gửi phản hồi
-        </button>
-      </div>
-    </CommonModal>
-  )
-}
-
-// ===== Modal xác nhận hành động =====
-const ConfirmationModal = ({
-  title,
-  message,
-  isOpen,
-  onClose,
-  onConfirm,
-  confirmText = "Xác nhận",
-  buttonColor = "bg-blue-500",
-  buttonHoverColor = "bg-blue-600",
-}) => {
-  if (!isOpen) return null
-  return (
-    <CommonModal title={title} isOpen={isOpen} onClose={onClose}>
-      <div className="mt-4 flex items-center space-x-3">
-        <ExclamationCircleIcon className="w-6 h-6 text-red-500 flex-shrink-0" />
-        <p className="text-gray-600">{message}</p>
-      </div>
-      <div className="mt-6 flex justify-end space-x-3">
-        <button
-          onClick={onClose}
-          className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-        >
-          Hủy bỏ
-        </button>
-        <button
-          onClick={onConfirm}
-          className={`px-4 py-2 text-sm font-medium text-white ${buttonColor} rounded-lg hover:${buttonHoverColor} transition-colors`}
-        >
-          {confirmText}
-        </button>
-      </div>
-    </CommonModal>
+    </AdminModal>
   )
 }
 
@@ -152,8 +87,8 @@ const ReviewManagementPage = () => {
   const [loading, setLoading] = useState(false)
   const [productFilter, setProductFilter] = useState("")
   const [selectedProduct, setSelectedProduct] = useState(null)
+  const [isFilterVisible, setIsFilterVisible] = useState(false)
 
-  // Hàm gọi API fetch product
   const fetchProducts = async (inputValue) => {
     const res = await apiAdmin.get("/products", {
       params: { search: inputValue, limit: 20 },
@@ -161,18 +96,19 @@ const ReviewManagementPage = () => {
     return res.data.products.map((p) => ({ value: p._id, label: p.name }))
   }
 
-  // Dùng debounce để delay khi người dùng gõ
   const loadOptions = useCallback(
     debounce((inputValue, callback) => {
       fetchProducts(inputValue).then(callback)
-    }, 500), // 500ms delay
+    }, 500),
     []
   )
 
   const handleChange = (selected) => {
     setSelectedProduct(selected)
     setProductFilter(selected?.value || "")
+    setPage(1)
   }
+
   const fetchReviews = async () => {
     try {
       setLoading(true)
@@ -194,8 +130,6 @@ const ReviewManagementPage = () => {
     }
   }
 
-
-
   useEffect(() => {
     fetchReviews()
   }, [page, starFilter, statusFilter, productFilter])
@@ -207,9 +141,6 @@ const ReviewManagementPage = () => {
     })
     return () => socket.disconnect()
   }, [])
-
-
-
 
   const handleSearch = (e) => {
     setSearchTerm(e.target.value)
@@ -260,259 +191,203 @@ const ReviewManagementPage = () => {
   }
 
   const getStarRating = (rating) => (
-    <div className="flex text-[#ff69b4]">
+    <div className="flex text-amber-400">
       {[...Array(5)].map((_, i) => (
         <StarIcon
           key={i}
-          className={`w-4 h-4 ${i < rating ? "fill-current" : "text-gray-300"}`}
+          className={`w-4 h-4 ${i < rating ? "fill-current" : "text-slate-200"}`}
         />
       ))}
     </div>
   )
 
-  const getStatusClasses = (status) => {
-    switch (status) {
-      case "approved":
-        return "bg-green-100 text-green-700"
-      case "pending":
-        return "bg-yellow-100 text-yellow-700"
-      case "rejected":
-        return "bg-red-100 text-red-700"
-      default:
-        return "bg-gray-100 text-gray-700"
-    }
+  const handleResetFilters = () => {
+    setSearchTerm("")
+    setStarFilter("")
+    setStatusFilter("")
+    setSelectedProduct(null)
+    setProductFilter("")
+    setPage(1)
   }
 
   return (
-    <div style={{ backgroundColor: "var(--bg-color)", color: "var(--text-color)" }} className="min-h-screen  p-5 font-sans ">
-      <header className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold ">Quản lý đánh giá</h1>
-        <button className="flex items-center space-x-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors bg-pink-100 hover:bg-pink-200 text-[#ff69b4]">
-          <ArrowDownTrayIcon className="w-5 h-5" />
-          <span>Xuất báo cáo</span>
-        </button>
-      </header>
+    <div className="p-6 bg-slate-50 dark:bg-slate-950 min-h-screen">
+      <PageHeader
+        title="Quản lý Đánh giá"
+        description="Xem xét đánh giá của khách hàng về sản phẩm, trả lời phản hồi và kiểm duyệt nội dung."
+        badge={`${total} đánh giá`}
+      />
 
-      {/* Bộ lọc */}
-      <div className=" rounded-xl shadow-md p-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 space-y-4 md:space-y-0 md:space-x-4">
-          <div className="relative w-full md:w-1/2">
-            <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <input
-              type="text"
-              className="w-full pl-10 text-black pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-300"
-              placeholder="Tìm kiếm theo nội dung, sản phẩm, user..."
-              value={searchTerm}
-              onChange={handleSearch}
-              onBlur={fetchReviews}
+      <Toolbar
+        searchValue={searchTerm}
+        onSearchChange={(val) => { setSearchTerm(val); setPage(1); }}
+        searchPlaceholder="Tìm kiếm đánh giá..."
+        onFilterToggle={() => setIsFilterVisible(!isFilterVisible)}
+        filterActive={isFilterVisible}
+        filterCount={Object.values({ starFilter, statusFilter, productFilter }).filter(Boolean).length}
+      />
+
+      <FilterPanel isOpen={isFilterVisible} onReset={handleResetFilters}>
+        <div className="md:col-span-2">
+          <FilterPanel.Field label="Sản phẩm">
+            <AsyncSelect
+              cacheOptions
+              defaultOptions
+              loadOptions={loadOptions}
+              value={selectedProduct}
+              onChange={handleChange}
+              className="text-slate-800 text-sm"
+              isClearable
+              placeholder="Gõ để tìm sản phẩm..."
+              styles={{
+                control: (provided) => ({
+                  ...provided,
+                  borderRadius: '12px',
+                  borderColor: '#e2e8f0',
+                  boxShadow: 'none',
+                  '&:hover': {
+                    borderColor: '#cbd5e1',
+                  }
+                }),
+              }}
             />
-          </div>
-          <AsyncSelect
-            cacheOptions
-            defaultOptions // load mặc định ban đầu
-            loadOptions={loadOptions}
-            value={selectedProduct}
-            onChange={handleChange}
-            className="text-black"
-            isClearable
-            placeholder="Chọn sản phẩm..."
-            styles={{
-              container: (provided) => ({ ...provided, width: 300 }),
-            }}
-          />
-          <div className="flex space-x-2 items-center">
-            <select
-              className="px-4 py-2 text-black border rounded-lg bg-gray-50 focus:ring-2 focus:ring-pink-300"
-              value={starFilter}
-              onChange={(e) => setStarFilter(e.target.value)}
-            >
-              <option value="">Số sao</option>
-              {[5, 4, 3, 2, 1].map((s) => (
-                <option key={s} value={s}>{s} sao</option>
-              ))}
-            </select>
-            <select
-              className="px-4 py-2 border text-black rounded-lg bg-gray-50 focus:ring-2 focus:ring-pink-300"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-            >
-              <option value="">Tất cả</option>
-              <option value="approved">Đã duyệt</option>
-              <option value="pending">Chờ duyệt</option>
-              <option value="rejected">Từ chối</option>
-            </select>
-          </div>
+          </FilterPanel.Field>
         </div>
 
-        {/* Danh sách */}
-        {loading ? (
-          <AdminSpinner message="Đang tải danh sách đánh giá..." />
-        ) : reviews.length > 0 ? (
-          // Đảm bảo bạn có đủ các icon (CheckCircleIcon, XMarkIcon, TrashIcon, PencilIcon)
+        <FilterPanel.Field label="Số sao">
+          <select value={starFilter} onChange={(e) => { setStarFilter(e.target.value); setPage(1); }}>
+            <option value="">Tất cả sao</option>
+            {[5, 4, 3, 2, 1].map((s) => (
+              <option key={s} value={s}>{s} sao</option>
+            ))}
+          </select>
+        </FilterPanel.Field>
 
-          <div className="space-y-6"> {/* Tăng khoảng cách giữa các review */}
-            {reviews.map((review) => (
-              <div
-                key={review._id}
-                // Card nền trắng, bo góc lớn hơn, bóng đổ nhẹ tạo cảm giác sang trọng
-                className="rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100"
-              >
-                <div className="flex justify-between items-start">
+        <FilterPanel.Field label="Trạng thái">
+          <select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}>
+            <option value="">Tất cả trạng thái</option>
+            <option value="approved">Đã duyệt</option>
+            <option value="pending">Chờ duyệt</option>
+            <option value="rejected">Từ chối</option>
+          </select>
+        </FilterPanel.Field>
+      </FilterPanel>
 
-                  {/* Cột 1: Avatar và Nội dung chính */}
-                  <div className="flex items-start space-x-4 flex-grow min-w-0">
+      {loading ? (
+        <AdminSpinner message="Đang tải danh sách đánh giá..." />
+      ) : reviews.length > 0 ? (
+        <div className="space-y-4">
+          {reviews.map((review) => (
+            <div
+              key={review._id}
+              className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col md:flex-row md:items-start gap-6"
+            >
+              <div className="flex-shrink-0 flex items-center md:flex-col gap-3">
+                <div className="w-12 h-12 rounded-xl bg-pink-50 flex items-center justify-center border border-pink-100 text-pink-600 font-bold text-lg">
+                  {review?.user?.name ? review?.user?.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() : "UD"}
+                </div>
+                <div className="md:text-center">
+                  <p className="font-bold text-slate-800 text-sm">{review?.user?.name || "Khách hàng"}</p>
+                  <p className="text-[10px] text-slate-400 mt-0.5">
+                    {new Date(review.createdAt).toLocaleDateString("vi-VN")}
+                  </p>
+                </div>
+              </div>
 
-                    {/* Avatar - Giữ nguyên logic monogram nhưng dùng kích thước lớn hơn */}
-                    <div className="flex-shrink-0 w-14 h-14 rounded-full bg-pink-50 flex items-center justify-center border-2 border-[#ff69b4]">
-                      <span className="text-xl font-bold text-[#ff69b4]">
-                        {review?.user?.name?.split(' ').map(n => n[0]).join('')}
-                      </span>
-                    </div>
+              <div className="flex-grow min-w-0 space-y-3">
+                <div className="flex items-center gap-3">
+                  {getStarRating(review.rating)}
+                  <StatusBadge status={review.status === "approved" ? "active" : review.status === "pending" ? "pending" : "inactive"} />
+                </div>
 
-                    <div className="flex-grow min-w-0">
-                      {/* Hàng 1: Tên, Sao, Trạng thái */}
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-3 mb-2">
-                        <span className="text-lg font-extrabold  truncate">
-                          {review?.user?.name || "Người dùng"}
-                        </span>
-                        <div className="flex items-center space-x-2 mt-1 sm:mt-0">
-                          {getStarRating(review.rating)} {/* Hàm hiển thị sao */}
-                          <span
-                            className={`px-3 py-1 text-xs font-semibold rounded-full uppercase tracking-wider ${getStatusClasses(review.status)}`}
-                          >
-                            {review.status}
-                          </span>
-                        </div>
-                      </div>
+                <div className="flex items-center gap-2 bg-slate-50 p-2 rounded-xl border border-slate-100 w-fit max-w-full">
+                  <img
+                    src={review?.product?.mainImage || "https://placehold.co/100x100"}
+                    alt={review?.product?.name}
+                    className="w-7 h-7 rounded-lg object-cover border border-slate-200"
+                  />
+                  <span className="text-xs text-slate-600 font-semibold truncate max-w-[200px]">
+                    {review?.product?.name}
+                  </span>
+                </div>
 
-                      {/* Hàng 2: Sản phẩm được đánh giá */}
-                      <div className="flex items-center space-x-2  mb-3">
-                        <span className="text-sm font-medium">cho:</span>
-                        <img src={review?.product?.mainImage} alt={review?.product?.name} className="w-8 h-8 rounded-lg object-cover shadow-sm" />
-                        <span className="text-sm  font-semibold truncate">
-                          {review?.product?.name}
-                        </span>
-                      </div>
+                <p className="text-slate-700 text-sm leading-relaxed">{review.content}</p>
 
-                      {/* Nội dung đánh giá */}
-                      {/* Sử dụng font chữ dễ đọc hơn cho nội dung */}
-                      <p className="text-base  mt-2 leading-relaxed">
-                        {review.content}
-                      </p>
-
-                      {/* Thông tin phụ: Thời gian và Hữu ích */}
-                      <div className="flex items-center space-x-4 mt-3 pt-3 border-t border-gray-100 text-sm ">
-                        <span className="text-xs">
-                          {new Date(review.createdAt).toLocaleString()}
-                        </span>
-                        <div className="flex items-center space-x-1">
-                          <span className="font-semibold ">{review.helpfulCount}</span>
-                          <span>người thấy hữu ích</span>
-                        </div>
-                      </div>
-                    </div>
+                {review.reply && (
+                  <div className="mt-3 pl-4 border-l-2 border-slate-200 space-y-1 bg-slate-50/50 p-3 rounded-r-xl">
+                    <p className="text-xs font-bold text-slate-600">Phản hồi của hệ thống:</p>
+                    <p className="text-xs text-slate-500 italic">"{review.reply}"</p>
                   </div>
+                )}
+              </div>
 
-                  {/* Cột 2: Hành động */}
-                  <div className="flex flex-col items-center space-y-1 ml-6 flex-shrink-0">
-
-                    {review.status === "pending" && (
-                      <>
-                        {/* Nút Duyệt: Màu sắc mạnh mẽ hơn */}
-                        <button
-                          onClick={() => {
-                            setSelectedReview(review)
-                            setIsApproveModalOpen(true)
-                          }}
-                          className="p-2 rounded-full text-white bg-green-500 hover:bg-green-600 transition shadow-md"
-                          title="Duyệt"
-                        >
-                          <CheckCircleIcon className="w-5 h-5" />
-                        </button>
-                        {/* Nút Từ chối: Màu sắc mạnh mẽ hơn */}
-                        <button
-                          onClick={() => {
-                            setSelectedReview(review)
-                            setIsRejectModalOpen(true)
-                          }}
-                          className="p-2 rounded-full text-white bg-red-500 hover:bg-red-600 transition shadow-md"
-                          title="Từ chối"
-                        >
-                          <XMarkIcon className="w-5 h-5" />
-                        </button>
-                      </>
-                    )}
-
-                    {/* Nút Phản hồi: Dùng màu chủ đạo của app */}
-                    {(review.status === "approved" || review.status === "pending") && (
-                      <button
-                        onClick={() => {
-                          setSelectedReview(review)
-                          setIsReplyModalOpen(true)
-                        }}
-                        className="p-2 rounded-full text-white bg-[#ff69b4] hover:bg-pink-600 transition shadow-md"
-                        title="Phản hồi"
-                      >
-                        <PencilIcon className="w-5 h-5" />
-                      </button>
-                    )}
-
-                    {/* Nút Xóa: Luôn có, màu xám nhạt tinh tế hơn */}
+              <div className="flex md:flex-col items-center gap-1.5 flex-shrink-0 md:self-stretch justify-end">
+                {review.status === "pending" && (
+                  <>
                     <button
                       onClick={() => {
                         setSelectedReview(review)
-                        setIsDeleteModalOpen(true)
+                        setIsApproveModalOpen(true)
                       }}
-                      className="p-2 rounded-full text-gray-500 hover:bg-red-100 hover:text-red-600 transition"
-                      title="Xóa"
+                      className="p-1.5 bg-green-50 hover:bg-green-100 text-green-600 hover:text-green-700 rounded-lg transition-colors border border-green-200 shadow-sm"
+                      title="Duyệt"
                     >
-                      <TrashIcon className="w-5 h-5" />
+                      <CheckCircleIcon className="w-4 h-4" />
                     </button>
+                    <button
+                      onClick={() => {
+                        setSelectedReview(review)
+                        setIsRejectModalOpen(true)
+                      }}
+                      className="p-1.5 bg-amber-50 hover:bg-amber-100 text-amber-600 hover:text-amber-700 rounded-lg transition-colors border border-amber-200 shadow-sm"
+                      title="Từ chối"
+                    >
+                      <XMarkIcon className="w-4 h-4" />
+                    </button>
+                  </>
+                )}
 
-                  </div>
-                </div>
+                {(review.status === "approved" || review.status === "pending") && (
+                  <button
+                    onClick={() => {
+                      setSelectedReview(review)
+                      setIsReplyModalOpen(true)
+                    }}
+                    className="p-1.5 bg-slate-50 hover:bg-slate-100 text-pink-600 hover:text-pink-700 rounded-lg transition-colors border border-slate-200 shadow-sm"
+                    title="Phản hồi"
+                  >
+                    <ChatBubbleLeftRightIcon className="w-4 h-4" />
+                  </button>
+                )}
 
+                <button
+                  onClick={() => {
+                    setSelectedReview(review)
+                    setIsDeleteModalOpen(true)
+                  }}
+                  className="p-1.5 bg-slate-50 hover:bg-slate-100 text-red-600 hover:text-red-700 rounded-lg transition-colors border border-slate-200 shadow-sm"
+                  title="Xóa"
+                >
+                  <TrashIcon className="w-4 h-4" />
+                </button>
               </div>
-            ))}
-          </div>
-        ) : (
-          <p className="text-center text-gray-500 py-8">Không có đánh giá nào.</p>
-        )}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <EmptyState
+          title="Không có đánh giá nào"
+          description="Chưa có đánh giá nào phù hợp với bộ lọc tìm kiếm hiện tại."
+        />
+      )}
 
-        {/* Phân trang */}
-        {total > limit && (
-          <div className="flex justify-center items-center mt-6 space-x-2">
-            <button
-              onClick={() => setPage((p) => Math.max(p - 1, 1))}
-              disabled={page === 1}
-              className="px-3 py-1 border rounded-lg  hover:bg-gray-200 disabled:opacity-50"
-            >
-              ← Trước
-            </button>
-            {Array.from({ length: Math.ceil(total / limit) }, (_, i) => (
-              <button
-                key={i}
-                onClick={() => setPage(i + 1)}
-                className={`px-3 py-1 border rounded-lg font-semibold ${page === i + 1
-                  ? "bg-pink-600 text-black"
-                  : " hover:bg-pink-600"
-                  }`}
-              >
-                {i + 1}
-              </button>
-            ))}
-            <button
-              onClick={() => setPage((p) => p + 1)}
-              disabled={page >= Math.ceil(total / limit)}
-              className="px-3 py-1 border rounded-lg  hover:bg-gray-200 disabled:opacity-50"
-            >
-              Sau →
-            </button>
-          </div>
-        )}
-      </div>
+      <Pagination
+        page={page}
+        total={total}
+        limit={limit}
+        onPageChange={setPage}
+      />
 
-      {/* Modal */}
       {isReplyModalOpen && (
         <ReplyModal
           isOpen={isReplyModalOpen}
@@ -522,44 +397,29 @@ const ReviewManagementPage = () => {
         />
       )}
 
-      {isApproveModalOpen && (
-        <ConfirmationModal
-          title="Duyệt đánh giá"
-          message="Bạn có chắc chắn muốn duyệt đánh giá này?"
-          isOpen={isApproveModalOpen}
-          onClose={() => setIsApproveModalOpen(false)}
-          onConfirm={handleApprove}
-          confirmText="Duyệt"
-          buttonColor="bg-green-500"
-          buttonHoverColor="bg-green-600"
-        />
-      )}
+      <ConfirmDialog
+        isOpen={isApproveModalOpen}
+        onClose={() => setIsApproveModalOpen(false)}
+        onConfirm={handleApprove}
+        title="Duyệt đánh giá"
+        description="Bạn có chắc chắn muốn phê duyệt đánh giá này để hiển thị công khai?"
+      />
 
-      {isRejectModalOpen && (
-        <ConfirmationModal
-          title="Từ chối đánh giá"
-          message="Bạn có chắc chắn muốn từ chối đánh giá này?"
-          isOpen={isRejectModalOpen}
-          onClose={() => setIsRejectModalOpen(false)}
-          onConfirm={handleReject}
-          confirmText="Từ chối"
-          buttonColor="bg-red-500"
-          buttonHoverColor="bg-red-600"
-        />
-      )}
+      <ConfirmDialog
+        isOpen={isRejectModalOpen}
+        onClose={() => setIsRejectModalOpen(false)}
+        onConfirm={handleReject}
+        title="Từ chối đánh giá"
+        description="Bạn có chắc chắn muốn từ chối đánh giá này?"
+      />
 
-      {isDeleteModalOpen && (
-        <ConfirmationModal
-          title="Xóa đánh giá"
-          message="Bạn có chắc chắn muốn xóa đánh giá này? Thao tác này không thể hoàn tác."
-          isOpen={isDeleteModalOpen}
-          onClose={() => setIsDeleteModalOpen(false)}
-          onConfirm={handleDelete}
-          confirmText="Xóa"
-          buttonColor="bg-red-500"
-          buttonHoverColor="bg-red-600"
-        />
-      )}
+      <ConfirmDialog
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleDelete}
+        title="Xóa đánh giá"
+        description="Bạn có chắc chắn muốn xóa đánh giá này? Thao tác này không thể hoàn tác."
+      />
     </div>
   )
 }

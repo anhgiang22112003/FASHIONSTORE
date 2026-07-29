@@ -3,7 +3,7 @@ import { useContext, useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
 import api from "../service/api"
-import { AuthContext } from "@/context/Authcontext"
+import { AuthContext } from "@/context/AuthContext"
 import { set } from "date-fns"
 
 export default function AuthPage() {

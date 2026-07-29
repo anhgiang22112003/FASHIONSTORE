@@ -226,7 +226,7 @@ const OrderDetail = ({ order, onBack }) => {
                                       </svg>
                                       <div>
                                         <p className="text-sm text-gray-500">Người nhận</p>
-                                        <p className="font-semibold">{order.recipientName || 'Khách hàng'}</p>
+                                        <p className="font-semibold">{order.shippingInfo?.name || order.customerInfo?.name || 'Khách hàng'}</p>
                                       </div>
                                     </div>
                                     <div className="flex items-start space-x-3">
@@ -235,7 +235,7 @@ const OrderDetail = ({ order, onBack }) => {
                                       </svg>
                                       <div>
                                         <p className="text-sm text-gray-500">Số điện thoại</p>
-                                        <p className="font-semibold">{order.phone || 'N/A'}</p>
+                                        <p className="font-semibold">{order.shippingInfo?.phone || order.customerInfo?.phone || 'N/A'}</p>
                                       </div>
                                     </div>
                                     <div className="flex items-start space-x-3">

@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useEffect } from 'react';
+import React, { Suspense, lazy, useEffect, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -15,61 +15,85 @@ const Newsletter = lazy(() => import('../components/fashion/Newsletter'));
 const FlashSaleBanner = lazy(() => import('@/components/fashion/FlashSaleBanner'));
 
 const HomePage = () => {
+  const [scrollProgress, setScrollProgress] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+      if (totalHeight > 0) {
+        setScrollProgress((window.scrollY / totalHeight) * 100);
+      }
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
-    <div>
-      {/* Thêm CSS cho scroll mượt và tối ưu performance */}
+    <div className="hm-dark-theme-wrapper">
+      {/* Dynamic Scroll Progress Bar */}
+      <div 
+        className="hm-scroll-progress" 
+        style={{ width: `${scrollProgress}%` }} 
+      />
+
+      {/* Global CSS for Vercel/Linear dark luxury aesthetic */}
       <style>{`
-        /* Làm mượt scroll toàn trang */
-        html {
-          scroll-behavior: smooth;
+        .hm-dark-theme-wrapper {
+          background-color: #000000;
+          color: #ffffff;
+          font-family: 'Inter', system-ui, -apple-system, sans-serif;
+          overflow-x: hidden;
+          position: relative;
         }
-        body {
-          overflow-anchor: auto; /* Tránh giật khi dynamic content load */
+
+        /* Smooth scrollbar styling */
+        ::-webkit-scrollbar {
+          width: 8px;
         }
-        /* Tối ưu animations */
-        .animate-float {
-          animation: float 6s ease-in-out infinite;
-          will-change: transform;
+        ::-webkit-scrollbar-track {
+          background: #000000;
         }
-        .animate-slide-up {
-          animation: slideUp 0.8s ease-out forwards;
-          will-change: transform, opacity;
+        ::-webkit-scrollbar-thumb {
+          background: #1f1f23;
+          border-radius: 4px;
         }
-        .animate-bounce-in {
-          animation: bounceIn 0.6s ease-out forwards;
-          will-change: transform, opacity;
+        ::-webkit-scrollbar-thumb:hover {
+          background: #2f2f35;
         }
-        @keyframes float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-10px); }
+
+        /* Top Scroll Progress */
+        .hm-scroll-progress {
+          position: fixed;
+          top: 0;
+          left: 0;
+          height: 3px;
+          background: linear-gradient(to right, oklch(62% 0.12 18), oklch(70% 0.17 330));
+          z-index: 9999;
+          transition: width 0.1s ease-out;
         }
-        @keyframes slideUp {
-          from { transform: translateY(30px); opacity: 0; }
-          to { transform: translateY(0); opacity: 1; }
+
+        /* Smooth scrolling container animation defaults */
+        .reveal-element {
+          opacity: 0;
+          transform: translateY(30px);
+          transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        @keyframes bounceIn {
-          0% { transform: scale(0.3); opacity: 0; }
-          50% { transform: scale(1.05); }
-          70% { transform: scale(0.9); }
-          100% { transform: scale(1); opacity: 1; }
-        }
-        /* Tối ưu hover effects */
-        .hover-scale {
-          transition: transform 0.3s ease, box-shadow 0.3s ease;
-          will-change: transform, box-shadow;
-        }
-        .hover-scale:hover {
-          transform: translateY(-4px) scale(1.02);
+        .reveal-element.is-visible {
+          opacity: 1;
+          transform: translateY(0);
         }
       `}</style>
-      <HeroSection />
-      <FlashSaleBanner />
-      <FeaturedCollections />
-      <ProductCategories />
-      <BestSellers />
-      <AboutSection />
-      <Testimonials />
-      <Newsletter />
+
+      <Suspense fallback={<div className="min-h-screen bg-black flex items-center justify-center text-white">Loading...</div>}>
+        <HeroSection />
+        <FlashSaleBanner />
+        <FeaturedCollections />
+        <ProductCategories />
+        <BestSellers />
+        <AboutSection />
+        <Testimonials />
+        <Newsletter />
+      </Suspense>
     </div>
   );
 };

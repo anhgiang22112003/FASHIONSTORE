@@ -328,3 +328,190 @@ Toast Container Styling
   -ms-overflow-style: none !important;  /* IE and Edge */
   scrollbar-width: none !important;  /* Firefox */
 }
+
+/* Admin Premium Dark Mode Styles */
+.dark .admin-dashboard-root,
+.dark .admin-dashboard-root .bg-slate-50,
+.dark .admin-dashboard-root .bg-slate-100\/50,
+.dark .admin-dashboard-root .bg-slate-50\/70,
+.dark .admin-dashboard-root .bg-slate-50\/80,
+.dark .admin-dashboard-root .bg-slate-50\/50,
+.dark .admin-dashboard-root .bg-slate-50\/30,
+.dark .admin-dashboard-root .bg-slate-50\/20,
+.dark .admin-dashboard-root .bg-slate-50\/10,
+.dark .admin-dashboard-root .bg-gray-50,
+.dark .admin-dashboard-root .bg-gray-50\/50,
+.dark .admin-dashboard-root .bg-gray-50\/30,
+.dark .admin-dashboard-root .bg-gray-50\/20,
+.dark .admin-dashboard-root .bg-gray-100\/50,
+.dark .admin-dashboard-root .bg-gray-50\/10 {
+  background-color: #020617 !important; /* slate-950 background */
+}
+
+.dark .admin-dashboard-root .bg-white,
+.dark .admin-dashboard-root .bg-gray-100 {
+  background-color: #0f172a !important; /* slate-900 boxes */
+}
+
+.dark .admin-dashboard-root .bg-gray-200 {
+  background-color: #1e293b !important; /* slate-800 */
+}
+
+.dark .admin-dashboard-root .bg-gray-300 {
+  background-color: #334155 !important; /* slate-700 */
+}
+
+.dark .admin-dashboard-root .text-slate-900,
+.dark .admin-dashboard-root .text-slate-800,
+.dark .admin-dashboard-root .text-gray-900,
+.dark .admin-dashboard-root .text-gray-800 {
+  color: #f8fafc !important; /* slate-50 text */
+}
+
+.dark .admin-dashboard-root .text-slate-700,
+.dark .admin-dashboard-root .text-slate-600,
+.dark .admin-dashboard-root .text-gray-700,
+.dark .admin-dashboard-root .text-gray-600 {
+  color: #cbd5e1 !important; /* slate-300 text */
+}
+
+.dark .admin-dashboard-root .text-slate-500,
+.dark .admin-dashboard-root .text-slate-400,
+.dark .admin-dashboard-root .text-gray-500,
+.dark .admin-dashboard-root .text-gray-400 {
+  color: #94a3b8 !important; /* slate-400 text */
+}
+
+.dark .admin-dashboard-root .border-slate-200,
+.dark .admin-dashboard-root .border-slate-100,
+.dark .admin-dashboard-root .border-gray-100,
+.dark .admin-dashboard-root .border-gray-200,
+.dark .admin-dashboard-root .border-gray-300 {
+  border-color: #1e293b !important; /* slate-800 borders */
+}
+
+.dark .admin-dashboard-root .divide-slate-200 > * + *,
+.dark .admin-dashboard-root .divide-slate-100 > * + *,
+.dark .admin-dashboard-root .divide-slate-50 > * + *,
+.dark .admin-dashboard-root .divide-gray-100 > * + *,
+.dark .admin-dashboard-root .divide-gray-200 > * + * {
+  border-color: #1e293b !important;
+}
+
+/* Inputs, Selects and Textareas inside Admin when in Dark Mode */
+.dark .admin-dashboard-root input:not([type="checkbox"]):not([type="radio"]),
+.dark .admin-dashboard-root select,
+.dark .admin-dashboard-root textarea {
+  background-color: #020617 !important; /* contrast sunken background */
+  color: #cbd5e1 !important;
+  border-color: #1e293b !important; /* soft dark border */
+}
+
+.dark .admin-dashboard-root input::placeholder,
+.dark .admin-dashboard-root textarea::placeholder {
+  color: #475569 !important;
+}
+
+.dark .admin-dashboard-root input:focus,
+.dark .admin-dashboard-root select:focus,
+.dark .admin-dashboard-root textarea:focus {
+  border-color: #6366f1 !important; /* indigo-500 focus */
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15) !important;
+}
+
+/* Specific elements like select dropdown arrow styling */
+.dark .admin-dashboard-root select {
+  background-image: none !important; /* remove native/overridden arrow, use the custom SVG chevron instead */
+  padding-right: 2.5rem !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+}
+
+/* Hover scales and special overlays */
+.dark .admin-dashboard-root .hover\:bg-slate-50:hover,
+.dark .admin-dashboard-root .hover\:bg-slate-100:hover,
+.dark .admin-dashboard-root .hover\:bg-slate-100\/80:hover,
+.dark .admin-dashboard-root .hover\:bg-gray-50:hover,
+.dark .admin-dashboard-root .hover\:bg-gray-100:hover {
+  background-color: #1e293b !important; /* dark slate background on hover */
+}
+
+.dark .admin-dashboard-root .bg-pink-50,
+.dark .admin-dashboard-root .bg-pink-50\/50 {
+  background-color: rgba(219, 39, 119, 0.15) !important;
+}
+
+.dark .admin-dashboard-root .text-pink-800 {
+  color: #f472b6 !important;
+}
+
+.dark .admin-dashboard-root .border-pink-200 {
+  border-color: rgba(219, 39, 119, 0.3) !important;
+}
+
+/* Modal Dialog boxes and other dynamic flyouts */
+.dark .admin-dashboard-root .bg-white.rounded-2xl,
+.dark .admin-dashboard-root .bg-white.rounded-xl,
+.dark .admin-dashboard-root .bg-white.shadow-2xl,
+.dark .admin-dashboard-root .bg-white.shadow-xl {
+  background-color: #0f172a !important;
+  border: 1px solid #1e293b !important;
+}
+
+/* Force light text color when elements use hardcoded text-black class */
+.dark .admin-dashboard-root .text-black {
+  color: #cbd5e1 !important;
+}
+
+/* POS specific styles & gradients */
+.dark .admin-dashboard-root .min-h-screen[style*="background-color"] {
+  background-color: #020617 !important;
+  background-image: none !important;
+}
+
+.dark .admin-dashboard-root .from-pink-50.to-purple-50,
+.dark .admin-dashboard-root .from-pink-50,
+.dark .admin-dashboard-root .to-purple-50 {
+  background-image: none !important;
+  background-color: #020617 !important;
+}
+
+.dark .admin-dashboard-root .from-blue-50.to-indigo-50,
+.dark .admin-dashboard-root .from-blue-50,
+.dark .admin-dashboard-root .to-indigo-50,
+.dark .admin-dashboard-root .bg-blue-50,
+.dark .admin-dashboard-root .bg-blue-50\/50 {
+  background-image: none !important;
+  background-color: rgba(59, 130, 246, 0.1) !important;
+  border-color: rgba(59, 130, 246, 0.2) !important;
+}
+
+.dark .admin-dashboard-root .bg-emerald-50,
+.dark .admin-dashboard-root .bg-emerald-50\/50,
+.dark .admin-dashboard-root .bg-emerald-100 {
+  background-color: rgba(16, 185, 129, 0.1) !important;
+  border-color: rgba(16, 185, 129, 0.2) !important;
+  color: #34d399 !important;
+}
+
+.dark .admin-dashboard-root .bg-amber-50,
+.dark .admin-dashboard-root .bg-amber-50\/50 {
+  background-color: rgba(245, 158, 11, 0.1) !important;
+  border-color: rgba(245, 158, 11, 0.2) !important;
+  color: #fbbf24 !important;
+}
+
+.dark .admin-dashboard-root .bg-purple-50,
+.dark .admin-dashboard-root .bg-purple-50\/50 {
+  background-color: rgba(139, 92, 246, 0.1) !important;
+  border-color: rgba(139, 92, 246, 0.2) !important;
+  color: #a78bfa !important;
+}
+
+.dark .admin-dashboard-root .bg-red-50,
+.dark .admin-dashboard-root .bg-red-50\/50 {
+  background-color: rgba(239, 68, 68, 0.1) !important;
+  border-color: rgba(239, 68, 68, 0.2) !important;
+  color: #f87171 !important;
+}
