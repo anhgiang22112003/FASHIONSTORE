@@ -1,11 +1,11 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
-import apiUser from '@/service/api';
+import apiUser from 'service/api';
 import { toast } from 'react-toastify';
 import {
   Clock, Package, Truck, CreditCard, Star, AlertTriangle, CheckCircle, XCircle, ArrowLeft, MapPin, User, Phone, Gift, DollarSign
 } from 'lucide-react';
 
-import ProductReviewForm from '@/pages/ProductReviewForm'
+import ProductReviewForm from 'pages/ProductReviewForm'
 import CancelOrderModal from './CancelOrderModal';
 import ConfirmCompleteModal from './ConfirmCompleteModal';
 

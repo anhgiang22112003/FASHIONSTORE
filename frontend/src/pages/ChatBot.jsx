@@ -1,11 +1,11 @@
-import { AuthContext } from '@/context/AuthContext'
-import { CartContext } from '@/context/CartContext'
-import { socket } from '@/service/socket'
-import api from '@/service/api'
+import { AuthContext } from 'context/AuthContext'
+import { CartContext } from 'context/CartContext'
+import { socket } from 'service/socket'
+import api from 'service/api'
 import React, { useState, useEffect, useRef, useContext, useCallback } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
-import BankPaymentModal from '@/components/BankPaymentSection'
+import BankPaymentModal from 'components/BankPaymentSection'
 import {
   MapPin,
   MapPinned,
@@ -56,7 +56,7 @@ const ChatBot = ({ userId }) => {
 
   // Load provinces json once
   useEffect(() => {
-    import('@/data/provinces.json').then(data => setCheckoutProvinces(data.default))
+    import('data/provinces.json').then(data => setCheckoutProvinces(data.default))
   }, [])
 
   useEffect(() => {

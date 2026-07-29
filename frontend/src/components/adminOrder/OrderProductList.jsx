@@ -4,7 +4,7 @@ import {
     PlusIcon,
     MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline"
-import apiAdmin from "@/service/apiAdmin"
+import apiAdmin from "service/apiAdmin"
 import { toast } from "react-toastify"
 import { formatCurrency } from "../../pages/Admin/EditOrder"
 const AddProductToOrder = ({ orderId, fetchOrder, onClose }) => {

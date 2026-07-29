@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
 import { ChevronUpDownIcon, PencilIcon, TrashIcon, PlusIcon } from '@heroicons/react/24/outline'
-import { AdminInput, AdminButton } from "@/components/admin/ui"
+import { AdminInput, AdminButton } from "components/admin/ui"
 
 // Danh sách màu sắc cố định (cho bảng chọn nhanh)
 const colors = [

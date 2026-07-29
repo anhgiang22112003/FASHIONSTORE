@@ -1,10 +1,10 @@
 import React, { useState, useContext, useEffect } from 'react'
 import { Star, Heart, ShoppingBag } from 'lucide-react'
 import { Button } from '../ui/button'
-import { WishlistContext } from '@/context/WishlistContext'
-import { AuthContext } from '@/context/AuthContext'
+import { WishlistContext } from 'context/WishlistContext'
+import { AuthContext } from 'context/AuthContext'
 import { toast } from 'react-toastify'
-import api from '@/service/api'
+import api from 'service/api'
 import SideCartDrawer from './SideCartDrawer'
 const VariantSelectionModal = React.lazy(() => import('./VariantSelectionModal'))
 

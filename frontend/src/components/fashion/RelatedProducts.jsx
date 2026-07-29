@@ -3,7 +3,7 @@ import axios from 'axios'
 import { ArrowRight } from 'lucide-react'
 import ProductCard from './ProductCard' // Giả sử ProductCard nằm trong components
 import { Button } from '../ui/button'
-import apiUser from '@/service/api'
+import apiUser from 'service/api'
 import { useNavigate } from 'react-router-dom'
 
 const RelatedProducts = ({ productId, title = "Sản phẩm cùng loại", category, collection }) => {

@@ -1,4 +1,4 @@
-import apiAdmin from '@/service/apiAdmin'
+import apiAdmin from 'service/apiAdmin'
 import React, { useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
 import { Package, RefreshCw, ChevronLeft, ChevronRight, Filter, ShoppingCart, Globe, RotateCcw, TrendingUp, TrendingDown } from 'lucide-react'

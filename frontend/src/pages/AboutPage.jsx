@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Users, Award, Heart, Truck, TrendingUp, Package, Shield, Zap } from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Skeleton } from 'components/ui/skeleton';
 
 const AboutPage = () => {
   const [loadedImages, setLoadedImages] = useState({});

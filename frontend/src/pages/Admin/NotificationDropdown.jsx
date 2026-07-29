@@ -1,7 +1,7 @@
 import React, { useEffect, useState, memo } from 'react'
 import { io } from 'socket.io-client'
 import axios from 'axios'
-import apiAdmin from '@/service/apiAdmin'
+import apiAdmin from 'service/apiAdmin'
 import { Link } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { Bell, Package, Star, AlertCircle, CheckCircle, X } from 'lucide-react'

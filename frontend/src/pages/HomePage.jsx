@@ -12,7 +12,7 @@ const BestSellers = lazy(() => import('../components/fashion/BestSellers'));
 const AboutSection = lazy(() => import('../components/fashion/AboutSection'));
 const Testimonials = lazy(() => import('../components/fashion/Testimonials'));
 const Newsletter = lazy(() => import('../components/fashion/Newsletter'));
-const FlashSaleBanner = lazy(() => import('@/components/fashion/FlashSaleBanner'));
+const FlashSaleBanner = lazy(() => import('components/fashion/FlashSaleBanner'));
 
 const HomePage = () => {
   const [scrollProgress, setScrollProgress] = useState(0);

@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react"
 import { PencilIcon, PrinterIcon, PaperAirplaneIcon, XMarkIcon, CheckIcon, } from "@heroicons/react/24/outline"
-import apiAdmin from "@/service/apiAdmin"
+import apiAdmin from "service/apiAdmin"
 import { toast } from "react-toastify"
 
 import OrderProductList from "../../components/adminOrder/OrderProductList"
 import OrderSummaryCard from "../../components/adminOrder/OrderSummaryCard"
 import OrderCustomerShippingInfo from "../../components/adminOrder/OrderCustomerShippingInfo"
-import InvoicePrint from "@/components/InvoicePrint"
-import OrderStatusProgress from "@/components/adminOrder/OrderStatusProgress"
+import InvoicePrint from "components/InvoicePrint"
+import OrderStatusProgress from "components/adminOrder/OrderStatusProgress"
 
 // --- HẰNG SỐ CHUNG ---
 const statusOptions = [

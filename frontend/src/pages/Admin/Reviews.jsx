@@ -6,13 +6,13 @@ import {
   TrashIcon,
   ChatBubbleLeftRightIcon
 } from "@heroicons/react/24/outline"
-import apiAdmin from "@/service/apiAdmin"
+import apiAdmin from "service/apiAdmin"
 import { toast } from "react-toastify"
-import AdminSpinner from "@/components/AdminSpinner"
-import { socket } from "@/service/socket"
+import AdminSpinner from "components/AdminSpinner"
+import { socket } from "service/socket"
 import AsyncSelect from "react-select/async"
 import debounce from "lodash.debounce"
-import { PageHeader, Toolbar, FilterPanel, Pagination, EmptyState, StatusBadge, AdminButton, ConfirmDialog, AdminModal, AdminTextarea } from "@/components/admin/ui"
+import { PageHeader, Toolbar, FilterPanel, Pagination, EmptyState, StatusBadge, AdminButton, ConfirmDialog, AdminModal, AdminTextarea } from "components/admin/ui"
 
 // ===== Modal phản hồi =====
 const ReplyModal = ({ isOpen, onClose, onSendReply, review }) => {

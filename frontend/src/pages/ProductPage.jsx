@@ -3,12 +3,12 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { Heart, ShoppingBag, Minus, Plus, Truck, RefreshCw, Shield, Star } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { toast } from 'react-toastify'
-import api from '@/service/api'
-import { CartContext } from '@/context/CartContext'
-import RelatedProducts from '@/components/fashion/RelatedProducts'
-import ProductReviews from '@/components/fashion/ProductReviews'
-import { WishlistContext } from '@/context/WishlistContext'
-import { AuthContext } from '@/context/AuthContext'
+import api from 'service/api'
+import { CartContext } from 'context/CartContext'
+import RelatedProducts from 'components/fashion/RelatedProducts'
+import ProductReviews from 'components/fashion/ProductReviews'
+import { WishlistContext } from 'context/WishlistContext'
+import { AuthContext } from 'context/AuthContext'
 
 const ProductPage = () => {
   const { id } = useParams()

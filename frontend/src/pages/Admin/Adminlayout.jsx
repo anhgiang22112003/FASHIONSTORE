@@ -1,13 +1,13 @@
 import React, { useEffect, useState, Suspense } from "react"
 import Sidebar from "../../components/layoutAdmin/SliderbarAdmin"
-import Header from "@/components/layoutAdmin/HeaderAdmin"
+import Header from "components/layoutAdmin/HeaderAdmin"
 import { toast } from "react-toastify"
-import ProductDetailContent from "@/components/ProductDetailContent"
-import apiAdmin from "@/service/apiAdmin"
+import ProductDetailContent from "components/ProductDetailContent"
+import apiAdmin from "service/apiAdmin"
 import { io } from 'socket.io-client'
-import { socket } from "@/service/socket"
-import { ThemeProvider } from "@/context/ThemeContext"
-import AdminSpinner from "@/components/AdminSpinner"
+import { socket } from "service/socket"
+import { ThemeProvider } from "context/ThemeContext"
+import AdminSpinner from "components/AdminSpinner"
 
 const ComplaintList = React.lazy(() => import("./ComplaintList"))
 const StockManagement = React.lazy(() => import("./StockManagement"))
@@ -30,7 +30,7 @@ const AddCustomerPage = React.lazy(() => import("./AddCustomer"))
 const ReviewManagementPage = React.lazy(() => import("./Reviews"))
 const PromotionManagementPage = React.lazy(() => import("./Promotions"))
 const Settings = React.lazy(() => import("./SettingsContent"))
-const AdminSettingsPage = React.lazy(() => import("@/components/layoutAdmin/AdminSettingPage"))
+const AdminSettingsPage = React.lazy(() => import("components/layoutAdmin/AdminSettingPage"))
 const AdminChatDashboard = React.lazy(() => import("./AdminChatDashboard"))
 const AddFlashSalePage = React.lazy(() => import("./AddFlashSalePage"))
 const FlashSaleListPage = React.lazy(() => import("./FlashSaleListPage"))

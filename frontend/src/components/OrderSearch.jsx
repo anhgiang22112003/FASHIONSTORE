@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import { Search, Package, User, Calendar, DollarSign } from 'lucide-react'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Skeleton } from '@/components/ui/skeleton'
-import apiAdmin from '@/service/apiAdmin'
-import { ORDER_STATUS_LABELS } from '@/data/constants'
+import { Input } from 'components/ui/input'
+import { Button } from 'components/ui/button'
+import { Card, CardContent } from 'components/ui/card'
+import { Badge } from 'components/ui/badge'
+import { Skeleton } from 'components/ui/skeleton'
+import apiAdmin from 'service/apiAdmin'
+import { ORDER_STATUS_LABELS } from 'data/constants'
 
 const OrderSearch = ({ onOrderSelect, selectedOrder }) => {
     const [searchTerm, setSearchTerm] = useState('')

@@ -1,4 +1,4 @@
-import apiAdmin from '@/service/apiAdmin'
+import apiAdmin from 'service/apiAdmin'
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'

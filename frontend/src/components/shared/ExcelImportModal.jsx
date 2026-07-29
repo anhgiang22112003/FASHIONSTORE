@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react'
 import { X, Upload, FileSpreadsheet, Download, AlertCircle, CheckCircle } from 'lucide-react'
-import apiAdmin from '@/service/apiAdmin'
+import apiAdmin from 'service/apiAdmin'
 import { toast } from 'react-toastify'
 
 export default function ExcelImportModal({ isOpen, onClose, onSuccess }) {

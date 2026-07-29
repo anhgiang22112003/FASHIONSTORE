@@ -6,11 +6,11 @@ import {
   PauseIcon,
   PlayIcon,
 } from '@heroicons/react/24/outline'
-import EditPromotionModal from '@/components/EditPromotionModal'
+import EditPromotionModal from 'components/EditPromotionModal'
 import { toast } from 'react-toastify'
-import apiAdmin from '@/service/apiAdmin'
-import AdminSpinner from '@/components/AdminSpinner'
-import { PageHeader, Toolbar, FilterPanel, Pagination, EmptyState, StatusBadge, AdminButton, ConfirmDialog } from "@/components/admin/ui"
+import apiAdmin from 'service/apiAdmin'
+import AdminSpinner from 'components/AdminSpinner'
+import { PageHeader, Toolbar, FilterPanel, Pagination, EmptyState, StatusBadge, AdminButton, ConfirmDialog } from "components/admin/ui"
 
 const formatDateTime = (isoString) => {
   const date = new Date(isoString)

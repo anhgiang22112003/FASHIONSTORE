@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react"
-import apiAdmin from "@/service/apiAdmin"
+import apiAdmin from "service/apiAdmin"
 import { toast } from "react-toastify"
 import dayjs from "dayjs"
 import {

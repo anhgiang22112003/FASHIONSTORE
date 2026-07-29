@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Loader2, Plus, Edit, X, AlertCircle, ShoppingCart, FileText, DollarSign, MessageSquare } from 'lucide-react';
 import OrderSearch from './OrderSearch';
-import apiAdmin from '@/service/apiAdmin';
-import { COMPLAINT_TYPES, COMPLAINT_TYPE_LABELS } from '@/data/constants';
+import apiAdmin from 'service/apiAdmin';
+import { COMPLAINT_TYPES, COMPLAINT_TYPE_LABELS } from 'data/constants';
 import { toast } from 'react-toastify';
 
 // ── Custom Modal Shell ──────────────────────────────────────────────────────

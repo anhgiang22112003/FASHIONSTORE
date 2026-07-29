@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react"
-import apiAdmin from "@/service/apiAdmin"
+import apiAdmin from "service/apiAdmin"
 import { toast } from "react-toastify"
 import dayjs from "dayjs"
 import {
@@ -7,7 +7,7 @@ import {
   StopCircleIcon,
   CalendarDaysIcon,
 } from "@heroicons/react/24/outline"
-import { PageHeader, Toolbar, DataTable, StatusBadge, AdminButton, EmptyState } from "@/components/admin/ui"
+import { PageHeader, Toolbar, DataTable, StatusBadge, AdminButton, EmptyState } from "components/admin/ui"
 
 const FlashSaleListPage = ({ setActiveTab, setEditData }) => {
   const [flashSales, setFlashSales] = useState([])

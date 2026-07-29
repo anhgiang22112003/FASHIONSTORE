@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import apiAdmin from '@/service/apiAdmin'; 
+import apiAdmin from 'service/apiAdmin'; 
 
 const getStatusDisplay = (status) => {
     const statusMap = {

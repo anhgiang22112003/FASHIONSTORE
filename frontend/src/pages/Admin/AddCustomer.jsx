@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
-import apiAdmin from '@/service/apiAdmin'
+import apiAdmin from 'service/apiAdmin'
 import {
   ArrowLeftIcon, UserCircleIcon, CheckCircleIcon, XMarkIcon,
   UserIcon, EnvelopeIcon, PhoneIcon, CalendarIcon, MapPinIcon,
@@ -8,7 +8,7 @@ import {
 } from '@heroicons/react/24/outline'
 import {
   AdminInput, AdminSelect, AdminTextarea, AdminCard, AdminButton
-} from '@/components/admin/ui'
+} from 'components/admin/ui'
 
 // ─────────────────────────────────────────────
 const PRESET_TAGS = ['Vip', 'Đã mua', 'Chưa mua', 'Phụ nữ', 'Đàn ông', 'Gucci']
@@ -39,7 +39,7 @@ const AddCustomerPage = ({ onBack, refreshCustomers }) => {
   const [isSaving, setIsSaving] = useState(false)
 
   useEffect(() => {
-    import('@/data/provinces.json')
+    import('data/provinces.json')
       .then((module) => setProvinces(module.default))
       .catch((err) => console.error('Lỗi tải tỉnh thành từ JSON:', err))
   }, [])

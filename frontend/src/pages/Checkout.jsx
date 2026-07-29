@@ -1,11 +1,11 @@
 import React, { useContext, useEffect, useState, useCallback, useMemo } from "react"
 import { useLocation, useNavigate } from "react-router-dom"
-import api from "@/service/api"
+import api from "service/api"
 import { toast } from "react-toastify"
-import { CartContext } from "@/context/CartContext"
-import AddproductSearch from "@/components/fashion/AddProductSearch"
-import BankPaymentModal from "@/components/BankPaymentSection"
-import VoucherSection from "@/components/VoucherSection"
+import { CartContext } from "context/CartContext"
+import AddproductSearch from "components/fashion/AddProductSearch"
+import BankPaymentModal from "components/BankPaymentSection"
+import VoucherSection from "components/VoucherSection"
 import {
   ShoppingBag,
   MapPin,
@@ -171,7 +171,7 @@ const Checkout = () => {
   }, [shippingMethod, cart?.discount, cart?.subtotal])
 
   useEffect(() => {
-    import('@/data/provinces.json').then((data) => setProvinces(data.default))
+    import('data/provinces.json').then((data) => setProvinces(data.default))
   }, [])
 
   const removeItem = useCallback(async (itemId) => {

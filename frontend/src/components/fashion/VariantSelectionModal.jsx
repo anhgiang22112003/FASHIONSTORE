@@ -2,7 +2,7 @@ import React, { useState, useMemo, useCallback, useEffect, useContext } from 're
 import { ShoppingBag, Minus, Plus, Package, Sparkles } from 'lucide-react'
 import { Button } from '../ui/button'
 import { toast } from 'react-toastify'
-import { CartContext } from '@/context/CartContext'
+import { CartContext } from 'context/CartContext'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog'
 
 const VariantSelectionModal = ({ product, isOpen, onClose, onSuccessAndOpenCart }) => {

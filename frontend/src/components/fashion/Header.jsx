@@ -9,11 +9,11 @@ import {
   Cog6ToothIcon,
   ArrowRightStartOnRectangleIcon,
 } from '@heroicons/react/24/outline'
-import { AuthContext } from '@/context/AuthContext'
-import { CartContext } from '@/context/CartContext'
-import { WishlistContext } from '@/context/WishlistContext'
+import { AuthContext } from 'context/AuthContext'
+import { CartContext } from 'context/CartContext'
+import { WishlistContext } from 'context/WishlistContext'
 import NotificationUser from './NotificationUser'
-import apiUser from '@/service/api'
+import apiUser from 'service/api'
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)

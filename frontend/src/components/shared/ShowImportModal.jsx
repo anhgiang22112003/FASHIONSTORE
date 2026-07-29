@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { EyeIcon, FunnelIcon, ArrowDownTrayIcon, ArrowUpTrayIcon } from "@heroicons/react/24/outline"
 import { toast } from 'react-toastify'
-import apiAdmin from '@/service/apiAdmin'
+import apiAdmin from 'service/apiAdmin'
 
 const ShowImportModal = ({fetchProducts}) => {
     const [showImportModal, setShowImportModal] = useState(false)

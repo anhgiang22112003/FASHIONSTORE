@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Calendar, Clock, User, ArrowRight, TrendingUp, BookOpen, Mail } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Skeleton } from 'components/ui/skeleton';
+import { Button } from 'components/ui/button';
+import { Input } from 'components/ui/input';
 import { toast } from 'react-toastify';
 
 const BlogPage = () => {

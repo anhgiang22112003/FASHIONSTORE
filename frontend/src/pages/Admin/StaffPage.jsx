@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react"
-import apiAdmin from "@/service/apiAdmin"
+import apiAdmin from "service/apiAdmin"
 import EditStaff from "./EditStaff"
 import { PlusIcon } from '@heroicons/react/24/outline'
-import AdminSpinner from "@/components/AdminSpinner"
-import { PageHeader, Toolbar, FilterPanel, EmptyState, StatusBadge, AdminButton } from "@/components/admin/ui"
+import AdminSpinner from "components/AdminSpinner"
+import { PageHeader, Toolbar, FilterPanel, EmptyState, StatusBadge, AdminButton } from "components/admin/ui"
 
 const StaffCard = ({ staff, onEdit }) => {
   return (

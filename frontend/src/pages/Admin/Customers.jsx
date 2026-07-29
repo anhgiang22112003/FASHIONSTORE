@@ -1,10 +1,10 @@
-import apiAdmin from '@/service/apiAdmin'
+import apiAdmin from 'service/apiAdmin'
 import React, { useEffect, useState, useMemo } from 'react'
 import { toast } from 'react-toastify'
 import { UserIcon, PencilIcon } from '@heroicons/react/24/outline'
-import { useDebounce } from '@/hooks/useDebounce'
-import AdminSpinner from '@/components/AdminSpinner'
-import { PageHeader, Toolbar, FilterPanel, Pagination, EmptyState, AdminButton } from "@/components/admin/ui"
+import { useDebounce } from 'hooks/useDebounce'
+import AdminSpinner from 'components/AdminSpinner'
+import { PageHeader, Toolbar, FilterPanel, Pagination, EmptyState, AdminButton } from "components/admin/ui"
 
 const formatVND = (value) => {
   if (value === '' || value === undefined || value === null) return ''
@@ -71,7 +71,7 @@ const Customers = ({ setEditingCustomer, setActivePage, data }) => {
   const limit = 12
 
   useEffect(() => {
-    import('@/data/provinces.json')
+    import('data/provinces.json')
       .then((data) => setProvinces(data.default || data))
       .catch(error => console.error("Lỗi tải tỉnh/thành:", error))
   }, [])

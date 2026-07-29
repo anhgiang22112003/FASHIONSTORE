@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react"
-import apiAdmin from "@/service/apiAdmin"
+import apiAdmin from "service/apiAdmin"
 import {
   PlusIcon,
   CheckIcon,
@@ -9,12 +9,12 @@ import {
   ComputerDesktopIcon
 } from "@heroicons/react/24/outline"
 import { toast } from "react-toastify"
-import { socket } from "@/service/socket"
-import CartSidebar from "@/components/CartSidebar"
-import VoucherModal from "@/components/VoucherModal"
-import BankPaymentModal from "@/components/BankPaymentSection"
-import BankPaymentPos from "@/components/BankPaymentPos"
-import { PageHeader, Toolbar, FilterPanel, Pagination, AdminButton } from "@/components/admin/ui"
+import { socket } from "service/socket"
+import CartSidebar from "components/CartSidebar"
+import VoucherModal from "components/VoucherModal"
+import BankPaymentModal from "components/BankPaymentSection"
+import BankPaymentPos from "components/BankPaymentPos"
+import { PageHeader, Toolbar, FilterPanel, Pagination, AdminButton } from "components/admin/ui"
 
 const PosPage = () => {
   const [products, setProducts] = useState([])

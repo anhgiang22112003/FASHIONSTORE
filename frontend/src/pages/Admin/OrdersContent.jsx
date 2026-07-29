@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { EyeIcon, FunnelIcon, ArrowDownTrayIcon, ArrowUpTrayIcon } from "@heroicons/react/24/outline"
 import { toast } from "react-toastify"
-import apiAdmin from "@/service/apiAdmin"
-import { useDebounce } from "@/hooks/useDebounce"
-import { PageHeader, Toolbar, FilterPanel, DataTable, Pagination, StatusBadge, AdminButton } from "@/components/admin/ui"
+import apiAdmin from "service/apiAdmin"
+import { useDebounce } from "hooks/useDebounce"
+import { PageHeader, Toolbar, FilterPanel, DataTable, Pagination, StatusBadge, AdminButton } from "components/admin/ui"
 
 const statusOptions = [
   { value: "PENDING", label: "Đang chờ xử lý" },
@@ -183,7 +183,7 @@ const OrdersContent = ({ onEditOrder }) => {
   useEffect(() => { fetchCustomers() }, [])
   
   useEffect(() => {
-    import('@/data/provinces.json').then((data) => setProvinces(data.default))
+    import('data/provinces.json').then((data) => setProvinces(data.default))
   }, [])
 
   const handleProvinceChange = (e) => {

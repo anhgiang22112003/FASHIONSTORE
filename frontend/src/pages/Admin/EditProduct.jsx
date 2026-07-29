@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import ProductVariations from './ProductVariations'
 import { toast } from 'react-toastify'
-import apiAdmin from '@/service/apiAdmin'
-import { AdminInput, AdminSelect, AdminTextarea, AdminButton, AdminCard } from '@/components/admin/ui'
+import apiAdmin from 'service/apiAdmin'
+import { AdminInput, AdminSelect, AdminTextarea, AdminButton, AdminCard } from 'components/admin/ui'
 
 const EditProduct = ({ productId, onBack, fetchProducts }) => {
     const [productName, setProductName] = useState('')

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { toast } from 'react-toastify'
-import apiAdmin from '@/service/apiAdmin'
-import CustomerOrderHistory from '@/components/CustomerOrderHistory'
+import apiAdmin from 'service/apiAdmin'
+import CustomerOrderHistory from 'components/CustomerOrderHistory'
 import {
   ArrowLeftIcon, UserIcon, EnvelopeIcon, CalendarIcon, UsersIcon,
   PhoneIcon, SparklesIcon, TagIcon, MapPinIcon, LockClosedIcon,
@@ -9,7 +9,7 @@ import {
 } from '@heroicons/react/24/outline'
 import {
   AdminInput, AdminSelect, AdminTextarea, AdminCard, AdminModal, AdminButton, StatusBadge
-} from '@/components/admin/ui'
+} from 'components/admin/ui'
 
 // ─────────────────────────────────────────────
 // TagInput – local sub-component (kept in place, styling updated)
@@ -81,7 +81,7 @@ const CustomerEdit = ({ customer: initialCustomerData, onBack, refreshCustomers,
   const [isSaving, setIsSaving] = useState(false)
 
   useEffect(() => {
-    import('@/data/provinces.json').then((data) => setProvinces(data.default))
+    import('data/provinces.json').then((data) => setProvinces(data.default))
   }, [])
 
   useEffect(() => {

@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import { Pencil, Trash2 } from 'lucide-react';
-import apiAdmin from '@/service/apiAdmin';
+import apiAdmin from 'service/apiAdmin';
 import { Switch } from '@headlessui/react'
-import AdminSpinner from '@/components/AdminSpinner';
+import AdminSpinner from 'components/AdminSpinner';
 import {
   PageHeader, Toolbar, FilterPanel, DataTable, Pagination,
   StatusBadge, AdminButton, ConfirmDialog,
   AdminModal, AdminInput, AdminSelect, AdminTextarea
-} from "@/components/admin/ui"
+} from "components/admin/ui"
 
 const Suppliers = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -43,7 +43,7 @@ const Suppliers = () => {
 
   // Load provinces data
   useEffect(() => {
-    import('@/data/provinces.json').then((data) => setProvinces(data.default));
+    import('data/provinces.json').then((data) => setProvinces(data.default));
   }, []);
 
   // Update districts when province changes

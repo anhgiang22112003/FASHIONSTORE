@@ -3,7 +3,7 @@ import React, { useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import axios from "axios"
 import { toast } from "react-toastify"
-import api from "@/service/api"
+import api from "service/api"
 
 const ResetPassword = () => {
     const { token } = useParams() // Token từ URL (vd: /reset-password/:token)

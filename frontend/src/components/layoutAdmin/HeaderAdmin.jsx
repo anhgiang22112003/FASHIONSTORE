@@ -11,8 +11,8 @@ import {
 import {
   ChatBubbleBottomCenterTextIcon,
 } from '@heroicons/react/24/solid'
-import NotificationDropdown from '@/pages/Admin/NotificationDropdown'
-import apiAdmin from '@/service/apiAdmin'
+import NotificationDropdown from 'pages/Admin/NotificationDropdown'
+import apiAdmin from 'service/apiAdmin'
 import SwitchAdminHeader from '../ui/switchAdminHeader'
 
 const Header = ({ toggleSidebar, setActiveTab, setEditingProductId, setEditingOrder }) => {

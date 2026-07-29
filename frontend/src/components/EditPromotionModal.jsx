@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { XMarkIcon } from '@heroicons/react/24/outline'
-import apiAdmin from '@/service/apiAdmin'
+import apiAdmin from 'service/apiAdmin'
 import { toast } from 'react-toastify'
 import UserSelectionTable from './UserSelectionTablePromotions'
 
