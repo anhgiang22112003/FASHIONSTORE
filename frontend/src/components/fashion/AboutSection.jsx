@@ -100,48 +100,30 @@ const AboutSection = () => {
     <>
       <style>{`
         .ab-section {
-          background-color: #020204;
-          color: white;
+          background: linear-gradient(180deg, #ffffff 0%, #fff1f2 100%);
+          color: #111827;
           position: relative;
           overflow: hidden;
-          padding: 8rem 0 4rem;
+          padding: 5rem 0 3rem;
         }
 
-        .ab-section::before {
-          content: '';
-          display: block;
-          position: absolute;
-          top: 0; left: 0; right: 0;
-          height: 1px;
-          background: rgba(255, 255, 255, 0.05);
-        }
-
-        /* Ambient glows */
         .ab-glow-bg {
           position: absolute;
           width: 35vw;
           height: 35vw;
-          background: radial-gradient(circle, rgba(168, 85, 247, 0.05) 0%, transparent 70%);
+          background: radial-gradient(circle, rgba(236, 72, 153, 0.08) 0%, transparent 70%);
           top: 10%;
           right: -10%;
           pointer-events: none;
           z-index: 1;
         }
 
-        .ab-container {
-          max-width: 1400px;
-          margin: 0 auto;
-          padding: 0 2rem;
-          position: relative;
-          z-index: 2;
-        }
-
         /* Upper Grid: Story + Image Showcase */
         .ab-story {
           display: grid;
           grid-template-columns: 1fr;
-          gap: 4rem;
-          margin-bottom: 6rem;
+          gap: 3rem;
+          margin-bottom: 5rem;
         }
 
         @media (min-width: 1024px) {
@@ -152,13 +134,12 @@ const AboutSection = () => {
         }
 
         .ab-eyebrow {
-          font-family: var(--font-body, 'Inter', sans-serif);
-          font-size: 0.6875rem;
-          font-weight: 600;
-          letter-spacing: 0.25em;
+          font-size: 0.75rem;
+          font-weight: 700;
+          letter-spacing: 0.2em;
           text-transform: uppercase;
-          color: #a855f7;
-          margin-bottom: 1.25rem;
+          color: #ec4899;
+          margin-bottom: 1rem;
           display: flex;
           align-items: center;
           gap: 0.75rem;
@@ -168,17 +149,17 @@ const AboutSection = () => {
           content: '';
           display: block;
           width: 1.5rem;
-          height: 1px;
-          background: #a855f7;
+          height: 2px;
+          background: #ec4899;
         }
 
         .ab-heading {
-          font-family: var(--font-display, 'Playfair Display', serif);
-          font-size: clamp(2rem, 3.5vw, 3rem);
-          font-weight: 700;
-          line-height: 1.1;
-          color: white;
-          margin-bottom: 1.75rem;
+          font-family: 'Inter', system-ui, -apple-system, sans-serif;
+          font-size: clamp(1.8rem, 3.5vw, 2.75rem);
+          font-weight: 900;
+          line-height: 1.15;
+          color: #111827;
+          margin-bottom: 1.5rem;
         }
 
         .ab-heading-word {
@@ -187,10 +168,9 @@ const AboutSection = () => {
         }
 
         .ab-body {
-          font-family: var(--font-body, 'Inter', sans-serif);
           font-size: 1rem;
           line-height: 1.8;
-          color: rgba(255, 255, 255, 0.6);
+          color: #4b5563;
           margin-bottom: 1.5rem;
           max-width: 48ch;
         }
@@ -199,9 +179,9 @@ const AboutSection = () => {
           display: grid;
           grid-template-columns: repeat(2, 1fr);
           gap: 1.5rem 2rem;
-          margin-top: 3rem;
-          padding-top: 2.5rem;
-          border-top: 1px solid rgba(255, 255, 255, 0.08);
+          margin-top: 2.5rem;
+          padding-top: 2rem;
+          border-top: 1px solid #fce7f3;
         }
 
         @media (min-width: 640px) {
@@ -209,31 +189,28 @@ const AboutSection = () => {
         }
 
         .ab-stat-num {
-          font-family: var(--font-display, 'Playfair Display', serif);
           font-size: 2.25rem;
           font-weight: 900;
-          color: white;
+          color: #be185d;
           line-height: 1;
           margin-bottom: 0.5rem;
         }
 
         .ab-stat-label {
-          font-family: var(--font-body, 'Inter', sans-serif);
-          font-size: 0.6875rem;
-          font-weight: 600;
+          font-size: 0.75rem;
+          font-weight: 700;
           letter-spacing: 0.1em;
           text-transform: uppercase;
-          color: rgba(255, 255, 255, 0.4);
+          color: #6b7280;
         }
 
-        /* Image Side with glass frame overlay */
         .ab-image-frame {
           position: relative;
           aspect-ratio: 4 / 3;
-          border-radius: 16px;
+          border-radius: 20px;
           overflow: hidden;
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          box-shadow: 0 30px 60px rgba(0,0,0,0.6);
+          border: 1px solid #fbcfe8;
+          box-shadow: 0 20px 40px rgba(236, 72, 153, 0.1);
         }
 
         .ab-story-img {
@@ -267,7 +244,7 @@ const AboutSection = () => {
           top: 0;
           bottom: 0;
           width: 2px;
-          background: rgba(255, 255, 255, 0.05);
+          background: #fce7f3;
           transform: translateX(-50%);
         }
 
@@ -277,14 +254,14 @@ const AboutSection = () => {
           top: 0;
           width: 100%;
           height: 0%;
-          background: linear-gradient(to bottom, #a855f7, #ef4444);
+          background: linear-gradient(to bottom, #ec4899, #be185d);
         }
 
         .ab-timeline-step {
           display: grid;
           grid-template-columns: 1fr;
           gap: 2rem;
-          margin-bottom: 4rem;
+          margin-bottom: 3rem;
           position: relative;
         }
 
@@ -305,7 +282,6 @@ const AboutSection = () => {
           }
         }
 
-        /* Node dot in center of gauge */
         .ab-timeline-node {
           position: absolute;
           left: 50%;
@@ -313,55 +289,52 @@ const AboutSection = () => {
           width: 12px;
           height: 12px;
           border-radius: 50%;
-          background: #020204;
-          border: 2px solid rgba(255, 255, 255, 0.3);
+          background: #ffffff;
+          border: 2px solid #d1d5db;
           transform: translateX(-50%);
           z-index: 3;
-          box-shadow: 0 0 10px rgba(0,0,0,0.8);
+          box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
 
         .ab-timeline-step:hover .ab-timeline-node {
-          border-color: #a855f7;
-          box-shadow: 0 0 10px #a855f7;
+          border-color: #ec4899;
+          box-shadow: 0 0 10px rgba(236, 72, 153, 0.4);
         }
 
         .ab-timeline-content {
-          background: rgba(255, 255, 255, 0.01);
-          border: 1px solid rgba(255, 255, 255, 0.05);
-          border-radius: 12px;
+          background: #ffffff;
+          border: 1px solid #fce7f3;
+          border-radius: 16px;
           padding: 1.5rem;
-          backdrop-filter: blur(10px);
-          transition: border-color 0.3s, background-color 0.3s;
+          transition: border-color 0.3s, box-shadow 0.3s;
+          box-shadow: 0 4px 15px rgba(0,0,0,0.04);
         }
 
         .ab-timeline-step:hover .ab-timeline-content {
-          border-color: rgba(255, 255, 255, 0.15);
-          background: rgba(255, 255, 255, 0.03);
+          border-color: #f9a8d4;
+          box-shadow: 0 8px 25px rgba(236, 72, 153, 0.1);
         }
 
         .ab-timeline-tag {
-          font-family: var(--font-body, 'Inter', sans-serif);
           font-size: 0.625rem;
           font-weight: 700;
           letter-spacing: 0.1em;
           text-transform: uppercase;
-          color: #a855f7;
+          color: #ec4899;
           margin-bottom: 0.5rem;
         }
 
         .ab-timeline-step-title {
-          font-family: var(--font-body, 'Inter', sans-serif);
           font-size: 1.0625rem;
-          font-weight: 600;
-          color: white;
+          font-weight: 700;
+          color: #111827;
           margin-bottom: 0.5rem;
         }
 
         .ab-timeline-step-desc {
-          font-family: var(--font-body, 'Inter', sans-serif);
           font-size: 0.8125rem;
           line-height: 1.6;
-          color: rgba(255, 255, 255, 0.5);
+          color: #4b5563;
           margin: 0;
         }
 
@@ -369,7 +342,7 @@ const AboutSection = () => {
         .ab-features {
           display: grid;
           grid-template-columns: 1fr;
-          border-top: 1px solid rgba(255, 255, 255, 0.05);
+          border-top: 1px solid #fce7f3;
         }
 
         @media (min-width: 640px) {
@@ -381,9 +354,9 @@ const AboutSection = () => {
         }
 
         .ab-feature-tile {
-          padding: 3rem 2rem;
-          border-right: 1px solid rgba(255, 255, 255, 0.05);
-          border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+          padding: 2.5rem 1.75rem;
+          border-right: 1px solid #fce7f3;
+          border-bottom: 1px solid #fce7f3;
           background: transparent;
           transition: background 0.3s;
         }
@@ -395,30 +368,27 @@ const AboutSection = () => {
         }
 
         .ab-feature-tile:hover {
-          background: rgba(255, 255, 255, 0.01);
+          background: rgba(236, 72, 153, 0.03);
         }
 
         .ab-feature-icon {
           width: 2.25rem;
           height: 2.25rem;
-          color: #a855f7;
-          margin-bottom: 1.5rem;
-          filter: drop-shadow(0 0 5px rgba(168,85,247,0.3));
+          color: #ec4899;
+          margin-bottom: 1.25rem;
         }
 
         .ab-feature-title {
-          font-family: var(--font-body, 'Inter', sans-serif);
           font-size: 0.9375rem;
-          font-weight: 600;
-          color: white;
+          font-weight: 700;
+          color: #111827;
           margin-bottom: 0.5rem;
         }
 
         .ab-feature-desc {
-          font-family: var(--font-body, 'Inter', sans-serif);
           font-size: 0.8125rem;
           line-height: 1.65;
-          color: rgba(255, 255, 255, 0.5);
+          color: #4b5563;
           margin: 0;
         }
       `}</style>
@@ -426,7 +396,7 @@ const AboutSection = () => {
       <section className="ab-section" ref={containerRef}>
         <div className="ab-glow-bg" />
 
-        <div className="ab-container">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           {/* Upper Grid */}
           <div className="ab-story">
             <div>

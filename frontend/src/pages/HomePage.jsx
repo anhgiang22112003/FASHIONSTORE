@@ -29,36 +29,21 @@ const HomePage = () => {
   }, []);
 
   return (
-    <div className="hm-dark-theme-wrapper">
+    <div className="hm-pink-theme-wrapper">
       {/* Dynamic Scroll Progress Bar */}
       <div 
         className="hm-scroll-progress" 
         style={{ width: `${scrollProgress}%` }} 
       />
 
-      {/* Global CSS for Vercel/Linear dark luxury aesthetic */}
+      {/* Global CSS for Pink/White/Black theme */}
       <style>{`
-        .hm-dark-theme-wrapper {
-          background-color: #000000;
-          color: #ffffff;
+        .hm-pink-theme-wrapper {
+          background-color: #fafafa;
+          color: #111827;
           font-family: 'Inter', system-ui, -apple-system, sans-serif;
           overflow-x: hidden;
           position: relative;
-        }
-
-        /* Smooth scrollbar styling */
-        ::-webkit-scrollbar {
-          width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-          background: #000000;
-        }
-        ::-webkit-scrollbar-thumb {
-          background: #1f1f23;
-          border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-          background: #2f2f35;
         }
 
         /* Top Scroll Progress */
@@ -67,7 +52,7 @@ const HomePage = () => {
           top: 0;
           left: 0;
           height: 3px;
-          background: linear-gradient(to right, oklch(62% 0.12 18), oklch(70% 0.17 330));
+          background: linear-gradient(to right, #ec4899, #f43f5e, #be185d);
           z-index: 9999;
           transition: width 0.1s ease-out;
         }
@@ -84,7 +69,7 @@ const HomePage = () => {
         }
       `}</style>
 
-      <Suspense fallback={<div className="min-h-screen bg-black flex items-center justify-center text-white">Loading...</div>}>
+      <Suspense fallback={<div className="min-h-screen bg-pink-50 flex items-center justify-center text-pink-600 font-semibold">Đang tải...</div>}>
         <HeroSection />
         <FlashSaleBanner />
         <FeaturedCollections />

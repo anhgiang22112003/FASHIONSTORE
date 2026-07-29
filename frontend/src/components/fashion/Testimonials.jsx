@@ -12,70 +12,50 @@ const Testimonials = () => {
     <>
       <style>{`
         .tm-section {
-          background-color: #020204;
-          color: white;
-          padding: 8rem 0;
+          background: linear-gradient(180deg, #fff1f2 0%, #ffffff 100%);
+          color: #111827;
+          padding: 5rem 0;
           position: relative;
           overflow: hidden;
         }
 
-        .tm-section::before {
-          content: '';
-          display: block;
-          position: absolute;
-          top: 0; left: 0; right: 0;
-          height: 1px;
-          background: rgba(255, 255, 255, 0.05);
-        }
-
-        /* Ambient Glow Blobs */
         .tm-glow-bg {
           position: absolute;
           width: 30vw;
           height: 30vw;
-          background: radial-gradient(circle, rgba(168, 85, 247, 0.04) 0%, transparent 70%);
+          background: radial-gradient(circle, rgba(236, 72, 153, 0.08) 0%, transparent 70%);
           bottom: 10%;
           left: 10%;
           pointer-events: none;
           z-index: 1;
         }
 
-        .tm-container {
-          max-width: 1400px;
-          margin: 0 auto;
-          padding: 0 2rem;
-          position: relative;
-          z-index: 2;
-        }
-
         .tm-header {
           text-align: center;
-          margin-bottom: 5rem;
+          margin-bottom: 3.5rem;
         }
 
         .tm-eyebrow {
-          font-family: var(--font-body, 'Inter', sans-serif);
-          font-size: 0.6875rem;
-          font-weight: 600;
-          letter-spacing: 0.25em;
+          font-size: 0.75rem;
+          font-weight: 700;
+          letter-spacing: 0.2em;
           text-transform: uppercase;
-          color: #a855f7;
-          margin-bottom: 1rem;
+          color: #ec4899;
+          margin-bottom: 0.5rem;
         }
 
         .tm-title {
-          font-family: var(--font-display, 'Playfair Display', serif);
-          font-size: clamp(2rem, 3.5vw, 3rem);
+          font-family: 'Inter', system-ui, -apple-system, sans-serif;
+          font-size: clamp(1.8rem, 3.5vw, 2.75rem);
           font-weight: 900;
-          line-height: 1.1;
-          color: white;
+          line-height: 1.15;
+          color: #111827;
           margin: 0;
         }
 
         .tm-title em {
-          font-style: italic;
-          color: #a855f7;
-          font-weight: 400;
+          font-style: normal;
+          color: #db2777;
         }
 
         /* Marquee layout wrappers */
@@ -123,63 +103,60 @@ const Testimonials = () => {
           100% { transform: translate3d(0, 0, 0); }
         }
 
-        /* Premium Glass Card */
+        /* Card */
         .tm-card {
           width: 360px;
-          background: rgba(255, 255, 255, 0.02);
-          border: 1px solid rgba(255, 255, 255, 0.05);
-          border-radius: 16px;
-          padding: 2.5rem;
+          flex-shrink: 0;
+          background: #ffffff;
+          border: 1px solid #fce7f3;
+          border-radius: 20px;
+          padding: 2rem;
           display: flex;
           flex-direction: column;
           justify-content: space-between;
-          backdrop-filter: blur(12px);
-          transition: border-color 0.3s, background 0.3s, transform 0.3s;
-          box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+          transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+          box-shadow: 0 10px 25px rgba(236, 72, 153, 0.06);
         }
 
         .tm-card:hover {
-          border-color: #a855f7;
-          background: rgba(255, 255, 255, 0.04);
+          border-color: #f472b6;
+          box-shadow: 0 15px 35px rgba(236, 72, 153, 0.15);
           transform: translateY(-4px);
         }
 
         .tm-stars {
           display: flex;
           gap: 0.2rem;
-          margin-bottom: 1.5rem;
+          margin-bottom: 1.25rem;
         }
 
-        .tm-star-filled { color: #a855f7; }
-        .tm-star-empty { color: rgba(255, 255, 255, 0.15); }
+        .tm-star-filled { color: #f59e0b; }
+        .tm-star-empty { color: #e5e7eb; }
 
         .tm-quote {
-          font-family: var(--font-display, 'Playfair Display', serif);
-          font-size: 1.0625rem;
-          font-style: italic;
-          font-weight: 400;
-          line-height: 1.7;
-          color: rgba(255, 255, 255, 0.85);
-          margin: 0 0 2rem;
+          font-size: 0.95rem;
+          line-height: 1.6;
+          color: #374151;
+          margin: 0 0 1.5rem;
+          font-weight: 500;
         }
 
         .tm-author {
           display: flex;
           align-items: center;
           gap: 0.875rem;
-          padding-top: 1.5rem;
-          border-top: 1px solid rgba(255, 255, 255, 0.06);
+          padding-top: 1.25rem;
+          border-top: 1px solid #fce7f3;
         }
 
-        /* Glowing circular outline on avatar */
         .tm-avatar-box {
           position: relative;
           width: 2.75rem;
           height: 2.75rem;
           border-radius: 50%;
           padding: 2px;
-          background: linear-gradient(135deg, #a855f7, #ef4444);
-          box-shadow: 0 0 10px rgba(168, 85, 247, 0.3);
+          background: linear-gradient(135deg, #ec4899, #ef4444);
+          box-shadow: 0 0 10px rgba(236, 72, 153, 0.3);
         }
 
         .tm-avatar {
@@ -188,21 +165,19 @@ const Testimonials = () => {
           border-radius: 50%;
           object-fit: cover;
           display: block;
-          border: 1px solid #020204;
+          border: 1px solid #ffffff;
         }
 
         .tm-author-name {
-          font-family: var(--font-body, 'Inter', sans-serif);
           font-size: 0.875rem;
-          font-weight: 600;
-          color: white;
+          font-weight: 700;
+          color: #111827;
           margin: 0 0 0.15rem;
         }
 
         .tm-author-role {
-          font-family: var(--font-body, 'Inter', sans-serif);
           font-size: 0.6875rem;
-          color: rgba(255, 255, 255, 0.4);
+          color: #6b7280;
           margin: 0;
         }
 
@@ -213,47 +188,45 @@ const Testimonials = () => {
           justify-content: center;
           gap: 3rem;
           flex-wrap: wrap;
-          margin-top: 5rem;
-          padding-top: 3rem;
-          border-top: 1px solid rgba(255, 255, 255, 0.05);
+          margin-top: 4rem;
+          padding-top: 2.5rem;
+          border-top: 1px solid #fce7f3;
         }
 
         .tm-trust-label {
-          font-family: var(--font-body, 'Inter', sans-serif);
           font-size: 0.6875rem;
-          font-weight: 600;
+          font-weight: 700;
           letter-spacing: 0.15em;
           text-transform: uppercase;
-          color: rgba(255, 255, 255, 0.4);
+          color: #9ca3af;
         }
 
         .tm-trust-divider {
           width: 1px;
           height: 1rem;
-          background: rgba(255, 255, 255, 0.1);
+          background: #e5e7eb;
           flex-shrink: 0;
         }
 
         @media (max-width: 639px) { .tm-trust-divider { display: none; } }
 
         .tm-platform {
-          font-family: var(--font-body, 'Inter', sans-serif);
           font-size: 0.875rem;
           font-weight: 800;
           letter-spacing: 0.12em;
           text-transform: uppercase;
-          color: rgba(255, 255, 255, 0.35);
+          color: #d1d5db;
           transition: color 0.3s;
           cursor: default;
         }
 
-        .tm-platform:hover { color: #a855f7; }
+        .tm-platform:hover { color: #ec4899; }
       `}</style>
 
       <section className="tm-section">
         <div className="tm-glow-bg" />
 
-        <div className="tm-container">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="tm-header">
             <p className="tm-eyebrow">Đánh giá</p>
             <h2 className="tm-title">Nhận Xét Từ <em>Khách Hàng</em></h2>
@@ -323,7 +296,7 @@ const Testimonials = () => {
           </div>
         </div>
 
-        <div className="tm-container">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="tm-trust">
             <span className="tm-trust-label">Cũng có mặt trên</span>
             <div className="tm-trust-divider" />

@@ -37,9 +37,8 @@ const Footer = () => {
     <>
       <style>{`
         .ft-footer {
-          background-color: oklch(14% 0.01 250);
-          color: oklch(80% 0.01 60);
-          font-family: var(--font-body, 'Inter', sans-serif);
+          background: #111827;
+          color: #d1d5db;
           position: relative;
           overflow: hidden;
         }
@@ -49,21 +48,15 @@ const Footer = () => {
           display: block;
           position: absolute;
           top: 0; left: 0; right: 0;
-          height: 1px;
-          background: oklch(22% 0.01 250);
-        }
-
-        .ft-container {
-          max-width: 1400px;
-          margin: 0 auto;
-          padding: 5rem 2rem 3rem;
+          height: 3px;
+          background: linear-gradient(90deg, #ec4899, #db2777, #be185d);
         }
 
         .ft-grid {
           display: grid;
           grid-template-columns: 1fr;
-          gap: 3.5rem;
-          margin-bottom: 4rem;
+          gap: 3rem;
+          margin-bottom: 3rem;
         }
 
         @media (min-width: 640px) {
@@ -75,7 +68,7 @@ const Footer = () => {
         @media (min-width: 1024px) {
           .ft-grid {
             grid-template-columns: 2fr 1fr 1fr 1.25fr;
-            gap: 4rem;
+            gap: 3.5rem;
           }
         }
 
@@ -83,22 +76,22 @@ const Footer = () => {
         .ft-brand-wrap {
           display: flex;
           flex-direction: column;
-          gap: 2rem;
+          gap: 1.5rem;
         }
 
         .ft-brand {
-          font-family: var(--font-display, 'Playfair Display', serif);
-          font-size: 1.75rem;
+          font-family: 'Inter', system-ui, sans-serif;
+          font-size: 1.5rem;
           font-weight: 900;
           letter-spacing: -0.01em;
-          color: oklch(97% 0.01 60);
-          margin: 0 0 1rem;
+          color: #ffffff;
+          margin: 0 0 0.75rem;
         }
 
         .ft-brand-desc {
           font-size: 0.875rem;
           line-height: 1.7;
-          color: oklch(70% 0.01 60);
+          color: #9ca3af;
           max-width: 32ch;
           margin: 0;
         }
@@ -106,7 +99,7 @@ const Footer = () => {
         .ft-contacts {
           display: flex;
           flex-direction: column;
-          gap: 0.875rem;
+          gap: 0.75rem;
         }
 
         .ft-contact-item {
@@ -114,45 +107,45 @@ const Footer = () => {
           align-items: center;
           gap: 0.75rem;
           font-size: 0.875rem;
-          color: oklch(75% 0.01 60);
+          color: #d1d5db;
         }
 
         .ft-contact-icon {
-          color: var(--color-accent, oklch(62% 0.12 18));
+          color: #ec4899;
           flex-shrink: 0;
         }
 
         .ft-socials {
           display: flex;
-          gap: 0.75rem;
+          gap: 0.625rem;
         }
 
         .ft-social-link {
           width: 2.25rem;
           height: 2.25rem;
-          background: oklch(22% 0.01 250);
+          background: rgba(255,255,255,0.08);
+          border-radius: 50%;
           display: flex;
           align-items: center;
           justify-content: center;
-          color: oklch(97% 0.01 60);
+          color: #d1d5db;
           transition: background 0.2s, color 0.2s, transform 0.2s;
         }
 
         .ft-social-link:hover {
-          background: var(--color-accent, oklch(62% 0.12 18));
+          background: #ec4899;
           color: white;
           transform: translateY(-2px);
         }
 
         /* Standard Columns */
         .ft-col-title {
-          font-family: var(--font-body, 'Inter', sans-serif);
-          font-size: 0.6875rem;
-          font-weight: 600;
+          font-size: 0.75rem;
+          font-weight: 700;
           letter-spacing: 0.2em;
           text-transform: uppercase;
-          color: oklch(97% 0.01 60);
-          margin: 0 0 1.75rem;
+          color: #ffffff;
+          margin: 0 0 1.5rem;
         }
 
         .ft-list {
@@ -161,26 +154,27 @@ const Footer = () => {
           margin: 0;
           display: flex;
           flex-direction: column;
-          gap: 0.875rem;
+          gap: 0.75rem;
         }
 
         .ft-list-link {
           font-size: 0.875rem;
-          color: oklch(70% 0.01 60);
+          color: #9ca3af;
           text-decoration: none;
           transition: color 0.2s, padding-left 0.2s;
           display: inline-block;
         }
 
         .ft-list-link:hover {
-          color: var(--color-accent, oklch(62% 0.12 18));
+          color: #ec4899;
           padding-left: 4px;
         }
 
         .ft-hours-card {
-          background: oklch(22% 0.01 250);
+          background: rgba(255,255,255,0.05);
           padding: 1.25rem;
-          border: 1px solid oklch(28% 0.01 250);
+          border: 1px solid rgba(255,255,255,0.1);
+          border-radius: 12px;
           margin-bottom: 1.5rem;
         }
 
@@ -192,19 +186,19 @@ const Footer = () => {
 
         .ft-hours-label {
           font-size: 0.6875rem;
-          font-weight: 500;
+          font-weight: 600;
           letter-spacing: 0.1em;
           text-transform: uppercase;
-          color: oklch(55% 0.01 250);
+          color: #6b7280;
           margin-bottom: 0.5rem !important;
         }
 
         .ft-payment-title {
           font-size: 0.6875rem;
-          font-weight: 500;
+          font-weight: 600;
           letter-spacing: 0.1em;
           text-transform: uppercase;
-          color: oklch(55% 0.01 250);
+          color: #6b7280;
           margin: 0 0 0.75rem;
         }
 
@@ -215,28 +209,29 @@ const Footer = () => {
         }
 
         .ft-payment-badge {
-          background: oklch(22% 0.01 250);
-          border: 1px solid oklch(28% 0.01 250);
+          background: rgba(255,255,255,0.05);
+          border: 1px solid rgba(255,255,255,0.1);
+          border-radius: 6px;
           font-size: 0.6875rem;
           font-weight: 600;
-          color: oklch(80% 0.01 60);
+          color: #d1d5db;
           text-align: center;
           padding: 0.4rem 0.25rem;
           transition: border-color 0.2s, color 0.2s;
         }
 
         .ft-payment-badge:hover {
-          border-color: var(--color-accent, oklch(62% 0.12 18));
+          border-color: #ec4899;
           color: white;
         }
 
         /* Bottom Bar */
         .ft-bottom {
-          border-top: 1px solid oklch(22% 0.01 250);
-          padding-top: 2.5rem;
+          border-top: 1px solid rgba(255,255,255,0.1);
+          padding-top: 2rem;
           display: flex;
           flex-direction: column;
-          gap: 1.5rem;
+          gap: 1.25rem;
         }
 
         @media (min-width: 768px) {
@@ -249,7 +244,7 @@ const Footer = () => {
 
         .ft-copyright {
           font-size: 0.75rem;
-          color: oklch(50% 0.01 250);
+          color: #6b7280;
           margin: 0;
         }
 
@@ -260,18 +255,18 @@ const Footer = () => {
 
         .ft-bottom-link {
           font-size: 0.75rem;
-          color: oklch(50% 0.01 250);
+          color: #6b7280;
           text-decoration: none;
           transition: color 0.2s;
         }
 
         .ft-bottom-link:hover {
-          color: var(--color-accent, oklch(62% 0.12 18));
+          color: #ec4899;
         }
       `}</style>
 
       <footer className="ft-footer">
-        <div className="ft-container">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
           <div className="ft-grid">
             {/* Info */}
             <div className="ft-brand-wrap">

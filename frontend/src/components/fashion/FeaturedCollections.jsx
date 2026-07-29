@@ -66,30 +66,11 @@ const FeaturedCollections = () => {
     <>
       <style>{`
         .fc-section {
-          padding: 8rem 0;
-          background-color: #030306;
+          padding: 5rem 0;
+          background: linear-gradient(180deg, #ffffff 0%, #fff1f2 100%);
           position: relative;
           overflow: hidden;
           cursor: crosshair;
-        }
-
-        .fc-section::before {
-          content: '';
-          display: block;
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          height: 1px;
-          background: rgba(255, 255, 255, 0.05);
-        }
-
-        .fc-container {
-          max-width: 1400px;
-          margin: 0 auto;
-          padding: 0 2rem;
-          position: relative;
-          z-index: 2;
         }
 
         /* Ambient glow backdrop */
@@ -97,7 +78,7 @@ const FeaturedCollections = () => {
           position: absolute;
           width: 40%;
           height: 40%;
-          background: radial-gradient(circle, rgba(168, 85, 247, 0.08) 0%, transparent 70%);
+          background: radial-gradient(circle, rgba(236, 72, 153, 0.08) 0%, transparent 70%);
           bottom: -10%;
           right: -5%;
           pointer-events: none;
@@ -116,7 +97,6 @@ const FeaturedCollections = () => {
           display: flex;
           align-items: center;
           justify-content: center;
-          font-family: var(--font-body, 'Inter', sans-serif);
           font-size: 0.6875rem;
           font-weight: 700;
           letter-spacing: 0.1em;
@@ -124,61 +104,54 @@ const FeaturedCollections = () => {
           z-index: 99;
           transform: translate(-50%, -50%) scale(0);
           opacity: 0;
-          transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
-          box-shadow: 0 15px 30px rgba(255, 255, 255, 0.15);
+          box-shadow: 0 8px 25px rgba(0,0,0,0.15);
         }
 
-        .fc-section:hover .fc-custom-cursor {
-          transform: translate(-50%, -50%) scale(1);
-          opacity: 1;
-        }
-
-        .fc-heading-group {
+        .fc-header {
           display: flex;
           align-items: flex-end;
           justify-content: space-between;
+          margin-bottom: 2.5rem;
           gap: 2rem;
-          margin-bottom: 5rem;
           flex-wrap: wrap;
+          position: relative;
+          z-index: 2;
         }
 
         .fc-eyebrow {
-          font-family: var(--font-body, 'Inter', sans-serif);
-          font-size: 0.6875rem;
-          font-weight: 600;
-          letter-spacing: 0.25em;
+          font-size: 0.75rem;
+          font-weight: 700;
+          letter-spacing: 0.2em;
           text-transform: uppercase;
-          color: #a855f7;
-          margin-bottom: 0.75rem;
+          color: #ec4899;
+          margin-bottom: 0.5rem;
         }
 
         .fc-title {
-          font-family: var(--font-display, 'Playfair Display', serif);
-          font-size: clamp(2rem, 4vw, 3.5rem);
+          font-family: 'Inter', system-ui, -apple-system, sans-serif;
+          font-size: clamp(1.8rem, 3.5vw, 2.75rem);
           font-weight: 900;
-          line-height: 1.05;
-          color: white;
+          line-height: 1.15;
+          color: #111827;
           margin: 0;
         }
 
         .fc-title em {
-          font-style: italic;
-          color: #a855f7;
-          font-weight: 400;
+          font-style: normal;
+          color: #db2777;
         }
 
         .fc-view-all-link {
           display: inline-flex;
           align-items: center;
           gap: 0.5rem;
-          font-family: var(--font-body, 'Inter', sans-serif);
           font-size: 0.8125rem;
-          font-weight: 600;
+          font-weight: 700;
           letter-spacing: 0.08em;
           text-transform: uppercase;
-          color: white;
+          color: #db2777;
           text-decoration: none;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+          border-bottom: 2px solid #fbcfe8;
           padding-bottom: 4px;
           transition: color 0.3s, border-color 0.3s;
           white-space: nowrap;
@@ -186,8 +159,8 @@ const FeaturedCollections = () => {
         }
 
         .fc-view-all-link:hover {
-          color: #a855f7;
-          border-color: #a855f7;
+          color: #be185d;
+          border-color: #be185d;
         }
 
         .fc-arrow {
@@ -197,28 +170,28 @@ const FeaturedCollections = () => {
 
         .fc-swiper-wrap {
           position: relative;
-          padding: 2rem 0 3rem;
+          padding: 1rem 0 3rem;
           overflow: visible;
         }
 
         /* Swiper Navigation & Pagination */
         .fc-swiper-wrap .swiper-button-next,
         .fc-swiper-wrap .swiper-button-prev {
-          width: 3.5rem;
-          height: 3.5rem;
-          background: rgba(255, 255, 255, 0.03);
-          border: 1px solid rgba(255, 255, 255, 0.08);
+          width: 3rem;
+          height: 3rem;
+          background: #ffffff;
+          border: 1px solid #fbcfe8;
           border-radius: 50%;
-          color: white;
+          color: #db2777;
           transition: background 0.3s, border-color 0.3s, transform 0.3s;
-          backdrop-filter: blur(8px);
+          box-shadow: 0 4px 15px rgba(236, 72, 153, 0.15);
         }
 
         .fc-swiper-wrap .swiper-button-next:hover,
         .fc-swiper-wrap .swiper-button-prev:hover {
-          background: #ffffff;
-          color: #000000;
-          border-color: #ffffff;
+          background: #ec4899;
+          color: #ffffff;
+          border-color: #ec4899;
         }
 
         .fc-swiper-wrap .swiper-button-next::after,
@@ -228,29 +201,28 @@ const FeaturedCollections = () => {
         }
 
         .fc-swiper-wrap .swiper-pagination-bullet {
-          background: rgba(255, 255, 255, 0.2);
+          background: #fbcfe8;
           opacity: 1;
           width: 24px;
-          height: 2px;
-          border-radius: 0;
+          height: 3px;
+          border-radius: 99px;
           transition: width 0.3s, background-color 0.3s;
         }
 
         .fc-swiper-wrap .swiper-pagination-bullet-active {
-          background: #a855f7;
+          background: #ec4899;
           width: 48px;
         }
 
-        /* Collection Card Glass */
         .fc-card {
           position: relative;
           overflow: hidden;
           aspect-ratio: 3 / 4;
-          background: rgba(255, 255, 255, 0.01);
-          border: 1px solid rgba(255, 255, 255, 0.05);
-          border-radius: 16px;
+          background: #f9fafb;
+          border: 1px solid #fce7f3;
+          border-radius: 20px;
           cursor: none;
-          box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+          box-shadow: 0 10px 30px rgba(236, 72, 153, 0.08);
         }
 
         .fc-card-img {
@@ -268,7 +240,7 @@ const FeaturedCollections = () => {
         .fc-card-overlay {
           position: absolute;
           inset: 0;
-          background: linear-gradient(to top, #000000 0%, rgba(0,0,0,0.2) 60%, transparent 100%);
+          background: linear-gradient(to top, rgba(17, 24, 39, 0.75) 0%, rgba(17, 24, 39, 0.15) 55%, transparent 100%);
           pointer-events: none;
         }
 
@@ -277,67 +249,69 @@ const FeaturedCollections = () => {
           bottom: 0;
           left: 0;
           right: 0;
-          padding: 2.5rem;
+          padding: 2.25rem;
           z-index: 3;
         }
 
         .fc-card-tag {
           display: inline-block;
-          font-family: var(--font-body, 'Inter', sans-serif);
-          font-size: 0.5625rem;
+          font-size: 0.625rem;
           font-weight: 700;
-          letter-spacing: 0.18em;
+          letter-spacing: 0.15em;
           text-transform: uppercase;
-          color: #a855f7;
-          background: rgba(255, 255, 255, 0.05);
-          border: 1px solid rgba(255,255,255,0.08);
-          padding: 0.35rem 0.75rem;
-          border-radius: 4px;
-          margin-bottom: 1rem;
+          color: #be185d;
+          background: rgba(255, 255, 255, 0.95);
+          border: 1px solid #fbcfe8;
+          padding: 0.35rem 0.85rem;
+          border-radius: 99px;
+          margin-bottom: 0.875rem;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.1);
           transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         .fc-card:hover .fc-card-tag {
-          transform: rotate(-3deg) scale(1.05);
+          transform: scale(1.05);
         }
 
         .fc-card-title {
-          font-family: var(--font-display, 'Playfair Display', serif);
-          font-size: 1.75rem;
-          font-weight: 700;
-          color: white;
-          margin: 0 0 0.5rem;
+          font-size: 1.625rem;
+          font-weight: 800;
+          color: #ffffff;
+          margin: 0 0 0.4rem;
           line-height: 1.2;
+          text-shadow: 0 2px 10px rgba(0,0,0,0.3);
         }
 
         .fc-card-desc {
-          font-family: var(--font-body, 'Inter', sans-serif);
           font-size: 0.8125rem;
-          color: rgba(255, 255, 255, 0.5);
-          line-height: 1.6;
-          margin: 0 0 1.75rem;
+          color: rgba(255, 255, 255, 0.85);
+          line-height: 1.5;
+          margin: 0 0 1.5rem;
           display: -webkit-box;
           -webkit-line-clamp: 2;
           -webkit-box-orient: vertical;
           overflow: hidden;
+          text-shadow: 0 1px 5px rgba(0,0,0,0.3);
         }
 
         .fc-card-cta {
           display: inline-flex;
           align-items: center;
           gap: 0.5rem;
-          font-family: var(--font-body, 'Inter', sans-serif);
           font-size: 0.75rem;
-          font-weight: 600;
+          font-weight: 700;
           letter-spacing: 0.08em;
           text-transform: uppercase;
-          color: white;
+          color: #ffffff;
           text-decoration: none;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.5);
-          padding-bottom: 2px;
+          background: rgba(236, 72, 153, 0.9);
+          padding: 0.5rem 1.25rem;
+          border-radius: 99px;
+          backdrop-filter: blur(8px);
           transform: translateY(12px);
           opacity: 0;
           transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+          box-shadow: 0 4px 15px rgba(236, 72, 153, 0.3);
         }
 
         .fc-card:hover .fc-card-cta {
@@ -345,7 +319,7 @@ const FeaturedCollections = () => {
           transform: translateY(0);
         }
 
-        .fc-card-cta:hover { border-color: white; }
+        .fc-card-cta:hover { background: #db2777; }
 
         @media (max-width: 1023px) {
           .fc-section { cursor: default; }
@@ -381,7 +355,7 @@ const FeaturedCollections = () => {
           </div>
         )}
 
-        <div className="fc-container" ref={containerRef}>
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10" ref={containerRef}>
           <div className="fc-heading-group">
             <div>
               <p className="fc-eyebrow">Collections</p>
@@ -400,11 +374,11 @@ const FeaturedCollections = () => {
                 modules={[Pagination, Navigation, EffectCoverflow]}
                 effect="coverflow"
                 coverflowEffect={{
-                  rotate: 35,
+                  rotate: 25,
                   stretch: 0,
                   depth: 120,
                   modifier: 1,
-                  slideShadows: true
+                  slideShadows: false
                 }}
                 grabCursor={true}
                 centeredSlides={true}

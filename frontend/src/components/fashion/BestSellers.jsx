@@ -47,7 +47,7 @@ const ProductCard = ({ product, isFavorite, onToggleFavorite, onAddToCart, index
   const navigate = useNavigate()
 
   const colors = Array.from(new Set((product?.variations || []).map(v => v.color).filter(Boolean)))
-  const sizes  = Array.from(new Set((product?.variations || []).map(v => v.size).filter(Boolean)))
+  const sizes = Array.from(new Set((product?.variations || []).map(v => v.size).filter(Boolean)))
   const hasDiscount = product?.originalPrice > product?.sellingPrice
   const discountPct = hasDiscount
     ? Math.round(((product.originalPrice - product.sellingPrice) / product.originalPrice) * 100) : 0
@@ -61,7 +61,7 @@ const ProductCard = ({ product, isFavorite, onToggleFavorite, onAddToCart, index
     const y = e.clientY - rect.top
     const cx = rect.width / 2
     const cy = rect.height / 2
-    
+
     // Smooth 3D tilt angles
     const rY = ((x - cx) / cx) * 10
     const rX = -((y - cy) / cy) * 10
@@ -214,16 +214,16 @@ const ProductCard = ({ product, isFavorite, onToggleFavorite, onAddToCart, index
 }
 
 const BestSellers = () => {
-  const [products, setProducts]   = useState([])
+  const [products, setProducts] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [selectedProduct, setSelectedProduct] = useState(null)
   const [isVariantModalOpen, setIsVariantModalOpen] = useState(false)
-  const [isCartDrawerOpen, setIsCartDrawerOpen]   = useState(false)
+  const [isCartDrawerOpen, setIsCartDrawerOpen] = useState(false)
   const [favorites, setFavorites] = useState([])
-  
+
   const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 })
   const [showCursor, setShowCursor] = useState(false)
-  
+
   const { fetchWishlist } = useContext(WishlistContext)
   const { user } = useContext(AuthContext)
   const containerRef = useRef(null)
@@ -303,31 +303,13 @@ const BestSellers = () => {
     <>
       <style>{`
         .bs-section {
-          background-color: #030306;
-          padding: 8rem 0;
+          background: linear-gradient(180deg, #ffffff 0%, #fff1f2 100%);
+          padding: 5rem 0;
           position: relative;
           overflow: hidden;
-          cursor: crosshair;
+          color: #111827;
         }
 
-        .bs-section::before {
-          content: '';
-          display: block;
-          position: absolute;
-          top: 0; left: 0; right: 0;
-          height: 1px;
-          background: rgba(255, 255, 255, 0.05);
-        }
-
-        .bs-container {
-          max-width: 1400px;
-          margin: 0 auto;
-          padding: 0 2rem;
-          position: relative;
-          z-index: 2;
-        }
-
-        /* Neon glow backdrop */
         .bs-glow-bg {
           position: absolute;
           top: 25%;
@@ -335,74 +317,43 @@ const BestSellers = () => {
           transform: translate(-50%, -50%);
           width: 55%;
           height: 55%;
-          background: radial-gradient(circle, rgba(168, 85, 247, 0.06) 0%, transparent 70%);
+          background: radial-gradient(circle, rgba(236, 72, 153, 0.08) 0%, transparent 70%);
           pointer-events: none;
           z-index: 1;
         }
 
-        /* Custom Floating Cursor */
-        .bs-custom-cursor {
-          position: absolute;
-          width: 5.5rem;
-          height: 5.5rem;
-          background: #ffffff;
-          color: #000000;
-          border-radius: 50%;
-          pointer-events: none;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-family: var(--font-body, 'Inter', sans-serif);
-          font-size: 0.6875rem;
-          font-weight: 700;
-          letter-spacing: 0.1em;
-          text-transform: uppercase;
-          z-index: 99;
-          transform: translate(-50%, -50%) scale(0);
-          opacity: 0;
-          transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
-          box-shadow: 0 12px 30px rgba(255, 255, 255, 0.15);
-        }
-
-        .bs-section:hover .bs-custom-cursor {
-          transform: translate(-50%, -50%) scale(1);
-          opacity: 1;
-        }
-
         .bs-header {
           text-align: center;
-          margin-bottom: 5.5rem;
+          margin-bottom: 3.5rem;
         }
 
         .bs-eyebrow {
-          font-family: var(--font-body, 'Inter', sans-serif);
-          font-size: 0.6875rem;
-          font-weight: 600;
-          letter-spacing: 0.25em;
+          font-size: 0.75rem;
+          font-weight: 700;
+          letter-spacing: 0.2em;
           text-transform: uppercase;
-          color: #a855f7;
-          margin-bottom: 1rem;
+          color: #ec4899;
+          margin-bottom: 0.5rem;
         }
 
         .bs-title {
-          font-family: var(--font-display, 'Playfair Display', serif);
-          font-size: clamp(2rem, 4vw, 3.5rem);
+          font-family: 'Inter', system-ui, -apple-system, sans-serif;
+          font-size: clamp(1.8rem, 3.5vw, 2.75rem);
           font-weight: 900;
-          line-height: 1.1;
-          color: white;
-          margin: 0 0 1rem;
+          line-height: 1.15;
+          color: #111827;
+          margin: 0 0 0.75rem;
         }
 
         .bs-title em {
-          font-style: italic;
-          color: #a855f7;
-          font-weight: 400;
+          font-style: normal;
+          color: #db2777;
         }
 
         .bs-desc {
           font-size: 0.9375rem;
           line-height: 1.6;
-          color: rgba(255, 255, 255, 0.5);
+          color: #4b5563;
           max-width: 50ch;
           margin: 0 auto;
         }
@@ -410,34 +361,51 @@ const BestSellers = () => {
         .bs-grid {
           display: grid;
           grid-template-columns: repeat(2, 1fr);
-          gap: 1.5rem;
+          gap: 1rem;
+        }
+
+        @media (min-width: 640px) {
+          .bs-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+          }
+        }
+
+        @media (min-width: 768px) {
+          .bs-grid {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.75rem;
+          }
         }
 
         @media (min-width: 1024px) {
           .bs-grid {
             grid-template-columns: repeat(4, 1fr);
-            gap: 2.5rem;
+            gap: 2rem;
           }
         }
 
-        /* 3D Holographic Card styling */
         .bs-card {
           display: flex;
           flex-direction: column;
-          background: rgba(255, 255, 255, 0.01);
-          border: 1px solid rgba(255, 255, 255, 0.05);
+          background: #ffffff;
+          border: 1px solid #fce7f3;
           border-radius: 16px;
           position: relative;
-          padding: 0.75rem;
+          padding: 0.6rem;
           opacity: 0;
           animation: bsFadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-          cursor: none;
-          transform-style: preserve-3d;
-          will-change: transform;
+          box-shadow: 0 4px 15px rgba(236, 72, 153, 0.05);
+          transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .bs-card:hover {
+          border-color: #f472b6;
+          box-shadow: 0 15px 30px rgba(236, 72, 153, 0.15);
         }
 
         @keyframes bsFadeIn {
-          from { opacity: 0; transform: translateY(30px); }
+          from { opacity: 0; transform: translateY(20px); }
           to { opacity: 1; transform: translateY(0); }
         }
 
@@ -446,14 +414,7 @@ const BestSellers = () => {
           aspect-ratio: 3 / 4;
           overflow: hidden;
           border-radius: 12px;
-          background: rgba(255, 255, 255, 0.01);
-          border: 1px solid rgba(255, 255, 255, 0.05);
-          transform: translateZ(10px);
-          transform-style: preserve-3d;
-        }
-
-        .bs-card:hover .bs-card-img-wrap {
-          border-color: #a855f7;
+          background: #f9fafb;
         }
 
         .bs-card-img {
@@ -461,71 +422,66 @@ const BestSellers = () => {
           height: 100%;
           object-fit: cover;
           display: block;
-          transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+          transition: transform 0.6s ease;
         }
 
-        .bs-card-glare {
-          position: absolute;
-          inset: 0;
-          pointer-events: none;
-          z-index: 5;
+        .bs-card:hover .bs-card-img {
+          transform: scale(1.05);
         }
 
-        /* Z-indexed components */
+        /* Top Left Rank */
         .bs-card-rank {
           position: absolute;
-          top: 1rem;
-          left: 1rem;
-          background: #ffffff;
-          color: #000000;
-          font-family: var(--font-display, 'Playfair Display', serif);
-          font-size: 0.875rem;
-          font-weight: 700;
-          font-style: italic;
-          padding: 0.3rem 0.6rem;
-          border-radius: 4px;
+          top: 0.75rem;
+          left: 0.75rem;
+          background: #111827;
+          color: #ffffff;
+          font-size: 0.75rem;
+          font-weight: 800;
+          padding: 0.2rem 0.5rem;
+          border-radius: 6px;
           z-index: 10;
-          transform: translateZ(25px);
         }
 
+        /* Top Left Discount next to rank */
         .bs-card-discount {
           position: absolute;
-          top: 1rem;
-          right: 1rem;
+          top: 0.75rem;
+          left: 2.75rem;
           background: #ef4444;
           color: white;
-          font-family: var(--font-body, 'Inter', sans-serif);
           font-size: 0.6875rem;
           font-weight: 700;
-          padding: 0.3rem 0.5rem;
-          border-radius: 4px;
+          padding: 0.2rem 0.5rem;
+          border-radius: 6px;
           z-index: 10;
-          transform: translateZ(25px);
         }
 
+        /* TOP RIGHT WISHLIST HEART ICON */
         .bs-card-wishlist {
           position: absolute;
-          bottom: 1rem;
-          right: 1rem;
+          top: 0.75rem;
+          right: 0.75rem;
           width: 2.25rem;
           height: 2.25rem;
           border-radius: 50%;
-          background: rgba(255, 255, 255, 0.04);
-          border: 1px solid rgba(255, 255, 255, 0.1);
+          background: rgba(255, 255, 255, 0.9);
+          border: 1px solid #fbcfe8;
           display: flex;
           align-items: center;
           justify-content: center;
-          color: rgba(255, 255, 255, 0.7);
+          color: #6b7280;
           cursor: pointer;
           z-index: 10;
-          transform: translateZ(25px);
           backdrop-filter: blur(8px);
-          transition: background 0.3s, color 0.3s, transform 0.3s;
+          box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+          transition: background 0.3s, color 0.3s, transform 0.2s;
         }
 
         .bs-card-wishlist:hover {
           color: #ef4444;
-          transform: translateZ(25px) scale(1.1);
+          background: #ffffff;
+          transform: scale(1.1);
         }
 
         .bs-card-wishlist.is-favorite {
@@ -534,67 +490,63 @@ const BestSellers = () => {
           border-color: #ef4444;
         }
 
-        /* Glassmorphic quick action menu on hover */
+        /* Quick action bottom bar */
         .bs-card-actions {
           position: absolute;
           bottom: 0;
           left: 0;
           right: 0;
-          padding: 1.25rem;
-          background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 100%);
+          padding: 0.75rem;
+          background: linear-gradient(to top, rgba(17,24,39,0.8) 0%, transparent 100%);
           display: flex;
-          gap: 0.5rem;
+          gap: 0.4rem;
           opacity: 0;
-          transform: translateY(12px) translateZ(30px);
-          transition: opacity 0.4s, transform 0.4s;
+          transform: translateY(8px);
+          transition: opacity 0.3s, transform 0.3s;
           z-index: 9;
         }
 
         .bs-card:hover .bs-card-actions {
           opacity: 1;
-          transform: translateY(0) translateZ(30px);
+          transform: translateY(0);
         }
 
         .bs-btn-action {
-          height: 2.5rem;
+          height: 2.25rem;
           border: none;
           display: inline-flex;
           align-items: center;
           justify-content: center;
           cursor: pointer;
-          font-family: var(--font-body, 'Inter', sans-serif);
           font-size: 0.75rem;
-          font-weight: 600;
-          letter-spacing: 0.04em;
-          text-transform: uppercase;
-          border-radius: 6px;
+          font-weight: 700;
+          border-radius: 8px;
         }
 
         .bs-btn-primary-action {
           flex: 1;
-          background: #ffffff;
-          color: #000000;
-          gap: 0.5rem;
-          transition: background 0.3s, transform 0.2s;
+          background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+          color: #ffffff;
+          gap: 0.4rem;
+          transition: background 0.3s;
         }
 
         .bs-btn-primary-action:hover {
-          background: #a855f7;
-          color: white;
+          background: linear-gradient(135deg, #db2777 0%, #be185d 100%);
         }
 
         .bs-btn-view-action {
-          width: 2.5rem;
-          background: rgba(255, 255, 255, 0.05);
-          color: white;
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          backdrop-filter: blur(8px);
+          width: 2.25rem;
+          background: #ffffff;
+          color: #111827;
+          border: 1px solid #e5e7eb;
           transition: background 0.3s;
         }
 
         .bs-btn-view-action:hover {
-          background: #a855f7;
-          border-color: #a855f7;
+          background: #ec4899;
+          color: #ffffff;
+          border-color: #ec4899;
         }
 
         .bs-card-info {
@@ -606,38 +558,36 @@ const BestSellers = () => {
         }
 
         .bs-card-meta {
-          font-family: var(--font-body, 'Inter', sans-serif);
           font-size: 0.625rem;
-          font-weight: 600;
+          font-weight: 700;
           letter-spacing: 0.15em;
           text-transform: uppercase;
-          color: #a855f7;
-          margin-bottom: 0.5rem;
+          color: #ec4899;
+          margin-bottom: 0.35rem;
         }
 
         .bs-card-title {
-          font-family: var(--font-body, 'Inter', sans-serif);
           font-size: 0.875rem;
-          font-weight: 500;
-          line-height: 1.45;
-          color: rgba(255, 255, 255, 0.9);
-          margin: 0 0 0.75rem;
+          font-weight: 600;
+          line-height: 1.4;
+          color: #111827;
+          margin: 0.4rem 0 0.5rem;
           display: -webkit-box;
-          -webkit-line-clamp: 1;
+          -webkit-line-clamp: 2;
           -webkit-box-orient: vertical;
           overflow: hidden;
           transition: color 0.3s;
         }
 
         .bs-card:hover .bs-card-title {
-          color: #a855f7;
+          color: #be185d;
         }
 
         .bs-card-rating-sizes {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-bottom: 0.75rem;
+          margin-bottom: 0.5rem;
         }
 
         .bs-card-rating {
@@ -647,9 +597,8 @@ const BestSellers = () => {
         }
 
         .bs-rating-count {
-          font-family: var(--font-body, 'Inter', sans-serif);
           font-size: 0.6875rem;
-          color: rgba(255, 255, 255, 0.4);
+          color: #6b7280;
           margin-left: 0.25rem;
         }
 
@@ -660,19 +609,18 @@ const BestSellers = () => {
         }
 
         .bs-size-badge {
-          font-family: var(--font-body, 'Inter', sans-serif);
           font-size: 0.625rem;
-          font-weight: 500;
-          color: rgba(255, 255, 255, 0.5);
-          border: 1px solid rgba(255, 255, 255, 0.15);
+          font-weight: 600;
+          color: #374151;
+          border: 1px solid #e5e7eb;
+          background: #f9fafb;
           padding: 0.1rem 0.35rem;
-          border-radius: 2px;
+          border-radius: 4px;
         }
 
         .bs-sizes-more {
-          font-family: var(--font-body, 'Inter', sans-serif);
           font-size: 0.625rem;
-          color: rgba(255, 255, 255, 0.4);
+          color: #9ca3af;
         }
 
         .bs-card-footer {
@@ -680,28 +628,26 @@ const BestSellers = () => {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding-top: 0.75rem;
-          border-top: 1px solid rgba(255, 255, 255, 0.08);
+          padding-top: 0.5rem;
+          border-top: 1px solid #fce7f3;
         }
 
         .bs-card-price-group {
           display: flex;
           align-items: baseline;
-          gap: 0.5rem;
+          gap: 0.4rem;
         }
 
         .bs-card-price {
-          font-family: var(--font-body, 'Inter', sans-serif);
           font-size: 0.9375rem;
-          font-weight: 700;
-          color: white;
+          font-weight: 800;
+          color: #be185d;
         }
 
         .bs-card-price-original {
-          font-family: var(--font-body, 'Inter', sans-serif);
           font-size: 0.75rem;
           text-decoration: line-through;
-          color: rgba(255, 255, 255, 0.4);
+          color: #9ca3af;
         }
 
         .bs-card-colors {
@@ -711,47 +657,47 @@ const BestSellers = () => {
         }
 
         .bs-color-dot {
-          width: 0.625rem;
-          height: 0.625rem;
+          width: 0.75rem;
+          height: 0.75rem;
           border-radius: 50%;
-          border: 1px solid rgba(255, 255, 255, 0.2);
+          border: 1px solid rgba(0, 0, 0, 0.15);
+          box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
 
         .bs-colors-more {
-          font-family: var(--font-body, 'Inter', sans-serif);
           font-size: 0.625rem;
-          color: rgba(255, 255, 255, 0.4);
+          color: #9ca3af;
         }
 
         /* Action buttons bar */
         .bs-action-bar {
           text-align: center;
-          margin-top: 4.5rem;
+          margin-top: 3.5rem;
         }
 
         .bs-btn-all {
           display: inline-flex;
           align-items: center;
           gap: 0.5rem;
-          background: #ffffff;
-          color: #000000;
-          font-family: var(--font-body, 'Inter', sans-serif);
+          background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+          color: #ffffff;
           font-size: 0.8125rem;
-          font-weight: 600;
+          font-weight: 700;
           letter-spacing: 0.06em;
           text-transform: uppercase;
           padding: 0.875rem 2.25rem;
+          border-radius: 99px;
           border: none;
           cursor: pointer;
           transition: background 0.3s, transform 0.15s, box-shadow 0.3s;
           text-decoration: none;
+          box-shadow: 0 8px 20px rgba(236, 72, 153, 0.25);
         }
 
         .bs-btn-all:hover {
-          background: #a855f7;
-          color: #ffffff;
+          background: linear-gradient(135deg, #db2777 0%, #be185d 100%);
           transform: translateY(-2px);
-          box-shadow: 0 0 25px rgba(168, 85, 247, 0.35);
+          box-shadow: 0 12px 25px rgba(236, 72, 153, 0.35);
         }
 
         @media (max-width: 1023px) {
@@ -768,10 +714,10 @@ const BestSellers = () => {
         onMouseEnter={() => setShowCursor(true)}
         onMouseLeave={() => setShowCursor(false)}
       >
-        <div className="bs-bg-glow" />
+        <div className="bs-glow-bg" />
 
         {/* Custom cursor follower */}
-        {showCursor && (
+        {/* {showCursor && (
           <div
             className="bs-custom-cursor"
             style={{
@@ -781,9 +727,9 @@ const BestSellers = () => {
           >
             Chọn mua
           </div>
-        )}
+        )} */}
 
-        <div className="bs-container" ref={containerRef}>
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10" ref={containerRef}>
           <div className="bs-header bs-header-anim">
             <p className="bs-eyebrow">Xu hướng</p>
             <h2 className="bs-title">Sản Phẩm <em>Bán Chạy</em></h2>
@@ -796,18 +742,18 @@ const BestSellers = () => {
             {isLoading
               ? Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)
               : products.slice(0, 8).map((product, index) => (
-                  <ProductCard
-                    key={product._id}
-                    product={product}
-                    index={index}
-                    isFavorite={favorites.includes(product._id)}
-                    onToggleFavorite={toggleFavorite}
-                    onAddToCart={(p) => {
-                      setSelectedProduct(p)
-                      setIsVariantModalOpen(true)
-                    }}
-                  />
-                ))
+                <ProductCard
+                  key={product._id}
+                  product={product}
+                  index={index}
+                  isFavorite={favorites.includes(product._id)}
+                  onToggleFavorite={toggleFavorite}
+                  onAddToCart={(p) => {
+                    setSelectedProduct(p)
+                    setIsVariantModalOpen(true)
+                  }}
+                />
+              ))
             }
           </div>
 

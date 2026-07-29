@@ -54,7 +54,7 @@ const Newsletter = () => {
 
     const draw = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = 'rgba(168, 85, 247, 0.4)';
+      ctx.fillStyle = 'rgba(236, 72, 153, 0.4)';
 
       particles.forEach((p, idx) => {
         // Move particle
@@ -68,7 +68,7 @@ const Newsletter = () => {
         // Draw particle
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255, 255, 255, ${p.alpha})`;
+        ctx.fillStyle = `rgba(236, 72, 153, ${p.alpha * 0.5})`;
         ctx.fill();
 
         // Connect nearby nodes
@@ -79,7 +79,7 @@ const Newsletter = () => {
             ctx.beginPath();
             ctx.moveTo(p.x, p.y);
             ctx.lineTo(p2.x, p2.y);
-            ctx.strokeStyle = `rgba(168, 85, 247, ${0.12 * (1 - dist / 80)})`;
+            ctx.strokeStyle = `rgba(236, 72, 153, ${0.12 * (1 - dist / 80)})`;
             ctx.lineWidth = 0.5;
             ctx.stroke();
           }
@@ -126,22 +126,14 @@ const Newsletter = () => {
     <>
       <style>{`
         .nl-section {
-          background-color: #020204;
-          padding: 8rem 0;
+          background: linear-gradient(180deg, #ffffff 0%, #fff1f2 100%);
+          color: #111827;
+          padding: 5rem 0;
           position: relative;
           overflow: hidden;
         }
 
-        .nl-section::before {
-          content: '';
-          display: block;
-          position: absolute;
-          top: 0; left: 0; right: 0;
-          height: 1px;
-          background: rgba(255, 255, 255, 0.05);
-        }
-
-        /* Interactive Particle Canvas background */
+        /* Particle Canvas */
         .nl-canvas {
           position: absolute;
           inset: 0;
@@ -151,7 +143,6 @@ const Newsletter = () => {
           z-index: 1;
         }
 
-        /* Ambient neon blobs shifting */
         .nl-blob {
           position: absolute;
           border-radius: 50%;
@@ -161,49 +152,41 @@ const Newsletter = () => {
 
         .nl-blob-1 {
           width: 25rem; height: 25rem;
-          background: #a855f7;
+          background: #ec4899;
           opacity: 0.06;
           top: -5rem; right: -5rem;
         }
 
         .nl-blob-2 {
           width: 20rem; height: 20rem;
-          background: #ef4444;
-          opacity: 0.04;
+          background: #f472b6;
+          opacity: 0.05;
           bottom: -5rem; left: -5rem;
         }
 
-        .nl-container {
-          max-width: 1400px;
-          margin: 0 auto;
-          padding: 0 2rem;
-          position: relative;
-          z-index: 2;
-        }
-
+        /* Grid layout */
         .nl-inner {
           display: grid;
           grid-template-columns: 1fr;
-          gap: 4rem;
+          gap: 3rem;
           align-items: start;
         }
 
         @media (min-width: 1024px) {
           .nl-inner {
             grid-template-columns: 1fr 1fr;
-            gap: 6rem;
+            gap: 5rem;
             align-items: center;
           }
         }
 
         .nl-eyebrow {
-          font-family: var(--font-body, 'Inter', sans-serif);
-          font-size: 0.6875rem;
-          font-weight: 600;
-          letter-spacing: 0.25em;
+          font-size: 0.75rem;
+          font-weight: 700;
+          letter-spacing: 0.2em;
           text-transform: uppercase;
-          color: #a855f7;
-          margin-bottom: 1.25rem;
+          color: #ec4899;
+          margin-bottom: 1rem;
           display: flex;
           align-items: center;
           gap: 0.75rem;
@@ -213,30 +196,28 @@ const Newsletter = () => {
           content: '';
           display: block;
           width: 1.5rem;
-          height: 1px;
-          background: #a855f7;
+          height: 2px;
+          background: #ec4899;
         }
 
         .nl-heading {
-          font-family: var(--font-display, 'Playfair Display', serif);
-          font-size: clamp(2rem, 3.5vw, 3rem);
+          font-family: 'Inter', system-ui, -apple-system, sans-serif;
+          font-size: clamp(1.8rem, 3.5vw, 2.75rem);
           font-weight: 900;
-          line-height: 1.1;
-          color: white;
+          line-height: 1.15;
+          color: #111827;
           margin: 0 0 1rem;
         }
 
         .nl-heading em {
-          font-style: italic;
-          color: #a855f7;
-          font-weight: 400;
+          font-style: normal;
+          color: #db2777;
         }
 
         .nl-sub {
-          font-family: var(--font-body, 'Inter', sans-serif);
           font-size: 0.9375rem;
           line-height: 1.7;
-          color: rgba(255, 255, 255, 0.5);
+          color: #4b5563;
           margin: 0 0 2.5rem;
           max-width: 40ch;
         }
@@ -247,52 +228,48 @@ const Newsletter = () => {
           max-width: 28rem;
         }
 
-        /* Glassmorphic input field */
         .nl-input {
           flex: 1;
           min-width: 0;
-          font-family: var(--font-body, 'Inter', sans-serif);
           font-size: 0.9375rem;
-          color: white;
-          background: rgba(255, 255, 255, 0.02);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          border-radius: 6px;
-          padding: 0.875rem 1.25rem;
+          color: #111827;
+          background: #ffffff;
+          border: 1px solid #fbcfe8;
+          border-radius: 99px;
+          padding: 0.875rem 1.5rem;
           outline: none;
-          transition: border-color 0.3s, background-color 0.3s;
+          transition: border-color 0.3s, box-shadow 0.3s;
         }
 
-        .nl-input::placeholder { color: rgba(255, 255, 255, 0.3); }
+        .nl-input::placeholder { color: #9ca3af; }
 
         .nl-input:focus {
-          border-color: #a855f7;
-          background: rgba(255, 255, 255, 0.04);
+          border-color: #ec4899;
+          box-shadow: 0 0 15px rgba(236, 72, 153, 0.15);
         }
 
-        /* Magnetic button overlay styles */
         .nl-submit {
           display: inline-flex;
           align-items: center;
           gap: 0.4rem;
-          background: #ffffff;
-          color: #000000;
-          font-family: var(--font-body, 'Inter', sans-serif);
+          background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+          color: #ffffff;
           font-size: 0.8125rem;
           font-weight: 700;
           letter-spacing: 0.06em;
           text-transform: uppercase;
           padding: 0.875rem 1.75rem;
           border: none;
-          border-radius: 6px;
+          border-radius: 99px;
           cursor: pointer;
           flex-shrink: 0;
           transition: background 0.3s, box-shadow 0.3s;
+          box-shadow: 0 4px 15px rgba(236, 72, 153, 0.25);
         }
 
         .nl-submit:hover {
-          background: #a855f7;
-          color: #ffffff;
-          box-shadow: 0 0 25px rgba(168, 85, 247, 0.35);
+          background: linear-gradient(135deg, #db2777 0%, #be185d 100%);
+          box-shadow: 0 8px 20px rgba(236, 72, 153, 0.35);
         }
 
         .nl-submit-arrow {
@@ -303,56 +280,51 @@ const Newsletter = () => {
 
         .nl-success {
           margin-top: 0.875rem;
-          font-family: var(--font-body, 'Inter', sans-serif);
           font-size: 0.8125rem;
-          font-weight: 500;
-          color: #a855f7;
+          font-weight: 600;
+          color: #059669;
         }
 
         .nl-privacy {
           margin-top: 1.25rem;
-          font-family: var(--font-body, 'Inter', sans-serif);
           font-size: 0.6875rem;
-          color: rgba(255, 255, 255, 0.35);
+          color: #9ca3af;
         }
 
         /* Perks sidebar listing */
         .nl-perks {
           display: flex;
           flex-direction: column;
-          border-top: 1px solid rgba(255, 255, 255, 0.05);
+          border-top: 1px solid #fce7f3;
         }
 
         .nl-perk {
           display: flex;
           gap: 1.25rem;
           align-items: flex-start;
-          padding: 1.75rem 0;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+          padding: 1.5rem 0;
+          border-bottom: 1px solid #fce7f3;
         }
 
         .nl-perk-icon {
           width: 2rem;
           height: 2rem;
-          color: #a855f7;
+          color: #ec4899;
           flex-shrink: 0;
           margin-top: 0.1rem;
-          filter: drop-shadow(0 0 5px rgba(168,85,247,0.3));
         }
 
         .nl-perk-title {
-          font-family: var(--font-body, 'Inter', sans-serif);
           font-size: 0.9375rem;
-          font-weight: 600;
-          color: white;
+          font-weight: 700;
+          color: #111827;
           margin-bottom: 0.25rem;
         }
 
         .nl-perk-desc {
-          font-family: var(--font-body, 'Inter', sans-serif);
           font-size: 0.8125rem;
           line-height: 1.6;
-          color: rgba(255, 255, 255, 0.5);
+          color: #4b5563;
           margin: 0;
         }
 
@@ -368,7 +340,7 @@ const Newsletter = () => {
         <div className="nl-blob nl-blob-1" aria-hidden="true" />
         <div className="nl-blob nl-blob-2" aria-hidden="true" />
 
-        <div className="nl-container">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="nl-inner">
             {/* Left */}
             <div>

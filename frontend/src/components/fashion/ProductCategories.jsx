@@ -1,543 +1,264 @@
-/* Hallmark · macrostructure: Marquee Hero · section: ProductCategories · tone: Vercel 3D Circular Hub */
 import api from '@/service/api'
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Swiper, SwiperSlide } from 'swiper/react'
-import { Pagination, Navigation, Autoplay } from 'swiper/modules'
-import { ArrowRight, Disc, Layers } from 'lucide-react'
-import 'swiper/css'
-import 'swiper/css/pagination'
-import 'swiper/css/navigation'
+import { ArrowRight, Sparkles } from 'lucide-react'
 
 const ProductCategories = () => {
   const [category, setCategory] = useState([])
-  const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 })
-  const [showCursor, setShowCursor] = useState(false)
-  
-  // Desktop Wheel Orbit States
-  const [activeCircleIndex, setActiveCircleIndex] = useState(0)
-  const [wheelRotation, setWheelRotation] = useState(0)
-
+  const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
-  const sectionRef = useRef(null)
 
-  const Category = async () => {
+  const fetchCategories = async () => {
     try {
       const response = await api.get('/categories')
       const activeCategories = response?.data?.data.filter(item => item.isActive)
-      setCategory(activeCategories)
+      setCategory(activeCategories || [])
     } catch (error) {
       console.error('Error fetching product categories:', error)
+    } finally {
+      setLoading(false)
     }
   }
 
   useEffect(() => {
-    Category()
+    fetchCategories()
   }, [])
-
-  const handleMouseMove = (e) => {
-    if (!sectionRef.current) return
-    const rect = sectionRef.current.getBoundingClientRect()
-    setCursorPos({
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top
-    })
-  }
-
-  // Handle active item in circle wheel selection
-  const handleItemHover = (index) => {
-    setActiveCircleIndex(index)
-    // Rotate wheel so selected item is at the top (-90 deg offset)
-    const targetAngle = -index * (360 / category.length)
-    setWheelRotation(targetAngle)
-  }
 
   return (
     <>
       <style>{`
         .pc-section {
-          padding: 8rem 0;
-          background-color: #020204;
+          padding: 5rem 0;
+          background: linear-gradient(180deg, #fff1f2 0%, #ffffff 100%);
+          color: #111827;
           position: relative;
           overflow: hidden;
-          cursor: crosshair;
         }
 
-        .pc-section::before {
-          content: '';
-          display: block;
-          position: absolute;
-          top: 0; left: 0; right: 0;
-          height: 1px;
-          background: rgba(255, 255, 255, 0.05);
-        }
-
-        .pc-container {
-          max-width: 1400px;
-          margin: 0 auto;
-          padding: 0 2rem;
-          position: relative;
-          z-index: 2;
-        }
-
-        /* Ambient Glow backdrop */
         .pc-glow-bg {
           position: absolute;
-          width: 40%;
-          height: 40%;
-          background: radial-gradient(circle, rgba(6, 182, 212, 0.08) 0%, transparent 70%);
-          top: 20%;
+          width: 35%;
+          height: 35%;
+          background: radial-gradient(circle, rgba(244, 114, 182, 0.12) 0%, transparent 70%);
+          top: 10%;
           left: 5%;
           pointer-events: none;
           z-index: 1;
         }
 
-        /* Custom Floating Cursor */
-        .pc-custom-cursor {
-          position: absolute;
-          width: 5rem;
-          height: 5rem;
-          background: #a855f7;
-          color: white;
-          border-radius: 50%;
-          pointer-events: none;
+        .pc-header {
           display: flex;
-          align-items: center;
-          justify-content: center;
-          font-family: var(--font-body, 'Inter', sans-serif);
-          font-size: 0.6875rem;
-          font-weight: 700;
-          letter-spacing: 0.1em;
-          text-transform: uppercase;
-          z-index: 99;
-          transform: translate(-50%, -50%) scale(0);
-          opacity: 0;
-          transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
-          box-shadow: 0 10px 25px rgba(168, 85, 247, 0.3);
-        }
-
-        .pc-section:hover .pc-custom-cursor {
-          transform: translate(-50%, -50%) scale(1);
-          opacity: 1;
-        }
-
-        .pc-heading-group {
-          margin-bottom: 4rem;
+          align-items: flex-end;
+          justify-content: space-between;
+          margin-bottom: 3rem;
+          gap: 1.5rem;
+          flex-wrap: wrap;
+          position: relative;
+          z-index: 2;
         }
 
         .pc-eyebrow {
-          font-family: var(--font-body, 'Inter', sans-serif);
-          font-size: 0.6875rem;
-          font-weight: 600;
-          letter-spacing: 0.25em;
+          font-size: 0.75rem;
+          font-weight: 700;
+          letter-spacing: 0.2em;
           text-transform: uppercase;
-          color: #a855f7;
-          margin-bottom: 0.75rem;
+          color: #ec4899;
+          margin-bottom: 0.5rem;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
         }
 
         .pc-title {
-          font-family: var(--font-display, 'Playfair Display', serif);
-          font-size: clamp(2rem, 4vw, 3.5rem);
+          font-family: 'Inter', system-ui, -apple-system, sans-serif;
+          font-size: clamp(1.8rem, 3.5vw, 2.5rem);
           font-weight: 900;
-          line-height: 1.05;
-          color: white;
+          line-height: 1.15;
+          color: #111827;
           margin: 0;
         }
 
         .pc-title em {
-          font-style: italic;
-          color: #a855f7;
-          font-weight: 400;
+          font-style: normal;
+          color: #db2777;
         }
 
-        /* Desktop layout - 2-col grid: spotlight | wheel */
-        .pc-wheel-layout {
-          display: none;
-          grid-template-columns: 300px 1fr;
-          align-items: center;
-          gap: 3rem;
-          margin-top: 2rem;
-          min-height: 600px;
-        }
-
-        @media (min-width: 1024px) {
-          .pc-wheel-layout {
-            display: grid;
-          }
-        }
-
-        /* Wheel arena: self-contained relative container for node positioning */
-        .pc-wheel-arena {
+        .pc-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 1.25rem;
           position: relative;
-          width: 100%;
-          height: 520px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        /* Center Hub */
-        .pc-wheel-center-hub {
-          position: absolute;
-          width: 160px;
-          height: 160px;
-          border-radius: 50%;
-          background: rgba(10, 10, 12, 0.8);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          backdrop-filter: blur(12px);
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          z-index: 5;
-          box-shadow: 0 0 50px rgba(0,0,0,0.8), inset 0 0 20px rgba(255,255,255,0.05);
-        }
-
-        .pc-hub-glow {
-          position: absolute;
-          inset: -10px;
-          border-radius: 50%;
-          background: radial-gradient(circle, rgba(168, 85, 247, 0.15) 0%, transparent 70%);
-          animation: hubPulse 3s infinite alternate;
-          z-index: -1;
-        }
-
-        @keyframes hubPulse {
-          0% { transform: scale(0.95); opacity: 0.5; }
-          100% { transform: scale(1.05); opacity: 1; }
-        }
-
-        .pc-hub-title {
-          font-family: var(--font-display, 'Playfair Display', serif);
-          font-size: 1.125rem;
-          font-weight: 700;
-          color: white;
-          margin-top: 0.5rem;
-        }
-
-        /* Decorative orbit ring (purely visual) */
-        .pc-orbit-ring {
-          position: absolute;
-          width: 460px;
-          height: 460px;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          border: 1px dashed rgba(255, 255, 255, 0.07);
-          border-radius: 50%;
-          pointer-events: none;
-          z-index: 0;
-        }
-
-        /* Circular Orbit Cards — absolutely placed relative to .pc-wheel-layout */
-        .pc-wheel-node {
-          position: absolute;
-          width: 110px;
-          height: 110px;
-          border-radius: 50%;
-          overflow: hidden;
-          background: rgba(255, 255, 255, 0.02);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          cursor: pointer;
-          transition: border-color 0.4s, box-shadow 0.4s, transform 0.4s;
-          box-shadow: 0 10px 30px rgba(0,0,0,0.5);
           z-index: 2;
         }
 
-        .pc-wheel-node:hover {
-          border-color: #a855f7;
-          box-shadow: 0 0 25px rgba(168, 85, 247, 0.25);
-          transform: scale(1.08);
-        }
-
-        .pc-node-active {
-          border-color: #a855f7 !important;
-          box-shadow: 0 0 30px rgba(168, 85, 247, 0.4) !important;
-          transform: scale(1.18) !important;
-        }
-
-        .pc-node-img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          opacity: 0.6;
-          transition: opacity 0.4s, transform 0.8s;
-        }
-
-        .pc-wheel-node:hover .pc-node-img,
-        .pc-node-active .pc-node-img {
-          opacity: 1;
-          transform: scale(1.08);
-        }
-
-        /* Spotlight display card */
-        .pc-spotlight-display {
-          width: 100%;
-          background: rgba(255, 255, 255, 0.02);
-          border: 1px solid rgba(255, 255, 255, 0.05);
-          backdrop-filter: blur(16px);
-          border-radius: 16px;
-          padding: 2rem;
-          display: flex;
-          flex-direction: column;
-          z-index: 4;
-          box-shadow: 0 25px 60px rgba(0,0,0,0.6);
-          align-self: center;
-        }
-
-        .pc-spotlight-img {
-          width: 100%;
-          aspect-ratio: 4 / 3;
-          object-fit: cover;
-          border-radius: 8px;
-          margin-bottom: 1.5rem;
-          border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .pc-spotlight-name {
-          font-family: var(--font-display, 'Playfair Display', serif);
-          font-size: 1.5rem;
-          font-weight: 700;
-          color: white;
-          margin-bottom: 0.5rem;
-        }
-
-        .pc-spotlight-count {
-          font-family: var(--font-body, 'Inter', sans-serif);
-          font-size: 0.75rem;
-          font-weight: 600;
-          letter-spacing: 0.1em;
-          text-transform: uppercase;
-          color: rgba(255, 255, 255, 0.4);
-          margin-bottom: 1.5rem;
-        }
-
-        .pc-spotlight-btn {
-          align-self: flex-start;
-          display: inline-flex;
-          align-items: center;
-          gap: 0.5rem;
-          background: white;
-          color: black;
-          font-size: 0.75rem;
-          font-weight: 700;
-          letter-spacing: 0.05em;
-          text-transform: uppercase;
-          padding: 0.75rem 1.5rem;
-          border: none;
-          border-radius: 4px;
-          cursor: pointer;
-          transition: background 0.3s, transform 0.2s;
-        }
-
-        .pc-spotlight-btn:hover {
-          background: #a855f7;
-          color: white;
-          transform: translateY(-2px);
-        }
-
-        /* Mobile swiper slider layout */
-        .pc-mobile-layout {
-          display: block;
-        }
-
-        @media (min-width: 1024px) {
-          .pc-mobile-layout {
-            display: none;
+        @media (min-width: 640px) {
+          .pc-grid {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
           }
         }
 
-        .pc-mobile-card {
-          position: relative;
-          overflow: hidden;
-          aspect-ratio: 3 / 4;
-          background: rgba(255,255,255,0.02);
-          border: 1px solid rgba(255,255,255,0.06);
-          border-radius: 12px;
-          cursor: pointer;
+        @media (min-width: 1024px) {
+          .pc-grid {
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.75rem;
+          }
         }
 
-        .pc-mobile-card-img {
+        .pc-card {
+          position: relative;
+          border-radius: 20px;
+          overflow: hidden;
+          background: #ffffff;
+          border: 1px solid #fce7f3;
+          box-shadow: 0 8px 25px rgba(236, 72, 153, 0.06);
+          cursor: pointer;
+          transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s, border-color 0.4s;
+          aspect-ratio: 4 / 5;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .pc-card:hover {
+          transform: translateY(-8px);
+          border-color: #f472b6;
+          box-shadow: 0 20px 40px rgba(236, 72, 153, 0.18);
+        }
+
+        .pc-card-img-wrap {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          overflow: hidden;
+        }
+
+        .pc-card-img {
           width: 100%;
           height: 100%;
           object-fit: cover;
-          display: block;
+          transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        .pc-mobile-card-overlay {
+        .pc-card:hover .pc-card-img {
+          transform: scale(1.08);
+        }
+
+        .pc-card-overlay {
           position: absolute;
           inset: 0;
-          background: linear-gradient(to top, #000000 0%, rgba(0,0,0,0.1) 60%, transparent 100%);
-          pointer-events: none;
+          background: linear-gradient(to top, rgba(17, 24, 39, 0.85) 0%, rgba(17, 24, 39, 0.25) 50%, transparent 100%);
+          transition: background 0.3s;
         }
 
-        .pc-mobile-card-body {
+        .pc-card:hover .pc-card-overlay {
+          background: linear-gradient(to top, rgba(190, 24, 93, 0.9) 0%, rgba(17, 24, 39, 0.3) 60%, transparent 100%);
+        }
+
+        .pc-card-body {
           position: absolute;
           bottom: 0;
           left: 0;
           right: 0;
           padding: 1.5rem;
-          display: flex;
-          align-items: flex-end;
-          justify-content: space-between;
           z-index: 3;
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
         }
 
-        .pc-mobile-card-name {
-          font-family: var(--font-display, 'Playfair Display', serif);
-          font-size: 1.25rem;
+        .pc-card-count {
+          font-size: 0.6875rem;
           font-weight: 700;
-          color: white;
-          margin: 0;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          color: #fbcfe8;
+          background: rgba(255, 255, 255, 0.15);
+          backdrop-filter: blur(8px);
+          padding: 0.25rem 0.65rem;
+          border-radius: 99px;
+          margin-bottom: 0.5rem;
         }
 
-        /* Swiper styles */
-        .pc-mobile-layout .swiper-pagination-bullet {
-          background: rgba(255, 255, 255, 0.2);
-          opacity: 1;
+        .pc-card-name {
+          font-size: 1.25rem;
+          font-weight: 800;
+          color: #ffffff;
+          margin: 0 0 0.5rem;
+          line-height: 1.3;
         }
 
-        .pc-mobile-layout .swiper-pagination-bullet-active {
-          background: #a855f7;
+        .pc-card-action {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.4rem;
+          font-size: 0.75rem;
+          font-weight: 700;
+          color: #ffffff;
+          opacity: 0.9;
+          transition: transform 0.3s, color 0.3s;
+        }
+
+        .pc-card:hover .pc-card-action {
+          transform: translateX(4px);
+          color: #fbcfe8;
         }
       `}</style>
 
-      <section
-        ref={sectionRef}
-        className="pc-section"
-        onMouseMove={handleMouseMove}
-        onMouseEnter={() => setShowCursor(true)}
-        onMouseLeave={() => setShowCursor(false)}
-      >
+      <section className="pc-section">
         <div className="pc-glow-bg" />
-        
-        {/* Custom cursor follower */}
-        {showCursor && (
-          <div
-            className="pc-custom-cursor"
-            style={{
-              left: `${cursorPos.x}px`,
-              top: `${cursorPos.y}px`
-            }}
-          >
-            Xem ngay
-          </div>
-        )}
 
-        <div className="pc-container">
-          <div className="pc-heading-group">
-            <p className="pc-eyebrow">Danh mục</p>
-            <h2 className="pc-title">Tìm kiếm theo <em>Phong cách</em></h2>
-          </div>
-
-          {/* DESKTOP 3D CIRCULAR WHEEL */}
-          {category.length > 0 && (
-            <div className="pc-wheel-layout">
-              {/* Col 1: Spotlight panel */}
-              {category[activeCircleIndex] && (
-                <div className="pc-spotlight-display">
-                  <img
-                    src={category[activeCircleIndex]?.image}
-                    alt={category[activeCircleIndex]?.name}
-                    className="pc-spotlight-img"
-                  />
-                  <h3 className="pc-spotlight-name">{category[activeCircleIndex]?.name}</h3>
-                  <p className="pc-spotlight-count">{category[activeCircleIndex]?.productCount || 0} sản phẩm</p>
-                  <button
-                    className="pc-spotlight-btn"
-                    onClick={() => navigate(
-                      `/category/${category[activeCircleIndex].slug || category[activeCircleIndex].name.replace(/\s+/g, '-').toLowerCase()}`,
-                      { state: { id: category[activeCircleIndex]._id } }
-                    )}
-                  >
-                    Khám phá ngay
-                    <ArrowRight size={12} />
-                  </button>
-                </div>
-              )}
-
-              {/* Col 2: Wheel arena — all nodes & hub positioned relative to this */}
-              <div className="pc-wheel-arena">
-                {/* Decorative orbit ring */}
-                <div className="pc-orbit-ring" />
-
-                {/* Center Hub */}
-                <div className="pc-wheel-center-hub">
-                  <div className="pc-hub-glow" />
-                  <Layers size={24} className="text-purple-500" />
-                  <span className="pc-hub-title">ATELIER</span>
-                </div>
-
-                {/* Nodes — positions are relative to pc-wheel-arena center */}
-                {category.map((cat, index) => {
-                  const angleDeg = index * (360 / category.length) - 90;
-                  const angleRad = (angleDeg * Math.PI) / 180;
-                  const radius = 185;
-                  const px = Math.cos(angleRad) * radius;
-                  const py = Math.sin(angleRad) * radius;
-
-                  return (
-                    <div
-                      key={cat._id || index}
-                      className={`pc-wheel-node ${activeCircleIndex === index ? 'pc-node-active' : ''}`}
-                      style={{
-                        left: `calc(50% + ${px}px - 55px)`,
-                        top: `calc(50% + ${py}px - 55px)`
-                      }}
-                      onMouseEnter={() => setActiveCircleIndex(index)}
-                      onClick={() => navigate(
-                        `/category/${cat.slug || cat.name.replace(/\s+/g, '-').toLowerCase()}`,
-                        { state: { id: cat._id } }
-                      )}
-                    >
-                      <img src={cat?.image} alt={cat?.name} className="pc-node-img" />
-                    </div>
-                  );
-                })}
-              </div>
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="pc-header">
+            <div>
+              <p className="pc-eyebrow">
+                <Sparkles size={14} /> Danh Mục Nổi Bật
+              </p>
+              <h2 className="pc-title">Tìm Kiếm Theo <em>Phong Cách</em></h2>
             </div>
-          )}
+          </div>
 
-          {/* MOBILE SWIPER */}
-          <div className="pc-mobile-layout">
-            <Swiper
-              modules={[Pagination, Navigation, Autoplay]}
-              autoplay={{ delay: 4000, disableOnInteraction: false }}
-              pagination={{ clickable: true }}
-              slidesPerView={1.5}
-              spaceBetween={16}
-              breakpoints={{
-                480: { slidesPerView: 2, spaceBetween: 20 },
-                640: { slidesPerView: 3, spaceBetween: 20 },
-              }}
-              grabCursor={true}
-              className="pb-12"
-            >
-              {category?.map((cat, index) => (
-                <SwiperSlide key={cat?.id || index}>
-                  <div
-                    className="pc-mobile-card"
-                    onClick={() => navigate(
-                      `/category/${cat.slug || cat.name.replace(/\s+/g, '-').toLowerCase()}`,
-                      { state: { id: cat._id } }
-                    )}
-                  >
+          {loading ? (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 animate-pulse">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="bg-pink-100/50 rounded-2xl aspect-[4/5]" />
+              ))}
+            </div>
+          ) : (
+            <div className="pc-grid">
+              {category.map((cat, index) => (
+                <div
+                  key={cat._id || index}
+                  className="pc-card"
+                  onClick={() => navigate(
+                    `/category/${cat.slug || cat.name.replace(/\s+/g, '-').toLowerCase()}`,
+                    { state: { id: cat._id } }
+                  )}
+                  id={`cat-card-${index}`}
+                >
+                  <div className="pc-card-img-wrap">
                     <img
-                      src={cat?.image}
+                      src={cat?.image || 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=600&auto=format&fit=crop&q=80'}
                       alt={cat?.name}
-                      className="pc-mobile-card-img"
+                      className="pc-card-img"
                       loading="lazy"
                     />
-                    <div className="pc-mobile-card-overlay" />
-                    <div className="pc-mobile-card-body">
-                      <h3 className="pc-mobile-card-name">{cat?.name}</h3>
-                      <ArrowRight size={14} className="text-white" />
+                    <div className="pc-card-overlay" />
+                  </div>
+
+                  <div className="pc-card-body">
+                    <span className="pc-card-count">
+                      {cat?.productCount || 0} sản phẩm
+                    </span>
+                    <h3 className="pc-card-name">{cat?.name}</h3>
+                    <div className="pc-card-action">
+                      Khám phá ngay <ArrowRight size={13} />
                     </div>
                   </div>
-                </SwiperSlide>
+                </div>
               ))}
-            </Swiper>
-          </div>
+            </div>
+          )}
         </div>
       </section>
     </>
