@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState, useCallback, useMemo } from 're
 import { CameraIcon, Lock, UserCircleIcon, X, CheckCircleIcon, PencilIcon, ArrowLeftIcon, User, Phone, Mail, MapPin, Package, Settings, ChevronRight } from 'lucide-react'
 import { toast } from 'react-toastify'
 import api from '@/service/api'
-import { AuthContext } from '@/context/Authcontext'
+import { AuthContext } from '@/context/AuthContext'
 import OrderDetails from '@/components/OrderDetails'
 
 const OrderStatusVN = {

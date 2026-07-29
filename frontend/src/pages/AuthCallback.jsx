@@ -1,4 +1,4 @@
-import { AuthContext } from "@/context/Authcontext"
+import { AuthContext } from "@/context/AuthContext"
 import { useContext, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"

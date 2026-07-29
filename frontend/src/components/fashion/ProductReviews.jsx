@@ -3,7 +3,7 @@ import { Star, Heart, User, ThumbsUp } from 'lucide-react'
 import { Button } from '../ui/button'
 import apiUser from '@/service/api'
 import { toast } from 'react-toastify'
-import { AuthContext } from '@/context/Authcontext'
+import { AuthContext } from '@/context/AuthContext'
 import apiAdmin from '@/service/apiAdmin'
 
 const ProductReviews = ({ productId }) => {

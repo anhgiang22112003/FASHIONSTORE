@@ -5,7 +5,7 @@ import { Star, ShoppingBag, Heart, Sparkles, TrendingUp, Package } from 'lucide-
 import VariantSelectionModal from '@/components/fashion/VariantSelectionModal';
 import { Button } from '@/components/ui/button';
 import { WishlistContext } from '@/context/WishlistContext';
-import { AuthContext } from '@/context/Authcontext';
+import { AuthContext } from '@/context/AuthContext';
 import { toast } from 'react-toastify';
 import { Link } from 'react-router-dom';
 

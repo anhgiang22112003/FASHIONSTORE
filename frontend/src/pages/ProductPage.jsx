@@ -8,7 +8,7 @@ import { CartContext } from '@/context/CartContext'
 import RelatedProducts from '@/components/fashion/RelatedProducts'
 import ProductReviews from '@/components/fashion/ProductReviews'
 import { WishlistContext } from '@/context/WishlistContext'
-import { AuthContext } from '@/context/Authcontext'
+import { AuthContext } from '@/context/AuthContext'
 
 const ProductPage = () => {
   const { id } = useParams()

@@ -9,7 +9,7 @@ import {
   Cog6ToothIcon,
   ArrowRightStartOnRectangleIcon,
 } from '@heroicons/react/24/outline'
-import { AuthContext } from '@/context/Authcontext'
+import { AuthContext } from '@/context/AuthContext'
 import { CartContext } from '@/context/CartContext'
 import { WishlistContext } from '@/context/WishlistContext'
 import NotificationUser from './NotificationUser'
