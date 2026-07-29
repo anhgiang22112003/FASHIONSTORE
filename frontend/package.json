@@ -37,6 +37,7 @@
     "@radix-ui/react-tooltip": "^1.2.4",
     "@react-oauth/google": "^0.12.2",
     "axios": "^1.8.4",
+    "babel-plugin-module-resolver": "^5.0.3",
     "canvas-confetti": "^1.9.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
