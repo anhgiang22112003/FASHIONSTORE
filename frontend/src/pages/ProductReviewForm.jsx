@@ -1,7 +1,7 @@
 // src/components/ProductReviewForm.jsx
 import React, { useState } from "react"
 import { toast } from "react-toastify"
-import api from "service/api"
+import api from "@/service/api"
 
 const ProductReviewForm = ({ item, userId, orderId }) => {
     const [rating, setRating] = useState(5)

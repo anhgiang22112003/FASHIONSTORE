@@ -1,10 +1,10 @@
 import React, { useState } from "react"
-import apiAdmin from "service/apiAdmin"
+import apiAdmin from "@/service/apiAdmin"
 import { UserIcon, EnvelopeIcon, PhoneIcon, LockClosedIcon } from '@heroicons/react/24/outline'
 import { toast } from "react-toastify"
 import {
   AdminModal, AdminInput, AdminSelect, AdminButton
-} from "components/admin/ui"
+} from "@/components/admin/ui"
 
 export default function EditStaff({ onClose, refresh, editData, open = true }) {
   const isEdit = Boolean(editData)

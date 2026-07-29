@@ -13,13 +13,13 @@ import {
   X,
   AlertCircle
 } from 'lucide-react';
-import apiAdmin from 'service/apiAdmin';
+import apiAdmin from '@/service/apiAdmin';
 import { 
   COMPLAINT_STATUS, 
   COMPLAINT_STATUS_LABELS, 
   COMPLAINT_TYPE_LABELS,
   ORDER_STATUS_LABELS 
-} from 'data/constants';
+} from '@/data/constants';
 
 // ── Custom Modal Shell ──────────────────────────────────────────────────────
 const Modal = ({ isOpen, onClose, title, children }) => {

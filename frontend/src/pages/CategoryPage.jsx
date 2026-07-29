@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { toast } from 'react-toastify'
-import api from 'service/api'
-import Sidebar from 'components/fashion/SidebarFilterProduct'
-import ProductCard from 'components/fashion/ProductCard'
+import api from '@/service/api'
+import Sidebar from '@/components/fashion/SidebarFilterProduct'
+import ProductCard from '@/components/fashion/ProductCard'
 import { Loader2 } from 'lucide-react'
 
 const CategoryPage = () => {

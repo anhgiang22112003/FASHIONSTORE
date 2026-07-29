@@ -1,5 +1,5 @@
 /* Hallmark · macrostructure: Marquee Hero · section: ProductCategories · tone: Vercel 3D Circular Hub */
-import api from 'service/api'
+import api from '@/service/api'
 import React, { useEffect, useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Swiper, SwiperSlide } from 'swiper/react'

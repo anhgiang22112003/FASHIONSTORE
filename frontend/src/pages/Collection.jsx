@@ -1,11 +1,11 @@
 import React, { useEffect, useState, useCallback, useContext, useMemo } from 'react';
-import apiUser from 'service/api';
-import SideCartDrawer from 'components/fashion/SideCartDrawer';
+import apiUser from '@/service/api';
+import SideCartDrawer from '@/components/fashion/SideCartDrawer';
 import { Star, ShoppingBag, Heart, Sparkles, TrendingUp, Package } from 'lucide-react';
-import VariantSelectionModal from 'components/fashion/VariantSelectionModal';
-import { Button } from 'components/ui/button';
-import { WishlistContext } from 'context/WishlistContext';
-import { AuthContext } from 'context/AuthContext';
+import VariantSelectionModal from '@/components/fashion/VariantSelectionModal';
+import { Button } from '@/components/ui/button';
+import { WishlistContext } from '@/context/WishlistContext';
+import { AuthContext } from '@/context/AuthContext';
 import { toast } from 'react-toastify';
 import { Link } from 'react-router-dom';
 

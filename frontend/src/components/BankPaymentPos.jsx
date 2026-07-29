@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react"
 import { toast } from "react-toastify"
-import apiAdmin from "service/apiAdmin"
+import apiAdmin from "@/service/apiAdmin"
 import { QRCodeCanvas } from "qrcode.react"
 import io from "socket.io-client"
-import { socket } from "service/socket"
+import { socket } from "@/service/socket"
 
 
 const BankPaymentPos = ({ order, onClose, selectedBank, setSelectedBank }) => {

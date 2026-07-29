@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Switch } from '@headlessui/react';
-import { PageHeader, AdminButton, AdminInput, AdminCard } from "components/admin/ui";
+import { PageHeader, AdminButton, AdminInput, AdminCard } from "@/components/admin/ui";
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState('general');

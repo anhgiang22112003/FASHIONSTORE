@@ -6,10 +6,10 @@ import ShowImportModal from "../../components/ShowImportModal"
 import { LazyLoadImage } from 'react-lazy-load-image-component'
 import 'react-lazy-load-image-component/src/effects/blur.css'
 import debounce from "lodash.debounce"
-import ConfirmBulkDeleteModal from "components/ConfirmBulkDeleteModal"
-import apiAdmin from "service/apiAdmin"
-import Switch from "components/ui/switch"
-import { PageHeader, Toolbar, FilterPanel, DataTable, Pagination, StatusBadge, AdminButton, ConfirmDialog } from "components/admin/ui"
+import ConfirmBulkDeleteModal from "@/components/ConfirmBulkDeleteModal"
+import apiAdmin from "@/service/apiAdmin"
+import Switch from "@/components/ui/switch"
+import { PageHeader, Toolbar, FilterPanel, DataTable, Pagination, StatusBadge, AdminButton, ConfirmDialog } from "@/components/admin/ui"
 
 const formatCurrency = (number) => {
   if (number === "" || number === null || isNaN(Number(number))) return ""

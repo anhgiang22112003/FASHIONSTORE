@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react"
-import apiAdmin from "service/apiAdmin"
-import OrderStatusChart from "components/OrderStatusChart"
+import apiAdmin from "@/service/apiAdmin"
+import OrderStatusChart from "@/components/OrderStatusChart"
 import DatePicker from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css"
 import {
@@ -13,8 +13,8 @@ import {
   ArchiveBoxIcon,
   ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline'
-import AdminSpinner from "components/AdminSpinner"
-import { PageHeader, StatusBadge } from "components/admin/ui"
+import AdminSpinner from "@/components/AdminSpinner"
+import { PageHeader, StatusBadge } from "@/components/admin/ui"
 
 const AdminDashboard = () => {
   const [data, setData] = useState(null)

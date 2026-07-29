@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useContext } from 'react'
 import { Star, Heart, User, ThumbsUp } from 'lucide-react'
 import { Button } from '../ui/button'
-import apiUser from 'service/api'
+import apiUser from '@/service/api'
 import { toast } from 'react-toastify'
-import { AuthContext } from 'context/AuthContext'
-import apiAdmin from 'service/apiAdmin'
+import { AuthContext } from '@/context/AuthContext'
+import apiAdmin from '@/service/apiAdmin'
 
 const ProductReviews = ({ productId }) => {
   const [activeTab, setActiveTab] = useState('reviews')

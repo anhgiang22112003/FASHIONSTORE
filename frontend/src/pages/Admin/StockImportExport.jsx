@@ -1,9 +1,9 @@
-import apiAdmin from 'service/apiAdmin'
+import apiAdmin from '@/service/apiAdmin'
 import React, { useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
 import { Search, Package, TrendingUp, TrendingDown, RefreshCw, X, Plus, ShoppingCart, Truck, FileText } from 'lucide-react'
-import QuickCreateProduct from 'components/QuickCreateProduct'
-import { AdminButton } from "components/admin/ui"
+import QuickCreateProduct from '@/components/QuickCreateProduct'
+import { AdminButton } from "@/components/admin/ui"
 
 function useDebounce(value, delay) {
   const [debouncedValue, setDebouncedValue] = useState(value)

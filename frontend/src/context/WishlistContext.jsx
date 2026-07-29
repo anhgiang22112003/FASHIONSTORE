@@ -1,6 +1,6 @@
 // src/context/WishlistContext.jsx
 import React, { createContext, useState, useEffect } from 'react'
-import api from 'service/api'
+import api from '@/service/api'
 
 export const WishlistContext = createContext()
 

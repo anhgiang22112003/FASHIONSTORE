@@ -1,7 +1,7 @@
 import React, { useState, memo } from "react"
 import { Gift, Tag, Sparkles, X } from "lucide-react"
 import { toast } from "react-toastify"
-import api from "service/api"
+import api from "@/service/api"
 
 const VoucherSection = memo(({ 
   voucherCode, 

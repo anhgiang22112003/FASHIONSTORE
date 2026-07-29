@@ -1,12 +1,12 @@
 import React, { useContext, useEffect, useState } from "react"
-import api from "service/api"
+import api from "@/service/api"
 import { Heart, Trash2, ShoppingBag, Star, Sparkles } from "lucide-react"
 import { toast } from "react-toastify"
-import { Button } from "components/ui/button"
-import VariantSelectionModal from "components/fashion/VariantSelectionModal"
-import SideCartDrawer from "components/fashion/SideCartDrawer"
+import { Button } from "@/components/ui/button"
+import VariantSelectionModal from "@/components/fashion/VariantSelectionModal"
+import SideCartDrawer from "@/components/fashion/SideCartDrawer"
 import { Link } from "react-router-dom"
-import { AuthContext } from "context/AuthContext"
+import { AuthContext } from "@/context/AuthContext"
 
 const Wishlist = () => {
   const [products, setProducts] = useState([])

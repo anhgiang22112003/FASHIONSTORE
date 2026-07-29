@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react"
 import { toast } from "react-toastify"
-import apiAdmin from "service/apiAdmin"
+import apiAdmin from "@/service/apiAdmin"
 import { QRCodeCanvas } from "qrcode.react"
-import { socket } from "service/socket"
+import { socket } from "@/service/socket"
 
 
 const BankPaymentModal = ({ order, onClose, selectedBank, setSelectedBank }) => {

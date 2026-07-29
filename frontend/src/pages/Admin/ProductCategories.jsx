@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react'
-import AdminSpinner from 'components/AdminSpinner'
+import AdminSpinner from '@/components/AdminSpinner'
 import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline'
 import { toast } from 'react-toastify'
 import { Switch } from '@headlessui/react'
 import { LazyLoadImage } from 'react-lazy-load-image-component'
 import 'react-lazy-load-image-component/src/effects/blur.css'
-import apiAdmin from 'service/apiAdmin'
-import { PageHeader, Toolbar, FilterPanel, DataTable, Pagination, StatusBadge, AdminButton, ConfirmDialog, AdminModal, AdminInput, AdminTextarea } from "components/admin/ui"
+import apiAdmin from '@/service/apiAdmin'
+import { PageHeader, Toolbar, FilterPanel, DataTable, Pagination, StatusBadge, AdminButton, ConfirmDialog, AdminModal, AdminInput, AdminTextarea } from "@/components/admin/ui"
 
 const ProductCategories = () => {
   const [isFormOpen, setIsFormOpen] = useState(false)

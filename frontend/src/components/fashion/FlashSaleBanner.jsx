@@ -2,8 +2,8 @@
 import React, { useEffect, useRef, useState, memo, useCallback, useMemo } from "react"
 import dayjs from "dayjs"
 import duration from "dayjs/plugin/duration"
-import apiUser from "service/api"
-import { socket } from "service/socket"
+import apiUser from "@/service/api"
+import { socket } from "@/service/socket"
 import FlashSaleCheckoutModal from "../FlashSaleCheckoutModal"
 
 dayjs.extend(duration)

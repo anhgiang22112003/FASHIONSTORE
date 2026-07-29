@@ -11,7 +11,7 @@ import {
   GlobeAsiaAustraliaIcon,
   PercentBadgeIcon
 } from "@heroicons/react/24/outline"
-import apiAdmin from "service/apiAdmin"
+import apiAdmin from "@/service/apiAdmin"
 import { toast } from "react-toastify"
 import { LazyLoadImage } from "react-lazy-load-image-component"
 import "react-lazy-load-image-component/src/effects/blur.css"

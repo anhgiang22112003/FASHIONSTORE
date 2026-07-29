@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect } from 'react'
-import api from 'service/api'
+import api from '@/service/api'
 import { toast } from 'react-toastify'
 
 export const CartContext = createContext()

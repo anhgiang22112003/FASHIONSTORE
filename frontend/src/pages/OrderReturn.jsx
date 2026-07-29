@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import api from "service/api";
+import api from "@/service/api";
 import { toast } from "react-toastify";
 
 const OrderReturn = () => {

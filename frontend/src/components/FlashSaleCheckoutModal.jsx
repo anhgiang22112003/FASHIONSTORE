@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react"
 import { toast } from "react-toastify"
-import apiUser from "service/api"
+import apiUser from "@/service/api"
 import { 
   X, 
   ShoppingBag, 

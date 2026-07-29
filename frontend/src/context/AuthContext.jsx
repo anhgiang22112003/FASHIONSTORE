@@ -1,8 +1,8 @@
 import React, { createContext, useState, useEffect, useContext } from "react"
 import { CartContext } from "./CartContext"
 import { WishlistContext } from "./WishlistContext"
-import { connectSocket, disconnectSocket } from "service/socket"
-import apiUser from "service/api"
+import { connectSocket, disconnectSocket } from "@/service/socket"
+import apiUser from "@/service/api"
 
 export const AuthContext = createContext()
 

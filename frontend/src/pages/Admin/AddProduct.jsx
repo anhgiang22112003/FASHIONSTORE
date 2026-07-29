@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
 import apiAdmin from "../../service/apiAdmin"
 import ProductVariations from './ProductVariations.jsx'
-import { AdminInput, AdminSelect, AdminTextarea, AdminButton, AdminCard } from 'components/admin/ui'
+import { AdminInput, AdminSelect, AdminTextarea, AdminButton, AdminCard } from '@/components/admin/ui'
 
 const AddProduct = ({ setActiveTab, fetchProducts }) => {
     const [productName, setProductName] = useState('')

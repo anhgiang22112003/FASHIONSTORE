@@ -1,9 +1,9 @@
 import React, { useContext, useEffect, useState, useCallback, useMemo } from 'react'
 import { CameraIcon, Lock, UserCircleIcon, X, CheckCircleIcon, PencilIcon, ArrowLeftIcon, User, Phone, Mail, MapPin, Package, Settings, ChevronRight } from 'lucide-react'
 import { toast } from 'react-toastify'
-import api from 'service/api'
-import { AuthContext } from 'context/AuthContext'
-import OrderDetails from 'components/OrderDetails'
+import api from '@/service/api'
+import { AuthContext } from '@/context/AuthContext'
+import OrderDetails from '@/components/OrderDetails'
 
 const OrderStatusVN = {
     PENDING: 'Chờ xử lý',
@@ -157,7 +157,7 @@ const UserProfile = () => {
     }
 
     useEffect(() => {
-        import('data/provinces.json').then((data) => setProvinces(data.default));
+        import('@/data/provinces.json').then((data) => setProvinces(data.default));
     }, []);
 
     useEffect(() => {

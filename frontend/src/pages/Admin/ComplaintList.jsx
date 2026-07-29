@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { CreateComplaintButton } from 'components/ComplaintForm'
+import { CreateComplaintButton } from '@/components/ComplaintForm'
 import {
   Search,
   Filter,
@@ -14,12 +14,12 @@ import {
   COMPLAINT_STATUS_LABELS,
   COMPLAINT_TYPE_LABELS,
   DEFAULT_PAGE_SIZE,
-} from 'data/constants'
-import apiAdmin from 'service/apiAdmin'
-import { ViewComplaintButton } from 'components/ComplaintDetail'
-import { EditComplaintButton } from 'components/ComplaintForm'
+} from '@/data/constants'
+import apiAdmin from '@/service/apiAdmin'
+import { ViewComplaintButton } from '@/components/ComplaintDetail'
+import { EditComplaintButton } from '@/components/ComplaintForm'
 import { toast } from 'react-toastify'
-import { PageHeader, Toolbar, FilterPanel, DataTable, Pagination, StatusBadge, AdminButton, ConfirmDialog } from "components/admin/ui"
+import { PageHeader, Toolbar, FilterPanel, DataTable, Pagination, StatusBadge, AdminButton, ConfirmDialog } from "@/components/admin/ui"
 
 const ComplaintList = ({ onRefresh }) => {
   const [complaints, setComplaints] = useState([])

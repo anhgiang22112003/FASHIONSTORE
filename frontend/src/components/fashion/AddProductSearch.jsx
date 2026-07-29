@@ -1,5 +1,5 @@
-import { CartContext } from "context/CartContext"
-import api from "service/api"
+import { CartContext } from "@/context/CartContext"
+import api from "@/service/api"
 import React, { useContext, useEffect, useState } from "react"
 import { toast } from "react-toastify"
 

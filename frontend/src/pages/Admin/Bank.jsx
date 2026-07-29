@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react'
-import AdminSpinner from 'components/AdminSpinner'
+import AdminSpinner from '@/components/AdminSpinner'
 import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline'
 import { toast } from 'react-toastify'
 import { Switch } from '@headlessui/react'
-import apiAdmin from 'service/apiAdmin'
-import { PageHeader, Toolbar, DataTable, EmptyState, StatusBadge, AdminButton, ConfirmDialog, AdminModal, AdminInput, AdminTextarea } from "components/admin/ui"
+import apiAdmin from '@/service/apiAdmin'
+import { PageHeader, Toolbar, DataTable, EmptyState, StatusBadge, AdminButton, ConfirmDialog, AdminModal, AdminInput, AdminTextarea } from "@/components/admin/ui"
 
 const Bank = () => {
   const [isFormOpen, setIsFormOpen] = useState(false)

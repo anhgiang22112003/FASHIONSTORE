@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { toast } from 'react-toastify'
-import apiAdmin from 'service/apiAdmin'
+import apiAdmin from '@/service/apiAdmin'
 import { X, Plus, Package, Tag, DollarSign, Palette } from 'lucide-react'
 
 export default function QuickCreateProduct({ setShowQuickCreate, onSuccess }) {

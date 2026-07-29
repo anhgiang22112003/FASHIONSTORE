@@ -1,12 +1,12 @@
 import React, { useState } from 'react'
 import { TrendingUp, TrendingDown, Package, FileText, Upload, Download } from 'lucide-react'
 import StockImportExport from './StockImportExport'
-import StockHistory from 'components/StockHistory'
-import TransactionHistory from 'components/TransactionHistory'
-import ExcelImportModal from 'components/ExcelImportModal'
-import apiAdmin from 'service/apiAdmin'
+import StockHistory from '@/components/StockHistory'
+import TransactionHistory from '@/components/TransactionHistory'
+import ExcelImportModal from '@/components/ExcelImportModal'
+import apiAdmin from '@/service/apiAdmin'
 import { toast } from 'react-toastify'
-import { PageHeader, Toolbar, AdminButton } from "components/admin/ui"
+import { PageHeader, Toolbar, AdminButton } from "@/components/admin/ui"
 
 export default function StockManagement() {
   const [tab, setTab] = useState('import')

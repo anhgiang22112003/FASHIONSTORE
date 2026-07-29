@@ -2,9 +2,9 @@ import React, { useState, useEffect, useContext, useCallback, useMemo } from 're
 import { Minus, Plus, Trash2, ArrowRight, ShoppingBag, Heart, Star, Gift, Package } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { useNavigate } from 'react-router-dom'
-import api from 'service/api'
+import api from '@/service/api'
 import { toast } from 'react-toastify'
-import { CartContext } from 'context/CartContext'
+import { CartContext } from '@/context/CartContext'
 
 const CartPage = () => {
   const navigate = useNavigate()

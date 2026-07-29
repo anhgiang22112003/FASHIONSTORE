@@ -7,19 +7,6 @@ const config = {
 };
 
 module.exports = {
-  babel: {
-    plugins: [
-      [
-        'module-resolver',
-        {
-          root: ['./src'],
-          alias: {
-            '@': './src',
-          },
-        },
-      ],
-    ],
-  },
   webpack: {
     alias: {
       '@': path.resolve(__dirname, 'src'),

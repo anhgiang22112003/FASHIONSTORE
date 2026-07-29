@@ -13,9 +13,9 @@ import {
   Line,
 } from "recharts";
 import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
-import apiAdmin from "service/apiAdmin";
-import AdminSpinner from "components/AdminSpinner";
-import { PageHeader, Toolbar, AdminButton } from "components/admin/ui";
+import apiAdmin from "@/service/apiAdmin";
+import AdminSpinner from "@/components/AdminSpinner";
+import { PageHeader, Toolbar, AdminButton } from "@/components/admin/ui";
 
 const ChartTypeToggle = ({ chartType, setChartType }) => (
   <div className="flex items-center space-x-1.5 p-1 bg-slate-100 rounded-xl border border-slate-200 shadow-inner">

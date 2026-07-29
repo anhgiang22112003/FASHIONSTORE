@@ -1,6 +1,6 @@
 import React from "react"
 import { Navigate } from "react-router-dom"
-import apiAdmin from "service/apiAdmin"
+import apiAdmin from "@/service/apiAdmin"
 
 export const AdminRoute = ({ children }) => {
   const [loading, setLoading] = React.useState(true)

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo } from "react"
 import { useLocation } from "react-router-dom"
-import api from "service/api"
+import api from "@/service/api"
 import { toast } from "react-toastify"
 import { format } from "date-fns"
 import { vi } from "date-fns/locale"

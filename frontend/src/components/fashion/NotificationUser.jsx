@@ -1,7 +1,7 @@
 import React, { useEffect, useState, memo } from 'react'
 import { toast } from 'react-toastify'
-import apiAdmin from 'service/apiAdmin'
-import apiUser from 'service/api'
+import apiAdmin from '@/service/apiAdmin'
+import apiUser from '@/service/api'
 import { Bell, Package, Star, AlertCircle, CheckCircle } from 'lucide-react'
 
 const NotificationUser = memo(({ userId, setActiveTab, setEditingOrder, setEditingProductId, onNotificationsChange, isOpen, onClose }) => {

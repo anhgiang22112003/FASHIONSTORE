@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Calendar, Clock, User, ArrowLeft, Share2, Heart, Bookmark, Facebook, Twitter, Link as LinkIcon } from 'lucide-react';
-import { Button } from 'components/ui/button';
-import { Skeleton } from 'components/ui/skeleton';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 
 const BlogArticlePage = () => {

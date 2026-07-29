@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
-import api from "service/api"
+import api from "@/service/api"
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
