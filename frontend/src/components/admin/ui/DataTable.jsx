@@ -23,6 +23,7 @@ const DataTable = ({
   maxHeight = 'calc(100vh - 300px)',
   className = '',
 }) => {
+
   const headerCls = `px-4 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap bg-slate-50 dark:bg-slate-900 ${stickyHeader ? 'sticky top-0 z-10' : ''}`
 
   return (
@@ -60,7 +61,7 @@ const DataTable = ({
                         key={colIndex}
                         className={`px-4 py-3 text-sm text-slate-700 dark:text-slate-300 whitespace-nowrap ${col.sticky ? 'sticky right-0 bg-white dark:bg-slate-950 group-hover:bg-pink-50/50 dark:group-hover:bg-pink-950/20 shadow-[-2px_0_4px_rgba(0,0,0,0.04)] dark:shadow-[-2px_0_4px_rgba(0,0,0,0.4)]' : ''} ${col.cellClassName || ''}`}
                       >
-                        {col.render ? col.render(row, rowIndex) : row[col.key]}
+                        {col.accessor ? col.accessor(row, rowIndex) : row[col.key]}
                       </td>
                     ))}
                   </tr>

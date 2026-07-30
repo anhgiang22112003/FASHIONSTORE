@@ -19,30 +19,22 @@ const Wishlist = () => {
   const handleSuccessAndOpenCart = () => {
     setIsCartDrawerOpen(true)
   }
-  const getFavorites = async () => {
-    try {
-      const res = await api.get('/users/favorites')
-      const ids = (res.data || []).map((p) => p._id ?? p.id)
-    } catch (error) {
-      console.error('Error fetching favorites:', error)
-    }
-  }
-  useEffect(() => {
-    if (user) {
-      getFavorites()
-    }
-  }, [user])
-
 
   const fetchFavorites = async () => {
     try {
       const res = await api.get("/users/favorites")
-      setProducts(res.data)
+      setProducts(res.data || [])
     } catch (err) {
       console.error(err)
       toast.error("Không thể tải danh sách yêu thích 💔")
     }
   }
+
+  useEffect(() => {
+    if (user) {
+      fetchFavorites()
+    }
+  }, [user])
 
   const handleRemoveFavorite = async (productId) => {
     try {
@@ -54,10 +46,6 @@ const Wishlist = () => {
       toast.error("Không thể xóa sản phẩm")
     }
   }
-
-  useEffect(() => {
-    fetchFavorites()
-  }, [])
 
   return (
     <div className=" bg-gradient-to-br from-pink-50 ">

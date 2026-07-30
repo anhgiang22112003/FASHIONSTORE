@@ -13,6 +13,9 @@ import { socket } from "@/service/socket"
 import { ShoppingBag } from "lucide-react"
 import SideCartDrawer from "@/components/fashion/SideCartDrawer"
 import { WishlistProvider } from "@/context/WishlistContext"
+import { CompareProvider } from "@/context/CompareContext"
+import ProductCompareModal from "@/components/fashion/ProductCompareModal"
+import ScrollToTop from "@/components/fashion/ScrollToTop"
 import ChatBot from "@/pages/ChatBot"
 import OrderReturn from "@/pages/OrderReturn"
 
@@ -38,6 +41,7 @@ const ResetPassword = lazy(() => import("@/pages/ResetPassword"))
 const ForgotPassword = lazy(() => import("@/pages/ForgotPassword"))
 const AuthCallback = lazy(() => import("@/pages/AuthCallback"))
 const PolicyPage = lazy(() => import("@/pages/PolicyPage"))
+const NotFoundPage = lazy(() => import("@/pages/NotFoundPage"))
 
 
 const orderStatusText = {
@@ -135,6 +139,8 @@ const FrontendLayout = ({ children, isCartDrawerOpen, setIsCartDrawerOpen, curre
       <Header />
       <main>{children}</main>
       <Footer />
+      <ScrollToTop />
+      <ProductCompareModal />
       <button
         onClick={() => setIsCartDrawerOpen(true)}
         className="fixed bottom-6 right-6 z-50 p-4 rounded-full bg-pink-600 text-white shadow-xl hover:bg-pink-700 transition-all duration-300 transform hover:scale-105"
@@ -164,8 +170,14 @@ function App() {
       <WishlistProvider>
         <CartProvider>
           <AuthProvider>
+            <CompareProvider>
 
-            <Suspense fallback={<div className="p-8 text-center">Đang tải...</div>}>
+            <Suspense fallback={
+              <div className="min-h-[60vh] flex flex-col items-center justify-center gap-3">
+                <div className="w-12 h-12 rounded-full border-4 border-pink-200 border-t-pink-600 animate-spin" />
+                <span className="text-sm font-semibold text-pink-600 tracking-wide animate-pulse">Đang tải PinkFashion...</span>
+              </div>
+            }>
               <ToastContainer
                 position="top-center" // hoặc bottom-center
                 autoClose={3000}
@@ -229,6 +241,7 @@ function App() {
                         <Route path="/terms" element={<PolicyPage />} />
                         <Route path="/returns" element={<PolicyPage />} />
                         <Route path="/guide" element={<PolicyPage />} />
+                        <Route path="*" element={<NotFoundPage />} />
                       </Routes>
                     </FrontendLayout>
                   }
@@ -239,6 +252,7 @@ function App() {
               </Routes>
             </Suspense>
 
+            </CompareProvider>
           </AuthProvider>
         </CartProvider>
       </WishlistProvider>

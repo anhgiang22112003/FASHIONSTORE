@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { MapPin, Phone, Mail, Clock, Send } from 'lucide-react';
+import { MapPin, Phone, Mail, Clock, Send, Loader2 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Textarea } from '../components/ui/textarea';
+import { toast } from 'react-toastify';
+import api from '@/service/api';
 
 const ContactPage = () => {
   const [formData, setFormData] = useState({
@@ -12,12 +14,21 @@ const ContactPage = () => {
     subject: '',
     message: ''
   });
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle form submission here
-    alert('Cảm ơn bạn đã liên hệ! Chúng tôi sẽ phản hồi trong thời gian sớm nhất.');
-    setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
+    setLoading(true);
+    try {
+      await api.post('/contacts', formData);
+      toast.success('Cảm ơn bạn đã liên hệ! Tin nhắn của bạn đã được gửi thành công 💌');
+      setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || 'Gửi tin nhắn thất bại, vui lòng thử lại');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleChange = (e) => {
@@ -201,9 +212,18 @@ const ContactPage = () => {
                   />
                 </div>
 
-                <Button type="submit" className="w-full bg-pink-500 hover:bg-pink-600" size="lg">
-                  <Send className="w-5 h-5 mr-2" />
-                  Gửi tin nhắn
+                <Button type="submit" disabled={loading} className="w-full bg-pink-500 hover:bg-pink-600 font-semibold" size="lg">
+                  {loading ? (
+                    <>
+                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                      Đang gửi...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-5 h-5 mr-2" />
+                      Gửi tin nhắn
+                    </>
+                  )}
                 </Button>
               </form>
             </div>
@@ -211,12 +231,17 @@ const ContactPage = () => {
             {/* Map Placeholder & Store Info */}
             <div className="space-y-8">
               {/* Map */}
-              <div className="bg-gray-200 rounded-xl h-64 flex items-center justify-center">
-                <div className="text-center text-gray-500">
-                  <MapPin className="w-12 h-12 mx-auto mb-2" />
-                  <p>Bản đồ cửa hàng</p>
-                  <p className="text-sm">123 Nguyễn Huệ, Quận 1, TP.HCM</p>
-                </div>
+              <div className="rounded-xl overflow-hidden h-64 shadow-sm border border-gray-200">
+                <iframe
+                  title="FashionStore Location"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.394837!2d106.70142!3d10.77596!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752f4b3330bcc7%3A0x4db964d76bf6e18e!2zMTIzIE5ndXnhu4VuIEh14buHLCBCxq1uIE5naOG7iywgUXXhuq1uIDEsIFRow6BuaCBwaOG7kSBI4buTIENow60gTWluaCwgVmnhu4d0IE5hbQ!5e0!3m2!1svi!2s!4v1690000000000!5m2!1svi!2s"
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                />
               </div>
 
               {/* Store Locations */}

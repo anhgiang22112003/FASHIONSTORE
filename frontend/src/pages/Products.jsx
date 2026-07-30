@@ -13,6 +13,7 @@ import { AuthContext } from '@/context/AuthContext'
 import SideCartDrawer from '@/components/fashion/SideCartDrawer'
 import VariantSelectionModal from '@/components/fashion/VariantSelectionModal'
 import ProductCard from '@/components/fashion/ProductCard'
+import Breadcrumb from '@/components/fashion/Breadcrumb'
 
 
 const Products = () => {
@@ -30,6 +31,7 @@ const Products = () => {
     const [searchQuery, setSearchQuery] = useState(urlQuery)
     const [selectedCategory, setSelectedCategory] = useState(urlCat)
     const [selectedCollection, setSelectedCollection] = useState('')
+    const [selectedRating, setSelectedRating] = useState(0)
     const [sortBy, setSortBy] = useState('newest')
     const [priceRange, setPriceRange] = useState([0, 10000000])
     const [showFilters, setShowFilters] = useState(false)
@@ -154,20 +156,27 @@ const Products = () => {
         setSearchQuery('')
         setSelectedCategory('')
         setSelectedCollection('')
+        setSelectedRating(0)
         setSortBy('newest')
         setPriceRange([0, 10000000])
         setPage(1)
     }
 
+    const displayedProducts = React.useMemo(() => {
+        if (!selectedRating || selectedRating === 0) return products
+        return products.filter((p) => (p.ratingAverage || 5) >= selectedRating)
+    }, [products, selectedRating])
+
     return (
         <div className="min-h-screen bg-[#FFF5F7]">
             {/* Header */}
             <div className="bg-white border-b border-pink-100">
-                <div className="container mx-auto px-4 py-8">
-                    <h4 className=" lg:text-5xl font-black text-black mb-2">
+                <div className="container mx-auto px-4 py-6">
+                    <Breadcrumb items={[{ label: 'Tất cả sản phẩm' }]} />
+                    <h4 className="lg:text-5xl font-black text-black mb-2 mt-2">
                         Tất Cả <span className="bg-gradient-to-r from-pink-400 to-pink-600 bg-clip-text text-transparent">Sản Phẩm</span>
                     </h4>
-                    <p className="text-gray-600">Tìm thấy {total} sản phẩm</p>
+                    <p className="text-gray-600">Tìm thấy {displayedProducts.length} / {total} sản phẩm</p>
                 </div>
             </div>
 
@@ -234,6 +243,42 @@ const Products = () => {
                                     ))}
                                 </select>
 
+                            </div>
+
+                            {/* Rating Filter */}
+                            <div className="mb-6">
+                                <label className="text-sm font-bold text-black mb-2 block flex items-center gap-1">
+                                    <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                                    Đánh giá sao
+                                </label>
+                                <div className="space-y-1.5">
+                                    {[0, 5, 4, 3].map((star) => (
+                                        <button
+                                            key={star}
+                                            type="button"
+                                            onClick={() => setSelectedRating(star)}
+                                            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
+                                                selectedRating === star
+                                                    ? 'bg-pink-50 text-pink-600 border border-pink-300 font-bold'
+                                                    : 'text-gray-600 hover:bg-gray-50 border border-transparent'
+                                            }`}
+                                        >
+                                            <span className="flex items-center gap-1">
+                                                {star === 0 ? (
+                                                    'Tất cả sao'
+                                                ) : (
+                                                    <>
+                                                        {[...Array(star)].map((_, i) => (
+                                                            <Star key={i} className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
+                                                        ))}
+                                                        <span className="ml-1 text-gray-700">trở lên</span>
+                                                    </>
+                                                )}
+                                            </span>
+                                            {selectedRating === star && <span className="text-pink-600 text-xs font-black">✓</span>}
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
 
                             {/* Price Range */}
@@ -404,7 +449,7 @@ const Products = () => {
                                     ? 'grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6'
                                     : 'flex flex-col gap-6'
                                 }>
-                                    {products?.map((product, index) => (
+                                    {displayedProducts?.map((product, index) => (
                                         <ProductCard
                                             key={product?._id}
                                             product={product}

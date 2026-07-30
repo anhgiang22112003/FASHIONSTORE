@@ -93,10 +93,40 @@ const Header = () => {
     return () => clearTimeout(timer)
   }, [searchQuery])
 
+  const [searchHistory, setSearchHistory] = useState(() => {
+    try {
+      const saved = localStorage.getItem('recent_searches')
+      return saved ? JSON.parse(saved) : []
+    } catch (e) {
+      return []
+    }
+  })
+
+  const saveSearchHistory = (term) => {
+    if (!term || !term.trim()) return
+    const clean = term.trim()
+    setSearchHistory((prev) => {
+      const filtered = prev.filter((item) => item.toLowerCase() !== clean.toLowerCase())
+      const updated = [clean, ...filtered].slice(0, 5)
+      try {
+        localStorage.setItem('recent_searches', JSON.stringify(updated))
+      } catch (e) {}
+      return updated
+    })
+  }
+
+  const clearSearchHistory = () => {
+    setSearchHistory([])
+    try {
+      localStorage.removeItem('recent_searches')
+    } catch (e) {}
+  }
+
   const handleSearchSubmit = (e) => {
     if (e.key === 'Enter' || e.type === 'click') {
       e?.preventDefault?.()
       if (searchQuery.trim()) {
+        saveSearchHistory(searchQuery.trim())
         setShowSearchPreview(false)
         navigate(`/products?search=${encodeURIComponent(searchQuery.trim())}`)
       }
@@ -300,7 +330,7 @@ const Header = () => {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={handleSearchSubmit}
-                  onFocus={() => { if (searchResults.length > 0) setShowSearchPreview(true) }}
+                  onFocus={() => setShowSearchPreview(true)}
                   placeholder="Tìm kiếm sản phẩm, mẫu mới..."
                   className="pl-11 pr-9 py-2.5 w-full rounded-full border-2 border-pink-200/80 focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20 transition-all bg-white/90 shadow-sm"
                 />
@@ -317,12 +347,47 @@ const Header = () => {
               {/* Instant Search Results Dropdown */}
               {showSearchPreview && (
                 <div className="absolute top-full left-0 right-0 mt-2 bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-pink-100 overflow-hidden z-50 animate-slideUp">
-                  <div className="p-3 bg-pink-50/60 border-b border-pink-100 flex items-center justify-between">
-                    <span className="text-xs font-bold text-gray-600 uppercase tracking-wider">
-                      {isSearching ? 'Đang tìm kiếm...' : `Gợi ý sản phẩm (${searchResults.length})`}
-                    </span>
-                    <span className="text-xs text-pink-600 font-semibold">{searchQuery}</span>
-                  </div>
+                  {/* Search History Section when empty query */}
+                  {!searchQuery.trim() && searchHistory.length > 0 && (
+                    <div className="p-4 space-y-3">
+                      <div className="flex items-center justify-between text-xs text-gray-500 font-bold uppercase tracking-wider">
+                        <span className="flex items-center gap-1.5 text-gray-700">
+                          <Search className="w-3.5 h-3.5 text-pink-500" /> Tìm kiếm gần đây
+                        </span>
+                        <button
+                          onClick={clearSearchHistory}
+                          className="text-pink-500 hover:text-pink-700 font-semibold normal-case text-xxs"
+                        >
+                          Xóa lịch sử
+                        </button>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {searchHistory.map((item, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => {
+                              setSearchQuery(item);
+                              saveSearchHistory(item);
+                              setShowSearchPreview(false);
+                              navigate(`/products?search=${encodeURIComponent(item)}`);
+                            }}
+                            className="px-3 py-1.5 bg-pink-50 hover:bg-pink-100/80 text-pink-700 text-xs font-medium rounded-full transition-colors flex items-center gap-1 border border-pink-200/60"
+                          >
+                            <span>{item}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {searchQuery.trim() && (
+                    <div className="p-3 bg-pink-50/60 border-b border-pink-100 flex items-center justify-between">
+                      <span className="text-xs font-bold text-gray-600 uppercase tracking-wider">
+                        {isSearching ? 'Đang tìm kiếm...' : `Gợi ý sản phẩm (${searchResults.length})`}
+                      </span>
+                      <span className="text-xs text-pink-600 font-semibold">{searchQuery}</span>
+                    </div>
+                  )}
 
                   {searchResults.length > 0 ? (
                     <div className="divide-y divide-gray-100 max-h-80 overflow-y-auto">

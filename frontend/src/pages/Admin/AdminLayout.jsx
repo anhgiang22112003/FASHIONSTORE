@@ -10,6 +10,7 @@ import { ThemeProvider } from "@/context/ThemeContext"
 import AdminSpinner from "@/components/AdminSpinner"
 
 const ComplaintList = React.lazy(() => import("./ComplaintList"))
+const ContactList = React.lazy(() => import("./ContactList"))
 const StockManagement = React.lazy(() => import("./StockManagement"))
 const Suppliers = React.lazy(() => import("./Suppliers"))
 const StaffPage = React.lazy(() => import("./StaffPage"))
@@ -299,6 +300,7 @@ const AdminLayout = () => {
               )}
 
               {activeTab === "compalint" && <ComplaintList />}
+              {activeTab === "contact" && <ContactList />}
               {activeTab === "importExport" && <StockManagement />}
               {activeTab === "settings" && <Settings />}
               {activeTab === "bank" && <Bank />}

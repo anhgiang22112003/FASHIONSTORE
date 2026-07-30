@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Heart, ShoppingBag, Minus, Plus, Truck, RefreshCw, Shield, Star } from 'lucide-react'
+import { Heart, ShoppingBag, Minus, Plus, Truck, RefreshCw, Shield, Star, Ruler, Scale, Share2, Copy } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { toast } from 'react-toastify'
 import api from '@/service/api'
@@ -9,6 +9,9 @@ import RelatedProducts from '@/components/fashion/RelatedProducts'
 import ProductReviews from '@/components/fashion/ProductReviews'
 import { WishlistContext } from '@/context/WishlistContext'
 import { AuthContext } from '@/context/AuthContext'
+import { CompareContext } from '@/context/CompareContext'
+import Breadcrumb from '@/components/fashion/Breadcrumb'
+import SizeGuideModal from '@/components/fashion/SizeGuideModal'
 
 const ProductPage = () => {
   const { id } = useParams()
@@ -23,9 +26,20 @@ const ProductPage = () => {
   const [imageLoading, setImageLoading] = useState(true)
   const { addToCart } = useContext(CartContext)
   const { fetchWishlist } = useContext(WishlistContext)
+  const { addToCompare } = useContext(CompareContext)
   const [favorites, setFavorites] = React.useState([])
   const { user } = useContext(AuthContext)
   const [inputValue, setInputValue] = useState("1");
+  const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(window.location.href);
+    toast.success('Đã sao chép liên kết sản phẩm 📋');
+  };
+
+  const handleShareFacebook = () => {
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, '_blank');
+  };
 
   useEffect(() => {
     setInputValue(String(quantity));
@@ -308,23 +322,15 @@ const ProductPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-pink-50/30 to-white">
       <div className="container mx-auto px-4 py-8">
-        {/* Breadcrumb */}
-        <nav className="text-sm text-muted-foreground mb-8 flex items-center gap-2">
-          <span
-            className="cursor-pointer hover:text-pink-500 transition-colors"
-            onClick={() => navigate('/')}
-          >
-            Trang chủ
-          </span>
-          <span className="text-border">/</span>
-          <span
-            className="cursor-pointer hover:text-pink-500 transition-colors"
-          >
-            {product?.category?.name}
-          </span>
-          <span className="text-border">/</span>
-          <span className="text-foreground font-medium">{product?.name}</span>
-        </nav>
+        {/* Breadcrumb Navigation */}
+        <div className="mb-6">
+          <Breadcrumb
+            items={[
+              { label: product?.category?.name || 'Thời trang', path: `/products` },
+              { label: product?.name || 'Chi tiết sản phẩm' }
+            ]}
+          />
+        </div>
 
         <div className="grid lg:grid-cols-2 gap-12 mb-20">
           {/* Product Images */}
@@ -458,10 +464,19 @@ const ProductPage = () => {
 
             {/* Size Selection */}
             <div>
-              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <span className="w-1 h-5 bg-gradient-to-b from-pink-500 to-rose-500 rounded-full"></span>
-                Kích thước: <span className="text-pink-500">{selectedSize}</span>
-              </h3>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold flex items-center gap-2">
+                  <span className="w-1 h-5 bg-gradient-to-b from-pink-500 to-rose-500 rounded-full"></span>
+                  Kích thước: <span className="text-pink-500">{selectedSize}</span>
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => setIsSizeGuideOpen(true)}
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-pink-600 hover:text-pink-700 bg-pink-50 hover:bg-pink-100 px-3 py-1.5 rounded-full transition-colors"
+                >
+                  <Ruler className="w-4 h-4" /> Bảng quy đổi size
+                </button>
+              </div>
               <div className="flex gap-3 flex-wrap">
                 {allSizes.map((size) => {
                   const isAvailable = availableSizes.includes(size)
@@ -502,19 +517,15 @@ const ProductPage = () => {
                     type="text"
                     value={inputValue}
                     onChange={(e) => {
-                      // Cho phép xoá hết để nhập lại (e.g "1" -> "" -> "6")
                       const val = e.target.value;
-
                       if (/^\d*$/.test(val)) {
                         setInputValue(val);
                       }
                     }}
                     onBlur={() => {
                       let num = parseInt(inputValue);
-
                       if (isNaN(num) || num < 1) num = 1;
                       if (num > currentStock) num = currentStock;
-
                       setQuantity(num);
                       setInputValue(String(num));
                     }}
@@ -573,6 +584,39 @@ const ProductPage = () => {
               </Button>
             </div>
 
+            {/* Secondary Actions: Compare & Share */}
+            <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+              <button
+                type="button"
+                onClick={() => addToCompare(product)}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-gray-700 bg-gray-100 hover:bg-pink-50 hover:text-pink-600 rounded-xl transition-colors"
+              >
+                <Scale className="w-4 h-4 text-pink-500" /> So sánh sản phẩm
+              </button>
+
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-gray-400 font-medium flex items-center gap-1">
+                  <Share2 className="w-3.5 h-3.5" /> Chia sẻ:
+                </span>
+                <button
+                  type="button"
+                  onClick={handleShareFacebook}
+                  className="px-2.5 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg text-xs font-bold transition-colors"
+                  title="Chia sẻ Facebook"
+                >
+                  FB
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCopyLink}
+                  className="px-2.5 py-1.5 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg text-xs font-bold transition-colors flex items-center gap-1"
+                  title="Sao chép link"
+                >
+                  <Copy className="w-3.5 h-3.5" /> Copy link
+                </button>
+              </div>
+            </div>
+
             {/* Benefits */}
             <div className="grid grid-cols-3 gap-4 pt-6 border-t">
               <div className="text-center group cursor-pointer">
@@ -614,6 +658,11 @@ const ProductPage = () => {
           <ProductReviews productId={id} />
         </div>
       </div>
+
+      <SizeGuideModal
+        isOpen={isSizeGuideOpen}
+        onClose={() => setIsSizeGuideOpen(false)}
+      />
     </div>
   )
 }
