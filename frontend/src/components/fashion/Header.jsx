@@ -28,6 +28,7 @@ const Header = () => {
   const [unreadCount, setUnreadCount] = useState(0)
   const [showDropdown, setShowDropdown] = useState(false)
   const [isCategoryMenuOpen, setIsCategoryMenuOpen] = useState(false)
+  const [mobileCategoryFilter, setMobileCategoryFilter] = useState('')
   const [isHoveringCategory, setIsHoveringCategory] = useState(false)
   const totalItems = cart?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0
   const wishlistCount = wishlist?.length
@@ -168,6 +169,10 @@ const Header = () => {
     { name: 'Giới thiệu', href: '/about' },
     { name: 'Blog', href: '/blog' }
   ]
+
+  const filteredCategories = categories.filter((category) =>
+    category.name?.toLowerCase().includes(mobileCategoryFilter.trim().toLowerCase())
+  )
 
   return (
     <>
@@ -661,42 +666,57 @@ const Header = () => {
                   transition: 'max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
                 }}
               >
-                <div className="ml-4 space-y-1 mt-2 pb-2">
-                  {categories.map((category, index) => (
-                    <Link
-                      key={category._id}
-                      className="block py-2.5 px-4 text-gray-700 hover:bg-pink-50 hover:text-pink-600 rounded-lg transition-all text-sm font-medium relative group"
-                      onClick={() => {
-                        navigate(`/category/${category.slug || category.name.replace(/\s+/g, '-').toLowerCase()}`, {
-                          state: { id: category._id },
-                        })
-                        setIsMenuOpen(false)
-                      }}
-                      style={{
-                        animation: isCategoryMenuOpen ? `slideIn 0.3s ease ${index * 0.05}s both` : 'none'
-                      }}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span>{category.name}</span>
-                        <ChevronDown
-                          className="w-3 h-3 text-gray-400 group-hover:text-pink-500 transition-all"
-                          style={{ transform: 'rotate(-90deg)' }}
-                        />
-                      </div>
-                      <div
-                        className="absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-pink-400 to-pink-600 rounded-r"
-                        style={{
-                          transform: 'scaleY(0)',
-                          transition: 'transform 0.3s ease',
-                          transformOrigin: 'top'
-                        }}
-                      ></div>
-                    </Link>
-                  ))}
+                <div className="ml-4 space-y-3 mt-2 pb-2">
+                  <div className="relative">
+                    <Input
+                      type="text"
+                      value={mobileCategoryFilter}
+                      onChange={(e) => setMobileCategoryFilter(e.target.value)}
+                      placeholder="Lọc danh mục..."
+                      className="pl-4 pr-10 py-3 w-full rounded-full border-2 border-pink-200 focus:border-pink-500 transition-all"
+                    />
+                    {mobileCategoryFilter && (
+                      <button
+                        onClick={() => setMobileCategoryFilter('')}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
 
-                  {categories.length === 0 && (
+                  {filteredCategories.length > 0 ? (
+                    filteredCategories.map((category, index) => (
+                      <Link
+                        key={category._id}
+                        to={`/category/${category.slug || category.name.replace(/\s+/g, '-').toLowerCase()}`}
+                        state={{ id: category._id }}
+                        className="block py-2.5 px-4 text-gray-700 hover:bg-pink-50 hover:text-pink-600 rounded-lg transition-all text-sm font-medium relative group"
+                        onClick={() => setIsMenuOpen(false)}
+                        style={{
+                          animation: isCategoryMenuOpen ? `slideIn 0.3s ease ${index * 0.05}s both` : 'none'
+                        }}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span>{category.name}</span>
+                          <ChevronDown
+                            className="w-3 h-3 text-gray-400 group-hover:text-pink-500 transition-all"
+                            style={{ transform: 'rotate(-90deg)' }}
+                          />
+                        </div>
+                        <div
+                          className="absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-pink-400 to-pink-600 rounded-r"
+                          style={{
+                            transform: 'scaleY(0)',
+                            transition: 'transform 0.3s ease',
+                            transformOrigin: 'top'
+                          }}
+                        ></div>
+                      </Link>
+                    ))
+                  ) : (
                     <div className="px-4 py-6 text-center text-gray-500 text-sm">
-                      Chưa có danh mục nào
+                      Không tìm thấy danh mục phù hợp.
                     </div>
                   )}
                 </div>

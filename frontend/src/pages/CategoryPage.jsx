@@ -4,7 +4,7 @@ import { toast } from 'react-toastify'
 import api from '@/service/api'
 import Sidebar from '@/components/fashion/SidebarFilterProduct'
 import ProductCard from '@/components/fashion/ProductCard'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Filter } from 'lucide-react'
 
 const CategoryPage = () => {
   const { state } = useLocation()  
@@ -15,6 +15,7 @@ const CategoryPage = () => {
   const [collection, setCollection] = useState('all')
   const [sortBy, setSortBy] = useState('newest')
   const [collections, setCollections] = useState([])
+  const [isFilterOpen, setIsFilterOpen] = useState(false)
 
   useEffect(() => {
     const fetchCategoriesAndCollections = async () => {
@@ -66,12 +67,15 @@ const CategoryPage = () => {
           {/* Sidebar */}
           <div className="lg:w-80 flex-shrink-0">
             <Sidebar
+              priceRange={priceRange}
               setPriceRange={setPriceRange}
               collections={collections}
               collection={collection}
               setCollection={setCollection}
               setSortBy={setSortBy}
               sortBy={sortBy}
+              isMobileOpen={isFilterOpen}
+              setIsMobileOpen={setIsFilterOpen}
             />
           </div>
 
@@ -79,14 +83,24 @@ const CategoryPage = () => {
           <div className="flex-1">
             <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <h2 className="text-3xl font-black text-gray-900">
-                  Sản phẩm theo danh mục
-                  {products.length > 0 && (
-                    <span className="ml-3 text-lg font-normal text-pink-500">
-                      ({products.length} sản phẩm)
-                    </span>
-                  )}
-                </h2>
+                <div>
+                  <h2 className="text-2xl sm:text-3xl font-black text-gray-900">
+                    Sản phẩm theo danh mục
+                    {products.length > 0 && (
+                      <span className="ml-3 text-lg font-normal text-pink-500">
+                        ({products.length} sản phẩm)
+                      </span>
+                    )}
+                  </h2>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsFilterOpen(true)}
+                  className="lg:hidden inline-flex items-center gap-2 rounded-full bg-pink-500 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-pink-200 transition-colors hover:bg-pink-600"
+                >
+                  <Filter className="w-4 h-4" />
+                  Lọc
+                </button>
               </div>
             </div>
 

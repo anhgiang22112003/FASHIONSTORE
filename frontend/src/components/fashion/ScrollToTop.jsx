@@ -27,7 +27,7 @@ const ScrollToTop = () => {
   if (!isVisible) return null
 
   return (
-    <div className="fixed bottom-36 right-7 z-[8888] group">
+    <div className="fixed bottom-36 right-7 z-50 group">
       {/* Tooltip */}
       <div className="absolute right-16 top-1/2 -translate-y-1/2 whitespace-nowrap rounded-lg bg-slate-900 px-3 py-2 text-sm text-white opacity-0 shadow-lg transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0 translate-x-2 pointer-events-none">
         Lên đầu trang

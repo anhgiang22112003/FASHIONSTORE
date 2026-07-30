@@ -1,8 +1,10 @@
 import { Filter, X } from 'lucide-react'
 import { useState } from 'react'
 
-const Sidebar = ({ sortBy, setPriceRange,collection, collections, setCollection, setSortBy }) => {
-  const [isMobileOpen, setIsMobileOpen] = useState(false)
+const Sidebar = ({ priceRange, sortBy, setPriceRange, collection, collections, setCollection, setSortBy, isMobileOpen: mobileOpenProp, setIsMobileOpen: setMobileOpenProp }) => {
+  const [internalMobileOpen, setInternalMobileOpen] = useState(false)
+  const isMobileOpen = mobileOpenProp ?? internalMobileOpen
+  const setIsMobileOpen = setMobileOpenProp ?? setInternalMobileOpen
 
   const priceRanges = [
     { value: 'all', label: 'Tất cả' },
@@ -21,6 +23,14 @@ const Sidebar = ({ sortBy, setPriceRange,collection, collections, setCollection,
     { value: 'stockDesc', label: 'Tồn kho giảm dần' },
   ]
 
+  const handleClearFilters = () => {
+    setPriceRange('all')
+    setCollection('all')
+    setSortBy('newest')
+  }
+
+  const hasActiveFilters = priceRange !== 'all' || collection !== 'all' || sortBy !== 'newest'
+
   const SidebarContent = () => (
     <>
       {/* Header */}
@@ -29,14 +39,26 @@ const Sidebar = ({ sortBy, setPriceRange,collection, collections, setCollection,
           <Filter className="w-5 h-5 text-pink-500" />
           <h3 className="font-black text-xl text-gray-900">Bộ lọc</h3>
         </div>
-        {isMobileOpen && (
-          <button
-            onClick={() => setIsMobileOpen(false)}
-            className="lg:hidden text-gray-600 hover:text-gray-900"
-          >
-            <X className="w-6 h-6" />
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          {hasActiveFilters && (
+            <button
+              type="button"
+              onClick={handleClearFilters}
+              className="text-sm font-semibold text-pink-600 hover:text-pink-800 transition-colors"
+            >
+              Xóa lọc
+            </button>
+          )}
+          {isMobileOpen && (
+            <button
+              type="button"
+              onClick={() => setIsMobileOpen(false)}
+              className="lg:hidden text-gray-600 hover:text-gray-900"
+            >
+              <X className="w-6 h-6" />
+            </button>
+          )}
+        </div>
       </div>
 
 
@@ -111,15 +133,7 @@ const Sidebar = ({ sortBy, setPriceRange,collection, collections, setCollection,
 
   return (
     <>
-      {/* Mobile Filter Button */}
-      <button
-        onClick={() => setIsMobileOpen(true)}
-        className="lg:hidden fixed bottom-6 right-6 z-40 bg-pink-500 text-white p-4 rounded-full shadow-2xl hover:bg-pink-600 transition-colors"
-      >
-        <Filter className="w-6 h-6" />
-      </button>
 
-      {/* Mobile Overlay */}
       {isMobileOpen && (
         <div
           className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
