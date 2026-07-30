@@ -174,7 +174,7 @@ const ContactList = () => {
   const columns = [
     {
       header: 'Khách hàng',
-      accessor: (row) => (
+      render: (row) => (
         <div className="flex flex-col">
           <span className="font-semibold text-gray-900">{row.name}</span>
           <span className="text-xs text-gray-500">{row.email}</span>
@@ -184,7 +184,7 @@ const ContactList = () => {
     },
     {
       header: 'Tiêu đề / Nội dung',
-      accessor: (row) => (
+      render: (row) => (
         <div className="max-w-xs">
           <p className="font-medium text-xs text-purple-700 truncate">{row.subject || 'Không tiêu đề'}</p>
           <p className="text-xs text-gray-600 line-clamp-2 mt-0.5">{row.message}</p>
@@ -193,7 +193,7 @@ const ContactList = () => {
     },
     {
       header: 'Ngày gửi',
-      accessor: (row) => (
+      render: (row) => (
         <span className="text-xs text-gray-500">
           {new Date(row.createdAt).toLocaleDateString('vi-VN', {
             hour: '2-digit',
@@ -207,7 +207,7 @@ const ContactList = () => {
     },
     {
       header: 'Trạng thái',
-      accessor: (row) => (
+      render: (row) => (
         <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${row.status === 'replied'
           ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
           : 'bg-amber-50 text-amber-700 border border-amber-200 animate-pulse'
@@ -219,7 +219,7 @@ const ContactList = () => {
     },
     {
       header: 'Thao tác',
-      accessor: (row) => (
+      render: (row) => (
         <div className="flex items-center gap-2">
           <button
             onClick={() => {

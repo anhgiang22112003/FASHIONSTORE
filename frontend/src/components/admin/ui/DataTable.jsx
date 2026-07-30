@@ -34,6 +34,8 @@ const DataTable = ({
             <thead>
               <tr>
                 {columns.map((col, i) => (
+                  console.log(col),
+
                   <th
                     key={i}
                     className={`${headerCls} ${col.sticky ? 'sticky right-0 shadow-[-2px_0_4px_rgba(0,0,0,0.04)] dark:shadow-[-2px_0_4px_rgba(0,0,0,0.4)]' : ''}`}
@@ -61,7 +63,7 @@ const DataTable = ({
                         key={colIndex}
                         className={`px-4 py-3 text-sm text-slate-700 dark:text-slate-300 whitespace-nowrap ${col.sticky ? 'sticky right-0 bg-white dark:bg-slate-950 group-hover:bg-pink-50/50 dark:group-hover:bg-pink-950/20 shadow-[-2px_0_4px_rgba(0,0,0,0.04)] dark:shadow-[-2px_0_4px_rgba(0,0,0,0.4)]' : ''} ${col.cellClassName || ''}`}
                       >
-                        {col.accessor ? col.accessor(row, rowIndex) : row[col.key]}
+                        {col.render ? col.render(row, rowIndex) : row[col.key]}
                       </td>
                     ))}
                   </tr>
