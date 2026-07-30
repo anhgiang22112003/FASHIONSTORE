@@ -87,9 +87,9 @@ const UserProfile = () => {
             const res = await api.get(`/users/${id}`)
             setUsers(res?.data)
         } catch (error) {
-            toast.error("lỗi không lấy được dữ liệu người dùng")
+            toast.error("Lỗi không lấy được dữ liệu người dùng")
         } finally {
-            setTimeout(() => setIsLoading(false), 800)
+            setIsLoading(false)
         }
     }, [user?.id])
 
@@ -143,6 +143,14 @@ const UserProfile = () => {
 
     const handlePasswordChange = async (e) => {
         e.preventDefault()
+        if (newPassword !== confirmPassword) {
+            toast.error('Mật khẩu mới và xác nhận mật khẩu không khớp!')
+            return
+        }
+        if (newPassword.length < 6) {
+            toast.error('Mật khẩu mới phải có ít nhất 6 ký tự!')
+            return
+        }
         try {
             await api.post('/auth/change-password', {
                 userId: users?._id,
@@ -150,6 +158,9 @@ const UserProfile = () => {
                 newPassword,
             })
             setActiveTab('profile')
+            setOldPassword('')
+            setNewPassword('')
+            setConfirmPassword('')
             toast.success('Đổi mật khẩu thành công!')
         } catch (err) {
             toast.error(err.response?.data?.message || 'Có lỗi xảy ra')
@@ -490,7 +501,16 @@ const UserProfile = () => {
                                 <Phone className="w-5 h-5 text-green-600" />
                                 <div>
                                     <p className="text-sm font-semibold text-gray-600">Số điện thoại</p>
-                                    <p className="font-bold text-gray-800">{users?.phone}</p>
+                                    <p className="font-bold text-gray-800">{users?.phone || 'Chưa cập nhật'}</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl">
+                                <MapPin className="w-5 h-5 text-amber-600" />
+                                <div>
+                                    <p className="text-sm font-semibold text-gray-600">Địa chỉ giao hàng</p>
+                                    <p className="font-bold text-gray-800">
+                                        {[users?.address, users?.ward, users?.district, users?.province].filter(Boolean).join(', ') || 'Chưa cập nhật địa chỉ'}
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -514,55 +534,62 @@ const UserProfile = () => {
                             </div>
                             <h3 className="text-2xl font-black text-gray-800">Lịch sử mua hàng</h3>
                         </div>
-                        <div className="overflow-x-auto">
-                            <table className="min-w-full divide-y divide-gray-200">
-                                <thead className="bg-gradient-to-r from-pink-50 to-purple-50">
-                                    <tr>
-                                        <th className="px-6 py-4 text-left text-xs font-black text-gray-700 uppercase tracking-wider">Mã đơn hàng</th>
-                                        <th className="px-6 py-4 text-left text-xs font-black text-gray-700 uppercase tracking-wider">Ngày</th>
-                                        <th className="px-6 py-4 text-left text-xs font-black text-gray-700 uppercase tracking-wider">Tổng tiền</th>
-                                        <th className="px-6 py-4 text-left text-xs font-black text-gray-700 uppercase tracking-wider">Trạng thái</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="bg-white divide-y divide-gray-100">
-                                    {orders?.map(order => (
-                                        <tr
-                                            key={order.id}
-                                            onClick={() => handleOrderClick(order)}
-                                            className="cursor-pointer hover:bg-gradient-to-r hover:from-pink-50 hover:to-purple-50 transition-all"
-                                        >
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">#{order?._id.substring(0, 10).toUpperCase()}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">
-                                                {new Date(order.createdAt).toLocaleString('vi-VN', {
-                                                    year: 'numeric',
-                                                    month: '2-digit',
-                                                    day: '2-digit',
-                                                    hour: '2-digit',
-                                                    minute: '2-digit',
-                                                })}
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-pink-600 font-black">{order?.total.toLocaleString()}₫</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                                <span className={`px-3 py-1.5 inline-flex text-xs leading-5 font-bold rounded-full ${order.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
-                                                    order.status === 'PROCESSING' ? 'bg-blue-100 text-blue-800' :
-                                                        order.status === 'SHIPPED' ? 'bg-orange-100 text-orange-800' :
-                                                            order.status === 'COMPLETED' ? 'bg-green-100 text-green-800' :
-                                                                'bg-red-100 text-red-800'
-                                                    }`}>
-                                                    {OrderStatusVN[order.status]}
-                                                </span>
-                                            </td>
+                        {orders?.length === 0 ? (
+                            <div className="text-center py-12 text-gray-500 font-medium">
+                                <Package className="w-16 h-16 mx-auto mb-3 text-gray-300" />
+                                <p>Bạn chưa có đơn hàng nào.</p>
+                            </div>
+                        ) : (
+                            <div className="overflow-x-auto">
+                                <table className="min-w-full divide-y divide-gray-200">
+                                    <thead className="bg-gradient-to-r from-pink-50 to-purple-50">
+                                        <tr>
+                                            <th className="px-6 py-4 text-left text-xs font-black text-gray-700 uppercase tracking-wider">Mã đơn hàng</th>
+                                            <th className="px-6 py-4 text-left text-xs font-black text-gray-700 uppercase tracking-wider">Ngày</th>
+                                            <th className="px-6 py-4 text-left text-xs font-black text-gray-700 uppercase tracking-wider">Tổng tiền</th>
+                                            <th className="px-6 py-4 text-left text-xs font-black text-gray-700 uppercase tracking-wider">Trạng thái</th>
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
+                                    </thead>
+                                    <tbody className="bg-white divide-y divide-gray-100">
+                                        {orders?.map(order => (
+                                            <tr
+                                                key={order._id}
+                                                onClick={() => handleOrderClick(order)}
+                                                className="cursor-pointer hover:bg-gradient-to-r hover:from-pink-50 hover:to-purple-50 transition-all"
+                                            >
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">#{order?._id.substring(0, 10).toUpperCase()}</td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">
+                                                    {new Date(order.createdAt).toLocaleString('vi-VN', {
+                                                        year: 'numeric',
+                                                        month: '2-digit',
+                                                        day: '2-digit',
+                                                        hour: '2-digit',
+                                                        minute: '2-digit',
+                                                    })}
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-pink-600 font-black">{order?.total.toLocaleString()}₫</td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                                    <span className={`px-3 py-1.5 inline-flex text-xs leading-5 font-bold rounded-full ${order.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
+                                                        order.status === 'PROCESSING' ? 'bg-blue-100 text-blue-800' :
+                                                            order.status === 'SHIPPED' ? 'bg-orange-100 text-orange-800' :
+                                                                order.status === 'COMPLETED' ? 'bg-green-100 text-green-800' :
+                                                                    'bg-red-100 text-red-800'
+                                                        }`}>
+                                                        {OrderStatusVN[order.status]}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
                     </div>
                 )
             case 'orderDetails':
                 if (selectedOrderId) {
                     return (
-                        <OrderDetails id={selectedOrderId} onBack={() => setSelectedOrder(null)} />
+                        <OrderDetails id={selectedOrderId} onBack={() => setActiveTab('orders')} />
                     )
                 }
                 return null

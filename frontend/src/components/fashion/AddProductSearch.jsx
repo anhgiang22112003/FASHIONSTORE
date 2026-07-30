@@ -29,26 +29,34 @@ const AddProductSearch = () => {
     try {
       setLoading(true)
       const res = await api.get(`/products/search?query=${query}`)
-      setResults(res.data)
+      const data = res.data
+      setResults(Array.isArray(data) ? data : data?.products || [])
     } catch (err) {
       console.error(err)
     } finally {
       setLoading(false)
     }
   }
-  const handleSearchChange = (product) => {
-    setSelectedProduct(product)
+  const handleSearchChange = async (product) => {
+    try {
+      // Fetch chi tiết đầy đủ sản phẩm (bao gồm variations)
+      const res = await api.get(`/products/${product._id}`)
+      setSelectedProduct(res.data)
+    } catch (err) {
+      // Fallback nếu API lỗi
+      setSelectedProduct(product)
+    }
     setResults([])
   }
 
 
   // 🎨 Lấy màu & size theo sản phẩm được chọn
   const allColors = selectedProduct
-    ? [...new Set(selectedProduct.variations.map((v) => v.color))]
+    ? [...new Set((selectedProduct.variations || []).map((v) => v.color))]
     : []
 
   const availableSizes = selectedProduct && selectedColor
-    ? selectedProduct.variations
+    ? (selectedProduct.variations || [])
         .filter((v) => v.color === selectedColor)
         .map((v) => v.size)
     : []
@@ -193,15 +201,38 @@ const AddProductSearch = () => {
           )}
 
           {/* Số lượng */}
-          <div className="flex items-center gap-2 mb-4">
+          <div className="flex items-center gap-3 mb-4">
             <label className="text-sm font-medium">Số lượng:</label>
-            <input
-              type="number"
-              min="1"
-              value={quantity}
-              onChange={(e) => setQuantity(Math.max(1, Number(e.target.value)))}
-              className="border rounded-lg px-2 py-1 w-20 text-center"
-            />
+            <div className="flex items-center gap-1 bg-white rounded-full border-2 border-gray-200 p-1 shadow-sm">
+              <button
+                type="button"
+                onClick={() => setQuantity(prev => Math.max(1, prev - 1))}
+                className="flex items-center justify-center w-8 h-8 rounded-full bg-white border-2 border-pink-300 text-pink-600 hover:bg-pink-50 hover:border-pink-400 transition-all active:scale-90 shadow-sm"
+              >
+                <span className="text-lg font-bold leading-none">−</span>
+              </button>
+              <input
+                type="text"
+                value={quantity}
+                onChange={(e) => {
+                  const val = e.target.value
+                  if (/^\d*$/.test(val)) {
+                    setQuantity(val === '' ? '' : Math.max(1, Number(val)))
+                  }
+                }}
+                onBlur={() => {
+                  if (!quantity || quantity < 1) setQuantity(1)
+                }}
+                className="w-12 text-center font-bold text-lg border-none focus:outline-none bg-transparent"
+              />
+              <button
+                type="button"
+                onClick={() => setQuantity(prev => prev + 1)}
+                className="flex items-center justify-center w-8 h-8 rounded-full bg-white border-2 border-pink-300 text-pink-600 hover:bg-pink-50 hover:border-pink-400 transition-all active:scale-90 shadow-sm"
+              >
+                <span className="text-lg font-bold leading-none">+</span>
+              </button>
+            </div>
           </div>
 
           {/* Nút thêm vào giỏ */}

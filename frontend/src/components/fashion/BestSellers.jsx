@@ -13,21 +13,6 @@ import { useGSAP } from '@gsap/react'
 
 const VariantSelectionModal = React.lazy(() => import('./VariantSelectionModal'))
 
-const colorMap = {
-  'Đen': '#111111', 'Den': '#111111',
-  'Trắng': '#F5F5F5', 'Trang': '#F5F5F5',
-  'Đỏ': '#EF4444', 'Do': '#EF4444',
-  'Xanh': '#3B82F6', 'Xanh dương': '#3B82F6',
-  'Xanh lá': '#10B981', 'Xanh la': '#10B981',
-  'Vàng': '#F59E0B', 'Vang': '#F59E0B',
-  'Hồng': '#EC4899', 'Hong': '#EC4899',
-  'Xám': '#9CA3AF', 'Xam': '#9CA3AF',
-  'Cam': '#F97316',
-  'Tím': '#8B5CF6', 'Tim': '#8B5CF6',
-  'Nâu': '#92400E', 'Nau': '#92400E',
-  'Kem': '#FEF3C7', 'Beige': '#F5F0E8',
-}
-
 const SkeletonCard = () => (
   <div className="bs-card-skeleton">
     <div className="bs-skeleton-img" />
@@ -39,179 +24,7 @@ const SkeletonCard = () => (
   </div>
 )
 
-const ProductCard = ({ product, isFavorite, onToggleFavorite, onAddToCart, index }) => {
-  const [hovered, setHovered] = useState(false)
-  const [tilt, setTilt] = useState({ x: 0, y: 0 })
-  const [glare, setGlare] = useState({ x: 50, y: 50 })
-  const cardRef = useRef(null)
-  const navigate = useNavigate()
-
-  const colors = Array.from(new Set((product?.variations || []).map(v => v.color).filter(Boolean)))
-  const sizes = Array.from(new Set((product?.variations || []).map(v => v.size).filter(Boolean)))
-  const hasDiscount = product?.originalPrice > product?.sellingPrice
-  const discountPct = hasDiscount
-    ? Math.round(((product.originalPrice - product.sellingPrice) / product.originalPrice) * 100) : 0
-
-  const rankLabels = ['01', '02', '03', '04', '05', '06', '07', '08']
-
-  const handleMouseMove = (e) => {
-    if (!cardRef.current) return
-    const rect = cardRef.current.getBoundingClientRect()
-    const x = e.clientX - rect.left
-    const y = e.clientY - rect.top
-    const cx = rect.width / 2
-    const cy = rect.height / 2
-
-    // Smooth 3D tilt angles
-    const rY = ((x - cx) / cx) * 10
-    const rX = -((y - cy) / cy) * 10
-    setTilt({ x: rX, y: rY })
-    setGlare({ x: (x / rect.width) * 100, y: (y / rect.height) * 100 })
-  }
-
-  const handleMouseLeave = () => {
-    setHovered(false)
-    setTilt({ x: 0, y: 0 })
-    setGlare({ x: 50, y: 50 })
-  }
-
-  return (
-    <div
-      ref={cardRef}
-      className={`bs-card group ${hovered ? 'is-hovered' : ''}`}
-      onMouseEnter={() => setHovered(true)}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      onClick={() => navigate(`/product/${product?._id}`)}
-      style={{
-        animationDelay: `${index * 80}ms`,
-        transform: `perspective(1000px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) scale(${hovered ? 1.02 : 1})`,
-        transition: hovered ? 'transform 0.05s linear, border-color 0.3s' : 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s'
-      }}
-    >
-      {/* Image container */}
-      <div className="bs-card-img-wrap">
-        <img
-          src={product?.mainImage}
-          alt={product?.name}
-          loading="lazy"
-          className="bs-card-img"
-        />
-
-        {/* Dynamic gloss sheen glare overlay */}
-        {hovered && (
-          <div
-            className="bs-card-glare"
-            style={{
-              background: `radial-gradient(circle at ${glare.x}% ${glare.y}%, rgba(255,255,255,0.18) 0%, transparent 60%)`
-            }}
-          />
-        )}
-
-        {/* Rank indicator - Layered Z-axis */}
-        <div className="bs-card-rank">
-          <span>{rankLabels[index] || index + 1}</span>
-        </div>
-
-        {/* Discount tag - Layered Z-axis */}
-        {hasDiscount && (
-          <div className="bs-card-discount">
-            -{discountPct}%
-          </div>
-        )}
-
-        {/* Wishlist heart - Layered Z-axis */}
-        <button
-          onClick={(e) => { e.stopPropagation(); onToggleFavorite(product._id) }}
-          className={`bs-card-wishlist ${isFavorite ? 'is-favorite' : ''}`}
-          aria-label="Thêm vào yêu thích"
-        >
-          <Heart size={14} className={isFavorite ? 'fill-current' : ''} />
-        </button>
-
-        {/* Frosted Glass Quick action bottom panel */}
-        <div className="bs-card-actions">
-          <button
-            onClick={(e) => { e.stopPropagation(); onAddToCart(product) }}
-            className="bs-btn-action bs-btn-primary-action"
-          >
-            <ShoppingBag size={14} />
-            Thêm vào giỏ
-          </button>
-          <span
-            className="bs-btn-action bs-btn-view-action"
-            onClick={e => { e.stopPropagation(); navigate(`/product/${product?._id}`) }}
-          >
-            <Eye size={14} />
-          </span>
-        </div>
-      </div>
-
-      {/* Info container */}
-      <div className="bs-card-info">
-        <div className="bs-card-meta">
-          <span className="bs-card-brand">{product?.brand || 'FASHIONSTORE'}</span>
-          {product?.material && <span className="bs-card-material"> · {product.material}</span>}
-        </div>
-
-        <h3 className="bs-card-title">{product?.name}</h3>
-
-        {/* Star Rating and Sizes */}
-        <div className="bs-card-rating-sizes">
-          <div className="bs-card-rating">
-            {[...Array(5)].map((_, i) => (
-              <Star
-                key={i}
-                size={11}
-                className={i < Math.floor(product?.ratingAverage || 0) ? 'text-amber-400 fill-current' : 'text-gray-600'}
-              />
-            ))}
-            <span className="bs-rating-count">({product?.reviewCount ?? 0})</span>
-          </div>
-
-          {sizes.length > 0 && (
-            <div className="bs-card-sizes">
-              {sizes.slice(0, 3).map((s, i) => (
-                <span key={i} className="bs-size-badge">{s}</span>
-              ))}
-              {sizes.length > 3 && <span className="bs-sizes-more">+{sizes.length - 3}</span>}
-            </div>
-          )}
-        </div>
-
-        {/* Price and Colors */}
-        <div className="bs-card-footer">
-          <div className="bs-card-price-group">
-            <span className="bs-card-price">
-              {product?.sellingPrice?.toLocaleString('vi-VN')}₫
-            </span>
-            {hasDiscount && (
-              <span className="bs-card-price-original">
-                {product?.originalPrice?.toLocaleString('vi-VN')}₫
-              </span>
-            )}
-          </div>
-
-          {colors.length > 0 && (
-            <div className="bs-card-colors">
-              {colors.slice(0, 4).map((c, idx) => (
-                <span
-                  key={idx}
-                  title={c}
-                  className="bs-color-dot"
-                  style={{ backgroundColor: colorMap[c] || '#CBD5E1' }}
-                />
-              ))}
-              {colors.length > 4 && (
-                <span className="bs-colors-more">+{colors.length - 4}</span>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  )
-}
+import ProductCard from './ProductCard'
 
 const BestSellers = () => {
   const [products, setProducts] = useState([])
@@ -511,6 +324,139 @@ const BestSellers = () => {
           transform: translateY(0);
         }
 
+        @media (max-width: 767px) {
+          .bs-section {
+            padding: 2.5rem 0 !important;
+          }
+          .bs-header {
+            margin-bottom: 1.5rem !important;
+          }
+          .bs-title {
+            font-size: 1.4rem !important;
+          }
+          .bs-desc {
+            font-size: 0.8rem !important;
+          }
+          .bs-grid {
+            gap: 0.4rem !important;
+          }
+          .bs-card {
+            padding: 0 !important;
+            border-radius: 10px !important;
+            transform: none !important;
+            border: 1px solid #fce7f3 !important;
+          }
+          .bs-card-img-wrap {
+            aspect-ratio: 1 / 1 !important;
+            border-radius: 10px 10px 0 0 !important;
+          }
+          /* Nút giỏ hàng = icon tròn hồng góc phải dưới ảnh */
+          .bs-card-actions {
+            opacity: 1 !important;
+            transform: none !important;
+            position: absolute !important;
+            bottom: 0.35rem !important;
+            right: 0.35rem !important;
+            left: auto !important;
+            background: none !important;
+            padding: 0 !important;
+          }
+          .bs-btn-primary-action {
+            width: 1.8rem !important;
+            height: 1.8rem !important;
+            border-radius: 50% !important;
+            padding: 0 !important;
+            min-width: auto !important;
+            flex: none !important;
+            box-shadow: 0 2px 8px rgba(236, 72, 153, 0.4) !important;
+          }
+          .bs-btn-primary-action span {
+            display: none !important;
+          }
+          .bs-btn-view-action {
+            display: none !important;
+          }
+          .bs-card-rank {
+            font-size: 0.55rem !important;
+            padding: 0.1rem 0.3rem !important;
+            top: 0.3rem !important;
+            left: 0.3rem !important;
+            border-radius: 4px !important;
+          }
+          .bs-card-discount {
+            font-size: 0.5rem !important;
+            padding: 0.08rem 0.2rem !important;
+            top: 0.3rem !important;
+            left: 1.7rem !important;
+          }
+          .bs-card-wishlist {
+            top: 0.3rem !important;
+            right: 0.3rem !important;
+            width: 1.4rem !important;
+            height: 1.4rem !important;
+          }
+          .bs-card-info {
+            padding: 0.35rem 0.4rem 0.3rem !important;
+            transform: none !important;
+          }
+          .bs-card-meta {
+            font-size: 0.5rem !important;
+            letter-spacing: 0.04em !important;
+            margin-bottom: 0.05rem !important;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
+          .bs-card-title {
+            font-size: 0.7rem !important;
+            line-height: 1.25 !important;
+            margin: 0 0 0.1rem !important;
+            -webkit-line-clamp: 2 !important;
+          }
+          .bs-card-rating-sizes {
+            margin-bottom: 0.1rem !important;
+          }
+          .bs-card-rating {
+            gap: 0.05rem !important;
+          }
+          .bs-rating-count {
+            font-size: 0.5rem !important;
+          }
+          .bs-card-sizes {
+            gap: 0.15rem !important;
+          }
+          .bs-size-badge {
+            font-size: 0.45rem !important;
+            padding: 0.02rem 0.15rem !important;
+          }
+          .bs-sizes-more {
+            font-size: 0.4rem !important;
+          }
+          .bs-card-footer {
+            gap: 0 !important;
+          }
+          .bs-card-price {
+            font-size: 0.75rem !important;
+          }
+          .bs-card-price-original {
+            font-size: 0.55rem !important;
+          }
+          .bs-color-dot {
+            width: 0.45rem !important;
+            height: 0.45rem !important;
+          }
+          .bs-colors-more {
+            font-size: 0.4rem !important;
+          }
+          .bs-action-bar {
+            margin-top: 1.5rem !important;
+          }
+          .bs-btn-all {
+            font-size: 0.7rem !important;
+            padding: 0.6rem 1.5rem !important;
+          }
+        }
+
         .bs-btn-action {
           height: 2.25rem;
           border: none;
@@ -664,6 +610,43 @@ const BestSellers = () => {
           box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
 
+        .bs-card-skeleton {
+          background: #ffffff;
+          border: 1px solid #fce7f3;
+          border-radius: 16px;
+          padding: 0.6rem;
+          display: flex;
+          flex-direction: column;
+          gap: 0.75rem;
+          animation: pulse 1.8s infinite ease-in-out;
+        }
+
+        .bs-skeleton-img {
+          width: 100%;
+          aspect-ratio: 3 / 4;
+          background: #fbcfe8;
+          opacity: 0.35;
+          border-radius: 12px;
+        }
+
+        .bs-skeleton-info {
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+          padding: 0.25rem;
+        }
+
+        .bs-skeleton-line {
+          height: 0.75rem;
+          background: #fbcfe8;
+          opacity: 0.4;
+          border-radius: 4px;
+        }
+
+        .bs-w-1-4 { width: 30%; }
+        .bs-w-4-5 { width: 85%; height: 0.9rem; }
+        .bs-w-3-5 { width: 50%; }
+
         .bs-colors-more {
           font-size: 0.625rem;
           color: #9ca3af;
@@ -746,6 +729,7 @@ const BestSellers = () => {
                   key={product._id}
                   product={product}
                   index={index}
+                  rankIndex={index}
                   isFavorite={favorites.includes(product._id)}
                   onToggleFavorite={toggleFavorite}
                   onAddToCart={(p) => {

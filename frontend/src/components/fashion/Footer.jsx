@@ -1,9 +1,24 @@
-/* Hallmark · macrostructure: Marquee Hero · section: Footer · tone: editorial */
-import React, { memo } from 'react';
+import React, { memo, useState, useEffect } from 'react';
 import { Facebook, Instagram, Twitter, Youtube, Phone, Mail, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import apiUser from '@/service/api';
 
 const Footer = () => {
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await apiUser.get('/categories');
+        const data = res.data?.data || res.data || [];
+        setCategories(data);
+      } catch (error) {
+        console.error('Lỗi khi lấy danh mục footer:', error);
+      }
+    };
+    fetchCategories();
+  }, []);
+
   const socialLinks = [
     { icon: Facebook, href: '#', label: 'Facebook' },
     { icon: Instagram, href: '#', label: 'Instagram' },
@@ -14,19 +29,10 @@ const Footer = () => {
   const quickLinks = [
     { name: 'Về chúng tôi', href: '/about' },
     { name: 'Liên hệ', href: '/contact' },
-    { name: 'Chính sách bảo mật', href: '#' },
-    { name: 'Điều khoản sử dụng', href: '#' },
-    { name: 'Chính sách đổi trả', href: '#' },
-    { name: 'Hướng dẫn mua hàng', href: '#' }
-  ];
-
-  const categories = [
-    'Thời trang nữ',
-    'Thời trang nam',
-    'Phụ kiện',
-    'Giày dép',
-    'Túi xách',
-    'Đồng hồ'
+    { name: 'Chính sách bảo mật', href: '/privacy' },
+    { name: 'Điều khoản sử dụng', href: '/terms' },
+    { name: 'Chính sách đổi trả', href: '/returns' },
+    { name: 'Hướng dẫn mua hàng', href: '/guide' }
   ];
 
   const paymentMethods = [
@@ -324,13 +330,25 @@ const Footer = () => {
             <div>
               <h4 className="ft-col-title">Danh mục</h4>
               <ul className="ft-list">
-                {categories.map((category) => (
-                  <li key={category}>
-                    <a href="#" className="ft-list-link">
-                      {category}
-                    </a>
-                  </li>
-                ))}
+                {categories.length > 0 ? (
+                  categories.slice(0, 6).map((cat) => {
+                    const catId = cat._id || cat.id;
+                    const catSlug = cat.slug || cat.name?.toLowerCase().replace(/\s+/g, '-');
+                    return (
+                      <li key={catId || cat.name}>
+                        <Link
+                          to={`/category/${catSlug}`}
+                          state={{ id: catId }}
+                          className="ft-list-link"
+                        >
+                          {cat.name}
+                        </Link>
+                      </li>
+                    );
+                  })
+                ) : (
+                  <li className="text-gray-400 text-xs italic">Đang tải danh mục...</li>
+                )}
               </ul>
             </div>
 

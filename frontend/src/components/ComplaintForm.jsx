@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Loader2, Plus, Edit, X, AlertCircle, ShoppingCart, FileText, DollarSign, MessageSquare } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import { Loader2, Plus, Edit, X, AlertCircle, ShoppingCart, FileText, DollarSign, Percent, MessageSquare } from 'lucide-react';
 import OrderSearch from './OrderSearch';
 import apiAdmin from '@/service/apiAdmin';
 import { COMPLAINT_TYPES, COMPLAINT_TYPE_LABELS } from '@/data/constants';
 import { toast } from 'react-toastify';
 
-// ── Custom Modal Shell ──────────────────────────────────────────────────────
+// ── Custom Modal Shell (Rendered via Portal to escape sticky table bounds) ─────
 const Modal = ({ isOpen, onClose, title, children }) => {
   useEffect(() => {
     if (isOpen) document.body.style.overflow = 'hidden';
@@ -15,15 +16,15 @@ const Modal = ({ isOpen, onClose, title, children }) => {
 
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
         onClick={onClose}
       />
       {/* Panel */}
-      <div className="relative z-10 w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white rounded-2xl shadow-2xl border border-gray-100 [&::-webkit-scrollbar]:hidden">
+      <div className="relative z-10 w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white rounded-2xl shadow-2xl border border-gray-100 [&::-webkit-scrollbar]:hidden animate-in fade-in zoom-in-95 duration-200">
         {/* Header */}
         <div className="sticky top-0 z-20 flex items-center justify-between p-6 bg-gradient-to-r from-pink-500 to-purple-600 rounded-t-2xl">
           <div className="flex items-center gap-3">
@@ -44,7 +45,8 @@ const Modal = ({ isOpen, onClose, title, children }) => {
           {children}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
@@ -55,7 +57,7 @@ const Field = ({ label, required, hint, children }) => (
       {label}{required && <span className="text-pink-500 ml-0.5">*</span>}
     </label>
     {children}
-    {hint && <p className="text-xs text-gray-400">{hint}</p>}
+    {hint && <p className="text-xs text-gray-400 font-medium">{hint}</p>}
   </div>
 );
 
@@ -77,6 +79,8 @@ const ComplaintForm = ({
     complaintAmount: '',
     note: ''
   });
+  const [discountType, setDiscountType] = useState('amount'); // 'amount' (VNĐ) | 'percent' (%)
+  const [discountValue, setDiscountValue] = useState('');
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -93,6 +97,8 @@ const ComplaintForm = ({
         complaintAmount: complaint.complaintAmount?.toString() || '',
         note: complaint.note || ''
       });
+      setDiscountValue(complaint.complaintAmount?.toString() || '');
+      setDiscountType('amount');
       if (complaint.orderId && typeof complaint.orderId === 'object') {
         setSelectedOrder(complaint.orderId);
       }
@@ -105,6 +111,8 @@ const ComplaintForm = ({
 
   const resetForm = () => {
     setFormData({ orderId: '', complaintType: '', reason: '', complaintAmount: '', note: '' });
+    setDiscountValue('');
+    setDiscountType('amount');
     setSelectedOrder(null);
     setError('');
   };
@@ -112,16 +120,67 @@ const ComplaintForm = ({
   const handleOrderSelect = (order) => {
     setSelectedOrder(order);
     setFormData(prev => ({ ...prev, orderId: order ? order._id : '' }));
+    // Recalculate amount if percent was selected
+    if (order && discountType === 'percent' && discountValue) {
+      const calcAmount = Math.round((order.total * Number(discountValue)) / 100);
+      setFormData(prev => ({ ...prev, complaintAmount: calcAmount.toString() }));
+    }
+  };
+
+  const handleDiscountValueChange = (val) => {
+    setDiscountValue(val);
+    if (!val) {
+      setFormData(prev => ({ ...prev, complaintAmount: '' }));
+      return;
+    }
+
+    const orderTotal = selectedOrder?.total || 0;
+    if (discountType === 'percent') {
+      const numPercent = Number(val);
+      if (orderTotal > 0) {
+        const calculatedVnd = Math.round((orderTotal * numPercent) / 100);
+        setFormData(prev => ({ ...prev, complaintAmount: calculatedVnd.toString() }));
+      } else {
+        setFormData(prev => ({ ...prev, complaintAmount: '' }));
+      }
+    } else {
+      setFormData(prev => ({ ...prev, complaintAmount: val }));
+    }
+  };
+
+  const handleToggleDiscountType = (type) => {
+    setDiscountType(type);
+    const orderTotal = selectedOrder?.total || 0;
+
+    if (type === 'percent') {
+      if (formData.complaintAmount && orderTotal > 0) {
+        const pct = ((Number(formData.complaintAmount) / orderTotal) * 100).toFixed(1);
+        setDiscountValue(pct);
+      } else {
+        setDiscountValue('');
+      }
+    } else {
+      setDiscountValue(formData.complaintAmount || '');
+    }
   };
 
   const validateForm = () => {
     if (!formData.orderId) { setError('Vui lòng chọn đơn hàng'); return false; }
     if (!formData.complaintType) { setError('Vui lòng chọn loại khiếu nại'); return false; }
     if (!formData.reason.trim()) { setError('Vui lòng nhập lý do khiếu nại'); return false; }
-    if (!formData.complaintAmount || isNaN(formData.complaintAmount) || Number(formData.complaintAmount) <= 0) {
+    
+    if (discountType === 'percent') {
+      const p = Number(discountValue);
+      if (!discountValue || isNaN(p) || p <= 0 || p > 100) {
+        setError('Phần trăm chiết khấu phải từ 1% đến 100%'); return false;
+      }
+    }
+
+    const amountNum = Number(formData.complaintAmount);
+    if (!formData.complaintAmount || isNaN(amountNum) || amountNum <= 0) {
       setError('Vui lòng nhập số tiền khiếu nại hợp lệ'); return false;
     }
-    if (selectedOrder && Number(formData.complaintAmount) > selectedOrder.total) {
+    if (selectedOrder && amountNum > selectedOrder.total) {
       setError('Số tiền khiếu nại không được vượt quá tổng đơn hàng'); return false;
     }
     return true;
@@ -158,6 +217,10 @@ const ComplaintForm = ({
 
   const formatCurrency = (amount) => new Intl.NumberFormat('vi-VN').format(amount);
 
+  const calculatedPercent = selectedOrder?.total && formData.complaintAmount
+    ? ((Number(formData.complaintAmount) / selectedOrder.total) * 100).toFixed(1)
+    : null;
+
   const FormBody = (
     <form onSubmit={handleSubmit} className="space-y-5">
       {/* Error banner */}
@@ -180,18 +243,18 @@ const ComplaintForm = ({
         </Field>
       )}
 
-      {/* Order info card when editing */}
-      {isEditing && selectedOrder && (
+      {/* Order info card when editing or selected */}
+      {selectedOrder && (
         <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl">
           <div className="flex items-center gap-2 mb-3">
             <ShoppingCart className="w-4 h-4 text-blue-600" />
-            <span className="text-sm font-semibold text-blue-700">Thông tin đơn hàng</span>
+            <span className="text-sm font-semibold text-blue-700">Thông tin đơn hàng đã chọn</span>
           </div>
           <div className="grid grid-cols-2 gap-3 text-sm">
             <div><span className="text-gray-500">Mã đơn:</span> <span className="font-medium text-gray-800">{selectedOrder.code}</span></div>
             <div><span className="text-gray-500">Tổng tiền:</span> <span className="font-semibold text-pink-600">{formatCurrency(selectedOrder.total)}đ</span></div>
-            <div><span className="text-gray-500">Khách hàng:</span> <span className="font-medium text-gray-800">{selectedOrder.customerInfo?.name || selectedOrder.shippingInfo?.name}</span></div>
-            <div><span className="text-gray-500">Ngày tạo:</span> <span className="text-gray-700">{new Date(selectedOrder.createdAt).toLocaleDateString('vi-VN')}</span></div>
+            <div><span className="text-gray-500">Khách hàng:</span> <span className="font-medium text-gray-800">{selectedOrder.customerName || selectedOrder.customerInfo?.name || selectedOrder.shippingInfo?.name || 'Khách lẻ'}</span></div>
+            <div><span className="text-gray-500">Ngày tạo:</span> <span className="text-gray-700">{selectedOrder.createdAt ? new Date(selectedOrder.createdAt).toLocaleDateString('vi-VN') : 'Mới'}</span></div>
           </div>
         </div>
       )}
@@ -212,23 +275,52 @@ const ComplaintForm = ({
           </select>
         </Field>
 
-        {/* Amount */}
+        {/* Amount & Percentage Toggle */}
         <Field
-          label="Số tiền khiếu nại (VNĐ)"
+          label="Mức chiết khấu / hoàn tiền"
           required
-          hint={selectedOrder ? `Tối đa: ${formatCurrency(selectedOrder.total)}đ` : ''}
+          hint={
+            discountType === 'percent'
+              ? (formData.complaintAmount ? `Tương đương: ${formatCurrency(Number(formData.complaintAmount))}đ` : 'Nhập % chiết khấu (1-100%)')
+              : (calculatedPercent ? `Tương đương: ${calculatedPercent}% giá trị đơn hàng` : (selectedOrder ? `Tối đa: ${formatCurrency(selectedOrder.total)}đ` : ''))
+          }
         >
-          <div className="relative">
-            <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input
-              type="number"
-              className={`${inputCls} pl-9`}
-              placeholder="0"
-              value={formData.complaintAmount}
-              onChange={(e) => setFormData(prev => ({ ...prev, complaintAmount: e.target.value }))}
-              min="1"
-              max={selectedOrder?.total || undefined}
-            />
+          <div className="space-y-2">
+            {/* Unit Toggle Tabs */}
+            <div className="flex bg-gray-100 p-1 rounded-xl">
+              <button
+                type="button"
+                onClick={() => handleToggleDiscountType('amount')}
+                className={`flex-1 py-1 text-xs font-bold rounded-lg transition-all ${discountType === 'amount' ? 'bg-white text-pink-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+              >
+                Theo số tiền (VNĐ)
+              </button>
+              <button
+                type="button"
+                onClick={() => handleToggleDiscountType('percent')}
+                className={`flex-1 py-1 text-xs font-bold rounded-lg transition-all ${discountType === 'percent' ? 'bg-white text-pink-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+              >
+                Theo phần trăm (%)
+              </button>
+            </div>
+
+            {/* Input Field */}
+            <div className="relative">
+              {discountType === 'amount' ? (
+                <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              ) : (
+                <Percent className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              )}
+              <input
+                type="number"
+                className={`${inputCls} pl-9`}
+                placeholder={discountType === 'amount' ? "Nhập số tiền VNĐ..." : "Nhập % (ví dụ: 10, 20)..."}
+                value={discountValue}
+                onChange={(e) => handleDiscountValueChange(e.target.value)}
+                min="1"
+                max={discountType === 'percent' ? "100" : (selectedOrder?.total || undefined)}
+              />
+            </div>
           </div>
         </Field>
       </div>

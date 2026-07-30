@@ -10,7 +10,7 @@ import { toast } from 'react-toastify'
 import { Skeleton } from '../ui/skeleton'
 
 const SideCartDrawer = ({ isOpen, onClose }) => {
-    const { cart, fetchCart } = useContext(CartContext)
+    const { cart, updateQuantity, removeFromCart } = useContext(CartContext)
     const navigate = useNavigate()
     const [loadedImages, setLoadedImages] = useState({})
     const [qtyInput, setQtyInput] = useState({});
@@ -23,37 +23,25 @@ const SideCartDrawer = ({ isOpen, onClose }) => {
         setLoadedImages(prev => ({ ...prev, [itemId]: true }))
     }
 
-    const handleRemoveItem = async (itemId) => {
-        try {
-            await api.delete(`/cart/remove/${itemId}`)
-            toast.success('Đã xóa sản phẩm khỏi giỏ hàng')
-            fetchCart()
-        } catch (err) {
-            toast.error('Xóa thất bại')
-        }
+    const handleRemoveItem = (itemId) => {
+        removeFromCart(itemId)
     }
 
-    const handleUpdateQuantity = async (itemId, newQuantity, maxStock) => {
-
-        // Giới hạn
+    const handleUpdateQuantity = (itemId, newQuantity, maxStock) => {
         if (newQuantity < 1) newQuantity = 1;
         if (newQuantity > maxStock) {
             newQuantity = maxStock;
             toast.warning(`Chỉ còn ${maxStock} sản phẩm, đã điều chỉnh số lượng`);
         }
 
-        // Cập nhật UI NGAY
-        setQtyInput(prev => ({
-            ...prev,
-            [itemId]: String(newQuantity)
-        }));
+        // Xóa qtyInput local để fallback về item.quantity từ Context (đồng bộ 2 giỏ)
+        setQtyInput(prev => {
+            const next = { ...prev };
+            delete next[itemId];
+            return next;
+        });
 
-        try {
-            await api.patch(`/cart/update/${itemId}`, { quantity: newQuantity });
-            fetchCart(); // cập nhật server
-        } catch (err) {
-            toast.error(err?.response?.data?.message || 'Cập nhật thất bại');
-        }
+        updateQuantity(itemId, newQuantity)
     };
 
 
@@ -61,7 +49,7 @@ const SideCartDrawer = ({ isOpen, onClose }) => {
         <Sheet open={isOpen} onOpenChange={onClose}>
             <SheetContent
                 side="right"
-                className="w-[400px] sm:max-w-md p-0 flex flex-col h-full bg-background"
+                className="w-full sm:w-[420px] sm:max-w-md p-0 flex flex-col h-full bg-background border-l-0 sm:border-l"
             >
                 {/* Header */}
                 <SheetHeader className="px-6 py-4 border-b bg-gradient-to-r from-pink-50 to-background">
@@ -76,25 +64,25 @@ const SideCartDrawer = ({ isOpen, onClose }) => {
                 {/* Body - Danh sách sản phẩm */}
                 <div className="flex-grow overflow-y-auto px-4 py-2">
                     {cartItems.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center h-full text-center py-12">
-                            <div className="w-24 h-24 rounded-full bg-pink-50 flex items-center justify-center mb-4">
-                                <Package className="w-12 h-12 text-pink-300" />
+                        <div className="flex flex-col items-center justify-center h-full text-center py-8 sm:py-12">
+                            <div className="w-16 h-16 sm:w-24 sm:h-24 rounded-full bg-pink-50 flex items-center justify-center mb-3 sm:mb-4">
+                                <Package className="w-8 h-8 sm:w-12 sm:h-12 text-pink-300" />
                             </div>
-                            <p className="text-muted-foreground text-lg font-medium">Giỏ hàng trống</p>
-                            <p className="text-sm text-muted-foreground mt-1">Hãy thêm sản phẩm yêu thích vào giỏ!</p>
+                            <p className="text-muted-foreground text-base sm:text-lg font-medium">Giỏ hàng trống</p>
+                            <p className="text-xs sm:text-sm text-muted-foreground mt-1">Hãy thêm sản phẩm yêu thích vào giỏ!</p>
                         </div>
                     ) : (
                         <div className="space-y-3">
                             {cartItems.map((item) => (
                                 <div
                                     key={item._id}
-                                    className="group relative flex gap-3 p-3 rounded-lg border border-border bg-card hover:shadow-md transition-all duration-300"
+                                    className="group relative flex gap-3 p-2.5 sm:p-3 rounded-lg border border-border bg-card hover:shadow-md transition-all duration-300"
                                 >
                                     {/* IMAGE with Loading State */}
                                     <Link
                                         to={`/product/${item.product?._id}`}
                                         onClick={onClose}
-                                        className="relative flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border border-border bg-muted"
+                                        className="relative flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden border border-border bg-muted"
                                     >
                                         {!loadedImages[item._id] && (
                                             <Skeleton className="absolute inset-0 w-full h-full" />
@@ -167,7 +155,7 @@ const SideCartDrawer = ({ isOpen, onClose }) => {
                                                         }
                                                     }}
                                                     onBlur={() => {
-                                                        const variant = item.product.variations.find(
+                                                        const variant = item.product?.variations?.find(
                                                             v => v.color === item.color && v.size === item.size
                                                         );
                                                         const maxStock = variant ? variant.stock : 1;
@@ -179,7 +167,13 @@ const SideCartDrawer = ({ isOpen, onClose }) => {
                                                             toast.warning(`Chỉ còn ${maxStock} sản phẩm, đã điều chỉnh số lượng`);
                                                         }
 
-                                                        handleUpdateQuantity(item._id, num, maxStock);
+                                                        // Xóa qtyInput local → fallback về item.quantity từ Context
+                                                        setQtyInput(prev => {
+                                                            const next = { ...prev };
+                                                            delete next[item._id];
+                                                            return next;
+                                                        });
+                                                        updateQuantity(item._id, num);
                                                     }}
                                                     className="w-10 h-7 text-center text-sm font-semibold bg-white border border-border rounded-full focus:ring-2 focus:ring-pink-400 focus:outline-none"
                                                 />
@@ -208,7 +202,7 @@ const SideCartDrawer = ({ isOpen, onClose }) => {
                                     <Button
                                         variant="ghost"
                                         size="icon"
-                                        className="absolute top-2 right-2 w-7 h-7 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-red-500 hover:bg-red-50"
+                                        className="absolute top-2 right-2 w-7 h-7 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-red-500 hover:bg-red-50"
                                         onClick={() => handleRemoveItem(item._id)}
                                     >
                                         <Trash2 className="w-4 h-4" />

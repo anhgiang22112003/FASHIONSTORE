@@ -522,39 +522,61 @@ const HeroSection = () => {
           to { opacity: 1; transform: translateY(0); }
         }
 
+        .hs-mobile-highlights {
+          display: none;
+        }
+
         @media (max-width: 1023px) {
           .hs-showcase-column {
-            height: 420px;
+            height: auto;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+            padding: 1.5rem 0;
           }
-          .hs-orbit-item-wrap {
-            width: 160px;
-            height: 105px;
-            left: calc(50% - 80px);
-            top: calc(50% - 52px);
+          .hs-orbit-3d {
+            display: none;
           }
           .hs-model-video-box {
-            width: 150px;
-            height: 200px;
+            position: relative;
+            width: 220px;
+            height: 290px;
+            margin: 0 auto;
+            transform: none !important;
+            box-shadow: 
+              0 20px 40px rgba(236, 72, 153, 0.25),
+              0 0 30px rgba(244, 114, 182, 0.15);
+          }
+          .hs-mobile-highlights {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+            width: 100%;
+            max-width: 360px;
+            margin: 0 auto;
+          }
+          .hs-mobile-chip {
+            background: #ffffff;
+            border: 1px solid #fbcfe8;
+            border-radius: 14px;
+            padding: 0.65rem 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            box-shadow: 0 4px 12px rgba(236, 72, 153, 0.06);
+          }
+          .hs-mobile-chip-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #111827;
           }
         }
       `}</style>
 
       <section ref={containerRef} className="hs-section">
-        {/* Full Background Fashion Video from public/fashion-model.mp4 */}
-        <div className="hs-video-bg-wrap" aria-hidden="true">
-          <video
-            className="hs-video-bg"
-            autoPlay
-            loop
-            muted
-            playsInline
-            preload="auto"
-          >
-            <source src="/fashion-model.mp4" type="video/mp4" />
-          </video>
-          <div className="hs-video-overlay" />
-        </div>
-
         {/* Background Grids and Pink Blobs */}
         <div className="hs-grid-bg" />
         <div className="hs-glow-radial" />
@@ -614,28 +636,33 @@ const HeroSection = () => {
                 setActiveCard(null)
               }}
             >
-              {/* Center Model Fashion Video Card */}
-              <div
+              {/* Center Model Fashion Image Showcase Card */}
+              <div 
                 className="hs-model-video-box hs-orb-animate"
                 style={{
                   transform: `translate3d(${mousePos.x * 12}px, ${mousePos.y * 12}px, 0)`
                 }}
               >
-                <video
+                <img
+                  src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=800&auto=format&fit=crop"
+                  alt="Atelier Fashion Model"
                   className="hs-model-video"
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  preload="auto"
-                  poster="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=600&auto=format&fit=crop"
-                >
-                  <source src="/fashion-model.mp4" type="video/mp4" />
-                </video>
+                  loading="eager"
+                />
                 <div className="hs-video-card-badge">
                   <span className="hs-badge-live-dot" />
                   <span>LOOKBOOK 2026</span>
                 </div>
+              </div>
+
+              {/* Mobile clean highlights grid */}
+              <div className="hs-mobile-highlights">
+                {orbitCards.map((card, i) => (
+                  <div key={i} className="hs-mobile-chip">
+                    <card.icon size={16} className="text-pink-500 flex-shrink-0" />
+                    <span className="hs-mobile-chip-title">{card.title}</span>
+                  </div>
+                ))}
               </div>
 
               {/* Orbiting Ring */}

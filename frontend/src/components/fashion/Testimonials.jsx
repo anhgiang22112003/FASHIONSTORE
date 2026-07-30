@@ -1,12 +1,40 @@
-/* Hallmark · macrostructure: Marquee Hero · section: Testimonials · tone: Vercel Infinite Marquee */
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Star } from 'lucide-react';
+import api from '@/service/api';
 import { testimonials } from '../../data/fashionMock';
 
 const Testimonials = () => {
-  // Repeat testimonials enough times for seamless infinite scroll on both rows
-  const marqueeRow1 = [...testimonials, ...testimonials, ...testimonials, ...testimonials];
-  const marqueeRow2 = [...testimonials, ...testimonials, ...testimonials, ...testimonials];
+  const [reviewsList, setReviewsList] = useState([]);
+
+  useEffect(() => {
+    const fetchFiveStarReviews = async () => {
+      try {
+        const response = await api.get('/reviews');
+        const data = response?.data?.data || response?.data || [];
+        const fiveStarReviews = Array.isArray(data)
+          ? data.filter(r => (r.rating === 5 || r.rating >= 4) && (r.comment || r.content))
+          : [];
+
+        if (fiveStarReviews.length > 0) {
+          const formatted = fiveStarReviews.map((r, index) => ({
+            name: r.user?.name || r.userName || r.user?.email?.split('@')[0] || `Khách hàng Atelier #${index + 1}`,
+            role: 'Khách hàng đã xác thực',
+            content: r.comment || r.content || 'Sản phẩm rất đẹp, phom dáng chuẩn tạc và chất liệu tuyệt vời!',
+            rating: r.rating || 5,
+            avatar: r.user?.avatar || `https://images.unsplash.com/photo-${1534528741775 + index * 1000}?w=150&auto=format&fit=crop&q=80`
+          }));
+          setReviewsList(formatted);
+        }
+      } catch (err) {
+        // fallback to default testimonials
+      }
+    };
+    fetchFiveStarReviews();
+  }, []);
+
+  const activeList = reviewsList.length > 0 ? reviewsList : testimonials;
+  const marqueeRow1 = [...activeList, ...activeList, ...activeList, ...activeList];
+  const marqueeRow2 = [...activeList, ...activeList, ...activeList, ...activeList];
 
   return (
     <>

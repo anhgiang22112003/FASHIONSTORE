@@ -3,6 +3,37 @@ import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowRight, Sparkles } from 'lucide-react'
 
+const fallbackCategories = [
+  {
+    _id: 'cat-1',
+    name: 'Áo Sơ Mi & Blouse',
+    slug: 'ao-so-mi',
+    productCount: 24,
+    image: 'https://images.unsplash.com/photo-1598554747436-c9293d6a588f?q=80&w=600&auto=format&fit=crop'
+  },
+  {
+    _id: 'cat-2',
+    name: 'Váy & Đầm Dạ Hội',
+    slug: 'vay-dam',
+    productCount: 38,
+    image: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=600&auto=format&fit=crop'
+  },
+  {
+    _id: 'cat-3',
+    name: 'Áo Khoác & Blazer',
+    slug: 'ao-khoac-blazer',
+    productCount: 19,
+    image: 'https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?q=80&w=600&auto=format&fit=crop'
+  },
+  {
+    _id: 'cat-4',
+    name: 'Quần & Chân Váy',
+    slug: 'quan-chan-vay',
+    productCount: 31,
+    image: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=600&auto=format&fit=crop'
+  }
+]
+
 const ProductCategories = () => {
   const [category, setCategory] = useState([])
   const [loading, setLoading] = useState(true)
@@ -11,8 +42,10 @@ const ProductCategories = () => {
   const fetchCategories = async () => {
     try {
       const response = await api.get('/categories')
-      const activeCategories = response?.data?.data.filter(item => item.isActive)
-      setCategory(activeCategories || [])
+      const activeCategories = response?.data?.data?.filter(item => item.isActive)
+      if (activeCategories && activeCategories.length > 0) {
+        setCategory(activeCategories)
+      }
     } catch (error) {
       console.error('Error fetching product categories:', error)
     } finally {
@@ -23,6 +56,8 @@ const ProductCategories = () => {
   useEffect(() => {
     fetchCategories()
   }, [])
+
+  const displayCategories = (category && category.length > 0) ? category : fallbackCategories
 
   return (
     <>
@@ -199,9 +234,16 @@ const ProductCategories = () => {
           transition: transform 0.3s, color 0.3s;
         }
 
-        .pc-card:hover .pc-card-action {
-          transform: translateX(4px);
-          color: #fbcfe8;
+        @media (max-width: 767px) {
+          .pc-section {
+            padding: 1.5rem 0 1rem !important;
+          }
+          .pc-header {
+            margin-bottom: 1.5rem !important;
+          }
+          .pc-title {
+            font-size: 1.4rem !important;
+          }
         }
       `}</style>
 
@@ -221,12 +263,16 @@ const ProductCategories = () => {
           {loading ? (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 animate-pulse">
               {[...Array(4)].map((_, i) => (
-                <div key={i} className="bg-pink-100/50 rounded-2xl aspect-[4/5]" />
+                <div key={i} className="bg-white/80 rounded-2xl aspect-[4/5] border border-pink-100 shadow-sm p-4 flex flex-col justify-end gap-2">
+                  <div className="w-16 h-4 bg-pink-100/80 rounded-full" />
+                  <div className="w-3/4 h-6 bg-pink-200/60 rounded-md" />
+                  <div className="w-20 h-4 bg-pink-100/60 rounded-md" />
+                </div>
               ))}
             </div>
           ) : (
             <div className="pc-grid">
-              {category.map((cat, index) => (
+              {displayCategories.map((cat, index) => (
                 <div
                   key={cat._id || index}
                   className="pc-card"

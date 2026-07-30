@@ -32,6 +32,12 @@ const Header = () => {
   const totalItems = cart?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0
   const wishlistCount = wishlist?.length
 
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchResults, setSearchResults] = useState([])
+  const [isSearching, setIsSearching] = useState(false)
+  const [showSearchPreview, setShowSearchPreview] = useState(false)
+  const searchRef = useRef(null)
+
   useEffect(() => {
     if (!user?.id) return   // ← Bảo vệ: không gọi khi user chưa sẵn sàng
     const fetchUnreadCount = async () => {
@@ -46,6 +52,7 @@ const Header = () => {
     }
     fetchUnreadCount()
   }, [user])
+
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (notificationRef.current && !notificationRef.current.contains(e.target)) {
@@ -54,11 +61,47 @@ const Header = () => {
       if (profileRef.current && !profileRef.current.contains(e.target)) {
         setIsProfileMenuOpen(false)
       }
+      if (searchRef.current && !searchRef.current.contains(e.target)) {
+        setShowSearchPreview(false)
+      }
     }
 
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
+
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSearchResults([])
+      setShowSearchPreview(false)
+      return
+    }
+
+    const timer = setTimeout(async () => {
+      setIsSearching(true)
+      try {
+        const res = await apiUser.get('/products', { params: { q: searchQuery.trim(), limit: 5 } })
+        setSearchResults(res.data?.products || [])
+        setShowSearchPreview(true)
+      } catch (err) {
+        console.error('Search error:', err)
+      } finally {
+        setIsSearching(false)
+      }
+    }, 300)
+
+    return () => clearTimeout(timer)
+  }, [searchQuery])
+
+  const handleSearchSubmit = (e) => {
+    if (e.key === 'Enter' || e.type === 'click') {
+      e?.preventDefault?.()
+      if (searchQuery.trim()) {
+        setShowSearchPreview(false)
+        navigate(`/products?search=${encodeURIComponent(searchQuery.trim())}`)
+      }
+    }
+  }
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -245,16 +288,99 @@ const Header = () => {
               ))}
             </nav>
 
-            {/* Search Bar */}
-            <div className="hidden lg:flex flex-1 max-w-md mx-8">
+            {/* Search Bar with Live Preview */}
+            <div className="hidden lg:flex flex-1 max-w-md mx-8 relative" ref={searchRef}>
               <div className="relative w-full group">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4 group-hover:text-primary transition-colors" />
+                <Search
+                  onClick={handleSearchSubmit}
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4 group-hover:text-pink-500 transition-colors cursor-pointer z-10"
+                />
                 <Input
                   type="text"
-                  placeholder="Tìm kiếm sản phẩm..."
-                  className="pl-11 pr-4 py-2.5 w-full rounded-full border-2 border-border focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={handleSearchSubmit}
+                  onFocus={() => { if (searchResults.length > 0) setShowSearchPreview(true) }}
+                  placeholder="Tìm kiếm sản phẩm, mẫu mới..."
+                  className="pl-11 pr-9 py-2.5 w-full rounded-full border-2 border-pink-200/80 focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20 transition-all bg-white/90 shadow-sm"
                 />
+                {searchQuery && (
+                  <button
+                    onClick={() => { setSearchQuery(''); setSearchResults([]); setShowSearchPreview(false); }}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
               </div>
+
+              {/* Instant Search Results Dropdown */}
+              {showSearchPreview && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-pink-100 overflow-hidden z-50 animate-slideUp">
+                  <div className="p-3 bg-pink-50/60 border-b border-pink-100 flex items-center justify-between">
+                    <span className="text-xs font-bold text-gray-600 uppercase tracking-wider">
+                      {isSearching ? 'Đang tìm kiếm...' : `Gợi ý sản phẩm (${searchResults.length})`}
+                    </span>
+                    <span className="text-xs text-pink-600 font-semibold">{searchQuery}</span>
+                  </div>
+
+                  {searchResults.length > 0 ? (
+                    <div className="divide-y divide-gray-100 max-h-80 overflow-y-auto">
+                      {searchResults.map((item) => {
+                        const FASHION_FALLBACKS = [
+                          'https://images.unsplash.com/photo-1542272604-787c3835535d?w=300&q=80',
+                          'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=300&q=80',
+                          'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=300&q=80',
+                          'https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=300&q=80',
+                          'https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=300&q=80',
+                        ];
+                        const defaultImg = FASHION_FALLBACKS[(item.name || '').length % FASHION_FALLBACKS.length];
+
+                        const rawImg = item.mainImage || item.image || item.productImage || (Array.isArray(item.images) && item.images[0]) || item.variations?.[0]?.image;
+                        const imgSrc = rawImg
+                          ? (rawImg.startsWith('http://') || rawImg.startsWith('https://') ? rawImg : (rawImg.startsWith('/') ? rawImg : `/${rawImg}`))
+                          : defaultImg;
+                        
+                        const itemPrice = item.sellingPrice ?? item.price ?? item.originalPrice ?? item.variations?.[0]?.price ?? 0;
+
+                        return (
+                          <div
+                            key={item._id}
+                            onClick={() => {
+                              setShowSearchPreview(false);
+                              navigate(`/product/${item._id}`);
+                            }}
+                            className="flex items-center gap-3 p-3 hover:bg-pink-50/50 cursor-pointer transition-colors"
+                          >
+                            <img
+                              src={imgSrc}
+                              alt={item.name}
+                              onError={(e) => { e.target.onerror = null; e.target.src = defaultImg; }}
+                              className="w-12 h-12 object-cover rounded-xl border border-gray-200 shadow-sm flex-shrink-0 bg-gray-100"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-bold text-gray-800 truncate">{item.name}</p>
+                              <p className="text-xs text-pink-600 font-black">{itemPrice > 0 ? `${itemPrice.toLocaleString()}₫` : 'Liên hệ'}</p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                      <button
+                        onClick={handleSearchSubmit}
+                        className="w-full py-2.5 text-center text-xs font-bold text-pink-600 hover:bg-pink-100/60 transition-colors border-t border-pink-100"
+                      >
+                        Xem tất cả kết quả ➔
+                      </button>
+                    </div>
+                  ) : (
+                    !isSearching && (
+                      <div className="p-6 text-center text-sm text-gray-500 font-medium">
+                        Không tìm thấy sản phẩm nào phù hợp.
+                      </div>
+                    )
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Actions */}

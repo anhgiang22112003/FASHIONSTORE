@@ -37,7 +37,7 @@ const Checkout = () => {
   const [orderData, setOrderData] = useState(null)
 
   const buyNowData = location.state
-  const { cart, fetchCart, setCart } = useContext(CartContext)
+  const { cart, fetchCart, setCart, updateQuantity: contextUpdateQuantity, removeFromCart } = useContext(CartContext)
   const [provinces, setProvinces] = useState([])
   const [districts, setDistricts] = useState([])
   const [wards, setWards] = useState([])
@@ -45,7 +45,7 @@ const Checkout = () => {
   const [buyNowDiscountAmount, setBuyNowDiscountAmount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
   const [shippingMethod, setShippingMethod] = useState("standard")
-  const [qtyInput, setQtyInput] = useState({});
+  const [qtyInput, setQtyInput] = useState({})
   const [form, setForm] = useState({
     name: cart?.user?.name || "",
     phone: cart?.user?.phone || "",
@@ -109,9 +109,12 @@ const Checkout = () => {
   ], [])
 
   useEffect(() => {
-    fetchCart()
-    const timer = setTimeout(() => setIsLoading(false), 1000)
-    return () => clearTimeout(timer)
+    if (cart === null) {
+      setIsLoading(true)
+      fetchCart().finally(() => setIsLoading(false))
+    } else {
+      setIsLoading(false)
+    }
   }, [])
 
   useEffect(() => {
@@ -158,68 +161,60 @@ const Checkout = () => {
     , [cart?.shipping, shippingFee])
 
   useEffect(() => {
+    if (!cart) return
     const newShippingFee = shippingMethod === "express" ? 50000 : 30000
     const subtotal = cart?.subtotal || 0
     const discount = cart?.discount || 0
     const newTotal = subtotal - discount + newShippingFee
 
-    setCart(prev => ({
-      ...prev,
-      shipping: newShippingFee,
-      total: newTotal,
-    }))
+    setCart(prev => {
+      if (!prev) return prev
+      if (prev.shipping === newShippingFee && prev.total === newTotal) return prev
+      return {
+        ...prev,
+        shipping: newShippingFee,
+        total: newTotal,
+      }
+    })
   }, [shippingMethod, cart?.discount, cart?.subtotal])
 
   useEffect(() => {
     import('@/data/provinces.json').then((data) => setProvinces(data.default))
   }, [])
 
-  const removeItem = useCallback(async (itemId) => {
-    try {
-      await api.delete(`/cart/remove/${itemId}`)
-      toast.success('Đã xóa sản phẩm khỏi giỏ hàng')
-      fetchCart()
-    } catch (err) {
-      toast.error('Xóa thất bại')
-    }
-  }, [fetchCart])
+  const removeItem = useCallback((itemId) => {
+    removeFromCart(itemId)
+  }, [removeFromCart])
 
-  const updateQuantity = useCallback(async (itemId, newQuantity) => {
-    // Lấy item hiện tại từ cart
-    const item = cart?.items.find(i => i._id === itemId)
+  const updateQuantity = useCallback((itemId, newQuantity) => {
+    const item = cart?.items?.find(i => i._id === itemId)
     if (!item) return
 
-    // Lấy stock thực tế từ biến thể
-    const currentVariant = item.product.variations.find(
+    const currentVariant = item.product?.variations?.find(
       v => v.color === item.color && v.size === item.size
     )
     const maxStock = currentVariant ? (currentVariant.stock - (currentVariant.lockedStock || 0)) : 0
 
-    // Giới hạn quantity trong khoảng 1..maxStock
     if (newQuantity < 1) newQuantity = 1
     if (newQuantity > maxStock) {
       newQuantity = maxStock
       toast.warning(`Chỉ còn ${maxStock} sản phẩm, đã điều chỉnh số lượng`)
     }
 
-    // Cập nhật local input để thay đổi hiển thị tức thì
-    setQtyInput(prev => ({ ...prev, [itemId]: String(newQuantity) }))
-
-    // Nếu số lượng <= 0 thì xóa sản phẩm
     if (newQuantity === 0) {
-      removeItem(itemId)
+      removeFromCart(itemId)
       return
     }
 
-    try {
-      // Gọi API cập nhật backend
-      await api.patch(`/cart/update/${itemId}`, { quantity: newQuantity })
-      // Đồng bộ lại cart
-      fetchCart()
-    } catch (err) {
-      toast.error(err?.response?.data?.message || 'Cập nhật thất bại')
-    }
-  }, [cart, fetchCart, removeItem])
+    // Xóa qtyInput local để fallback về item.quantity từ Context (đồng bộ 3 giỏ)
+    setQtyInput(prev => {
+      const next = { ...prev }
+      delete next[itemId]
+      return next
+    })
+
+    contextUpdateQuantity(itemId, newQuantity)
+  }, [cart, removeFromCart, contextUpdateQuantity])
 
 
   const handleProvinceChange = useCallback((e) => {
@@ -751,33 +746,28 @@ const Checkout = () => {
                               setQtyInput(prev => ({ ...prev, [item._id]: val }))
                             }
                           }}
-                          onBlur={async () => {
+                          onBlur={() => {
                             let num = parseInt(qtyInput[item._id])
 
-                            // Lấy stock thực tế từ biến thể
-                            const currentVariant = item.product.variations.find(
+                            const currentVariant = item.product?.variations?.find(
                               v => v.color === item.color && v.size === item.size
                             )
                             const maxStock = currentVariant ? (currentVariant.stock - (currentVariant.lockedStock || 0)) : 0
 
-                            // Nếu nhập < 1 thì set về 1
                             if (isNaN(num) || num < 1) num = 1
 
-                            // Nếu nhập quá stock thì set về max stock và thông báo
                             if (num > maxStock) {
                               num = maxStock
                               toast.warning(`Chỉ còn ${maxStock} sản phẩm, đã điều chỉnh số lượng`)
                             }
 
-                            // Gọi API cập nhật quantity
-                            try {
-                              await api.patch(`/cart/update/${item._id}`, { quantity: num })
-                              // Đồng bộ lại cart
-                              fetchCart()
-                              setQtyInput(prev => ({ ...prev, [item._id]: String(num) }))
-                            } catch (err) {
-                              toast.error(err?.response?.data?.message || 'Cập nhật thất bại')
-                            }
+                            // Xóa qtyInput local → fallback về item.quantity từ Context
+                            setQtyInput(prev => {
+                              const next = { ...prev }
+                              delete next[item._id]
+                              return next
+                            })
+                            contextUpdateQuantity(item._id, num)
                           }}
                           className="w-12 sm:w-16 text-center font-black text-base sm:text-lg border-none focus:outline-none bg-transparent"
                         />
@@ -829,7 +819,7 @@ const Checkout = () => {
                 <div className="flex justify-between items-center text-lg sm:text-xl font-bold pt-3 sm:pt-4 border-t-2 border-dashed border-pink-300">
                   <p className="text-gray-800 text-base sm:text-lg">Tổng cộng:</p>
                   <p className="text-2xl sm:text-3xl font-black bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
-                    {buyNowData ? buyNowTotal.toLocaleString("vi-VN") : buyNowTotal.toLocaleString("vi-VN")}₫
+                    {(buyNowData ? buyNowTotal : (cart?.total || 0)).toLocaleString("vi-VN")}₫
                   </p>
                 </div>
               </div>

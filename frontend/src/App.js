@@ -37,6 +37,8 @@ const UserProfile = lazy(() => import("@/pages/UserProfile"))
 const ResetPassword = lazy(() => import("@/pages/ResetPassword"))
 const ForgotPassword = lazy(() => import("@/pages/ForgotPassword"))
 const AuthCallback = lazy(() => import("@/pages/AuthCallback"))
+const PolicyPage = lazy(() => import("@/pages/PolicyPage"))
+
 
 const orderStatusText = {
   PENDING: "Chờ xác nhận",
@@ -214,6 +216,7 @@ function App() {
                         <Route path="/login" element={<AuthPage />} />
                         <Route path="/auth/callback" element={<AuthCallback />} />
                         <Route path="/collection" element={<CollectionPage />} />
+                        <Route path="/collection/:id" element={<CollectionPage />} />
                         <Route path="/category" element={<ProductCategoryPage />} />
                         <Route path="/blog" element={<BlogPage />} />
                         <Route path="/blog/:slug" element={<BlogArticlePage />} />
@@ -222,6 +225,10 @@ function App() {
                         <Route path="/forgot-password" element={<ForgotPassword />} />
                         <Route path="/reset-password/:token" element={<ResetPassword />} />
                         <Route path="/order/return" element={<OrderReturn />} />
+                        <Route path="/privacy" element={<PolicyPage />} />
+                        <Route path="/terms" element={<PolicyPage />} />
+                        <Route path="/returns" element={<PolicyPage />} />
+                        <Route path="/guide" element={<PolicyPage />} />
                       </Routes>
                     </FrontendLayout>
                   }

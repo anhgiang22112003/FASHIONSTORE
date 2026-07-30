@@ -8,6 +8,7 @@ import { WishlistContext } from '@/context/WishlistContext';
 import { AuthContext } from '@/context/AuthContext';
 import { toast } from 'react-toastify';
 import { Link } from 'react-router-dom';
+import ProductCard from '@/components/fashion/ProductCard';
 
 // Collection Card Component - Memoized
 const CollectionCard = React.memo(({ collection, index }) => {
@@ -62,125 +63,7 @@ const CollectionCard = React.memo(({ collection, index }) => {
 
 CollectionCard.displayName = 'CollectionCard';
 
-// Product Card Component - Memoized (giống BestSellers)
-const ProductCard = React.memo(({ product, index, favorites, onToggleFavorite, onAddToCart }) => {
-  const isFavorite = favorites.includes(product._id);
-  
-  return (
-    <div
-      className="group relative bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden hover:-translate-y-2"
-      style={{ animationDelay: `${index * 0.1}s` }}
-    >
-      {/* Product Image */}
-      <div className="aspect-[4/5] overflow-hidden relative">
-        <img
-          src={product.mainImage}
-          alt={product.name}
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-          loading="lazy"
-        />
 
-        {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-
-        {/* Sale Badge */}
-        {product.originalPrice > product.sellingPrice && (
-          <div className="absolute top-4 left-4 bg-gradient-to-r from-pink-400 to-pink-600 text-white px-3 py-2 rounded-full text-xs font-black shadow-lg animate-bounce-in">
-            -{Math.round(((product.originalPrice - product.sellingPrice) / product.originalPrice) * 100)}% OFF
-          </div>
-        )}
-
-        {/* Featured Badge */}
-        <div className="absolute top-4 right-4 bg-pink-500 text-white px-3 py-2 rounded-full text-xs font-black shadow-lg flex items-center gap-1 animate-pulse">
-          <Sparkles className="w-3 h-3" />
-          NỔI BẬT
-        </div>
-
-        {/* Action Buttons */}
-        <div className="absolute top-20 right-4 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transform translate-x-4 group-hover:translate-x-0 transition-all duration-300">
-          <Button
-            size="sm"
-            className={`w-12 h-12 p-0 rounded-full shadow-xl ${
-              isFavorite
-                ? 'bg-gradient-to-r from-pink-400 to-pink-600'
-                : 'bg-white hover:bg-gray-50'
-            }`}
-            onClick={(e) => {
-              e.preventDefault();
-              onToggleFavorite(product._id);
-            }}
-          >
-            <Heart
-              className={`w-5 h-5 ${
-                isFavorite ? 'fill-white text-white' : 'text-black'
-              }`}
-            />
-          </Button>
-        </div>
-
-        {/* Add to Cart Button */}
-        <div className="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300">
-          <Button
-            size="lg"
-            className="w-full bg-gradient-to-r from-pink-400 to-pink-600 text-white font-bold rounded-full shadow-xl hover:shadow-pink-500/50"
-            onClick={(e) => {
-              e.preventDefault();
-              onAddToCart(product);
-            }}
-          >
-            <ShoppingBag className="w-4 h-4 mr-2" />
-            Thêm vào giỏ
-          </Button>
-        </div>
-      </div>
-
-      {/* Product Info */}
-      <div className="p-6 bg-white">
-        <Link to={`/product/${product._id}`}>
-          <h3 className="font-bold text-black mb-3 line-clamp-2 text-lg group-hover:text-pink-500 transition-colors">
-            {product.name}
-          </h3>
-        </Link>
-
-        {/* Rating */}
-        <div className="flex items-center gap-2 mb-3">
-          <div className="flex items-center">
-            {[...Array(5)].map((_, i) => (
-              <Star
-                key={i}
-                className={`w-4 h-4 ${
-                  i < Math.floor(product.ratingAverage || 0)
-                    ? 'text-pink-500 fill-pink-500'
-                    : 'text-gray-300'
-                }`}
-              />
-            ))}
-          </div>
-          <span className="text-sm text-gray-600 font-semibold">
-            {product.ratingAverage?.toFixed(1) ?? 0} ({product.reviewCount ?? 0})
-          </span>
-        </div>
-
-        {/* Price */}
-        <div className="flex items-center gap-3">
-          <span className="text-2xl font-black bg-gradient-to-r from-pink-400 to-pink-600 bg-clip-text text-transparent">
-            {product.sellingPrice?.toLocaleString('vi-VN')}₫
-          </span>
-          {product.originalPrice > product.sellingPrice && (
-            <span className="text-sm text-gray-500 line-through font-medium">
-              {product.originalPrice?.toLocaleString('vi-VN')}₫
-            </span>
-          )}
-        </div>
-      </div>
-
-      {/* Shine effect */}
-      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 pointer-events-none"></div>
-    </div>
-  );
-});
-
-ProductCard.displayName = 'ProductCard';
 
 // Main Component
 const CollectionPage = () => {
@@ -290,7 +173,7 @@ const CollectionPage = () => {
         key={product._id}
         product={product}
         index={index}
-        favorites={favorites}
+        isFavorite={favorites.includes(product._id)}
         onToggleFavorite={toggleFavorite}
         onAddToCart={handleAddToCart}
       />
@@ -387,7 +270,7 @@ const CollectionPage = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 lg:gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6 lg:gap-8">
             {productList}
           </div>
 

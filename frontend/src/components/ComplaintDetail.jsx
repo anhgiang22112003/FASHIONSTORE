@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   Eye, 
   CheckCircle, 
@@ -21,7 +22,7 @@ import {
   ORDER_STATUS_LABELS 
 } from '@/data/constants';
 
-// ── Custom Modal Shell ──────────────────────────────────────────────────────
+// ── Custom Modal Shell (Portal to escape sticky table z-index) ──────────────
 const Modal = ({ isOpen, onClose, title, children }) => {
   useEffect(() => {
     if (isOpen) document.body.style.overflow = 'hidden';
@@ -31,11 +32,11 @@ const Modal = ({ isOpen, onClose, title, children }) => {
 
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
         onClick={onClose}
       />
       {/* Panel */}
@@ -60,7 +61,8 @@ const Modal = ({ isOpen, onClose, title, children }) => {
           {children}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

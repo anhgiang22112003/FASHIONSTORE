@@ -6,15 +6,20 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Slider } from '@/components/ui/slider'
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
 import api from '@/service/api'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { WishlistContext } from '@/context/WishlistContext'
 import { AuthContext } from '@/context/AuthContext'
 import SideCartDrawer from '@/components/fashion/SideCartDrawer'
 import VariantSelectionModal from '@/components/fashion/VariantSelectionModal'
+import ProductCard from '@/components/fashion/ProductCard'
 
 
 const Products = () => {
+    const [searchParams] = useSearchParams()
+    const urlQuery = searchParams.get('search') || searchParams.get('q') || ''
+    const urlCat = searchParams.get('category') || ''
+
     const [products, setProducts] = useState([])
     const [total, setTotal] = useState(0)
     const [page, setPage] = useState(1)
@@ -22,8 +27,8 @@ const Products = () => {
     const [loading, setLoading] = useState(false)
 
     // Filters
-    const [searchQuery, setSearchQuery] = useState('')
-    const [selectedCategory, setSelectedCategory] = useState('')
+    const [searchQuery, setSearchQuery] = useState(urlQuery)
+    const [selectedCategory, setSelectedCategory] = useState(urlCat)
     const [selectedCollection, setSelectedCollection] = useState('')
     const [sortBy, setSortBy] = useState('newest')
     const [priceRange, setPriceRange] = useState([0, 10000000])
@@ -122,6 +127,12 @@ const Products = () => {
         fetchCategories()
         fetchCollections()
     }, [])
+
+    useEffect(() => {
+        setSearchQuery(urlQuery)
+        setSelectedCategory(urlCat)
+        setPage(1)
+    }, [urlQuery, urlCat])
 
     useEffect(() => {
         fetchProducts()
@@ -390,184 +401,23 @@ const Products = () => {
                         ) : (
                             <>
                                 <div className={viewMode === 'grid'
-                                    ? 'grid sm:grid-cols-2 lg:grid-cols-3 gap-6'
+                                    ? 'grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6'
                                     : 'flex flex-col gap-6'
                                 }>
-                                    {products?.map((product) => {
-                                        const colors = Array.from(new Set((product?.variations || []).map(v => v.color).filter(Boolean)));
-                                        const sizes = Array.from(new Set((product?.variations || []).map(v => v.size).filter(Boolean)));
-                                        const colorMap = {
-                                            'Đen': '#000000', 'Den': '#000000',
-                                            'Trắng': '#FFFFFF', 'Trang': '#FFFFFF',
-                                            'Đỏ': '#EF4444', 'Do': '#EF4444',
-                                            'Xanh': '#3B82F6',
-                                            'Xanh lá': '#10B981', 'Xanh la': '#10B981',
-                                            'Vàng': '#F59E0B', 'Vang': '#F59E0B',
-                                            'Hồng': '#EC4899', 'Hong': '#EC4899',
-                                            'Xám': '#6B7280', 'Xam': '#6B7280',
-                                            'Cam': '#F97316',
-                                            'Tím': '#8B5CF6', 'Tim': '#8B5CF6',
-                                            'Nâu': '#78350F', 'Nau': '#78350F',
-                                        };
-
-                                        return (
-                                            <div
-                                                key={product?._id}
-                                                className={`group relative bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden hover:-translate-y-2 ${viewMode === 'list' ? 'flex flex-row' : ''
-                                                    }`}
-                                            >
-                                                <div className={`${viewMode === 'list' ? 'w-64' : 'aspect-[4/5]'} overflow-hidden relative`}>
-                                                    <img
-                                                        src={product?.mainImage}
-                                                        alt={product?.name}
-                                                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                                    />
-
-                                                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-
-                                                    {product?.originalPrice > product?.sellingPrice && (
-                                                        <div className="absolute top-4 left-4 bg-gradient-to-r from-pink-400 to-pink-600 text-white px-3 py-2 rounded-full text-xs font-black shadow-lg">
-                                                            -{Math.round(((product?.originalPrice - product?.sellingPrice) / product?.originalPrice) * 100)}% OFF
-                                                        </div>
-                                                    )}
-
-                                                    <div className="absolute top-4 right-4 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                                                        <Button
-                                                            size="sm"
-                                                            className={`w-10 h-10 p-0 rounded-full shadow-xl ${favorites.includes(product._id)
-                                                                ? 'bg-gradient-to-r from-pink-400 to-pink-600'
-                                                                : 'bg-white hover:bg-gray-50'
-                                                                }`}
-                                                            onClick={(e) => {
-                                                                e.preventDefault()
-                                                                toggleFavorite(product._id)
-                                                            }}
-                                                        >
-                                                            <Heart
-                                                                className={`w-4 h-4 ${favorites.includes(product._id)
-                                                                    ? 'fill-white text-white'
-                                                                    : 'text-black'
-                                                                    }`}
-                                                            />
-                                                        </Button>
-                                                    </div>
-
-                                                    {viewMode === 'grid' && (
-                                                        <div className="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300">
-                                                            <Button
-                                                                size="lg"
-                                                                className="w-full bg-gradient-to-r from-pink-400 to-pink-600 text-white font-bold rounded-full shadow-xl"
-                                                                onClick={() => {
-                                                                    setSelectedProduct(product)
-                                                                    setIsVariantModalOpen(true)
-                                                                }}
-                                                            >
-                                                                <ShoppingBag className="w-4 h-4 mr-2" />
-                                                                Thêm vào giỏ
-                                                            </Button>
-                                                        </div>
-                                                    )}
-                                                </div>
-
-                                                <div className={`p-6 bg-white flex-1 flex flex-col justify-between`}>
-                                                    <div>
-                                                        {/* Brand & Material */}
-                                                        <div className="text-[10px] uppercase font-black tracking-wider text-pink-500 mb-1">
-                                                            {product?.brand || 'FashionStore'} • {product?.material || 'Chất lượng cao'}
-                                                        </div>
-
-                                                        <Link to={`/product/${product?._id}`}>
-                                                            <h3 className="font-bold text-black mb-2 line-clamp-2 text-base group-hover:text-pink-500 transition-colors leading-snug">
-                                                                {product?.name}
-                                                            </h3>
-                                                        </Link>
-
-                                                        {/* Short description for list mode */}
-                                                        {viewMode === 'list' && product?.shortDescription && (
-                                                            <p className="text-sm text-gray-500 mb-3 line-clamp-2">{product?.shortDescription}</p>
-                                                        )}
-
-                                                        {/* Rating */}
-                                                        <div className="flex items-center gap-1.5 mb-2.5">
-                                                            <div className="flex items-center">
-                                                                {[...Array(5)].map((_, i) => (
-                                                                    <Star
-                                                                        key={i}
-                                                                        className={`w-3.5 h-3.5 ${i < Math.floor(product?.ratingAverage || 0)
-                                                                            ? 'text-pink-500 fill-pink-500'
-                                                                            : 'text-gray-300'
-                                                                            }`}
-                                                                    />
-                                                                ))}
-                                                            </div>
-                                                            <span className="text-xs text-gray-600 font-bold">
-                                                                {product?.ratingAverage?.toFixed(1) ?? 0} ({product?.reviewCount ?? 0})
-                                                            </span>
-                                                        </div>
-
-                                                        {/* Colors & Sizes Swatches */}
-                                                        {(colors.length > 0 || sizes.length > 0) && (
-                                                            <div className="flex items-center justify-between gap-2 border-t border-gray-50 pt-2.5 mb-3">
-                                                                {colors.length > 0 ? (
-                                                                    <div className="flex items-center gap-1">
-                                                                        {colors.slice(0, 4).map((c, idx) => {
-                                                                            const bgCol = colorMap[c] || '#CBD5E1';
-                                                                            return (
-                                                                                <span
-                                                                                    key={idx}
-                                                                                    className="w-3 h-3 rounded-full border border-gray-200 inline-block shadow-sm"
-                                                                                    style={{ backgroundColor: bgCol }}
-                                                                                    title={c}
-                                                                                />
-                                                                            );
-                                                                        })}
-                                                                        {colors.length > 4 && (
-                                                                            <span className="text-[9px] text-gray-400 font-bold">+{colors.length - 4}</span>
-                                                                        )}
-                                                                    </div>
-                                                                ) : <div />}
-
-                                                                {sizes.length > 0 && (
-                                                                    <div className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">
-                                                                        Sizes: {sizes.slice(0, 3).join(', ')}{sizes.length > 3 && '...'}
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                        )}
-                                                    </div>
-
-                                                    <div className="flex items-end justify-between">
-                                                        <div className="flex items-baseline gap-2.5">
-                                                            <span className="text-xl font-black bg-gradient-to-r from-pink-400 to-pink-600 bg-clip-text text-transparent">
-                                                                {product?.sellingPrice?.toLocaleString('vi-VN')}đ
-                                                            </span>
-                                                            {product.originalPrice > product.sellingPrice && (
-                                                                <span className="text-xs text-gray-400 line-through font-medium">
-                                                                    {product?.originalPrice?.toLocaleString('vi-VN')}đ
-                                                                </span>
-                                                            )}
-                                                        </div>
-
-                                                        {viewMode === 'list' && (
-                                                            <Button
-                                                                size="lg"
-                                                                className="bg-gradient-to-r from-pink-400 to-pink-600 text-white font-bold rounded-full"
-                                                                onClick={() => {
-                                                                    setSelectedProduct(product)
-                                                                    setIsVariantModalOpen(true)
-                                                                }}
-                                                            >
-                                                                <ShoppingBag className="w-4 h-4 mr-2" />
-                                                                Thêm vào giỏ
-                                                            </Button>
-                                                        )}
-                                                    </div>
-                                                </div>
-
-                                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 pointer-events-none"></div>
-                                            </div>
-                                        );
-                                    })}
+                                    {products?.map((product, index) => (
+                                        <ProductCard
+                                            key={product?._id}
+                                            product={product}
+                                            index={index}
+                                            viewMode={viewMode}
+                                            isFavorite={favorites.includes(product._id)}
+                                            onToggleFavorite={toggleFavorite}
+                                            onAddToCart={(p) => {
+                                                setSelectedProduct(p)
+                                                setIsVariantModalOpen(true)
+                                            }}
+                                        />
+                                    ))}
                                 </div>
 
                                 {/* Pagination */}

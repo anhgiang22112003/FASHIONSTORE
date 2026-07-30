@@ -12,26 +12,69 @@ import 'swiper/css/effect-coverflow';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 
+const fallbackCollections = [
+  {
+    id: 'f1',
+    name: 'Bộ Sưu Tập Thu Đông 2026',
+    description: 'Thiết kế sang trọng, phom dáng chuẩn tạc từ những chất liệu cao cấp nhất.',
+    image: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=800&auto=format&fit=crop',
+    slug: 'thu-dong-2026',
+    tag: 'NEW ARRIVAL'
+  },
+  {
+    id: 'f2',
+    name: 'Atelier Workwear Premium',
+    description: 'Phong cách công sở hiện đại, thanh lịch tôn vinh thần thái quyến rũ.',
+    image: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=800&auto=format&fit=crop',
+    slug: 'workwear-premium',
+    tag: 'BESTSELLER'
+  },
+  {
+    id: 'f3',
+    name: 'Đầm Dạ Hội Luxury Event',
+    description: 'Quyến rũ và kiêu sa trong từng đường kim mũi chỉ dành cho quý cô thượng lưu.',
+    image: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=800&auto=format&fit=crop',
+    slug: 'da-hoi-luxury',
+    tag: 'EXCLUSIVE'
+  },
+  {
+    id: 'f4',
+    name: 'Phụ Kiện & Giày Cao Cấp',
+    description: 'Hoàn thiện diện mạo với những điểm nhấn phụ kiện túi xách, giày da hàng hiệu.',
+    image: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=800&auto=format&fit=crop',
+    slug: 'phu-kien-luxury',
+    tag: 'TRENDING'
+  }
+];
+
 const FeaturedCollections = () => {
   const [collection, setCollection] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
   const [showCursor, setShowCursor] = useState(false);
   const containerRef = useRef(null);
   const sectionRef = useRef(null);
 
   const featuredCollections = async () => {
+    setLoading(true);
     try {
       const response = await api.get('/collection');
       const activeCollection = response?.data?.data?.filter(item => item.isActive);
-      setCollection(activeCollection);
+      if (activeCollection && activeCollection.length > 0) {
+        setCollection(activeCollection);
+      }
     } catch (error) {
       // silently fail
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     featuredCollections();
   }, []);
+
+  const displayCollections = (collection && collection.length > 0) ? collection : fallbackCollections;
 
   useGSAP(() => {
     if (collection.length === 0) return;
@@ -322,7 +365,10 @@ const FeaturedCollections = () => {
         .fc-card-cta:hover { background: #db2777; }
 
         @media (max-width: 1023px) {
-          .fc-section { cursor: default; }
+          .fc-section {
+            cursor: default;
+            padding: 1.5rem 0 2.5rem !important;
+          }
           .fc-custom-cursor { display: none; }
           .fc-card { cursor: pointer; }
           .fc-card-cta { opacity: 1; transform: none; }
@@ -369,8 +415,19 @@ const FeaturedCollections = () => {
           </div>
 
           <div className="fc-swiper-wrap">
-            {collection && collection.length > 0 ? (
-            <Swiper
+            {loading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 animate-pulse py-6">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="bg-white/80 rounded-[20px] aspect-[3/4] border border-pink-100 shadow-sm p-6 flex flex-col justify-end gap-3">
+                    <div className="w-20 h-5 bg-pink-100/80 rounded-full" />
+                    <div className="w-3/4 h-7 bg-pink-200/60 rounded-lg" />
+                    <div className="w-full h-4 bg-pink-100/60 rounded-md" />
+                    <div className="w-24 h-8 bg-pink-200/50 rounded-full mt-2" />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <Swiper
                 modules={[Pagination, Navigation, EffectCoverflow]}
                 effect="coverflow"
                 coverflowEffect={{
@@ -392,7 +449,7 @@ const FeaturedCollections = () => {
                 }}
                 className="pb-14"
               >
-                {collection.map((item, index) => (
+                {displayCollections.map((item, index) => (
                   <SwiperSlide key={item?.id || index}>
                     <div className="fc-card">
                       <img
@@ -403,11 +460,11 @@ const FeaturedCollections = () => {
                       />
                       <div className="fc-card-overlay" />
                       <div className="fc-card-body">
-                        <div className="fc-card-tag">New</div>
+                        <div className="fc-card-tag">{item?.tag || 'Collection'}</div>
                         <h3 className="fc-card-title">{item?.name}</h3>
                         <p className="fc-card-desc">{item?.description}</p>
                         <Link
-                          to={`/collection/${item?.slug || 'detail'}`}
+                          to={item?._id ? `/products?collection=${item._id}` : `/collection`}
                           className="fc-card-cta"
                           id={`fc-card-cta-${index}`}
                         >
@@ -418,10 +475,6 @@ const FeaturedCollections = () => {
                   </SwiperSlide>
                 ))}
               </Swiper>
-            ) : (
-              <div className="text-center py-20 text-gray-500">
-                <p>Chưa có bộ sưu tập nào.</p>
-              </div>
             )}
           </div>
         </div>
