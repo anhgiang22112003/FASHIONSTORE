@@ -13,6 +13,7 @@ import { socket } from "@/service/socket"
 import { ShoppingBag } from "lucide-react"
 import SideCartDrawer from "@/components/fashion/SideCartDrawer"
 import { WishlistProvider } from "@/context/WishlistContext"
+import { FlashSaleProvider } from "@/context/FlashSaleContext"
 import { CompareProvider } from "@/context/CompareContext"
 import ProductCompareModal from "@/components/fashion/ProductCompareModal"
 import ScrollToTop from "@/components/fashion/ScrollToTop"
@@ -167,6 +168,7 @@ function App() {
 
   return (
     <Router>
+      <FlashSaleProvider>
       <WishlistProvider>
         <CartProvider>
           <AuthProvider>
@@ -256,6 +258,7 @@ function App() {
           </AuthProvider>
         </CartProvider>
       </WishlistProvider>
+    </FlashSaleProvider>
     </Router>
   )
 }

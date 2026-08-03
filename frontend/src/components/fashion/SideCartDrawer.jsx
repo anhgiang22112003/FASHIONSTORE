@@ -1,16 +1,18 @@
 // SideCartDrawer.jsx
-import { ShoppingBag, X, Minus, Plus, Trash2, Package } from 'lucide-react'
+import { ShoppingBag, X, Minus, Plus, Trash2, Package, Zap } from 'lucide-react'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '../ui/sheet'
 import { Button } from '../ui/button'
 import { useContext, useState } from 'react'
 import { CartContext } from '@/context/CartContext'
 import { Link, useNavigate } from 'react-router-dom'
 import api from '@/service/api'
+import { useFlashSale } from '@/context/FlashSaleContext'
 import { toast } from 'react-toastify'
 import { Skeleton } from '../ui/skeleton'
 
 const SideCartDrawer = ({ isOpen, onClose }) => {
     const { cart, updateQuantity, removeFromCart } = useContext(CartContext)
+    const { getFlashInfo } = useFlashSale()
     const navigate = useNavigate()
     const [loadedImages, setLoadedImages] = useState({})
     const [qtyInput, setQtyInput] = useState({});
@@ -119,10 +121,23 @@ const SideCartDrawer = ({ isOpen, onClose }) => {
                                         </div>
 
                                         {/* Price & Quantity Controls */}
-                                        <div className="flex items-center justify-between mt-2">
-                                            <p className="font-bold text-pink-600 text-base">
-                                                {item.price?.toLocaleString('vi-VN')}đ
-                                            </p>
+                                        <div className="flex items-center justify-between mt-2">                                            {(() => { const f = getFlashInfo(item.product?._id); return (
+              <div>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <p className="font-bold text-pink-600 text-base">
+                    {(f?.salePrice ?? item.price)?.toLocaleString('vi-VN')}đ
+                  </p>
+                  {f && (
+                    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-black bg-gradient-to-r from-red-500 to-pink-500 text-white">
+                      <Zap size={10} /> -{Math.round(((item.price - f.salePrice) / item.price) * 100)}%
+                    </span>
+                  )}
+                </div>
+                {f && (
+                  <span className="text-[10px] text-gray-400 line-through">{item.price?.toLocaleString('vi-VN')}đ</span>
+                )}
+              </div>
+            )})()}
 
                                             <div className="flex items-center gap-1.5 bg-muted rounded-full p-0.5">
                                                 <Button

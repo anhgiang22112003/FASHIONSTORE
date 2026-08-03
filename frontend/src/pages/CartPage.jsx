@@ -1,26 +1,35 @@
 import React, { useState, useEffect, useContext, useCallback, useMemo } from 'react'
-import { Minus, Plus, Trash2, ArrowRight, ShoppingBag, Heart, Star, Gift, Package } from 'lucide-react'
+import { AuthContext } from '@/context/AuthContext'
+import { Minus, Plus, Trash2, ArrowRight, ShoppingBag, Heart, Star, Gift, Package, Zap } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { useNavigate } from 'react-router-dom'
 import api from '@/service/api'
 import { toast } from 'react-toastify'
 import { CartContext } from '@/context/CartContext'
+import { useFlashSale } from '@/context/FlashSaleContext'
 
 const CartPage = () => {
   const navigate = useNavigate()
   const [isLoading, setIsLoading] = useState(true)
+  const { user } = useContext(AuthContext)
   const { cart, fetchCart, updateQuantity: contextUpdateQuantity, removeFromCart: contextRemoveFromCart } = useContext(CartContext)
+  const { getFlashInfo } = useFlashSale()
   const [qtyInput, setQtyInput] = useState({});
 
   // Chỉ fetch khi mount và context chưa có dữ liệu → hạn chế gọi API
   useEffect(() => {
+    if (!user) {
+      toast.warning('Vui lòng đăng nhập để xem giỏ hàng')
+      navigate('/login')
+      return
+    }
     if (cart === null) {
       setIsLoading(true)
       fetchCart().finally(() => setTimeout(() => setIsLoading(false), 500))
     } else {
       setIsLoading(false)
     }
-  }, [])  // eslint-disable-line
+  }, [user, cart, fetchCart, navigate])  // eslint-disable-line
 
   // Tự cập nhật khi CartContext thay đổi (chatbot thêm giỏ, v.v.)
   useEffect(() => {
@@ -99,6 +108,10 @@ const CartPage = () => {
       </div>
     </div>
   )
+
+  if (!user) {
+    return null
+  }
 
   if (isLoading) {
     return <LoadingSkeleton />
@@ -202,9 +215,24 @@ const CartPage = () => {
                           </div>
                         </div>
 
-                        <div className="text-2xl font-black bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
-                          {item?.product?.sellingPrice?.toLocaleString('vi-VN')}₫
+{(() => { const f = getFlashInfo(item.product?._id); const dp = f?.salePrice ?? item?.product?.sellingPrice; return (
+                        <div>
+                          {f && (
+                            <div className="flex items-center gap-1.5 mb-1">
+                              <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded text-[11px] font-black bg-gradient-to-r from-red-500 to-pink-500 text-white">
+                                <Zap size={12} /> FLASH SALE -{Math.round(((item?.product?.sellingPrice - f.salePrice) / item?.product?.sellingPrice) * 100)}%
+                              </span>
+                              <span className="text-xs text-red-500 font-bold">Kết thúc: {(() => { if (!f.endTime) return ''; const d = new Date(f.endTime).getTime() - Date.now(); if (d <= 0) return ''; const h = Math.floor(d/36e5); const m = Math.floor((d%36e5)/6e4); return h+'g'+String(m).padStart(2,'0')+'p'; })()}</span>
+                            </div>
+                          )}
+                          <div className="text-2xl font-black bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
+                            {dp?.toLocaleString('vi-VN')}₫
+                          </div>
+                          {f && (
+                            <div className="text-sm text-gray-400 line-through">{item?.product?.sellingPrice?.toLocaleString('vi-VN')}₫</div>
+                          )}
                         </div>
+                      )})()}
                       </div>
 
                       {/* Actions */}

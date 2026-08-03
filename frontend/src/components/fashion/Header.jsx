@@ -3,6 +3,7 @@ import { Search, ShoppingBag, User, Menu, X, Heart, Sparkles, ChevronDown } from
 import { Input } from '../ui/input'
 import { Button } from '../ui/button'
 import { Link, useNavigate } from 'react-router-dom'
+import { toast } from 'react-toastify'
 import {
   UserCircleIcon,
   BellIcon,
@@ -26,6 +27,24 @@ const Header = () => {
   const { user, logout } = useContext(AuthContext)
   const { cart } = useContext(CartContext)
   const [unreadCount, setUnreadCount] = useState(0)
+
+  const handleWishlistClick = () => {
+    if (!user) {
+      toast.warning('Vui lòng đăng nhập để xem danh sách yêu thích')
+      navigate('/login')
+      return
+    }
+    navigate('/wishlist')
+  }
+
+  const handleCartClick = () => {
+    if (!user) {
+      toast.warning('Vui lòng đăng nhập để xem giỏ hàng')
+      navigate('/login')
+      return
+    }
+    navigate('/cart')
+  }
   const [showDropdown, setShowDropdown] = useState(false)
   const [isCategoryMenuOpen, setIsCategoryMenuOpen] = useState(false)
   const [mobileCategoryFilter, setMobileCategoryFilter] = useState('')
@@ -456,27 +475,25 @@ const Header = () => {
             {/* Actions */}
             <div className="flex items-center space-x-1 sm:space-x-2">
               {/* Wishlist */}
-              <Link to="/wishlist">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="relative flex items-center justify-center h-9 w-9 sm:h-10 sm:w-10 rounded-full transition-all group"
-                >
-                  <Heart className="w-4 h-4 sm:w-5 sm:h-5 text-foreground transition-colors" />
-                  {wishlistCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center shadow-lg">
-                      {wishlistCount}
-                    </span>
-                  )}
-                </Button>
-              </Link>
+              <button
+                type="button"
+                onClick={handleWishlistClick}
+                className="relative h-9 w-9 sm:h-10 sm:w-10 rounded-full transition-all group"
+              >
+                <Heart className="w-4 h-4 sm:w-5 sm:h-5 text-foreground transition-colors" />
+                {wishlistCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center shadow-lg">
+                    {wishlistCount}
+                  </span>
+                )}
+              </button>
 
               {/* Cart */}
               <Button
                 variant="ghost"
                 size="sm"
                 className="relative h-9 w-9 sm:h-10 sm:w-10 rounded-full hover:bg-accent transition-all group"
-                onClick={() => navigate('/cart')}
+                onClick={handleCartClick}
               >
                 <ShoppingBag className="w-4 h-4 sm:w-5 sm:h-5 text-foreground transition-colors" />
                 {totalItems > 0 && (

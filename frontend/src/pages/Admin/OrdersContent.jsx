@@ -43,6 +43,7 @@ const OrdersContent = ({ onEditOrder }) => {
     userId: "",
     staffId: "",
     orderType: "",
+    isFlashSale: "",
     status: "",
     minDate: "",
     maxDate: "",
@@ -615,6 +616,14 @@ const OrdersContent = ({ onEditOrder }) => {
             <option value="">-- Tất cả loại đơn --</option>
             <option value="ONLINE">ONLINE</option>
             <option value="POS">POS</option>
+          </select>
+        </FilterPanel.Field>
+
+        <FilterPanel.Field label="Flash Sale">
+          <select name="isFlashSale" value={filters.isFlashSale} onChange={handleFilterChange}>
+            <option value="">-- Tất cả --</option>
+            <option value="yes">Đơn Flash Sale</option>
+            <option value="no">Đơn thường</option>
           </select>
         </FilterPanel.Field>
 

@@ -1,5 +1,6 @@
-import React, { useState, useRef } from 'react'
-import { Star, Heart, ShoppingBag, Eye } from 'lucide-react'
+import React, { useState, useRef, useEffect } from 'react'
+import { useFlashSale } from '@/context/FlashSaleContext'
+import { Star, Heart, ShoppingBag, Eye, Zap } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
 const colorMap = {
@@ -40,6 +41,38 @@ const ProductCard = ({
   const hasDiscount = originalPrice > price
   const discountPct = hasDiscount ? Math.round(((originalPrice - price) / originalPrice) * 100) : 0
 
+  // Flash sale info
+  const { getFlashInfo, version } = useFlashSale()
+  const [flashInfo, setFlashInfo] = useState(() => getFlashInfo(product?._id))
+  const [flashCountdown, setFlashCountdown] = useState('')
+
+  useEffect(() => {
+    const info = getFlashInfo(product?._id)
+    setFlashInfo(info)
+  }, [getFlashInfo, version, product?._id])
+
+  function computeCountdown(endMs) {
+    if (!endMs) return ''
+    const diff = new Date(endMs).getTime() - Date.now()
+    if (isNaN(diff) || diff <= 0) return ''
+    const h = Math.floor(diff / 3600000)
+    const m = Math.floor((diff % 3600000) / 60000)
+    const s = Math.floor((diff % 60000) / 1000)
+    return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`
+  }
+
+  useEffect(() => {
+    if (!flashInfo?.endTime) { setFlashCountdown(''); return }
+    setFlashCountdown(computeCountdown(flashInfo.endTime))
+    const id = setInterval(() => setFlashCountdown(computeCountdown(flashInfo.endTime)), 1000)
+    return () => clearInterval(id)
+  }, [flashInfo?.endTime, product?._id])
+
+  const displayPrice = flashInfo ? flashInfo.salePrice : price
+  const displayOriginal = flashInfo ? price : originalPrice
+  const showDiscount = flashInfo || hasDiscount
+  const displayDiscountPct = flashInfo ? Math.round(((price - flashInfo.salePrice) / price) * 100) : discountPct
+
   const handleCardClick = (e) => {
     if (onClick) {
       onClick(e)
@@ -50,6 +83,7 @@ const ProductCard = ({
 
   const handleMouseMove = (e) => {
     if (!cardRef.current || viewMode === 'list') return
+    if (typeof window !== 'undefined' && window.innerWidth < 768) return // disable tilt on small screens
     const rect = cardRef.current.getBoundingClientRect()
     const x = e.clientX - rect.left
     const y = e.clientY - rect.top
@@ -173,7 +207,7 @@ const ProductCard = ({
 
         .bs-card:hover {
           border-color: #f472b6;
-          box-shadow: 0 15px 30px rgba(236, 72, 153, 0.15);
+          box-shadow: 0 8px 20px rgba(236, 72, 153, 0.08);
         }
 
         .bs-card-img-wrap {
@@ -189,11 +223,12 @@ const ProductCard = ({
           height: 100%;
           object-fit: cover;
           display: block;
-          transition: transform 0.6s ease;
+          transition: transform 0.25s ease;
         }
 
-        .bs-card:hover .bs-card-img {
-          transform: scale(1.05);
+        /* subtler hover zoom on desktop only */
+        @media (min-width: 768px) {
+          .bs-card:hover .bs-card-img { transform: scale(1.03); }
         }
 
         .bs-card-glare {
@@ -263,16 +298,16 @@ const ProductCard = ({
 
         .bs-card-actions {
           position: absolute;
-          bottom: 0;
-          left: 0;
-          right: 0;
-          padding: 0.75rem;
-          background: linear-gradient(to top, rgba(17,24,39,0.8) 0%, transparent 100%);
+          bottom: 0.5rem;
+          left: 0.5rem;
+          right: 0.5rem;
+          padding: 0.5rem;
+          background: linear-gradient(to top, rgba(17,24,39,0.6) 0%, transparent 100%);
           display: flex;
-          gap: 0.4rem;
+          gap: 0.5rem;
           opacity: 0;
-          transform: translateY(8px);
-          transition: opacity 0.3s, transform 0.3s;
+          transform: translateY(6px);
+          transition: opacity 0.2s, transform 0.2s;
           z-index: 9;
         }
 
@@ -298,7 +333,7 @@ const ProductCard = ({
           background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
           color: #ffffff;
           gap: 0.4rem;
-          transition: background 0.3s;
+          transition: background 0.18s;
         }
 
         .bs-btn-primary-action:hover {
@@ -449,30 +484,43 @@ const ProductCard = ({
             aspect-ratio: 1 / 1 !important;
             border-radius: 10px 10px 0 0 !important;
           }
+          /* make actions accessible and tappable on mobile: full-width primary button */
           .bs-card-actions {
             opacity: 1 !important;
             transform: none !important;
-            position: absolute !important;
-            bottom: 0.35rem !important;
-            right: 0.35rem !important;
+            position: relative !important;
+            bottom: auto !important;
+            right: auto !important;
             left: auto !important;
             background: none !important;
-            padding: 0 !important;
+            padding: 0.5rem 0 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 0.5rem !important;
           }
           .bs-btn-primary-action {
-            width: 1.8rem !important;
-            height: 1.8rem !important;
-            border-radius: 50% !important;
-            padding: 0 !important;
+            width: 100% !important;
+            height: 2.8rem !important;
+            border-radius: 12px !important;
+            padding: 0 0.75rem !important;
             min-width: auto !important;
             flex: none !important;
-            box-shadow: 0 2px 8px rgba(236, 72, 153, 0.4) !important;
+            box-shadow: 0 6px 18px rgba(236, 72, 153, 0.12) !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
           }
           .bs-btn-primary-action span {
-            display: none !important;
+            display: inline-block !important;
           }
           .bs-btn-view-action {
-            display: none !important;
+            width: 40px !important;
+            height: 40px !important;
+            border-radius: 8px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            margin: 0 auto !important;
           }
           .bs-card-rank {
             font-size: 0.55rem !important;
@@ -558,10 +606,10 @@ const ProductCard = ({
         onClick={handleCardClick}
         style={{
           animationDelay: `${index * 60}ms`,
-          transform: viewMode === 'grid' && hovered
+          transform: (typeof window !== 'undefined' && window.innerWidth >= 768 && viewMode === 'grid' && hovered)
             ? `perspective(1000px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) scale(1.02)`
             : 'none',
-          transition: hovered ? 'transform 0.05s linear, border-color 0.3s' : 'transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s'
+          transition: hovered ? 'transform 0.12s linear, border-color 0.2s' : 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s'
         }}
       >
         {/* Image container */}
@@ -586,6 +634,13 @@ const ProductCard = ({
           {rankIndex !== undefined && rankIndex !== null && (
             <div className="bs-card-rank">
               <span>{typeof rankIndex === 'number' ? String(rankIndex + 1).padStart(2, '0') : rankIndex}</span>
+            </div>
+          )}
+
+          {/* Flash Sale tag */}
+          {flashInfo && (
+            <div className="flash-sale-badge" style={{ background: 'linear-gradient(135deg, #ec4899, #ef4444)', color: '#fff', position: 'absolute', zIndex: 10, left: '0.6rem', bottom: '0.6rem', top: 'auto', right: 'auto', display: 'flex', alignItems: 'center', gap: '0.3rem', borderRadius: '999px', boxShadow: '0 2px 8px rgba(236,72,153,0.4)', animation: 'flashPulse 1.5s ease-in-out infinite' }}>
+              <Zap className="w-4 h-4 md:w-5 md:h-5" /> <span className="text-[11px] md:text-sm font-black">FLASH SALE -{displayDiscountPct}%</span>
             </div>
           )}
 
@@ -660,14 +715,20 @@ const ProductCard = ({
           </div>
 
           {/* Price and Colors */}
+          {flashInfo && flashCountdown && (
+            <div className="flash-countdown-line" style={{ marginBottom: '0.35rem', display: 'flex', alignItems: 'center', gap: '0.3rem', padding: '0.25rem 0.5rem', background: 'linear-gradient(135deg, #fef2f2, #fff1f2)', borderRadius: '8px', border: '1px solid #fecdd3' }}>
+              <Zap className="w-3.5 h-3.5 md:w-4 md:h-4 text-red-500" />
+              <span className="text-[11px] md:text-sm font-black text-red-500 tracking-tight whitespace-nowrap">{flashCountdown}</span>
+            </div>
+          )}
           <div className="bs-card-footer">
             <div className="bs-card-price-group">
               <span className="bs-card-price">
-                {price?.toLocaleString('vi-VN')}₫
+                {displayPrice?.toLocaleString('vi-VN')}₫
               </span>
-              {hasDiscount && (
+              {showDiscount && (
                 <span className="bs-card-price-original">
-                  {originalPrice?.toLocaleString('vi-VN')}₫
+                  {displayOriginal?.toLocaleString('vi-VN')}₫
                 </span>
               )}
             </div>

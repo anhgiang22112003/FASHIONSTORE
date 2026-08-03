@@ -18,7 +18,14 @@ import {
   Truck,
   Zap,
   Minus,
-  Plus
+  Plus,
+  X,
+  MessageCircle,
+  Loader2,
+  ArrowDown,
+  Send,
+  Lock,
+  Cpu
 } from 'lucide-react'
 
 const ChatBot = ({ userId }) => {
@@ -810,14 +817,9 @@ const ChatBot = ({ userId }) => {
             <span className="absolute inset-0 rounded-2xl bg-violet-500 opacity-30 animate-ping" />
           )}
           {isChatOpen ? (
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-white">
-              <path fillRule="evenodd" d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" />
-            </svg>
+            <X className="w-5 h-5 text-white" />
           ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-white">
-              <path d="M4.913 2.658c2.075-.27 4.19-.408 6.337-.408 2.147 0 4.262.139 6.337.408 1.922.25 3.291 1.861 3.405 3.727a4.403 4.403 0 0 0-1.032-.211 50.89 50.89 0 0 0-8.42 0c-2.358.196-4.04 2.19-4.04 4.434v4.286a4.47 4.47 0 0 0 2.433 3.984L7.28 21.53A.75.75 0 0 1 6 21v-4.03a48.527 48.527 0 0 1-1.087-.128C2.905 16.58 1.5 14.833 1.5 12.862V6.638c0-1.97 1.405-3.718 3.413-3.979Z" />
-              <path d="M15.75 7.5c-1.376 0-2.739.057-4.086.169C10.124 7.797 9 9.103 9 10.609v4.285c0 1.507 1.128 2.814 2.67 2.94 1.243.102 2.5.157 3.768.165l2.782 2.781a.75.75 0 0 0 1.28-.53v-2.39l.33-.026c1.542-.125 2.67-1.433 2.67-2.94v-4.286c0-1.505-1.125-2.811-2.664-2.94A49.392 49.392 0 0 0 15.75 7.5Z" />
-            </svg>
+            <MessageCircle className="w-6 h-6 text-white" />
           )}
         </div>
       </button>
@@ -831,10 +833,7 @@ const ChatBot = ({ userId }) => {
               {/* AI Avatar with online ring */}
               <div className="relative">
                 <div className="w-10 h-10 bg-white/15 backdrop-blur rounded-xl flex items-center justify-center border border-white/20">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-white">
-                    <path d="M16.5 7.5h-9v9h9v-9Z" />
-                    <path fillRule="evenodd" d="M8.25 2.25A.75.75 0 0 1 9 3v.75h2.25V3a.75.75 0 0 1 1.5 0v.75H15V3a.75.75 0 0 1 1.5 0v.75h.75a3 3 0 0 1 3 3v.75H21A.75.75 0 0 1 21 9h-.75v2.25H21a.75.75 0 0 1 0 1.5h-.75V15H21a.75.75 0 0 1 0 1.5h-.75v.75a3 3 0 0 1-3 3h-.75V21a.75.75 0 0 1-1.5 0v-.75h-2.25V21a.75.75 0 0 1-1.5 0v-.75H9V21a.75.75 0 0 1-1.5 0v-.75h-.75a3 3 0 0 1-3-3v-.75H3A.75.75 0 0 1 3 15h.75v-2.25H3a.75.75 0 0 1 0-1.5h.75V9H3a.75.75 0 0 1 0-1.5h.75v-.75a3 3 0 0 1 3-3h.75V3a.75.75 0 0 1 .75-.75ZM6 6.75A.75.75 0 0 1 6.75 6h10.5a.75.75 0 0 1 .75.75v10.5a.75.75 0 0 1-.75.75H6.75a.75.75 0 0 1-.75-.75V6.75Z" clipRule="evenodd" />
-                  </svg>
+                  <Cpu className="w-5 h-5 text-white" />
                 </div>
                 {user && isConnected && (
                   <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-400 rounded-full border-2 border-indigo-800" />
@@ -851,9 +850,7 @@ const ChatBot = ({ userId }) => {
               onClick={() => setIsChatOpen(false)}
               className="w-7 h-7 flex items-center justify-center rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
-                <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
-              </svg>
+              <X className="w-4 h-4" />
             </button>
           </div>
 
@@ -868,10 +865,7 @@ const ChatBot = ({ userId }) => {
               {messages.length === 0 && !isTyping && (
                   <div className="flex flex-col items-center justify-center h-full text-center px-6 py-8">
                     <div className="w-16 h-16 bg-gradient-to-br from-violet-100 to-indigo-100 rounded-2xl flex items-center justify-center mb-4 shadow-sm">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-8 h-8 text-violet-600">
-                        <path d="M4.913 2.658c2.075-.27 4.19-.408 6.337-.408 2.147 0 4.262.139 6.337.408 1.922.25 3.291 1.861 3.405 3.727a4.403 4.403 0 0 0-1.032-.211 50.89 50.89 0 0 0-8.42 0c-2.358.196-4.04 2.19-4.04 4.434v4.286a4.47 4.47 0 0 0 2.433 3.984L7.28 21.53A.75.75 0 0 1 6 21v-4.03a48.527 48.527 0 0 1-1.087-.128C2.905 16.58 1.5 14.833 1.5 12.862V6.638c0-1.97 1.405-3.718 3.413-3.979Z" />
-                        <path d="M15.75 7.5c-1.376 0-2.739.057-4.086.169C10.124 7.797 9 9.103 9 10.609v4.285c0 1.507 1.128 2.814 2.67 2.94 1.243.102 2.5.157 3.768.165l2.782 2.781a.75.75 0 0 0 1.28-.53v-2.39l.33-.026c1.542-.125 2.67-1.433 2.67-2.94v-4.286c0-1.505-1.125-2.811-2.664-2.94A49.392 49.392 0 0 0 15.75 7.5Z" />
-                      </svg>
+                      <MessageCircle className="w-8 h-8 text-violet-600" />
                     </div>
                     <p className="font-bold text-gray-800 text-sm">Trợ lý Mua sắm AI</p>
                     <p className="text-gray-500 text-xs mt-1 leading-relaxed">Hỏi tôi về sản phẩm, tư vấn size,<br/>hoặc thêm vào giỏ hàng trực tiếp!</p>
@@ -884,10 +878,7 @@ const ChatBot = ({ userId }) => {
                   <div className="flex justify-start mb-3">
                     <div className="flex items-end gap-2">
                       <div className="w-7 h-7 bg-gradient-to-br from-violet-600 to-indigo-600 rounded-xl flex-shrink-0 flex items-center justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5 text-white">
-                          <path d="M3.505 2.365A41.369 41.369 0 0 1 9 2c1.863 0 3.697.124 5.495.365 1.247.167 2.18 1.108 2.435 2.268a4.45 4.45 0 0 0-.577-.069 43.141 43.141 0 0 0-4.706 0C9.229 4.696 7.5 6.727 7.5 9.5v2.093c0 1.518.87 2.883 2.243 3.546L8.516 17.43A.75.75 0 0 1 7.5 17v-2.27a43.142 43.142 0 0 1-1.487-.212C4.185 14.108 3 12.567 3 10.835V4.633a2.241 2.241 0 0 1 .505-1.268Z" />
-                          <path d="M13.76 4.498a41.121 41.121 0 0 0-4.52 0 1.734 1.734 0 0 0-1.74 1.867v.253a44.71 44.71 0 0 1 6 0v-.253a1.734 1.734 0 0 0-1.74-1.867ZM7.5 9.5c0-2.311 1.662-4.214 3.844-4.492a43.14 43.14 0 0 1 4.712 0C18.338 5.286 20 7.19 20 9.5v1.335c0 1.732-1.185 3.273-2.993 3.739a43.186 43.186 0 0 1-4.014.513v1.726a.75.75 0 0 1-1.28.53l-2.78-2.78a43.186 43.186 0 0 1-.433-.017Z" />
-                        </svg>
+                        <Loader2 className="w-3.5 h-3.5 text-white animate-spin" />
                       </div>
                       <div className="bg-white border border-gray-100 rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm">
                         <div className="flex space-x-1.5">
@@ -910,9 +901,7 @@ const ChatBot = ({ userId }) => {
                   className="absolute bottom-20 right-4 w-9 h-9 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-lg flex items-center justify-center transition-all z-10 animate-bounce"
                   title="Xem tin nhắn mới nhất"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
-                    <path fillRule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" />
-                  </svg>
+                  <ArrowDown className="w-5 h-5" />
                 </button>
               )}
 
@@ -932,9 +921,7 @@ const ChatBot = ({ userId }) => {
                     disabled={!isConnected || !inputMessage.trim()}
                     className="w-8 h-8 flex-shrink-0 bg-gradient-to-br from-violet-600 to-indigo-600 text-white rounded-xl flex items-center justify-center hover:opacity-90 transition-opacity disabled:opacity-30 disabled:cursor-not-allowed"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
-                      <path d="M3.105 2.288a.75.75 0 0 0-.826.95l1.414 4.926A1.5 1.5 0 0 0 5.135 9.25h6.115a.75.75 0 0 1 0 1.5H5.135a1.5 1.5 0 0 0-1.442 1.086l-1.414 4.926a.75.75 0 0 0 .826.95 28.897 28.897 0 0 0 15.293-7.155.75.75 0 0 0 0-1.114A28.897 28.897 0 0 0 3.105 2.288Z" />
-                    </svg>
+                    <Send className="w-4 h-4" />
                   </button>
                 </form>
                 <p className="text-center text-[10px] text-gray-400 mt-2">AI có thể mắc lỗi. Kiểm tra thông tin trước khi mua.</p>
@@ -943,9 +930,7 @@ const ChatBot = ({ userId }) => {
           ) : (
             <div className="flex-1 flex flex-col items-center justify-center p-8 bg-gray-50 text-center">
               <div className="w-16 h-16 bg-gradient-to-br from-violet-100 to-indigo-100 rounded-2xl flex items-center justify-center mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-8 h-8 text-violet-500">
-                  <path fillRule="evenodd" d="M12 1.5a5.25 5.25 0 0 0-5.25 5.25v3a3 3 0 0 0-3 3v6.75a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3v-6.75a3 3 0 0 0-3-3v-3c0-2.9-2.35-5.25-5.25-5.25Zm3.75 8.25v-3a3.75 3.75 0 1 0-7.5 0v3h7.5Z" clipRule="evenodd" />
-                </svg>
+                <Lock className="w-8 h-8 text-violet-500" />
               </div>
               <h4 className="font-bold text-gray-900 mb-1">Đăng nhập để trò chuyện</h4>
               <p className="text-xs text-gray-500 mb-5 leading-relaxed">Bạn cần đăng nhập để sử dụng<br/>trợ lý mua sắm AI thông minh</p>

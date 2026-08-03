@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useState } from "react"
+import { useNavigate } from 'react-router-dom'
 import api from "@/service/api"
 import { Heart, Trash2, ShoppingBag, Star, Sparkles } from "lucide-react"
 import { toast } from "react-toastify"
@@ -15,6 +16,7 @@ const Wishlist = () => {
   const [isVariantModalOpen, setIsVariantModalOpen] = React.useState(false)
   const [isCartDrawerOpen, setIsCartDrawerOpen] = React.useState(false)
   const { user } = useContext(AuthContext)
+  const navigate = useNavigate()
 
   const handleSuccessAndOpenCart = () => {
     setIsCartDrawerOpen(true)
@@ -31,10 +33,13 @@ const Wishlist = () => {
   }
 
   useEffect(() => {
-    if (user) {
-      fetchFavorites()
+    if (!user) {
+      toast.warning('Vui lòng đăng nhập để xem danh sách yêu thích')
+      navigate('/login')
+      return
     }
-  }, [user])
+    fetchFavorites()
+  }, [user, navigate])
 
   const handleRemoveFavorite = async (productId) => {
     try {

@@ -1,5 +1,6 @@
 // src/components/ProductReviewForm.jsx
 import React, { useState } from "react"
+import { Star } from "lucide-react"
 import { toast } from "react-toastify"
 import api from "@/service/api"
 
@@ -45,23 +46,15 @@ const ProductReviewForm = ({ item, userId, orderId }) => {
             {/* Rating stars */}
             <div className="flex space-x-1 mb-3">
                 {[1, 2, 3, 4, 5].map((star) => (
-                    <svg
-                        key={star}
-                        onClick={() => setRating(star)}
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill={star <= rating ? "#facc15" : "none"}
-                        viewBox="0 0 24 24"
-                        strokeWidth={1.5}
-                        stroke="#facc15"
-                        className="w-6 h-6 cursor-pointer transition"
-                    >
-                        <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M11.48 3.499a.562.562 0 011.04 0l2.013 4.082a.563.563 0 00.424.308l4.505.654a.563.563 0 01.312.96l-3.26 3.178a.563.563 0 00-.162.498l.769 4.48a.563.563 0 01-.817.592L12 16.347l-4.03 2.12a.563.563 0 01-.817-.592l.769-4.48a.563.563 0 00-.162-.498L4.5 9.503a.563.563 0 01.312-.96l4.505-.654a.563.563 0 00.424-.308l2.013-4.082z"
-                        />
-                    </svg>
-                ))}
+                <Star
+                    key={star}
+                    onClick={() => setRating(star)}
+                    fill={star <= rating ? "#facc15" : "none"}
+                    stroke="#facc15"
+                    strokeWidth={1.5}
+                    className="w-6 h-6 cursor-pointer transition"
+                />
+            ))}
             </div>
 
             <textarea

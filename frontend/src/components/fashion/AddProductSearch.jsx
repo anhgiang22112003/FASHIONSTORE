@@ -1,4 +1,6 @@
+import { useNavigate } from 'react-router-dom'
 import { CartContext } from "@/context/CartContext"
+import { AuthContext } from "@/context/AuthContext"
 import api from "@/service/api"
 import React, { useContext, useEffect, useState } from "react"
 import { toast } from "react-toastify"
@@ -12,6 +14,8 @@ const AddProductSearch = () => {
   const [quantity, setQuantity] = useState(1)
   const [loading, setLoading] = useState(false)
   const { fetchCart } = useContext(CartContext)
+  const { user } = useContext(AuthContext)
+  const navigate = useNavigate()
 
   // 🔍 Tìm kiếm sản phẩm theo tên
   useEffect(() => {
@@ -62,6 +66,11 @@ const AddProductSearch = () => {
     : []
 
   const handleAddToCart = async () => {
+    if (!user) {
+      toast.warning('Vui lòng đăng nhập để thêm vào giỏ hàng')
+      navigate('/login')
+      return
+    }
     if (!selectedProduct || !selectedColor || !selectedSize) {
       toast.error("Vui lòng chọn đủ màu và size!")
       return

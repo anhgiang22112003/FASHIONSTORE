@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom"
 import api from "@/service/api"
 import { toast } from "react-toastify"
 import { CartContext } from "@/context/CartContext"
+import { useFlashSale } from '@/context/FlashSaleContext'
 import AddproductSearch from "@/components/fashion/AddProductSearch"
 import BankPaymentModal from "@/components/BankPaymentSection"
 import VoucherSection from "@/components/VoucherSection"
@@ -35,7 +36,7 @@ const Checkout = () => {
   const [showBankModal, setShowBankModal] = useState(false)
   const [selectedBank, setSelectedBank] = useState(null)
   const [orderData, setOrderData] = useState(null)
-
+  const { getFlashInfo } = useFlashSale()
   const buyNowData = location.state
   const { cart, fetchCart, setCart, updateQuantity: contextUpdateQuantity, removeFromCart } = useContext(CartContext)
   const [provinces, setProvinces] = useState([])
@@ -427,7 +428,7 @@ const Checkout = () => {
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50">
       <div className="container mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8 max-w-[1550px]">
         {/* Header */}
-        <div className="mb-6 sm:mb-8 animate-slideDown">
+        <div className="mb-6 sm:mb-8">
           <div className="flex items-center gap-3 sm:gap-4 mb-3">
             <div className="p-2 sm:p-3 bg-gradient-to-br from-pink-500 via-purple-500 to-indigo-500 rounded-xl sm:rounded-2xl shadow-lg sm:shadow-xl">
               <ShoppingBag className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
@@ -443,11 +444,11 @@ const Checkout = () => {
           </div>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-4 sm:gap-6">
+        <div className="grid lg:grid-cols-5 gap-4 sm:gap-6">
           {/* Left Side: Shipping Info */}
-          <div className="lg:col-span-2 space-y-4 sm:space-y-6">
+          <div className="lg:col-span-3 space-y-4 sm:space-y-6">
             {/* Shipping Information */}
-            <div className="bg-white/90 backdrop-blur-md rounded-2xl sm:rounded-3xl shadow-xl border border-white/20 p-4 sm:p-6 hover:shadow-2xl transition-all duration-300 animate-slideUp">
+            <div className="bg-white/90 backdrop-blur-md rounded-2xl sm:rounded-3xl shadow-sm border border-white/20 p-4 sm:p-6 transition-colors duration-150">
               <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
                 <div className="p-2 sm:p-2.5 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg sm:rounded-xl shadow-lg">
                   <MapPin className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
@@ -570,7 +571,7 @@ const Checkout = () => {
             </div>
 
             {/* Shipping Method */}
-            <div className="bg-white/90 backdrop-blur-md rounded-2xl sm:rounded-3xl shadow-xl border border-white/20 p-4 sm:p-6 hover:shadow-2xl transition-all duration-300 animate-slideUp" style={{ animationDelay: '0.1s' }}>
+            <div className="bg-white/90 backdrop-blur-md rounded-2xl sm:rounded-3xl shadow-sm border border-white/20 p-4 sm:p-6 transition-colors duration-150" style={{ animationDelay: '0.1s' }}>
               <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
                 <div className="p-2 sm:p-2.5 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg sm:rounded-xl shadow-lg">
                   <Truck className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
@@ -582,11 +583,10 @@ const Checkout = () => {
                 {shippingOptions.map((option) => (
                   <label
                     key={option.id}
-                    className={`flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-5 border-2 rounded-xl sm:rounded-2xl cursor-pointer transition-all duration-300 ${shippingMethod === option.id
-                      ? "border-pink-400 bg-gradient-to-r from-pink-50 via-purple-50 to-indigo-50 shadow-lg scale-[1.02]"
-                      : "border-gray-200 hover:border-pink-300 hover:bg-gray-50 hover:shadow-md"
-                      }`}
-                  >
+                      className={`flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-5 border-2 rounded-xl sm:rounded-2xl cursor-pointer transition-colors duration-150 ${shippingMethod === option.id
+                        ? "border-pink-400 bg-gradient-to-r from-pink-50 via-purple-50 to-indigo-50"
+                        : "border-gray-200 hover:border-pink-300 hover:bg-gray-50"
+                        }`}>
                     <div className="flex items-center gap-3 sm:gap-4 flex-1 mb-2 sm:mb-0">
                       <input
                         type="radio"
@@ -620,7 +620,7 @@ const Checkout = () => {
             </div>
 
             {/* Payment Method */}
-            <div className="bg-white/90 backdrop-blur-md rounded-2xl sm:rounded-3xl shadow-xl border border-white/20 p-4 sm:p-6 hover:shadow-2xl transition-all duration-300 animate-slideUp" style={{ animationDelay: '0.2s' }}>
+            <div className="bg-white/90 backdrop-blur-md rounded-2xl sm:rounded-3xl shadow-sm border border-white/20 p-4 sm:p-6 transition-colors duration-150" style={{ animationDelay: '0.2s' }}>
               <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
                 <div className="p-2 sm:p-2.5 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg sm:rounded-xl shadow-lg">
                   <CreditCard className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
@@ -633,11 +633,10 @@ const Checkout = () => {
                   <div
                     key={method.id}
                     onClick={() => handlePaymentChange(method.id)}
-                    className={`flex items-center p-3 sm:p-5 border-2 rounded-xl sm:rounded-2xl cursor-pointer transition-all duration-300 ${form.paymentMethod === method.id
-                      ? "border-pink-400 bg-gradient-to-r from-pink-50 via-purple-50 to-indigo-50 shadow-lg scale-[1.02]"
-                      : "border-gray-200 hover:border-pink-300 hover:bg-gray-50 hover:shadow-md"
-                      }`}
-                  >
+                      className={`flex items-center p-3 sm:p-5 border-2 rounded-xl sm:rounded-2xl cursor-pointer transition-colors duration-150 ${form.paymentMethod === method.id
+                        ? "border-pink-400 bg-gradient-to-r from-pink-50 via-purple-50 to-indigo-50"
+                        : "border-gray-200 hover:border-pink-300 hover:bg-gray-50"
+                        }`}>
                     <input
                       type="radio"
                       name="payment_method"
@@ -674,8 +673,8 @@ const Checkout = () => {
           </div>
 
           {/* Right Side: Order Summary */}
-          <div className="lg:col-span-1">
-            <div className="bg-white/90 backdrop-blur-md rounded-2xl sm:rounded-3xl shadow-2xl border border-white/20 p-4 sm:p-6 lg:sticky lg:top-4 animate-slideUp" style={{ animationDelay: '0.3s' }}>
+          <div className="lg:col-span-2">
+            <div className="bg-white/90 backdrop-blur-md rounded-2xl sm:rounded-3xl shadow-sm md:shadow-lg border border-white/20 p-4 sm:p-6 lg:sticky lg:top-4" style={{ animationDelay: '0.3s' }}>
               <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
                 <div className="p-2 sm:p-2.5 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg sm:rounded-xl shadow-lg">
                   <ShoppingBag className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
@@ -688,7 +687,7 @@ const Checkout = () => {
               {/* Product List */}
               <div className="space-y-2 sm:space-y-3 max-h-[200px] sm:max-h-[280px] overflow-y-auto pr-1 sm:pr-2 mb-4 sm:mb-6 custom-scrollbar">
                 {buyNowData?.mode === "buyNow" ? (
-                  <div className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50 rounded-xl sm:rounded-2xl border-2 border-pink-200 shadow-sm hover:shadow-md transition-all">
+                  <div className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50 rounded-xl sm:rounded-2xl border-2 border-pink-200 shadow-sm md:hover:shadow-md md:transition-colors md:duration-150">
                     <img
                       src={buyNowData?.product?.mainImage || "/images/Product.jpg"}
                       alt={buyNowData?.product?.name}
@@ -709,7 +708,7 @@ const Checkout = () => {
                   </div>
                 ) : (
                   cart?.items?.map((item, index) => (
-                    <div key={index} className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50 rounded-xl sm:rounded-2xl border-2 border-pink-200 shadow-sm hover:shadow-md transition-all">
+                    <div key={index} className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50 rounded-xl sm:rounded-2xl border-2 border-pink-200 shadow-sm md:hover:shadow-md md:transition-colors md:duration-150">
                       <img
                         src={item?.product?.mainImage || "/images/Product.jpg"}
                         alt={item?.product?.name}
@@ -720,9 +719,21 @@ const Checkout = () => {
                         <p className="text-xs text-gray-600 mb-1 sm:mb-2">
                           Size: <span className="font-semibold">{item?.size}</span> | Màu: <span className="font-semibold">{item?.color}</span>
                         </p>
-                        <p className="text-pink-600 font-black text-base sm:text-lg">
-                          {item?.product?.sellingPrice?.toLocaleString("vi-VN")}₫
-                        </p>
+                        {(() => { const fl = getFlashInfo(item.product?._id); const dp = fl?.salePrice ?? item?.product?.sellingPrice; return (
+                        <div>
+                          {fl && (
+                            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] sm:text-[10px] font-black bg-gradient-to-r from-red-500 to-pink-500 text-white mb-1">
+                              <Zap size={10} /> FLASH SALE -{Math.round(((item?.product?.sellingPrice - fl.salePrice) / item?.product?.sellingPrice) * 100)}%
+                            </span>
+                          )}
+                          <p className="text-pink-600 font-black text-base sm:text-lg">
+                            {dp?.toLocaleString("vi-VN")}₫
+                          </p>
+                          {fl && (
+                            <p className="text-xs text-gray-400 line-through">{item?.product?.sellingPrice?.toLocaleString("vi-VN")}₫</p>
+                          )}
+                        </div>
+                      )})()}
                       </div>
                       <div className="flex items-center gap-1 sm:gap-2 bg-white rounded-full border-2 border-gray-200 p-1 sm:p-2 shadow-sm">
                         {/* Giảm */}

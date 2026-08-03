@@ -1,4 +1,5 @@
 import React from "react";
+import { Heart, Search, Filter } from "lucide-react";
 
 const categories = [
   { name: "Tất cả", count: 120, active: true },
@@ -64,13 +65,7 @@ const ProductCard = ({ product }) => (
         </div>
       )}
       <button className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white shadow-lg flex items-center justify-center">
-        <svg
-          className="w-4 h-4 text-pink-600"
-          fill="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5A5.5 5.5 0 017.5 3c2.4 0 4.23 1.25 5 3.5.77-2.25 2.6-3.5 5-3.5A5.5 5.5 0 0122 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path>
-        </svg>
+        <Heart className="w-4 h-4 text-pink-600" />
       </button>
     </div>
     <div className="p-3 sm:p-4 flex flex-col flex-grow">
@@ -104,28 +99,10 @@ const ProductCategoryPage = () => {
                 placeholder="Tìm kiếm sản phẩm..."
                 className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-200"
               />
-              <svg
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
             </div>
             <button className="flex items-center px-4 py-2 bg-pink-50 text-pink-600 rounded-lg font-semibold">
-              <svg
-                className="w-5 h-5 mr-1"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path d="M3 17a1 1 0 001 1h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v12zm1-2h16V5H4v10zm-1-8H1a1 1 0 000 2h2v-2zm22 0h-2a1 1 0 000 2h2v-2zM9 11a1 1 0 001 1h4a1 1 0 001-1V9a1 1 0 00-1-1h-4a1 1 0 00-1 1v2z"></path>
-              </svg>
+              <Filter className="w-5 h-5 mr-1" />
               Bộ lọc
             </button>
           </div>

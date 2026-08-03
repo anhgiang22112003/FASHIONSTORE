@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { WishlistContext } from '@/context/WishlistContext';
 import { AuthContext } from '@/context/AuthContext';
 import { toast } from 'react-toastify';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import ProductCard from '@/components/fashion/ProductCard';
 
 // Collection Card Component - Memoized
@@ -77,6 +77,8 @@ const CollectionPage = () => {
   const { fetchWishlist } = useContext(WishlistContext);
   const { user } = useContext(AuthContext);
 
+  const navigate = useNavigate()
+
   const handleSuccessAndOpenCart = useCallback(() => {
     setIsCartDrawerOpen(true);
   }, []);
@@ -140,9 +142,14 @@ const CollectionPage = () => {
   }, [favorites, user, fetchWishlist, getFavorites]);
 
   const handleAddToCart = useCallback((product) => {
+    if (!user) {
+      toast.warning('Vui lòng đăng nhập để thêm vào giỏ hàng');
+      navigate('/login');
+      return;
+    }
     setSelectedProduct(product);
     setIsVariantModalOpen(true);
-  }, []);
+  }, [navigate, user]);
 
   useEffect(() => {
     fetchCollections();

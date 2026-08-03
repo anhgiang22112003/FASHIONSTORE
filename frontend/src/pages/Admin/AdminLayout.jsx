@@ -35,6 +35,7 @@ const AdminSettingsPage = React.lazy(() => import("@/components/layoutAdmin/Admi
 const AdminChatDashboard = React.lazy(() => import("./AdminChatDashboard"))
 const AddFlashSalePage = React.lazy(() => import("./AddFlashSalePage"))
 const FlashSaleListPage = React.lazy(() => import("./FlashSaleListPage"))
+const FlashSaleHistoryPage = React.lazy(() => import("./FlashSaleHistoryPage"))
 
 const AdminLayout = () => {
   const [activeTab, setActiveTab] = useState("dashboard")
@@ -289,6 +290,8 @@ const AdminLayout = () => {
               )}
 
               {activeTab === "flash-sale" && <FlashSaleListPage setActiveTab={setActiveTab} setEditData={setEditData} />}
+
+              {activeTab === "flash-sale-history" && <FlashSaleHistoryPage setActiveTab={setActiveTab} />}
 
 
 

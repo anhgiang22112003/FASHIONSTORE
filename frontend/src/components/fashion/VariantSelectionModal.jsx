@@ -1,8 +1,9 @@
 import React, { useState, useMemo, useCallback, useEffect, useContext } from 'react'
-import { ShoppingBag, Minus, Plus, Package, Sparkles } from 'lucide-react'
+import { ShoppingBag, Minus, Plus, Package, Sparkles,Zap  } from 'lucide-react'
 import { Button } from '../ui/button'
 import { toast } from 'react-toastify'
 import { CartContext } from '@/context/CartContext'
+import { useFlashSale } from '@/context/FlashSaleContext'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog'
 
 const VariantSelectionModal = ({ product, isOpen, onClose, onSuccessAndOpenCart }) => {
@@ -10,6 +11,7 @@ const VariantSelectionModal = ({ product, isOpen, onClose, onSuccessAndOpenCart 
   const [selectedSize, setSelectedSize] = useState('')
   const [quantity, setQuantity] = useState(1)
   const { addToCart } = useContext(CartContext)
+  const { getFlashInfo } = useFlashSale()
   const [inputValue, setInputValue] = useState("1");
 
   useEffect(() => {
@@ -103,7 +105,26 @@ const VariantSelectionModal = ({ product, isOpen, onClose, onSuccessAndOpenCart 
                 {product?.name}
               </h3>
               <p className="text-base sm:text-xl font-black text-pink-600">
-                {product?.sellingPrice?.toLocaleString('vi-VN')}₫
+{(() => { const fl = getFlashInfo(product?._id); const dp = fl?.salePrice ?? product?.sellingPrice; return (
+              <div>
+                <span className="text-3xl font-black text-pink-600">
+                  {dp?.toLocaleString('vi-VN')}đ
+                </span>
+                {fl && (
+                  <span className="text-lg text-gray-400 line-through ml-3">
+                    {product?.sellingPrice?.toLocaleString('vi-VN')}đ
+                  </span>
+                )}
+                {fl && (
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-black bg-gradient-to-r from-red-500 to-pink-500 text-white">
+                      <Zap size={12} /> FLASH SALE -{Math.round(((product?.sellingPrice - fl.salePrice) / product?.sellingPrice) * 100)}%
+                    </span>
+                    {(() => { if (!fl.endTime) return null; const d = new Date(fl.endTime).getTime() - Date.now(); if (d <= 0) return null; const h = Math.floor(d/36e5); const m = Math.floor((d%36e5)/6e4); const s = Math.floor((d%6e4)/1000); return (`Kết thúc: ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`); })()}
+                  </div>
+                )}
+              </div>
+            )})()}
               </p>
             </div>
           </div>

@@ -1,6 +1,6 @@
-// src/context/WishlistContext.jsx
-import React, { createContext, useState, useEffect } from 'react'
+import React, { createContext, useState, useEffect, useMemo } from 'react'
 import api from '@/service/api'
+import { toast } from 'react-toastify'
 
 export const WishlistContext = createContext()
 
@@ -15,13 +15,18 @@ export const WishlistProvider = ({ children }) => {
       console.error('Lỗi khi tải danh sách yêu thích:', error)
     }
   }
-  useEffect(() => {
 
+  useEffect(() => {
     const token = localStorage.getItem('accessToken')
     if (token) fetchWishlist()
   }, [])
 
   const toggleWishlist = async (productId) => {
+    const token = localStorage.getItem('accessToken')
+    if (!token) {
+      toast.warning('Vui lòng đăng nhập để thêm vào yêu thích')
+      return
+    }
     try {
       const res = await api.post(`/users/toggle-favorite/${productId}`)
       setWishlist(res.data.favorites || [])
@@ -30,9 +35,7 @@ export const WishlistProvider = ({ children }) => {
     }
   }
 
-  return (
-    <WishlistContext.Provider value={{ wishlist, setWishlist, toggleWishlist, fetchWishlist }}>
-      {children}
-    </WishlistContext.Provider>
-  )
+  const value = useMemo(() => ({ wishlist, setWishlist, toggleWishlist, fetchWishlist }), [wishlist])
+
+  return <WishlistContext.Provider value={value}>{children}</WishlistContext.Provider>
 }

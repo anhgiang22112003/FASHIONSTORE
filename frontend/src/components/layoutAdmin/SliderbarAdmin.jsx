@@ -55,9 +55,15 @@ const Sidebar = ({ activeTab, setActiveTab, isOpen, toggleSidebar }) => {
       )
     },
     {
-      id: 'flash-sale', name: 'Flash Sale', icon: (
+      id: 'flash-sale',
+      name: 'Flash Sale',
+      icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-      )
+      ),
+      submenu: [
+        { id: 'flash-sale', name: 'Quản lý Flash Sale' },
+        { id: 'flash-sale-history', name: 'Lịch sử & Thống kê' },
+      ]
     },
     {
       id: 'users',

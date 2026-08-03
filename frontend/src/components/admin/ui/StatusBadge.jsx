@@ -51,17 +51,15 @@ const StatusBadge = ({ status, map, label, className = '' }) => {
     success:    { label: 'Thành công',   color: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
   }
 
-  // Resolve using provided map or auto-detect
-  const resolvedMap = map || {
-    ...orderStatusMap,
-    ...paymentStatusMap,
-    ...productStatusMap,
-    ...userStatusMap,
-    ...flashSaleStatusMap,
-    ...extraStatusMap,
-  }
-
-  const config = resolvedMap[status]
+  // Resolve using provided map or auto-detect.
+  // Priority: explicit `map` prop -> orderStatusMap -> paymentStatusMap -> extras
+  const config = (map && map[status])
+    || orderStatusMap[status]
+    || paymentStatusMap[status]
+    || productStatusMap[status]
+    || userStatusMap[status]
+    || flashSaleStatusMap[status]
+    || extraStatusMap[status]
 
   if (!config) {
     return (

@@ -1,6 +1,7 @@
 // AuthPage.jsx
 import { useContext, useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
+import { Mail, User, Phone, Lock } from 'lucide-react'
 import { toast } from "react-toastify"
 import api from "../service/api"
 import { AuthContext } from "@/context/AuthContext"
@@ -221,10 +222,10 @@ export default function AuthPage() {
 // Reusable InputField
 function InputField({ id, type, label, placeholder, icon, value, onChange, error }) {
   const icons = {
-    user: "👤",
-    mail: "📧",
-    phone: "📞",
-    lock: "🔒",
+    user: <User className="w-5 h-5" />,
+    mail: <Mail className="w-5 h-5" />,
+    phone: <Phone className="w-5 h-5" />,
+    lock: <Lock className="w-5 h-5" />,
   }
 
   return (

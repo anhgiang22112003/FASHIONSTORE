@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useContext } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Heart, ShoppingBag, Minus, Plus, Truck, RefreshCw, Shield, Star, Ruler, Scale, Share2, Copy } from 'lucide-react'
+import { Heart, ShoppingBag, Zap, Minus, Plus, Truck, RefreshCw, Shield, Star, Ruler, Scale, Share2, Copy } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { toast } from 'react-toastify'
 import api from '@/service/api'
+import apiUser from '@/service/api'
 import { CartContext } from '@/context/CartContext'
 import RelatedProducts from '@/components/fashion/RelatedProducts'
 import ProductReviews from '@/components/fashion/ProductReviews'
@@ -31,6 +32,7 @@ const ProductPage = () => {
   const { user } = useContext(AuthContext)
   const [inputValue, setInputValue] = useState("1");
   const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
+  const [flashSaleItem, setFlashSaleItem] = useState(null);
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href);
@@ -64,6 +66,10 @@ const ProductPage = () => {
   }
 
   const toggleFavorite = async (productId) => {
+    if (!user) {
+      toast.warning('Vui lòng đăng nhập để thêm vào yêu thích')
+      return
+    }
     try {
       const already = favorites.includes(productId)
       setFavorites(prev => already ? prev.filter(id => id !== productId) : [...prev, productId])
@@ -92,6 +98,15 @@ const ProductPage = () => {
 
   useEffect(() => {
     getProductsDetails()
+  }, [id])
+
+  useEffect(() => {
+    if (!id) return
+    apiUser.get('/flash-sales/active').then(res => {
+      if (!Array.isArray(res.data)) return
+      const items = res.data.flatMap(s => (s.items || []).filter(i => String(i.productId) === id))
+      setFlashSaleItem(items.length > 0 ? items[0] : null)
+    }).catch(() => setFlashSaleItem(null))
   }, [id])
 
   useEffect(() => {
@@ -266,6 +281,11 @@ const ProductPage = () => {
 
 
   const handleBuyNow = async () => {
+    if (!user) {
+      toast.warning('Vui lòng đăng nhập để mua hàng')
+      navigate('/login')
+      return
+    }
     if (!selectedColor || !selectedSize) {
       toast.warning('Vui lòng chọn màu và kích thước')
       return
@@ -290,6 +310,11 @@ const ProductPage = () => {
   }
 
   const handleAddToCart = async () => {
+    if (!user) {
+      toast.warning('Vui lòng đăng nhập để thêm vào giỏ hàng')
+      navigate('/login')
+      return
+    }
     if (!selectedColor || !selectedSize) {
       toast.warning('Vui lòng chọn màu và kích thước')
       return
@@ -405,6 +430,27 @@ const ProductPage = () => {
                 </div>
               </div>
             </div>
+
+            {flashSaleItem && (
+              <div className="bg-gradient-to-r from-red-500 via-pink-500 to-rose-500 rounded-2xl p-4 mb-4 text-white">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Zap className="w-5 h-5 animate-pulse" />
+                    <span className="font-bold text-sm">FLASH SALE ĐANG DIỄN RA</span>
+                  </div>
+                  <span className="text-xs bg-white/20 px-2.5 py-1 rounded-full font-bold">
+                    Còn {flashSaleItem.quantity - flashSaleItem.sold} sp
+                  </span>
+                </div>
+                <div className="flex items-center gap-3 mt-2">
+                  <span className="text-2xl font-black">{flashSaleItem.salePrice?.toLocaleString("vi-VN")}đ</span>
+                  <span className="text-sm line-through opacity-80">{product?.sellingPrice?.toLocaleString("vi-VN")}đ</span>
+                  <span className="text-xs bg-white/25 px-2 py-0.5 rounded-full font-bold">
+                    -{Math.round(((product?.sellingPrice - flashSaleItem.salePrice) / product?.sellingPrice) * 100)}%
+                  </span>
+                </div>
+              </div>
+            )}
 
             {/* Price */}
             <div className="bg-gradient-to-r from-pink-50 to-rose-50 rounded-2xl p-6 border border-pink-100">

@@ -105,6 +105,10 @@ const Products = () => {
     }
 
     const toggleFavorite = async (productId) => {
+        if (!user) {
+            toast.warning('Vui lòng đăng nhập để thêm vào yêu thích')
+            return
+        }
         try {
             const already = favorites.includes(productId)
             setFavorites(prev => already ? prev.filter(id => id !== productId) : [...prev, productId])

@@ -1,6 +1,7 @@
 import apiAdmin from '@/service/apiAdmin'
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Mail, Lock } from 'lucide-react'
 import { toast } from 'react-toastify'
 
 const AdminLoginForm = () => {
@@ -75,7 +76,7 @@ const AdminLoginForm = () => {
                                 className="w-full px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500/70 transition duration-150 pl-10 text-gray-800"
                             />
                             {/* Icon Email */}
-                            <svg className="absolute top-1/2 left-3 transform -translate-y-1/2 w-5 h-5 text-pink-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path></svg>
+                            <Mail className="absolute top-1/2 left-3 transform -translate-y-1/2 w-5 h-5 text-pink-500" />
                         </div>
                     </div>
 
@@ -99,7 +100,7 @@ const AdminLoginForm = () => {
                                 className="w-full px-4 py-3 border border-pink-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500/70 transition duration-150 pl-10 text-gray-800"
                             />
                             {/* Icon khóa */}
-                            <svg className="absolute top-1/2 left-3 transform -translate-y-1/2 w-5 h-5 text-pink-500" fill="currentColor" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2z"></path></svg>
+                            <Lock className="absolute top-1/2 left-3 transform -translate-y-1/2 w-5 h-5 text-pink-500" />
                         </div>
                     </div>
 

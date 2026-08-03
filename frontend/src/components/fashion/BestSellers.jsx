@@ -112,6 +112,18 @@ const BestSellers = () => {
     })
   }
 
+  const navigate = useNavigate()
+
+  const handleAddToCartClick = (product) => {
+    if (!user) {
+      toast.warning('Vui lòng đăng nhập để thêm vào giỏ hàng')
+      navigate('/login')
+      return
+    }
+    setSelectedProduct(product)
+    setIsVariantModalOpen(true)
+  }
+
   return (
     <>
       <style>{`

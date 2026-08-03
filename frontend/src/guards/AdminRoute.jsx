@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useMemo } from "react"
 import { Navigate } from "react-router-dom"
 import apiAdmin from "@/service/apiAdmin"
 
@@ -6,34 +6,25 @@ export const AdminRoute = ({ children }) => {
   const [loading, setLoading] = React.useState(true)
   const [isAdmin, setIsAdmin] = React.useState(false)
 
-  const token = sessionStorage.getItem("accessToken")
-  const user = sessionStorage.getItem("user")
-
   React.useEffect(() => {
-    // Nếu không có token hoặc user -> chuyển hướng ngay
+    const token = localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken")
+    const userRaw = localStorage.getItem("user") || sessionStorage.getItem("user")
+    let user = null
+    try { if (userRaw) user = JSON.parse(userRaw) } catch {}
+
     if (!token || !user) {
       setIsAdmin(false)
       setLoading(false)
       return
     }
 
-    // Nếu có token thì kiểm tra quyền admin
-    apiAdmin
-      .get("/auth/profile")
-      .then((res) => {
-        if (["admin", "staff"].includes(res.data.role)) {
-          setIsAdmin(true)
-        } else {
-          setIsAdmin(false)
-        }
-      })
-
+    apiAdmin.get("/auth/profile")
+      .then((res) => setIsAdmin(["admin","staff"].includes(res.data.role)))
       .catch(() => setIsAdmin(false))
       .finally(() => setLoading(false))
-  }, [token, user])
+  }, []) // empty deps — only run once on mount
 
-  if (loading) return <div>Đang kiểm tra quyền...</div>
+  if (loading) return <div className="flex items-center justify-center min-h-screen text-gray-400">Đang kiểm tra quyền...</div>
   if (!isAdmin) return <Navigate to="/login/admin" replace />
-
   return children
 }
